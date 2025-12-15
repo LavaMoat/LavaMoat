@@ -22,14 +22,26 @@ import {
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
+import { GenerationError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
-import { reportInvalidCanonicalNames, reportSesViolations } from '../report.js'
+import {
+  createModuleInspectionProgressReporter,
+  reportInvalidCanonicalNames,
+  reportSesViolations,
+} from '../report.js'
 import { WorkerPool } from '../worker-pool.js'
 
 /**
- * @import {LoadAndGeneratePolicyOptions, LoadCompartmentMapResult, InspectMessage, PoliciesMessage, ErrorMessage, StructuredViolationsResult} from '../internal.js'
- * @import {CanonicalName, Language, LocalModuleSource} from '@endo/compartment-mapper'
+ * @import {LoadAndGeneratePolicyOptions,
+ * LoadCompartmentMapResult,
+ * InspectMessage,
+ * InspectionResultsMessage,
+ * ErrorMessage,
+ * ModuleInspectionProgressReporter,
+ * StructuredViolationsResult,
+ * ReportModuleInspectionProgressFn} from '../internal.js'
+ * @import {CanonicalName, ModuleSourceHookModuleSource} from '@endo/compartment-mapper'
  * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
  * @import {MergedLavaMoatPolicy, FileUrlString, SourceType} from '../types.js'
  * @import {Loggerr} from 'loggerr'
@@ -101,7 +113,10 @@ export const loadAndGeneratePolicy = async (
   /**
    * A worker pool for inspecting modules.
    *
-   * @type {WorkerPool<InspectMessage, PoliciesMessage | ErrorMessage>}
+   * @type {WorkerPool<
+   *   InspectMessage,
+   *   InspectionResultsMessage | ErrorMessage
+   * >}
    */
   const workerPool = new WorkerPool(inspectorPath)
 
@@ -141,7 +156,9 @@ export const loadAndGeneratePolicy = async (
    */
   const violationsForPackage = new Map()
 
-  // Create the module source inspector function with all dependencies
+  const { reportModuleInspectionProgress, reportModuleInspectionProgressEnd } =
+    createModuleInspectionProgressReporter()
+
   const inspectModuleSource = createModuleSourceInspector(
     log,
     workerPool,
@@ -150,7 +167,8 @@ export const loadAndGeneratePolicy = async (
     globalsForPackage,
     builtinsForPackage,
     violationsForPackage,
-    pendingInspections
+    pendingInspections,
+    reportModuleInspectionProgress
   )
 
   // preprocess include array to match Endo's _preload format;
@@ -208,18 +226,12 @@ export const loadAndGeneratePolicy = async (
 
     // Clear the progress line and move to next line
     if (process.stderr.isTTY) {
-      const prefix = `        ${chalk.dim('›')} `
-      process.stderr.write(
-        `\r${prefix}${chalk.dim('▶')}${chalk.white('▶')}${chalk.whiteBright('▶')} ${chalk.white('Inspecting modules: ')}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)} ${chalk.greenBright('✓')}\n`
-      )
+      reportModuleInspectionProgressEnd(inspectedModules, modulesToInspect)
     }
 
-    const errors = []
-    for (const result of inspectionResults) {
-      if (result.status !== 'fulfilled') {
-        errors.push(result.reason)
-      }
-    }
+    const errors = inspectionResults
+      .filter((result) => result.status !== 'fulfilled')
+      .map((result) => result.reason)
 
     if (errors.length > 0) {
       throw new AggregateError(
@@ -231,8 +243,6 @@ export const loadAndGeneratePolicy = async (
     log.info(
       `${chalk.greenBright('✓')} ${chalk.bold('Completed inspection')} ${chalk.white('for')} ${chalk.whiteBright(modulesToInspect.size)} modules`
     )
-
-    // TODO: handle untrusted root policy
 
     const policy = compilePolicy(
       globalsForPackage,
@@ -261,11 +271,18 @@ export const loadAndGeneratePolicy = async (
 }
 
 /**
- * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
- * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
- * @param {Map<CanonicalName, PackagePolicy>} packagesForPackage
- * @param {LavaMoatPolicy} [policyOverride]
- * @returns {MergedLavaMoatPolicy}
+ * Compiles the per-package policies and violations into a
+ * {@link MergedLavaMoatPolicy}.
+ *
+ * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage Map of global
+ *   policies for each package.
+ * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage Map of builtin
+ *   policies for each package.
+ * @param {Map<CanonicalName, PackagePolicy>} packagesForPackage Map of package
+ *   policies for each package.
+ * @param {LavaMoatPolicy} [policyOverride] Policy override to merge with the
+ *   compiled policy.
+ * @returns {MergedLavaMoatPolicy} Merged policy.
  */
 const compilePolicy = (
   globalsForPackage,
@@ -315,21 +332,31 @@ const compilePolicy = (
 /**
  * Creates a module source inspector function with the provided dependencies.
  *
- * @param {Loggerr} log
- * @param {WorkerPool<InspectMessage, PoliciesMessage | ErrorMessage>} workerPool
- * @param {Set<FileUrlString>} inspectedModules
- * @param {Set<FileUrlString>} modulesToInspect
- * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
- * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
+ * @param {Loggerr} log Logger instance.
+ * @param {WorkerPool<
+ *   InspectMessage,
+ *   InspectionResultsMessage | ErrorMessage
+ * >} workerPool
+ *   Worker pool instance which expects to send only {@link InspectMessage}s and
+ *   receive {@link InspectionResultsMessage}s or {@link ErrorMessage}s.
+ * @param {Set<FileUrlString>} inspectedModules Set of modules that have been
+ *   inspected already.
+ * @param {Set<FileUrlString>} modulesToInspect For progress reporting
+ * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage Map of global
+ *   policies for each package.
+ * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage Map of builtin
+ *   policies for each package.
  * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
- * @param {Set<Promise<FileUrlString>>} pendingInspections
+ *   Map of SES compatibility violations for each package.
+ * @param {Set<Promise<FileUrlString>>} pendingInspections Work queue of
+ *   promises to inspect modules.
+ * @param {ReportModuleInspectionProgressFn} reportModuleInspectionProgress
+ *   Function to report module inspection progress.
  * @returns {(
- *   moduleSource: Omit<
- *     LocalModuleSource,
- *     'location' | 'sourceLocation' | 'sourceDirname' | 'parser' | 'record'
- *   > & { language: Language; location: FileUrlString },
+ *   moduleSource: ModuleSourceHookModuleSource,
  *   canonicalName: CanonicalName
  * ) => void}
+ *   Inspection function
  */
 const createModuleSourceInspector = (
   log,
@@ -339,19 +366,25 @@ const createModuleSourceInspector = (
   globalsForPackage,
   builtinsForPackage,
   violationsForPackage,
-  pendingInspections
+  pendingInspections,
+  reportModuleInspectionProgress
 ) => {
-  let messageCount = 0
-
   /**
-   * @param {Omit<
-   *   LocalModuleSource,
-   *   'location' | 'sourceLocation' | 'sourceDirname' | 'parser' | 'record'
-   * > & { language: Language; location: FileUrlString }} moduleSource
-   * @param {CanonicalName} canonicalName
+   * Sends task to inspect a module source to the worker pool and updates the
+   * work queue ({@link pendingInspections}) and the set of modules to inspect
+   * ({@link modulesToInspect}).
+   *
+   * Only supports JS sources.
+   *
+   * @param {ModuleSourceHookModuleSource} moduleSource Module source to
+   *   inspect.
+   * @param {CanonicalName} canonicalName Canonical name of the module.
    * @returns {void}
    */
   const inspectModuleSource = (moduleSource, canonicalName) => {
+    if ('error' in moduleSource || 'exit' in moduleSource) {
+      return
+    }
     const { bytes: source, location: id, language } = moduleSource
     const type = MessageTypes.Inspect
     /** @type {SourceType | undefined} */
@@ -379,79 +412,119 @@ const createModuleSourceInspector = (
       type,
     }
 
-    log.debug(`Inspecting module: ${id}`)
+    /**
+     * For progress reporting
+     */
+    let messageCount = 0
 
+    log.debug(`Inspecting module: ${id}…`)
+    const handleInspectionResults = createInspectionResultsHandler(
+      canonicalName,
+      globalsForPackage,
+      builtinsForPackage,
+      violationsForPackage
+    )
+
+    // note that all rejections will be aggregated
     const inspectionPromise = workerPool
-      .sendTask(message, MessageTypes.Policies)
-      .then((message) => {
-        inspectedModules.add(id)
-        if (process.stderr.isTTY) {
-          messageCount++
-          const trianglePos = ((messageCount - 1) % 3) + 1
-          const prefix = '   '.split('')
-
-          // Style the triangle based on position
-          let styledTriangle
-          if (trianglePos === 1) {
-            styledTriangle = chalk.dim('▶')
-          } else if (trianglePos === 2) {
-            styledTriangle = chalk.white('▶')
-          } else {
-            styledTriangle = chalk.whiteBright('▶')
-          }
-
-          prefix[trianglePos - 1] = styledTriangle
-          const prefixStr = prefix.join('')
-          process.stderr.write(
-            `\r        ${chalk.dim('›')} ${prefixStr} ${chalk.white('Inspecting modules: ')}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)}`
-          )
-        }
-        if (message.type === MessageTypes.Policies) {
-          const { globalPolicy, builtinPolicy, violations } = message
-          if (globalPolicy) {
-            const currentGlobalPolicy = globalsForPackage.get(canonicalName)
-            globalsForPackage.set(canonicalName, {
-              ...currentGlobalPolicy,
-              ...globalPolicy,
-            })
-          }
-          if (builtinPolicy) {
-            const currentBuiltinPolicy = builtinsForPackage.get(canonicalName)
-            builtinsForPackage.set(canonicalName, {
-              ...currentBuiltinPolicy,
-              ...builtinPolicy,
-            })
-          }
-          if (violations) {
-            const currentViolations = violationsForPackage.get(canonicalName)
-            if (currentViolations) {
-              violationsForPackage.set(canonicalName, {
-                primordialMutations: [
-                  ...currentViolations.primordialMutations,
-                  ...violations.primordialMutations,
-                ],
-                strictModeViolations: [
-                  ...currentViolations.strictModeViolations,
-                  ...violations.strictModeViolations,
-                ],
-                dynamicRequires: [
-                  ...currentViolations.dynamicRequires,
-                  ...violations.dynamicRequires,
-                ],
-              })
-            } else {
-              violationsForPackage.set(canonicalName, violations)
-            }
-          }
-        }
-        return id
-      })
+      .sendTask(message, MessageTypes.InspectionResults)
       .catch((error) => {
         log.error(`Error inspecting module ${id}: ${error.message}`)
         throw error
       })
+      .then((message) => {
+        switch (message.type) {
+          case MessageTypes.InspectionResults: {
+            inspectedModules.add(id)
+
+            if (process.stderr.isTTY) {
+              messageCount = reportModuleInspectionProgress(
+                messageCount,
+                inspectedModules,
+                modulesToInspect
+              )
+            }
+
+            handleInspectionResults(message)
+
+            return id
+          }
+
+          // if an error is successfully trapped in the worker, we'll hit this.
+          case MessageTypes.Error: {
+            const { error } = message
+            throw new GenerationError(
+              `Error inspecting module ${id}: ${error}`,
+              { cause: error }
+            )
+          }
+        }
+      })
+
     pendingInspections.add(inspectionPromise)
     modulesToInspect.add(id)
   }
   return inspectModuleSource
+}
+
+/**
+ * Creates a function which handles a {@link InspectionResultsMessage} by
+ * updating the appropriate maps.
+ *
+ * @param {CanonicalName} canonicalName
+ * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
+ * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
+ * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
+ * @returns {(message: InspectionResultsMessage) => void}
+ */
+const createInspectionResultsHandler = (
+  canonicalName,
+  globalsForPackage,
+  builtinsForPackage,
+  violationsForPackage
+) => {
+  /**
+   * Builds data structures of per-package policies and violations.
+   *
+   * @param {InspectionResultsMessage} message
+   */
+  return ({ globalPolicy, builtinPolicy, violations }) => {
+    if (globalPolicy) {
+      const currentGlobalPolicy = globalsForPackage.get(canonicalName)
+      globalsForPackage.set(canonicalName, {
+        ...currentGlobalPolicy,
+        ...globalPolicy,
+      })
+    }
+
+    if (builtinPolicy) {
+      const currentBuiltinPolicy = builtinsForPackage.get(canonicalName)
+      builtinsForPackage.set(canonicalName, {
+        ...currentBuiltinPolicy,
+        ...builtinPolicy,
+      })
+    }
+
+    if (violations) {
+      const currentViolations = violationsForPackage.get(canonicalName)
+      if (currentViolations) {
+        violationsForPackage.set(canonicalName, {
+          primordialMutations: [
+            ...currentViolations.primordialMutations,
+            ...violations.primordialMutations,
+          ],
+          strictModeViolations: [
+            ...currentViolations.strictModeViolations,
+            ...violations.strictModeViolations,
+          ],
+          dynamicRequires: [
+            ...currentViolations.dynamicRequires,
+            ...violations.dynamicRequires,
+          ],
+        })
+      } else {
+        violationsForPackage.set(canonicalName, violations)
+      }
+    }
+  }
 }

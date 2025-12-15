@@ -9,7 +9,8 @@
  *
  * It sends the following messages to the parent thread:
  *
- * - `policies` {see {@link PoliciesMessage}}: posts the results of the inspection
+ * - `policies` {see {@link InspectionResultsMessage}}: posts the results of the
+ *   inspection
  * - `error` {see {@link ErrorMessage}}: posts an error to the parent thread
  *
  * This module is intended to be run as a Worker thread.
@@ -20,7 +21,7 @@
 /**
  * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue} from '@lavamoat/types'
  * @import {ParseResult} from '@babel/parser'
- * @import {InspectMessage, PoliciesMessage, ErrorMessage, StructuredViolationsResult} from '../internal.js'
+ * @import {InspectMessage, InspectionResultsMessage, ErrorMessage, StructuredViolationsResult} from '../internal.js'
  * @import {SourceType} from '../types.js'
  */
 
@@ -232,8 +233,8 @@ const createBuiltinPolicy = (ast) => {
  * of this file.
  *
  * This function calls {@link createGlobalPolicy} and posts the result as a
- * {@link PoliciesMessage} message to the parent with the processed globals and
- * the original identifier.
+ * {@link InspectionResultsMessage} message to the parent with the processed
+ * globals and the original identifier.
  *
  * If an error occurs, it posts an {@link ErrorMessage} to the parent with the
  * error.
@@ -287,16 +288,16 @@ const inspectListener = ({ source, sourceType, id }) => {
 
   // Post message to parent
   if (parentPort) {
-    /** @type {PoliciesMessage} */
-    const policiesMessage = {
-      type: MessageTypes.Policies,
+    /** @type {InspectionResultsMessage} */
+    const inspectionResultsMessage = {
+      type: MessageTypes.InspectionResults,
       globalPolicy,
       builtinPolicy,
       violations,
       id,
     }
     try {
-      parentPort.postMessage(policiesMessage)
+      parentPort.postMessage(inspectionResultsMessage)
     } catch (error) {
       error
     }
