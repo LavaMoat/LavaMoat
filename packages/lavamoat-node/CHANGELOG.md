@@ -19,6 +19,13 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [10.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.0.5...lavamoat-v10.1.0) (2025-12-15)
+
+
+### Features
+
+* **lavamoat-node:** expose top level export as return value of runLava ([#1872](https://github.com/LavaMoat/LavaMoat/issues/1872)) ([f360ca4](https://github.com/LavaMoat/LavaMoat/commit/f360ca4d75d9c1ceec8e91617f42ff7b3daea075))
+
 ## [10.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.0.4...lavamoat-v10.0.5) (2025-12-02)
 
 
