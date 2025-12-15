@@ -335,9 +335,9 @@ export interface StructuredViolationsResult {
  *
  * @internal
  */
-export interface PoliciesMessage {
+export interface InspectionResultsMessage {
   /** Message type (discriminant) */
-  type: (typeof MessageTypes)['Policies']
+  type: (typeof MessageTypes)['InspectionResults']
   /** The resulting global policy */
   globalPolicy: GlobalPolicy | null
   /** The resulting builtin policy */
@@ -360,4 +360,41 @@ export interface ErrorMessage {
   error: string
   /** Identifier for the source (file:// URL) */
   id: FileUrlString
+}
+
+/**
+ * Callback used to report the progress of the module inspection process
+ *
+ * @param {number} messageCount The number of messages inspected so far
+ * @param {Set<FileUrlString>} inspectedModules The modules that have been
+ *   inspected so far
+ * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
+ *   be inspected
+ * @returns {number} The new message count
+ */
+export type ReportModuleInspectionProgressFn = (
+  messageCount: number,
+  inspectedModules: Set<FileUrlString>,
+  modulesToInspect: Set<FileUrlString>
+) => number
+
+/**
+ * Callback used to report the end of the module inspection process
+ *
+ * @param {Set<FileUrlString>} inspectedModules The modules that have been
+ *   inspected so far
+ * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
+ *   be inspected
+ */
+export type ReportModuleInspectionProgressEndFn = (
+  inspectedModules: Set<FileUrlString>,
+  modulesToInspect: Set<FileUrlString>
+) => void
+
+/**
+ * Object returned by `createModuleInspectionProgressReporter`
+ */
+export interface ModuleInspectionProgressReporter {
+  reportModuleInspectionProgress: ReportModuleInspectionProgressFn
+  reportModuleInspectionProgressEnd: ReportModuleInspectionProgressEndFn
 }
