@@ -3,7 +3,8 @@
  *
  * **All exports in this module are considered part of the public API.**
  *
- * TODO: Capabilities are inconsistent
+ * TODO: Some of these functions accept a `{readPowers}` option, but others do
+ * not. They should probably _all_ accept it for testing purposes.
  *
  * @packageDocumentation
  */
