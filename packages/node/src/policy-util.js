@@ -550,6 +550,10 @@ const makeDefaultPath = (
       `Policy path must be an absolute path; got ${hrCode(policyPath)}`
     )
     dir = nodePath.dirname(policyPath)
+    return nodePath.join(
+      dir,
+      `${nodePath.basename(policyPath, nodePath.extname(policyPath))}-override.json`
+    )
   } else if (projectRoot) {
     projectRoot = toAbsolutePath(
       projectRoot,
