@@ -30,6 +30,7 @@ import {
   reportInvalidCanonicalNames,
   reportSesViolations,
 } from '../report.js'
+import { pluralize } from '../util.js'
 import { WorkerPool } from '../worker-pool.js'
 
 /**
@@ -79,6 +80,7 @@ export const loadAndGeneratePolicy = async (
     packageCompartmentMap,
     unknownCanonicalNames,
     knownCanonicalNames,
+    rootUsePolicy,
   } = await makeNodeCompartmentMap(entrypointPath, {
     readPowers,
     dev,
@@ -86,6 +88,14 @@ export const loadAndGeneratePolicy = async (
     trustRoot,
     policyOverride,
   })
+
+  /* c8 ignore next */
+  if (!trustRoot && !rootUsePolicy) {
+    // should never happen
+    throw new GenerationError(
+      `Root compartment is not trusted, but no data for root.usePolicy exists`
+    )
+  }
 
   /**
    * In-flight requests to inspect modules
@@ -191,11 +201,17 @@ export const loadAndGeneratePolicy = async (
        *
        * We use this to build the package policies.
        */
-      packageConnectionsHook: ({ canonicalName, connections }) => {
-        // this should be a dupe of whatever the root compartment is
-        if (canonicalName === ROOT_COMPARTMENT) {
+      packageConnectionsHook: ({
+        canonicalName: rawCanonicalName,
+        connections,
+      }) => {
+        if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
           return
         }
+        const canonicalName =
+          rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
+            ? rootUsePolicy
+            : rawCanonicalName
         const packagePolicy = packagePoliciesMap.get(canonicalName) ?? {}
         for (const connection of connections) {
           if (connection !== canonicalName) {
@@ -213,10 +229,15 @@ export const loadAndGeneratePolicy = async (
        * We use this to inspect each module for globals, builtins, and SES
        * compatibility violations.
        */
-      moduleSourceHook: ({ moduleSource, canonicalName }) => {
-        if (canonicalName === ROOT_COMPARTMENT) {
+      moduleSourceHook: ({ moduleSource, canonicalName: rawCanonicalName }) => {
+        if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
+          log.debug('Root module is trusted; skipping inspection')
           return
         }
+        const canonicalName =
+          rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
+            ? rootUsePolicy
+            : rawCanonicalName
         return inspectModuleSource(moduleSource, canonicalName)
       },
       ...options,
@@ -241,14 +262,15 @@ export const loadAndGeneratePolicy = async (
     }
 
     log.info(
-      `${chalk.greenBright('✓')} ${chalk.bold('Completed inspection')} ${chalk.white('for')} ${chalk.whiteBright(modulesToInspect.size)} modules`
+      `${chalk.greenBright('✓')} ${chalk.bold('Completed inspection')} ${chalk.white('for')} ${chalk.whiteBright(modulesToInspect.size)} ${pluralize(modulesToInspect.size, 'module')}`
     )
 
     const policy = compilePolicy(
       globalsForPackage,
       builtinsForPackage,
       packagePoliciesMap,
-      policyOverride
+      policyOverride,
+      rootUsePolicy
     )
     return { policy, packageJsonMap }
   } finally {
@@ -282,13 +304,16 @@ export const loadAndGeneratePolicy = async (
  *   policies for each package.
  * @param {LavaMoatPolicy} [policyOverride] Policy override to merge with the
  *   compiled policy.
+ * @param {CanonicalName | undefined} [rootUsePolicy] Canonical name of the
+ *   untrusted entry package
  * @returns {MergedLavaMoatPolicy} Merged policy.
  */
 const compilePolicy = (
   globalsForPackage,
   builtinsForPackage,
   packagesForPackage,
-  policyOverride
+  policyOverride,
+  rootUsePolicy
 ) => {
   /** @type {LavaMoatPolicy} */
   const policy = { resources: {} }
@@ -324,6 +349,12 @@ const compilePolicy = (
     }
   }
 
+  if (rootUsePolicy) {
+    policy.root = {
+      usePolicy: rootUsePolicy,
+    }
+  }
+
   const mergedPolicy = mergePolicies(policy, policyOverride)
 
   return mergedPolicy
@@ -354,7 +385,8 @@ const compilePolicy = (
  *   Function to report module inspection progress.
  * @returns {(
  *   moduleSource: ModuleSourceHookModuleSource,
- *   canonicalName: CanonicalName
+ *   canonicalName: CanonicalName,
+ *   rootUsePolicy?: string
  * ) => void}
  *   Inspection function
  */
@@ -379,9 +411,11 @@ const createModuleSourceInspector = (
    * @param {ModuleSourceHookModuleSource} moduleSource Module source to
    *   inspect.
    * @param {CanonicalName} canonicalName Canonical name of the module.
+   * @param {string | undefined} rootUsePolicy Canonical name of the policy to
+   *   use for the root compartment.
    * @returns {void}
    */
-  const inspectModuleSource = (moduleSource, canonicalName) => {
+  const inspectModuleSource = (moduleSource, canonicalName, rootUsePolicy) => {
     if ('error' in moduleSource || 'exit' in moduleSource) {
       return
     }
@@ -422,7 +456,8 @@ const createModuleSourceInspector = (
       canonicalName,
       globalsForPackage,
       builtinsForPackage,
-      violationsForPackage
+      violationsForPackage,
+      rootUsePolicy
     )
 
     // note that all rejections will be aggregated
@@ -471,18 +506,36 @@ const createModuleSourceInspector = (
  * Creates a function which handles a {@link InspectionResultsMessage} by
  * updating the appropriate maps.
  *
- * @param {CanonicalName} canonicalName
- * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
- * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
+ * @param {CanonicalName} rawCanonicalName Canonical name of package per
+ *   inspection
+ * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage Map of global
+ *   policies for each package.
+ * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage Map of builtin
+ *   policies for each package.
  * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
- * @returns {(message: InspectionResultsMessage) => void}
+ *   Map of SES compatibility violations for each package.
+ * @param {CanonicalName | undefined} rootUsePolicy Canonical name of the policy
+ *   to use for the root compartment.
+ * @returns {(message: InspectionResultsMessage) => void} Function to handle
+ *   inspection results.
  */
 const createInspectionResultsHandler = (
-  canonicalName,
+  rawCanonicalName,
   globalsForPackage,
   builtinsForPackage,
-  violationsForPackage
+  violationsForPackage,
+  rootUsePolicy
 ) => {
+  /**
+   * If `rootUsePolicy` is provided, we're not trusting the entry package, so
+   * we're going to generate a policy with `root.usePolicy` and create a
+   * `ResourcePolicy` for the entry package by its name.
+   */
+  const canonicalName =
+    rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
+      ? rootUsePolicy
+      : rawCanonicalName
+
   /**
    * Builds data structures of per-package policies and violations.
    *

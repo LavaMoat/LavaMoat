@@ -9,7 +9,7 @@ import {
   loadJSONFixture,
 } from '../json-fixture-util.js'
 
-test('result is deterministic', async (t) => {
+test('result is deterministic for trusted root', async (t) => {
   const { readPowers } = await loadJSONFixture(
     new URL('./kitchen-sink.json', JSON_FIXTURE_DIR_URL)
   )
@@ -19,6 +19,22 @@ test('result is deterministic', async (t) => {
     {
       readPowers,
       trustRoot: DEFAULT_TRUST_ROOT_COMPARTMENT,
+    }
+  )
+
+  t.snapshot(policy)
+})
+
+test('result is deterministic for untrusted root', async (t) => {
+  const { readPowers } = await loadJSONFixture(
+    new URL('./kitchen-sink.json', JSON_FIXTURE_DIR_URL)
+  )
+
+  const { policy } = await loadAndGeneratePolicy(
+    DEFAULT_JSON_FIXTURE_ENTRY_POINT,
+    {
+      readPowers,
+      trustRoot: false,
     }
   )
 
