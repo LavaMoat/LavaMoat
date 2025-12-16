@@ -1,0 +1,7 @@
+{
+  "name": "missing-from-descriptors",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true
+}
