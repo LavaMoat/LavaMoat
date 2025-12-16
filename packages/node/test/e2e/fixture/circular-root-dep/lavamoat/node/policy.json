@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "child-pkg": {
+      "packages": {
+        "$root$": true
+      }
+    }
+  }
+}
+
