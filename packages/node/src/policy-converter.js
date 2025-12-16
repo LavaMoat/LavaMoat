@@ -25,7 +25,6 @@ import {
   ENDO_POLICY_ITEM_WILDCARD,
   ENDO_POLICY_RESOURCES,
   LAVAMOAT_PKG_POLICY_NATIVE,
-  LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
 import { ConversionError } from './error.js'
 import { isMergedPolicy, loadPolicies } from './policy-util.js'
@@ -142,13 +141,7 @@ const convertToEndoPackagePolicyPackages = (item) => {
    */
   const policyItem = {}
   for (const [key, value] of entries(item)) {
-    if (key === LAVAMOAT_PKG_POLICY_ROOT) {
-      throw new ConversionError(
-        `Unexpected root package (${LAVAMOAT_PKG_POLICY_ROOT}) referenced in package policy`
-      )
-    } else {
-      policyItem[key] = !!value
-    }
+    policyItem[key] = !!value
   }
   return policyItem
 }
@@ -162,12 +155,7 @@ const convertToEndoPackagePolicyPackages = (item) => {
  * @param {GlobalPolicy} [item] - A value in `ResourcePolicy`
  * @returns {LavaMoatEndoPackagePolicy['globals']}
  */
-const convertToEndoPackagePolicyGlobals = (item) => {
-  if (!item) {
-    return undefined
-  }
-  return [item]
-}
+const convertToEndoPackagePolicyGlobals = (item) => (!item ? undefined : [item])
 
 /**
  * Converts LavaMoat `ResourcePolicy` to Endo's `PackagePolicyOptions`
