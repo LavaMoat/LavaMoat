@@ -161,8 +161,6 @@ test(
   }
 )
 
-test.todo('hashbang in module')
-
 test(
   'do not fail if missing optional dependencies',
   testExec,
