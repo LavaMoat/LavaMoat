@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "dev-pkg": {
+      "builtin": {
+        "node:util": true
+      }
+    }
+  }
+}
