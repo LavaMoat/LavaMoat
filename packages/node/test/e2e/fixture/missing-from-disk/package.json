@@ -1,0 +1,10 @@
+{
+  "name": "missing-from-disk",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "incomplete-pkg": "^1.0.0"
+  }
+}
