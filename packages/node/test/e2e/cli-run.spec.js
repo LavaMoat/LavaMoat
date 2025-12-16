@@ -18,6 +18,7 @@ const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
 const deptree = fixture('deptree')
 const devDeptree = fixture('deptree', { entrypoint: 'tool.js' })
 const missingFromDisk = fixture('missing-from-disk')
+const missingFromDescriptors = fixture('missing-from-descriptors')
 
 const { testCLI } = createCLIMacros(test)
 
@@ -78,13 +79,27 @@ test(
   'scripty test'
 )
 
-test.todo('package missing from all package descriptors')
+test(
+  'package missing from all package descriptors',
+  testCLI,
+  [
+    'run',
+    missingFromDescriptors.entrypoint,
+    '--project-root',
+    missingFromDescriptors.dir,
+  ],
+  { code: 1, stderr: /Cannot find package 'undeclared-dep'/ }
+)
 
 test(
   'package missing from disk',
   testCLI,
   ['run', missingFromDisk.entrypoint, '--project-root', missingFromDisk.dir],
-  { code: 1, stderr: /Cannot find package 'incomplete-pkg'/ }
+  {
+    code: 1,
+    stderr:
+      /The following entry found in policy were not associated with any Compartment and may be invalid:\n\s+- resources\["undeclared-dep"\]/,
+  }
 )
 
 test.todo('package only present in policy override')
