@@ -21,7 +21,7 @@ import {
   DEFAULT_POLICY_OVERRIDE_FILENAME,
   LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
-import { InvalidPolicyError, NoPolicyError } from './error.js'
+import { InvalidPolicyError, NoPolicyError, WritePolicyError } from './error.js'
 import { hrCode, hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
@@ -124,26 +124,27 @@ export const maybeReadPolicyOverride = async (
     }
     if (/** @type {NodeJS.ErrnoException} */ (err).code === 'ENOENT') {
       log.debug(
-        `No LavaMoat policy overrides found at ${hrPath(policyOverridePath)}`
+        `No LavaMoat policy override file found at ${hrPath(policyOverridePath)}`
       )
       return
     }
 
     if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
       throw new InvalidPolicyError(
-        `Failed to read LavaMoat policy overrides file at ${hrPath(policyOverridePath)}`,
+        `Failed to read provided LavaMoat policy override file at ${hrPath(policyOverridePath)}`,
         { cause: err }
       )
     }
   }
 
+  // TODO: integrate with @lavamoat/policy when it exists
   try {
     assertPolicy(allegedPolicy)
-    log.debug(`Read policy override from ${hrPath(policyOverridePath)}`)
+    log.debug(`Read policy override file from ${hrPath(policyOverridePath)}`)
     return allegedPolicy
   } catch (err) {
     throw new InvalidPolicyError(
-      `Invalid LavaMoat policy overrides at ${hrPath(policyOverridePath)}; does not match expected schema`,
+      `Invalid LavaMoat policy override file at ${hrPath(policyOverridePath)}; does not match expected schema`,
       { cause: err }
     )
   }
@@ -155,8 +156,8 @@ export const maybeReadPolicyOverride = async (
  *
  * @privateRemarks
  * TODO: The way this fails is not user-friendly; it will just throw a
- * `TypeError` saying that the policy is invalid. **We should use proper schema
- * validation** to provide a more helpful error message.
+ * `InvalidPolicyError` saying that the policy is invalid. **We should use
+ * proper schema validation** to provide a more helpful error message.
  * @param {string | URL | LavaMoatPolicy} [policyOrPolicyPath] Path to
  *   `policy.json` or the policy itself. Defaults to
  *   `./lavamoat/node/policy.json` relative to
@@ -341,25 +342,32 @@ export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
       recursive: true,
     })
   } catch (err) {
-    throw new Error(`Failed to create policy directory ${hrPath(policyDir)}`, {
-      cause: err,
-    })
+    throw new WritePolicyError(
+      `Failed to create policy directory ${hrPath(policyDir)}`,
+      {
+        cause: err,
+      }
+    )
   }
   try {
     await fs.promises.writeFile(filepath, jsonStringifySortedPolicy(policy))
   } catch (err) {
     if (createdDir) {
+      log.debug('Removing created policy directory due to write failure…')
       try {
         await fs.promises.rm(createdDir, { recursive: true })
-      } catch (err) {
-        const rmErr = new Error(
-          `Failed to remove created directory ${hrPath(createdDir)}`,
-          { cause: err }
+      } catch {
+        log.debug(
+          `Failed to remove created policy directory ${hrPath(createdDir)}; may need manual cleanup`
         )
-        throw new AggregateError([err, rmErr])
       }
     }
-    throw err
+    throw new WritePolicyError(
+      `Failed to write policy to ${hrPath(filepath)}`,
+      {
+        cause: err,
+      }
+    )
   }
 }
 

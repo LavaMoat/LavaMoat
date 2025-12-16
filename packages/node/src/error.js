@@ -121,11 +121,20 @@ export const PermissionDeniedError = createLavaMoatError(
 )
 
 /**
- * Error thrown if an policy with an untrusted root is attempted to be run in a
+ * Error thrown if a policy with an untrusted root is attempted to be run in a
  * trusted context
  */
 export const TrustMismatchError = createLavaMoatError(
   'TrustMismatchError',
   ErrorCodes.TrustMismatch,
+  class extends Error {}
+)
+
+/**
+ * Error thrown if a policy cannot be written to disk
+ */
+export const WritePolicyError = createLavaMoatError(
+  'WritePolicyError',
+  ErrorCodes.WritePolicyFailure,
   class extends Error {}
 )
