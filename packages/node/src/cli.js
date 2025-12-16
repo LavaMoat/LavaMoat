@@ -57,12 +57,9 @@ const PATH_GROUP = 'Path Options:'
  * For this to work, we _must_ mutate `process.argv` _in place_.
  *
  * @param {string} entrypoint Entry module
- * @param {(string | number)[]} nonOptionArguments Array of stuff passed after
- *   `--` on the command-line. Note that Yargs parses numbers, and we have to
- *   convert them back to strings.
  * @returns {void}
  */
-const stripProcessArgv = (entrypoint, nonOptionArguments = []) => {
+const stripProcessArgv = (entrypoint) => {
   /**
    * This module could be executed in myriad ways (`lavamoat`, `node
    * /path/to/lavamoat`, `npx lavamoat2`, etc.), so we are just going to
@@ -70,25 +67,21 @@ const stripProcessArgv = (entrypoint, nonOptionArguments = []) => {
    */
   const start = 0
 
+  const indexOfDoubleDash = process.argv.indexOf('--')
+
   /**
    * If the user provided `--` we want everything after that, but if they
    * didn't, the entire rest of the array is lavamoat args, so it can be
    * removed.
    */
-  const deleteCount = process.argv.includes('--')
-    ? process.argv.indexOf('--')
-    : process.argv.length
+  const deleteCount =
+    indexOfDoubleDash !== -1 ? indexOfDoubleDash + 1 : process.argv.length
 
   /**
    * Path to `node`, any args to `node`, the path to the entrypoint, then
    * whatever was in {@link nonOptionArguments}. Hope this works!
    */
-  const items = [
-    process.execPath,
-    ...process.execArgv,
-    entrypoint,
-    ...nonOptionArguments.map(String),
-  ]
+  const items = [process.execPath, ...process.execArgv, entrypoint]
 
   process.argv.splice(start, deleteCount, ...items)
 }
@@ -460,14 +453,7 @@ const main = async (args = hideBin(process.argv)) => {
           })
         }
 
-        stripProcessArgv(
-          entrypoint,
-          /**
-           * `@types/yargs` doesn't know about this
-           *
-           * @type {(string | number)[]}
-           */ (argv['--'])
-        )
+        stripProcessArgv(entrypoint)
 
         await run(entrypoint, {
           policyOverridePath,
