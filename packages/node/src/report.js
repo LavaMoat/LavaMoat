@@ -9,7 +9,7 @@ import { stripVTControlCharacters } from 'node:util'
 import { InvalidArgumentsError } from './error.js'
 import { hrCode, hrLabel, hrPath } from './format.js'
 import { log as defaultLog } from './log.js'
-import { isObjectyObject, toKeypath } from './util.js'
+import { isObjectyObject, pluralize, toKeypath } from './util.js'
 
 /**
  * @import {ReportInvalidOverridesOptions,
@@ -282,8 +282,9 @@ export const createModuleInspectionProgressReporter = () => {
 
     prefix[trianglePos - 1] = styledTriangle
     const prefixStr = prefix.join('')
+    const moduleStr = pluralize(modulesToInspect.size, 'module')
     process.stderr.write(
-      `\r        ${chalk.dim('›')} ${prefixStr} ${chalk.white('Inspecting modules: ')}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)}`
+      `\r        ${chalk.dim('›')} ${prefixStr} ${chalk.white(`Inspecting ${moduleStr}: `)}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)}`
     )
     return messageCount
   }
@@ -298,8 +299,9 @@ export const createModuleInspectionProgressReporter = () => {
     modulesToInspect
   ) => {
     const prefix = `        ${chalk.dim('›')} `
+    const moduleStr = pluralize(modulesToInspect.size, 'module')
     process.stderr.write(
-      `\r${prefix}${chalk.dim('▶')}${chalk.white('▶')}${chalk.whiteBright('▶')} ${chalk.white('Inspecting modules: ')}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)} ${chalk.greenBright('✓')}\n`
+      `\r${prefix}${chalk.dim('▶')}${chalk.white('▶')}${chalk.whiteBright('▶')} ${chalk.white(`Inspecting ${moduleStr}: `)}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)} ${chalk.greenBright('✓')}\n`
     )
   }
 
