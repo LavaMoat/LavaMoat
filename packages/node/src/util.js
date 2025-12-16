@@ -277,3 +277,24 @@ export const toKeypath = (path) => {
   })
 }
 // #endregion
+
+/**
+ * Returns the singular or plural form of a word based on count.
+ *
+ * @example
+ *
+ * ```js
+ * pluralize(1, 'item') // => 'item'
+ * pluralize(0, 'item') // => 'items'
+ * pluralize(5, 'item') // => 'items'
+ * pluralize(2, 'ox', 'oxen') // => 'oxen'
+ * ```
+ *
+ * @param {number} count The count to check
+ * @param {string} singular The singular form of the word
+ * @param {string} [plural] The plural form (defaults to `singular + 's'`)
+ * @returns {string} The appropriate form of the word
+ * @internal
+ */
+export const pluralize = (count, singular, plural = `${singular}s`) =>
+  count === 1 ? singular : plural
