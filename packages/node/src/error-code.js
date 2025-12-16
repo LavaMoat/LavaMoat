@@ -23,5 +23,6 @@ export const ErrorCodes = Object.freeze(
     NoWorkspace: 'LMN_NO_WORKSPACE',
     PermissionDenied: 'LMN_PERMISSION_DENIED',
     TrustMismatch: 'LMN_TRUST_MISMATCH',
+    WritePolicyFailure: 'LMN_WRITE_POLICY_FAILURE',
   })
 )
