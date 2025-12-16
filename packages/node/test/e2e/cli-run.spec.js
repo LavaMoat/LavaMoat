@@ -19,6 +19,7 @@ const deptree = fixture('deptree')
 const devDeptree = fixture('deptree', { entrypoint: 'tool.js' })
 const missingFromDisk = fixture('missing-from-disk')
 const missingFromDescriptors = fixture('missing-from-descriptors')
+const circularRootDep = fixture('circular-root-dep')
 
 const { testCLI } = createCLIMacros(test)
 
@@ -102,9 +103,12 @@ test(
   }
 )
 
-test.todo('package only present in policy override')
-
-test.todo('entry module is depended upon by a descendant')
+test(
+  'entry module is depended upon by a descendant',
+  testCLI,
+  ['run', circularRootDep.entrypoint, '--project-root', circularRootDep.dir],
+  'child-pkg got: helper from root'
+)
 
 test('--dev processes dev deps', async (t) => {
   t.plan(2)
