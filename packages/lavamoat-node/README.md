@@ -99,6 +99,12 @@ Options:
 
 ```
 
+To pass arguments to the script without revealing lavamoat-specific arguments, use `--` like so:
+
+```
+ lavamoat index.js --override './policies/policy-override.json' -- --arg-for-index=1
+```
+
 ## More Examples
 
 ### Run with Policy in default location

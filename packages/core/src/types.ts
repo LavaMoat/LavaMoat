@@ -6,6 +6,6 @@ export * from './index'
 export type * from './moduleRecord'
 export type * from './options'
 export type * from './parseForPolicy'
-export type { LavaMoatScuttleOpts } from './scuttle.d.ts'
+export type { LavaMoatScuttleOpts } from './scuttle'
 export { E as EndowmentsToolkitFactory }
 

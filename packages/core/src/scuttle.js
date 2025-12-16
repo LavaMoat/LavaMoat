@@ -1,4 +1,14 @@
-/** @import { LavaMoatScuttleOpts, GlobalRef } from './scuttle.d.ts' */
+/**
+ * @typedef {object} LavaMoatScuttleOpts Options for scuttling `globalThis`.
+ * @property {boolean} enabled Whether scuttling is enabled or not.
+ * @property {Array<string | RegExp>} [exceptions] List of properties to exclude from scuttling.
+ * @property {string} [scuttlerName] Name of the scuttler function to use which is expected to be found as a property on the global object (e.g. if scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
+ */
+
+/**
+ * @typedef {object} GlobalRef Reference to the global object
+ * @property {Record<PropertyKey, unknown>} [globalThis] Reference to the global object.
+ */
 
 const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
   globalThis

@@ -33,6 +33,44 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [19.0.6](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.5...lavamoat-browserify-v19.0.6) (2025-12-02)
+
+
+### Bug Fixes
+
+* **browserify,core,lavamoat-node,node:** do not publish extraneous files ([#1866](https://github.com/LavaMoat/LavaMoat/issues/1866)) ([e7666d8](https://github.com/LavaMoat/LavaMoat/commit/e7666d804e2f9af71fb0cd948af04a283458b6d1)), closes [#1865](https://github.com/LavaMoat/LavaMoat/issues/1865)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.20 to ^7.0.21
+    * lavamoat-core bumped from ^17.1.1 to ^17.1.2
+  * devDependencies
+    * lavamoat bumped from 10.0.4 to 10.0.5
+
+## [19.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.4...lavamoat-browserify-v19.0.5) (2025-12-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.19 to ^7.0.20
+    * lavamoat-core bumped from ^17.1.0 to ^17.1.1
+  * devDependencies
+    * lavamoat bumped from 10.0.3 to 10.0.4
+
+## [19.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.3...lavamoat-browserify-v19.0.4) (2025-11-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * lavamoat bumped from 10.0.2 to 10.0.3
+
 ## [19.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.2...lavamoat-browserify-v19.0.3) (2025-11-19)
 
 

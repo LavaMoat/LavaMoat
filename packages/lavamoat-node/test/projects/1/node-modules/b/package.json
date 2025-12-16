@@ -1,4 +1,10 @@
 {
   "name": "b",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./index.cjs"
+    }
+  }
 }

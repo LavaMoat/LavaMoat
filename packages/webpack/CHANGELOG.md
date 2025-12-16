@@ -18,6 +18,29 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.5.6](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.5...webpack-v1.5.6) (2025-12-02)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.1.1 to ^17.1.2
+
+## [1.5.5](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.4...webpack-v1.5.5) (2025-12-01)
+
+
+### Bug Fixes
+
+* typescript got confused into creating a cyclic reference in types for scuttling in core ([5e25a36](https://github.com/LavaMoat/LavaMoat/commit/5e25a361094a7b3ed7ae2744cd405910f9dc3baa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.1.0 to ^17.1.1
+
 ## [1.5.4](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.3...webpack-v1.5.4) (2025-11-19)
 
 
