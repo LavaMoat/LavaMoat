@@ -27,16 +27,15 @@ import type {
   SourceType,
   WithDev,
   WithFs,
-  WithLavaMoatEndoPolicy,
   WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
   WithPolicyOverrideOnly,
   WithProjectRoot,
   WithReadFile,
-  WithReadPowers,
+  WithReadPowersAndTrust,
+  WithReadPowersAndTrustAndEndoPolicy,
   WithScuttleGlobalThis,
-  WithTrustRoot,
 } from './types.js'
 
 /**
@@ -58,9 +57,8 @@ export type ContextTestFn = (context: object) => boolean
 export type LoadAndGeneratePolicyOptions = ComposeOptions<
   [
     WithLoadForMapOptions,
-    WithReadPowers,
+    WithReadPowersAndTrust,
     WithPolicyOverride,
-    WithTrustRoot,
     WithProjectRoot,
   ]
 >
@@ -207,10 +205,8 @@ export interface LoadCompartmentMapResult {
 export type MakeNodeCompartmentMapOptions = ComposeOptions<
   [
     WithLog,
-    WithReadPowers,
+    WithReadPowersAndTrustAndEndoPolicy,
     WithDev,
-    WithTrustRoot,
-    WithLavaMoatEndoPolicy,
     WithPolicyOverrideOnly,
   ]
 >
@@ -225,6 +221,7 @@ export interface MakeNodeCompartmentMapResult {
   packageCompartmentMap: PackageCompartmentMapDescriptor
   unknownCanonicalNames: Set<CanonicalName>
   knownCanonicalNames: Set<CanonicalName>
+  rootUsePolicy?: CanonicalName
 }
 
 /**
