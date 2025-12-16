@@ -332,4 +332,19 @@ console.log("you can use await import` +
   }
 )
 
-test.todo('exit modules are not imported')
+// this is a test of the nullImportHook which is needed to avoid importing exit
+// modules during policy generation
+test(
+  'exit module should not be imported',
+  testPolicyForJSON,
+  'exit-module-no-import.json',
+  {
+    modules: {
+      'some-exit-module': {
+        grief: () => {
+          throw new Error('should not happen')
+        },
+      },
+    },
+  }
+)

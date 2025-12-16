@@ -1,0 +1,16 @@
+[
+  0,
+  {},
+  {
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,Ly8gVGhpcyBwYWNrYWdlIGRvZXMgbm90IGV4aXN0IGFuZCBpcyBub3QgaW4gcGFja2FnZS5qc29uIGRlcGVuZGVuY2llcwppbXBvcnQgeyBncmllZiB9IGZyb20gJ3NvbWUtZXhpdC1tb2R1bGUnCgpleHBvcnQgZGVmYXVsdCBncmllZigpCg=="
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImV4aXQtbW9kdWxlLW5vLWltcG9ydCIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL2V4aXQtbW9kdWxlLW5vLWltcG9ydC5qc29uIgogIH0KfQoK"
+    ]
+  }
+]
