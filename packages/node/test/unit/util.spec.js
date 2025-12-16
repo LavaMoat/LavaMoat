@@ -8,6 +8,7 @@ import {
   isObjectyObject,
   isReadNowPowers,
   isString,
+  pluralize,
   toFileURLString,
 } from '../../src/util.js'
 
@@ -141,4 +142,15 @@ test('isReadNowPowers - returns false for invalid ReadNowPowers', (t) => {
     isAbsolute: () => {},
   }
   t.false(isReadNowPowers(invalidReadNowPowers))
+})
+
+test('pluralize - returns singular form when count is 1', (t) => {
+  t.is(pluralize(1, 'item'), 'item')
+})
+
+test('pluralize - returns plural form when count is not 1', (t) => {
+  t.plan(3)
+  t.is(pluralize(0, 'item'), 'items')
+  t.is(pluralize(5, 'item'), 'items')
+  t.is(pluralize(2, 'ox', 'oxen'), 'oxen')
 })
