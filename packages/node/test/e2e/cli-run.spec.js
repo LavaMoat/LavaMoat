@@ -17,6 +17,7 @@ const echo = fixture('basic', { entrypoint: 'echo.js' })
 const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
 const deptree = fixture('deptree')
 const devDeptree = fixture('deptree', { entrypoint: 'tool.js' })
+const missingFromDisk = fixture('missing-from-disk')
 
 const { testCLI } = createCLIMacros(test)
 
@@ -79,7 +80,12 @@ test(
 
 test.todo('package missing from all package descriptors')
 
-test.todo('package missing from disk')
+test(
+  'package missing from disk',
+  testCLI,
+  ['run', missingFromDisk.entrypoint, '--project-root', missingFromDisk.dir],
+  { code: 1, stderr: /Cannot find package 'incomplete-pkg'/ }
+)
 
 test.todo('package only present in policy override')
 
