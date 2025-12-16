@@ -1,7 +1,10 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
-import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
+import {
+  DEFAULT_POLICY_FILENAME,
+  DEFAULT_POLICY_OVERRIDE_FILENAME,
+} from '../../src/constants.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
 import { fixtureFinder } from '../test-util.js'
 import { createCLIMacros } from './cli-macros.js'
@@ -13,6 +16,7 @@ const basic = fixture('basic')
 const echo = fixture('basic', { entrypoint: 'echo.js' })
 const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
 const deptree = fixture('deptree')
+const devDeptree = fixture('deptree', { entrypoint: 'tool.js' })
 
 const { testCLI } = createCLIMacros(test)
 
@@ -52,20 +56,6 @@ test(
 )
 
 test(
-  'extra non-option arguments (positionals and options)',
-  testCLI,
-  [
-    'run',
-    basic.entrypoint,
-    '--project-root',
-    basic.dir,
-    '--',
-    'howdy',
-    '--yelling',
-  ],
-  'HOWDY WORLD'
-)
-test(
   'extra non-option arguments are passed cleanly (positionals and options)',
   testCLI,
   [
@@ -87,8 +77,6 @@ test(
   'scripty test'
 )
 
-test.todo('--dev flag')
-
 test.todo('package missing from all package descriptors')
 
 test.todo('package missing from disk')
@@ -96,6 +84,32 @@ test.todo('package missing from disk')
 test.todo('package only present in policy override')
 
 test.todo('entry module is depended upon by a descendant')
+
+test('--dev processes dev deps', async (t) => {
+  t.plan(2)
+
+  const tempdir = await makeTempdir(t)
+  try {
+    const { code } = await runCLI(
+      [
+        'run',
+        devDeptree.entrypoint,
+        '--dev',
+        '--policy',
+        tempdir.join(`dev-${DEFAULT_POLICY_FILENAME}`),
+        '--policy-override',
+        tempdir.join(`dev-${DEFAULT_POLICY_OVERRIDE_FILENAME}`),
+        '--generate-recklessly',
+        '--write',
+      ],
+      t,
+      { cwd: devDeptree.dir }
+    )
+    t.is(code, undefined)
+  } finally {
+    await tempdir[Symbol.asyncDispose]()
+  }
+})
 
 test('overrides merged back into policy', async (t) => {
   t.plan(2)
