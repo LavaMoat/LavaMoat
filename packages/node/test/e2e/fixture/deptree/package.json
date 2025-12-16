@@ -7,5 +7,8 @@
   "dependencies": {
     "another-pkg": "^1.0.0",
     "shared-pkg": "^2.0.0"
+  },
+  "devDependencies": {
+    "dev-pkg": "^1.0.0"
   }
 }
