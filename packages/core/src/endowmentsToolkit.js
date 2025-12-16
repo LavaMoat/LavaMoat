@@ -22,7 +22,7 @@
  */
 
 module.exports = endowmentsToolkit
-
+module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
@@ -728,14 +728,38 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
 }
 
 /**
- * @type {DefaultWrapperFn}
+ * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
+ */
+
+/**
+ * The default implementation of the utility for wrapping endowed function to
+ * set `this` to a correct reference.
+ *
+ * Wraps a function so that it has a proper context object.
+ *
+ * The motivation is that some functions in `globalThis` must be called with the
+ * `globalThis` object as context. This detects such functions and wraps them
+ * such that they are called with the correct context.
+ *
+ * Supports constructors (e.g., {@link FunctionConstructor}).
+ *
+ * @template {SomeFunction} [T=SomeFunction] Function to wrap. Can be a
+ *   constructor. Default is `SomeFunction`
+ * @template {object} [U=object] Context to use, if necessary. Default is
+ *   `object`
+ * @param {T} sourceValue Function to wrap
+ * @param {ContextTestFn} unwrapTest Test to determine context; if true will use
+ *   `unwrapTo` as `this`
+ * @param {U} unwrapTo Some object (usually a `globalThis`)
+ * @returns {T} Wrapped function
  */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
-   * @param {...any[]} args
-   * @returns {any}
-   * @this {object}
+   * @param {SomeParameters<T>} args
+   * @returns {ReturnType<T>}
+   * @this {U | Record<PropertyKey, any>}
    */
+  // eslint-disable-next-line func-style
   const newValue = function (...args) {
     if (new.target) {
       // handle constructor calls
@@ -757,7 +781,7 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   ) {
     Object.setPrototypeOf(newValue, Reflect.getPrototypeOf(sourceValue))
   }
-  return newValue
+  return /** @type {T} */ (newValue)
 }
 
 /**
