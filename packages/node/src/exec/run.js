@@ -80,6 +80,11 @@ export const run = async (
   const executeOptions = {
     Compartment: makeExecutionCompartment(globalThis),
     modules: {
+      // We are passing the default attenuator in as an exit module. It's not required
+      // for it to be a package then, but if we have a prototype pollution or RCE
+      // in the attenuator, we're exposing the outside instead of the attenuators
+      // compartment. It's a tradeoff. We could address it by manually creating a separate
+      // compartment for defining the attenuator in.
       [DEFAULT_ATTENUATOR]: {
         attenuateGlobals: makeGlobalsAttenuator({
           policy,
