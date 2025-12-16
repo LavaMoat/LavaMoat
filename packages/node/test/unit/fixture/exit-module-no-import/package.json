@@ -1,0 +1,10 @@
+{
+  "name": "exit-module-no-import",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs ../../json-fixture/exit-module-no-import.json"
+  }
+}

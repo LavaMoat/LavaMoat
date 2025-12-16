@@ -16,10 +16,9 @@ import { AttenuationError } from '../error.js'
 import { isObjectyObject } from '../util.js'
 
 /**
- * @import {MakeGlobalsAttenuatorOptions} from '../types.js'
+ * @import {MakeGlobalsAttenuatorOptions} from '../internal.js'
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {GlobalAttenuatorParams} from '../types.js'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 const {
@@ -47,13 +46,14 @@ export const attenuateModule = (params, originalObject) => {
  * Creates a global attenuator
  *
  * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
+ * use ExecutionCompartment if you want to customize globals regardless of policy
  *
  * @param {MakeGlobalsAttenuatorOptions} [options]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  * @internal
  */
 export const makeGlobalsAttenuator = ({
-  policy: { resources } = {},
+  policy: { resources } = { resources: {} },
   scuttleGlobalThis = { enabled: false },
 } = {}) => {
   /** @type {Set<string>} */
@@ -70,10 +70,6 @@ export const makeGlobalsAttenuator = ({
         }
       }
     }
-  }
-
-  if (typeof scuttleGlobalThis === 'boolean') {
-    scuttleGlobalThis = { enabled: scuttleGlobalThis }
   }
 
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
@@ -99,22 +95,16 @@ export const makeGlobalsAttenuator = ({
         )
       }
       rootCompartmentGlobalThis = packageCompartmentGlobalThis
-      // ^ this is a little dumb, but only a little - assuming importLocation is
-      // called only once in parallel. The thing is - even if it isn't, the new
-      // one will have a new copy of this module anyway. That is unless we
-      // decide to use `modules` for passing the attenuator, in which case we
-      // have an attenuator defined outside of Endo and we can scope it as we
-      // wish. Tempting. Slightly less secure, because if we have a prototype
-      // pollution or RCE in the attenuator, we're exposing the outside instead
-      // of the attenuators compartment.
+      // ^ A naive approach is taken of assuming the root compartment mut be the
+      // first compartment being passed.
+      // related: https://github.com/LavaMoat/LavaMoat/pull/1749
+      // if we solve the remaining issue (failing test in latest commit) it could address the concern about rootCompartmentGlobalThis being the source of truth for endowments in other compartments creating a dependency on oo compartment being attenuated first.
+
       copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
         'globalThis',
         'global',
       ])
-      scuttle(originalGlobalThis, {
-        ...scuttleGlobalThis,
-        enabled: !!scuttleGlobalThis.enabled,
-      })
+      scuttle(originalGlobalThis, scuttleGlobalThis)
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis
