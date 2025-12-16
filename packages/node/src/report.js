@@ -135,9 +135,9 @@ export const reportInvalidCanonicalNames = (
       }
     }
 
-    let msg = `The following entries(s) found in ${what}`
+    let msg = `The following ${pluralize(unknownCanonicalNameMap.length, 'entry', 'entries')} found in ${what}`
     msg += policyPath ? ` (${hrPath(policyPath)})` : ''
-    msg += ` were not associated with any Compartment and may be invalid:\n`
+    msg += ` ${pluralize(unknownCanonicalNameMap.length, 'was', 'were')} not associated with any Compartment and may be invalid:\n`
     msg += unknownCanonicalNameMap
       .map(({ name, source }) => {
         if (suggestions.has(name)) {
