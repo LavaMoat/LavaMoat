@@ -287,11 +287,9 @@ export type ExecuteOptions = ComposeOptions<
       ImportLocationOptions | SyncImportLocationOptions,
       'log' | 'dev' | 'policy'
     >,
-    WithLavaMoatEndoPolicy,
+    WithReadPowersAndTrustAndEndoPolicy,
     WithLog,
-    WithReadPowers,
     WithDev,
-    WithTrustRoot,
     WithPolicyOnly,
   ]
 >
@@ -309,15 +307,12 @@ export interface WithLavaMoatEndoPolicy {
  */
 export type GeneratePolicyOptions = ComposeOptions<
   [
-    WithReadPowers,
+    WithReadPowersAndTrust,
     WithIsBuiltin,
     WithLoadForMapOptions,
     WithWritePolicyOptions,
-    WithPolicyOverrideOrPath,
-    WithTrustRoot,
     WithScuttleGlobalThis,
-    WithReadFile,
-    WithProjectRoot,
+    LoadPoliciesOptions,
   ]
 >
 
@@ -394,10 +389,8 @@ export type RunOptions = ComposeOptions<
     WithTrustRoot,
     WithScuttleGlobalThis,
     WithLog,
-    WithProjectRoot,
-    WithPolicyOverrideOrPath,
     WithPolicyOrPath,
-    WithReadFile,
+    LoadPoliciesOptions,
   ]
 >
 
@@ -437,6 +430,33 @@ export type ToEndoPolicyOptionsWithoutPolicyOverride = ComposeOptions<
  */
 export type WithRawReadPowers = WithReadPowers | WithRawPowers
 
+/**
+ * Options having both {@link WithReadPowers} and {@link WithTrustRoot}
+ * properties.
+ *
+ * These properties always appear together in compartment map operations.
+ */
+export type WithReadPowersAndTrust = ComposeOptions<
+  [WithReadPowers, WithTrustRoot]
+>
+
+/**
+ * Options having {@link WithReadPowersAndTrust} and
+ * {@link WithLavaMoatEndoPolicy} properties.
+ *
+ * These properties always appear together in compartment map execution.
+ */
+export type WithReadPowersAndTrustAndEndoPolicy = ComposeOptions<
+  [WithReadPowersAndTrust, WithLavaMoatEndoPolicy]
+>
+
+/**
+ * Options for `loadPolicies()`
+ */
+export type LoadPoliciesOptions = ComposeOptions<
+  [WithProjectRoot, WithReadFile, WithPolicyOverrideOrPath]
+>
+
 export type CanonicalName = LiteralUnion<
   typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
   string
@@ -460,13 +480,6 @@ export type {
 } from '@lavamoat/types'
 
 export type * from './errors.js'
-
-/**
- * Options for `loadPolicies()`
- */
-export type LoadPoliciesOptions = ComposeOptions<
-  [WithProjectRoot, WithReadFile, WithPolicyOverrideOrPath]
->
 
 /**
  * Options bucket containing a `readFile` prop
