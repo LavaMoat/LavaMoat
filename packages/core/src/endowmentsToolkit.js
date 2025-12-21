@@ -23,6 +23,8 @@
 
 module.exports = endowmentsToolkit
 
+const { assign, create, entries, defineProperty } = Object
+
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
@@ -84,49 +86,60 @@ function endowmentsToolkit({
     const allowedWriteFields = new Set()
     /** @type {string[]} */
     const explicitlyBanned = []
+    /** @type {string[]} */
+    const allowRedefine = []
 
-    Object.entries(packagePolicy.globals).forEach(
-      ([path, packagePolicyValue]) => {
-        const pathParts = path.split('.')
-        // disallow dunder proto in path
-        const pathContainsDunderProto = pathParts.some(
-          (pathPart) => pathPart === '__proto__'
+    entries(packagePolicy.globals).forEach(([path, packagePolicyValue]) => {
+      const pathParts = path.split('.')
+      // disallow dunder proto in path
+      const pathContainsDunderProto = pathParts.some(
+        (pathPart) => pathPart === '__proto__'
+      )
+      if (pathContainsDunderProto) {
+        throw new Error(
+          `Lavamoat - "__proto__" disallowed when creating minimal view. saw "${path}"`
         )
-        if (pathContainsDunderProto) {
-          throw new Error(
-            `Lavamoat - "__proto__" disallowed when creating minimal view. saw "${path}"`
-          )
-        }
-        // false means no access. It's necessary so that overrides can also be used to tighten the policy
-        if (packagePolicyValue === false) {
-          explicitlyBanned.push(path)
+      }
+      // false means no access. It's necessary so that overrides can also be used to tighten the policy
+      if (packagePolicyValue === false) {
+        explicitlyBanned.push(path)
+        return
+      }
+      // write access handled elsewhere
+      if (
+        typeof packagePolicyValue === 'string' &&
+        packagePolicyValue.startsWith('write')
+      ) {
+        if (!handleGlobalWrite) {
           return
         }
-        // write access handled elsewhere
-        if (packagePolicyValue === 'write') {
-          if (!handleGlobalWrite) {
-            return
-          }
-          if (pathParts.length > 1) {
-            throw new Error(
-              `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+        if (pathParts.length > 1) {
+          throw new Error(
+            `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+          )
+        }
+        allowedWriteFields.add(path)
+        whitelistedReads.push(path)
+        if (packagePolicyValue === 'write+define') {
+          if (!unwrapFrom) {
+            throw ReferenceError(
+              'LavaMoat - write+define value in policy requires unwrapFrom to be set when generating endowments'
             )
           }
-          allowedWriteFields.add(path)
-          whitelistedReads.push(path)
-          return
+          allowRedefine.push(path)
         }
-        if (packagePolicyValue !== true) {
-          throw new Error(
-            `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
-          )
-        }
-        whitelistedReads.push(path)
+        return
       }
-    )
+      if (packagePolicyValue !== true) {
+        throw new Error(
+          `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
+        )
+      }
+      whitelistedReads.push(path)
+    })
     // sort by length to optimize further steps
     whitelistedReads.sort((a, b) => a.length - b.length)
-    return makeMinimalViewOfRef(
+    const endowments = makeMinimalViewOfRef(
       sourceRef,
       whitelistedReads,
       unwrapTo,
@@ -134,6 +147,41 @@ function endowmentsToolkit({
       explicitlyBanned,
       allowedWriteFields
     )
+
+    if (allowRedefine.length > 0 && unwrapFrom) {
+      const expectedTarget = unwrapFrom || endowments
+      const originalDefineProperty = unwrapFrom.Object.defineProperty
+      /**
+       * @param {Record<PropertyKey, any>} target
+       * @param {PropertyKey} key
+       * @param {PropertyDescriptor} descriptor
+       * @returns {boolean}
+       */
+      const redefine = (target, key, descriptor) => {
+        if (
+          target === expectedTarget &&
+          typeof key !== 'symbol' &&
+          allowRedefine.includes(`${key}`)
+        ) {
+          target[key] = descriptor.value
+          return true
+        }
+        originalDefineProperty(target, key, descriptor)
+        return true
+      }
+      endowments.Object = assign(
+        create(unwrapFrom.Object.prototype),
+        unwrapFrom.Object
+      )
+      defineProperty(endowments.Object, 'defineProperty', {
+        value: redefine,
+        writable: false,
+        configurable: false,
+        enumerable: true,
+      })
+    }
+
+    return endowments
   }
 
   /**

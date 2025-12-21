@@ -16,12 +16,12 @@ test('getEndowmentsForConfig', (t) => {
       stringValue: 'yabbadabbadoo',
     },
   }
-  const config = {
+  const policy = {
     globals: {
       'namespace.stringValue.includes': true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   t.is(sourceGlobal.namespace.stringValue.includes('dab'), true)
   t.is(resultGlobal.namespace.stringValue.includes('dab'), true)
 })
@@ -36,25 +36,25 @@ test('getEndowmentsForConfig - function on proto', (t) => {
   const sourceGlobal = {
     lookAtMyProto: Object.create(theProto),
   }
-  const config = {
+  const policy = {
     globals: {
       'lookAtMyProto.appendChild': true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   t.is(resultGlobal.lookAtMyProto.appendChild(), assertMe)
 })
 
 test('getEndowmentsForConfig - siblings', (t) => {
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = { Buffer }
-  const config = {
+  const policy = {
     globals: {
       'Buffer.from': true,
       'Buffer.isBuffer': true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   {
     const sourceProp = Object.getOwnPropertyDescriptor(
       sourceGlobal.Buffer,
@@ -125,14 +125,14 @@ test('getEndowmentsForConfig - knownWritable', (t) => {
     b: { c: 2 },
     d: 3,
   }
-  const config = {
+  const policy = {
     globals: {
       a: true,
       'b.c': true,
       d: true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   {
     t.is(resultGlobal.a, 1)
     t.is(resultGlobal.b.c, 2)
@@ -173,7 +173,7 @@ test('getEndowmentsForConfig - knownWritable and tightening access with false', 
     a: { b: { c: 2, d: 3 }, q: 1 },
   }
 
-  const config = {
+  const policy = {
     globals: {
       'a.b.c': true,
       'a.b': false,
@@ -181,7 +181,7 @@ test('getEndowmentsForConfig - knownWritable and tightening access with false', 
     },
   }
 
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   {
     t.is(typeof resultGlobal.a.b, 'object')
     t.is(resultGlobal.a.b.c, 2)
@@ -199,7 +199,7 @@ test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
     a: { b: { c: 2, d: 3 }, q: 1 },
   }
 
-  const config = {
+  const policy = {
     globals: {
       'a.b': true,
       'a.b.c': true,
@@ -207,7 +207,7 @@ test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
     },
   }
 
-  t.throws(() => getEndowmentsForConfig(sourceGlobal, config))
+  t.throws(() => getEndowmentsForConfig(sourceGlobal, policy))
 })
 
 test('getEndowmentsForConfig - read-write', (t) => {
@@ -218,21 +218,21 @@ test('getEndowmentsForConfig - read-write', (t) => {
     b: { c: 2 },
     d: 3,
   }
-  const config1 = {
+  const policy1 = {
     globals: {
       a: true,
       'b.c': true,
       d: true,
     },
   }
-  const config2 = {
+  const policy2 = {
     globals: {
       a: 'write',
       b: 'write',
     },
   }
-  const global1 = getEndowmentsForConfig(sourceGlobal, config1)
-  const global2 = getEndowmentsForConfig(sourceGlobal, config2)
+  const global1 = getEndowmentsForConfig(sourceGlobal, policy1)
+  const global2 = getEndowmentsForConfig(sourceGlobal, policy2)
   {
     t.is(global1.a, 1)
     t.is(global1.b.c, 2)
@@ -254,12 +254,12 @@ test('getEndowmentsForConfig - basic getter', (t) => {
       return { xyz: 42 }
     },
   }
-  const config = {
+  const policy = {
     globals: {
       'abc.xyz': true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   {
     const sourceProp = Object.getOwnPropertyDescriptor(sourceGlobal, 'abc')
     const resultProp = Object.getOwnPropertyDescriptor(resultGlobal, 'abc')
@@ -294,20 +294,20 @@ test('getEndowmentsForConfig - traversing with getters', (t) => {
 
   const sourceGlobal = recur(3)()
 
-  const config = {
+  const policy = {
     globals: {
       'zzz.zzz.zzz': true,
     },
   }
-  const configShallow = {
+  const policyShallow = {
     globals: {
       'zzz.zzz': true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   const resultGlobalShallow = getEndowmentsForConfig(
     sourceGlobal,
-    configShallow
+    policyShallow
   )
 
   {
@@ -339,7 +339,6 @@ test('getEndowmentsForConfig - traversing with getters', (t) => {
 })
 
 test('getEndowmentsForConfig - ensure window.document getter behavior support', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
@@ -347,12 +346,12 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
       return this
     },
   }
-  const config = {
+  const policy = {
     globals: {
       xyz: true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
 
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
@@ -364,7 +363,6 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
 })
 
 test('getEndowmentsForConfig - specify unwrap to', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
   const { getEndowmentsForConfig } = prepareTest()
@@ -373,12 +371,12 @@ test('getEndowmentsForConfig - specify unwrap to', (t) => {
       return this
     },
   }
-  const config = {
+  const policy = {
     globals: {
       xyz: true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config, unwrapTo)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy, unwrapTo)
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
   t.is(resultGlobal.xyz, unwrapTo)
@@ -390,7 +388,6 @@ test('getEndowmentsForConfig - specify unwrap to', (t) => {
 })
 
 test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
   const unwrapFrom = {}
@@ -400,14 +397,14 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
       return this
     },
   }
-  const config = {
+  const policy = {
     globals: {
       xyz: true,
     },
   }
   const resultGlobal = getEndowmentsForConfig(
     sourceGlobal,
-    config,
+    policy,
     unwrapTo,
     unwrapFrom
   )
@@ -424,19 +421,18 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
 
 // eslint-disable-next-line ava/no-async-fn-without-await
 test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
-  'use strict'
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     abc: function () {
       return this
     },
   }
-  const config = {
+  const policy = {
     globals: {
       'abc.bind': true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
 
   // the intermediate should actually be an object
   t.is(typeof resultGlobal.abc, 'object')
@@ -449,7 +445,6 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
 })
 
 test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
@@ -457,12 +452,12 @@ test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invo
       return this
     },
   }
-  const config = {
+  const policy = {
     globals: {
       setTimeout: true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, policy)
   t.is(resultGlobal.setTimeout(), sourceGlobal)
 })
 
@@ -491,7 +486,6 @@ test('copyWrappedGlobals - support other realm prototype chains', (t) => {
 })
 
 test('copyWrappedGlobals - copy from prototype too', (t) => {
-  'use strict'
   const { copyWrappedGlobals } = prepareTest()
   const sourceProto = {
     onTheProto: function () {},
@@ -521,4 +515,83 @@ test('copyWrappedGlobals - static methods on wrapped functions', (t) => {
 
   t.is(typeof target.Array.from, 'function')
   t.is(typeof target.Uint8Array.from, 'function')
+})
+
+test('getEndowmentsForConfig - allow redefine on properties', (t) => {
+  const knownWritable = new Set(['x', 'y'])
+  const { getEndowmentsForConfig } = prepareTest({ knownWritable })
+  const sourceGlobal = {
+    ...globalThis,
+    x: 1,
+    y: 2,
+    z: 3,
+  }
+  const policy = {
+    globals: {
+      x: 'write+define',
+      y: 'write',
+      z: true,
+    },
+  }
+  // Compartment's globalThis
+  const derivedGlobal = {
+    Object,
+    Array,
+    Error,
+    Promise, // and so on...
+  }
+  const endowments = getEndowmentsForConfig(
+    sourceGlobal,
+    policy,
+    globalThis,
+    derivedGlobal
+  )
+  Object.defineProperties(
+    derivedGlobal,
+    Object.getOwnPropertyDescriptors(endowments)
+  )
+  t.is(typeof derivedGlobal.Object, 'object')
+  Object.freeze(derivedGlobal)
+
+  // Regular property access works
+  t.is(derivedGlobal.x, 1)
+  t.is(derivedGlobal.y, 2)
+  t.is(derivedGlobal.z, 3)
+
+  // Regular write works for both 'write' and 'redefine'
+  derivedGlobal.x = 10
+  derivedGlobal.y = 20
+  t.is(derivedGlobal.x, 10)
+  t.is(derivedGlobal.y, 20)
+  t.is(sourceGlobal.x, 10, 'source value updated for redefine property')
+  t.is(sourceGlobal.y, 20, 'source value updated for write property')
+
+  // defineProperty works for 'write+define' but not for others
+  derivedGlobal.Object.defineProperty(derivedGlobal, 'x', {
+    value: 100,
+    // writable, configurable, and enumerable are not applied
+  })
+
+  t.is(derivedGlobal.x, 100, 'value updated after defineProperty')
+  t.is(sourceGlobal.x, 100, 'source value updated after defineProperty')
+
+  // Trying to defineProperty on a 'write' property should throw
+  t.throws(
+    () => {
+      derivedGlobal.Object.defineProperty(derivedGlobal, 'y', {
+        value: 200,
+      })
+    },
+    { message: /Cannot redefine property/ }
+  )
+
+  // Trying to defineProperty on a read-only property should throw
+  t.throws(
+    () => {
+      derivedGlobal.Object.defineProperty(derivedGlobal, 'z', {
+        value: 300,
+      })
+    },
+    { message: /Cannot redefine property/ }
+  )
 })
