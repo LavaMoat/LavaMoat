@@ -24,15 +24,17 @@ test('use lavamoat programmatically', async (t) => {
   const projectRoot = join(__dirname, `/projects/2`)
   const entryPath = './index.js'
 
-  await runLava({
+  const result = await runLava({
     entryPath,
     projectRoot,
     debugMode: true,
   })
 
-  // TODO: add means to endow entry with new references and pass a callback to assert it's been called.
-
-  t.pass()
+  t.is(
+    result.keccak256,
+    '5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
+    'should return expected result'
+  )
 })
 
 test('use lavamoat-run-command', async (t) => {
