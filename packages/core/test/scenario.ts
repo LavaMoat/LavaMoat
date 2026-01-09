@@ -8,7 +8,7 @@ import {
 } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
 import { type SetRequired } from 'type-fest'
-import type { LavaMoatOpts } from '../src/types'
+import type { LavaMoatOpts } from '../src/options'
 
 export type ScenarioType = 'truthy' | 'falsy' | 'deepEqual'
 
