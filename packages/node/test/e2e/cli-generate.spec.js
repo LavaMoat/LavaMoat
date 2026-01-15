@@ -1,6 +1,8 @@
 import '../../src/preamble.js'
+
 // eslint-disable-next-line ava/use-test
 import anyTest from 'ava'
+
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
 import { keysOr } from '../../src/util.js'
@@ -93,7 +95,7 @@ test('canonical names are used in policy', async (t) => {
 test('--quiet is quiet', async (t) => {
   const policyPath = t.context.tempdir.join(`quiet-${DEFAULT_POLICY_FILENAME}`)
 
-  const { code, stdout, stderr } = await runCLI(
+  const { code, stderr, stdout } = await runCLI(
     ['generate', basic.entrypoint, '--policy', policyPath, '--quiet'],
     t,
     {
@@ -101,8 +103,8 @@ test('--quiet is quiet', async (t) => {
     }
   )
   t.deepEqual(
-    { code, stdout, stderr },
-    { code: undefined, stdout: '', stderr: '' }
+    { code, stderr, stdout },
+    { code: undefined, stderr: '', stdout: '' }
   )
 })
 

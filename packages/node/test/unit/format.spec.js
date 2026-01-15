@@ -1,5 +1,6 @@
 import test from 'ava'
 import path from 'node:path'
+
 import { hrPath, stripAnsi } from '../../src/format.js'
 
 test('hrPath - returns relative path if shorter than absolute path', (t) => {

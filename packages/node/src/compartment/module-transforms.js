@@ -126,11 +126,11 @@ const createModuleTransform = (parser) => {
     const { code, map } = evadeCensorSync(source, {
       // elideComments: true, would clean up a lot
       sourceMap: opts?.sourceMap,
-      sourceUrl: new URL(specifier, location).href,
       sourceType: parser === 'mjs' ? 'module' : 'script',
+      sourceUrl: new URL(specifier, location).href,
     })
     const objectBytes = encoder.encode(code)
-    return { bytes: objectBytes, parser, map }
+    return { bytes: objectBytes, map, parser }
   }
 }
 
