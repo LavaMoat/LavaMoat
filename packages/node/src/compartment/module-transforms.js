@@ -53,7 +53,10 @@ const decapitateHashbang = (source) => {
  * @returns {string}
  */
 const evadeImportString = (source) => {
-  return source.replace(/(?<=[`"'][\w\d\s,-]*)import\(/g, 'import（')
+  return source.replace(
+    /(?<=[`"'][\w\d\s,.(){}!?@#$%^<>/\\-]*)import\(/g,
+    'import（'
+  )
 }
 
 const htmlCommentPattern = new RegExp(`(?:${'<'}!--|--${'>'})`, 'g')
@@ -99,8 +102,8 @@ export const useLocalTransforms = (source) => {
   source = decapitateHashbang(source)
   // The following 3 transforms could be imported from core
   // import { applySourceTransforms } from 'lavamoat-core'
-  // but the import trnsform in core is not making exceptions 
-  // for valid dynamic import() statements, and it seems like 
+  // but the import trnsform in core is not making exceptions
+  // for valid dynamic import() statements, and it seems like
   // we want those to remain.
   source = evadeHtmlComment(source)
   source = evadeDirectEvalExpressions(source)
