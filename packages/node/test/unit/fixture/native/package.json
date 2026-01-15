@@ -8,6 +8,6 @@
     "start": "npx snapshot-fs ../../json-fixture/native.json"
   },
   "dependencies": {
-    "hello_world": "0.0.0"
+    "hello-world": "0.0.0"
   }
 }

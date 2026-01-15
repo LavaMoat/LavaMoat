@@ -1,9 +1,14 @@
 import '../../../src/preamble.js'
 
+import { Loggerr } from 'loggerr'
 import { fileURLToPath } from 'node:url'
-import { generatePolicy } from '../../../src/policy-gen/generate.js'
+import { defaultReadPowers } from '../../../src/compartment/power.js'
+import { MERGED_POLICY_FIELD, SourceTypes } from '../../../src/constants.js'
+import { log as defaultLog } from '../../../src/log.js'
+import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import { isPolicy } from '../../../src/policy-util.js'
 import { isFunction } from '../../../src/util.js'
+import { fixtureFinder } from '../../test-util.js'
 import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
   JSON_FIXTURE_DIR_URL,
@@ -11,33 +16,13 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {ValueOf} from 'type-fest'
- * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions} from './types.js'
+ * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions, TestPolicyForFixtureOptions} from './types.js'
+ * @import {SourceType} from '../../../src/types.js'
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
-/**
- * Used by inner function in {@link createGeneratePolicyMacros} to determine
- * which scaffold to use
- *
- * @internal
- */
-export const InlineSourceTypes = /** @type {const} */ ({
-  Module: 'module',
-  Script: 'script',
-})
-
-/**
- * Available inline source type
- *
- * @remarks
- * This typedef should stay here instead of in `types.ts` otherwise it would
- * create a cycle.
- * @typedef {ValueOf<typeof InlineSourceTypes>} InlineSourceType
- * @internal
- * @see {@link InlineSourceTypes}
- */
+const fixture = fixtureFinder(new URL('..', import.meta.url))
 
 /**
  * Given an AVA test function, returns a set of macros for testing policy
@@ -63,7 +48,7 @@ export function createGeneratePolicyMacros(test) {
    *     content: string,
    *     opts: {
    *       expectedPolicy?: LavaMoatPolicy | TestPolicyMacroOptions
-   *       sourceType?: InlineSourceType
+   *       sourceType?: SourceType
    *     },
    *   ],
    *   Ctx
@@ -73,22 +58,43 @@ export function createGeneratePolicyMacros(test) {
     exec: async (
       t,
       content,
-      { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
+      { expectedPolicy = {}, sourceType = SourceTypes.Module } = {}
     ) => {
       const { readPowers } = await scaffoldFixture(content, { sourceType })
+      /** @type {Loggerr} */
+      let log
+      if (!isPolicy(expectedPolicy) && expectedPolicy.log) {
+        log = expectedPolicy.log
+      } else {
+        log = defaultLog
+        if (process.env.LAVAMOAT_DEBUG === undefined) {
+          log.setLevel(Loggerr.EMERGENCY)
+        }
+      }
 
-      const actualPolicy = await generatePolicy('/entry.js', {
-        readPowers,
-        policyOverride:
-          'policyOverride' in expectedPolicy
-            ? expectedPolicy.policyOverride
-            : undefined,
-      })
+      const { policy: actualPolicy } = await loadAndGeneratePolicy(
+        '/entry.js',
+        {
+          log,
+          readPowers,
+          policyOverride:
+            'policyOverride' in expectedPolicy
+              ? expectedPolicy.policyOverride
+              : undefined,
+        }
+      )
 
       if (isPolicy(expectedPolicy)) {
-        t.deepEqual(actualPolicy, expectedPolicy)
+        const actual = /** @type {LavaMoatPolicy} */ ({ ...actualPolicy })
+        delete (/** @type {any} */ (actual)[MERGED_POLICY_FIELD])
+        t.deepEqual(actual, expectedPolicy)
       } else if ('expected' in expectedPolicy) {
-        t.deepEqual(actualPolicy, expectedPolicy.expected)
+        if (!isPolicy(expectedPolicy.expected)) {
+          throw new TypeError('expectedPolicy.expected is not a policy')
+        }
+        const actual = /** @type {LavaMoatPolicy} */ ({ ...actualPolicy })
+        delete (/** @type {any} */ (actual)[MERGED_POLICY_FIELD])
+        t.deepEqual(actual, expectedPolicy.expected)
       } else {
         t.snapshot(actualPolicy)
       }
@@ -96,7 +102,7 @@ export function createGeneratePolicyMacros(test) {
     title: (
       title,
       _content,
-      { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
+      { expectedPolicy = {}, sourceType = SourceTypes.Module } = {}
     ) =>
       (isPolicy(expectedPolicy) || 'expected' in expectedPolicy
         ? `${title ?? `policy for inline ${sourceType} matches expected policy`}`
@@ -124,12 +130,12 @@ export function createGeneratePolicyMacros(test) {
       exec: async (t, content, expectedPolicy) =>
         testInlinePolicyDeclaration.exec(t, content, {
           expectedPolicy,
-          sourceType: InlineSourceTypes.Module,
+          sourceType: SourceTypes.Module,
         }),
       title: (title, content, expectedPolicy) =>
         testInlinePolicyDeclaration.title(title, content, {
           expectedPolicy,
-          sourceType: InlineSourceTypes.Module,
+          sourceType: SourceTypes.Module,
         }),
     })
   )
@@ -153,12 +159,12 @@ export function createGeneratePolicyMacros(test) {
       exec: async (t, content, expectedPolicy) =>
         testInlinePolicyDeclaration.exec(t, content, {
           expectedPolicy,
-          sourceType: InlineSourceTypes.Script,
+          sourceType: SourceTypes.Script,
         }),
       title: (title, content, expectedPolicy) =>
         testInlinePolicyDeclaration.title(title, content, {
           expectedPolicy,
-          sourceType: InlineSourceTypes.Script,
+          sourceType: SourceTypes.Script,
         }),
     })
   )
@@ -199,14 +205,27 @@ export function createGeneratePolicyMacros(test) {
           ;({ expected, ...options } = options)
         }
 
+        const {
+          jsonEntrypoint = DEFAULT_JSON_FIXTURE_ENTRY_POINT,
+          randomDelay = false,
+          ...otherOptions
+        } = options ?? {}
+
         const { readPowers } = await loadJSONFixture(
-          new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
+          new URL(fixtureFilename, JSON_FIXTURE_DIR_URL),
+          { randomDelay }
         )
 
-        const actualPolicy = await generatePolicy(
-          options?.jsonEntrypoint ?? DEFAULT_JSON_FIXTURE_ENTRY_POINT,
+        let { log } = otherOptions
+        if (!log && process.env.LAVAMOAT_DEBUG === undefined) {
+          log = defaultLog
+          log.setLevel(Loggerr.EMERGENCY)
+        }
+
+        const { policy: actualPolicy } = await loadAndGeneratePolicy(
+          jsonEntrypoint,
           {
-            ...options,
+            ...otherOptions,
             readPowers,
           }
         )
@@ -216,11 +235,9 @@ export function createGeneratePolicyMacros(test) {
         t.plan(options?.policyOverride ? 2 : 1)
 
         if (isPolicy(expected)) {
-          t.deepEqual(
-            actualPolicy,
-            expected,
-            'policy does not deeply equal expected'
-          )
+          const actual = /** @type {LavaMoatPolicy} */ ({ ...actualPolicy })
+          delete (/** @type {any} */ (actual)[MERGED_POLICY_FIELD])
+          t.deepEqual(actual, expected, 'policy does not deeply equal expected')
         } else if (isFunction(expected)) {
           await expected(t, actualPolicy)
         } else {
@@ -267,7 +284,122 @@ export function createGeneratePolicyMacros(test) {
     })
   )
 
+  /**
+   * Macro to test policy generation for a given fixture file.
+   *
+   * **This should be avoided in favor of `testPolicyForJSON`**; it is useful
+   * for building out fixtures before snapshotting them into JSON.
+   */
+  const testPolicyForFixture = test.macro(
+    /**
+     * @type {MacroDeclarationOptions<
+     *   [
+     *     name: string,
+     *     expectedPolicyOrOptions?:
+     *       | LavaMoatPolicy
+     *       | TestPolicyForFixtureOptions,
+     *     options?: TestPolicyForFixtureOptions,
+     *   ],
+     *   Ctx
+     * >}
+     */ ({
+      exec: async (t, name, expectedPolicyOrOptions, options = {}) => {
+        /** @type {TestPolicyForFixtureOptions['expected']} */
+        let expected
+        if (isPolicy(expectedPolicyOrOptions)) {
+          expected = expectedPolicyOrOptions
+        } else {
+          options = /** @type {TestPolicyForFixtureOptions} */ (
+            expectedPolicyOrOptions ?? {}
+          )
+          ;({ expected, ...options } = options)
+        }
+
+        const {
+          entrypoint,
+          entrypointFilename,
+          readPowers = defaultReadPowers,
+          ...otherOptions
+        } = options ?? {}
+
+        let { log } = otherOptions
+        if (!log && process.env.LAVAMOAT_DEBUG === undefined) {
+          log = defaultLog
+          log.setLevel(Loggerr.EMERGENCY)
+        }
+
+        const { entrypoint: entrypointPath, dir: projectRoot } = fixture(name, {
+          entrypoint,
+          entrypointFilename,
+        })
+        const { policy: actualPolicy } = await loadAndGeneratePolicy(
+          entrypointPath,
+          {
+            ...otherOptions,
+            projectRoot,
+            readPowers,
+            log,
+          }
+        )
+
+        // if overrides provided, then we will make a second check that
+        // asserts `actualPolicy` is a superset of the override
+        t.plan(options?.policyOverride ? 2 : 1)
+
+        if (isPolicy(expected)) {
+          t.deepEqual(
+            actualPolicy,
+            expected,
+            'policy does not deeply equal expected'
+          )
+        } else if (isFunction(expected)) {
+          await expected(t, actualPolicy)
+        } else {
+          t.snapshot(actualPolicy, 'policy does not match snapshot')
+        }
+
+        if (options?.policyOverride) {
+          t.like(
+            actualPolicy,
+            options.policyOverride,
+            'policy is not a superset of overrides'
+          )
+        }
+      },
+
+      title: (
+        title,
+        fixtureFilename,
+        expectedPolicyOrOptions,
+        options = {}
+      ) => {
+        if (title) {
+          return title
+        }
+        /** @type {TestPolicyForFixtureOptions['expected']} */
+        let expected
+        if (isPolicy(expectedPolicyOrOptions)) {
+          expected = expectedPolicyOrOptions
+        } else {
+          options = /** @type {TestPolicyForFixtureOptions} */ (
+            expectedPolicyOrOptions ?? {}
+          )
+          ;({ expected, ...options } = options)
+        }
+
+        if (isPolicy(expected)) {
+          return `policy for fixture matches expected policy (${fixtureFilename})`
+        } else if (isFunction(expected)) {
+          return `policy for fixture passes assertions (${fixtureFilename})`
+        } else {
+          return `policy for fixture matches snapshot (${fixtureFilename})`
+        }
+      },
+    })
+  )
+
   return {
+    testPolicyForFixture,
     testPolicyForJSON,
     testPolicyForModule: testPolicyForInlineModule,
     testPolicyForScript: testPolicyForInlineScript,
@@ -316,10 +448,10 @@ const SCAFFOLD_SCRIPT_FIXTURE = fileURLToPath(
  */
 
 async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
-  const fixture =
+  const fixturePath =
     sourceType === 'module' ? SCAFFOLD_MODULE_FIXTURE : SCAFFOLD_SCRIPT_FIXTURE
   const { vol, readPowers } = await loadJSONFixture(
-    new URL(fixture, import.meta.url)
+    new URL(fixturePath, import.meta.url)
   )
 
   await vol.promises.writeFile(SCAFFOLD_ENTRY_POINT, content, {

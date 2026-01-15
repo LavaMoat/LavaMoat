@@ -7,33 +7,35 @@
  */
 
 import type {
-  CompartmentDescriptor,
-  CompartmentMapDescriptor,
+  PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
-  Sources,
 } from '@endo/compartment-mapper'
-import { type LavaMoatPolicy } from '@lavamoat/types'
-import type { LavamoatModuleRecordOptions } from 'lavamoat-core'
-import type { Except, LiteralUnion, Simplify } from 'type-fest'
+import type { CanonicalName } from '@endo/compartment-mapper/import.js'
 import type {
-  ATTENUATORS_COMPARTMENT,
-  LAVAMOAT_PKG_POLICY_ROOT,
-} from './constants.js'
+  BuiltinPolicy,
+  GlobalPolicy,
+  LavaMoatPolicy,
+  Resources,
+} from '@lavamoat/types'
+import type { PackageJson, ValueOf } from 'type-fest'
+import type { MessageTypes, SES_VIOLATION_TYPES } from './constants.js'
 import type {
-  BaseLoadCompartmentMapOptions,
-  BuildModuleRecordsOptions,
-  GeneratePolicyOptions,
-  WithDebug,
+  ComposeOptions,
+  FileUrlString,
+  MergedLavaMoatPolicy,
+  SourceType,
+  WithDev,
   WithFs,
-  WithIsBuiltin,
+  WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
-  WithPolicyOverridePath,
+  WithPolicyOverrideOnly,
+  WithProjectRoot,
   WithReadFile,
-  WithReadPowers,
-  WithTrustRoot,
-  WritePolicyOptions,
+  WithReadPowersAndTrust,
+  WithReadPowersAndTrustAndEndoPolicy,
+  WithScuttleGlobalThis,
 } from './types.js'
 
 /**
@@ -48,50 +50,17 @@ import type {
 export type ContextTestFn = (context: object) => boolean
 
 /**
- * Options for `generate()` function
+ * Options for `loadCompartmentMapForPolicy()`
  *
  * @internal
  */
-export type GenerateOptions = Except<
-  GeneratePolicyOptions,
-  keyof WritePolicyOptions
->
-
-/**
- * Options for `loadCompartmentMap()`
- *
- * @internal
- */
-export type LoadCompartmentMapOptions = Simplify<
-  BaseLoadCompartmentMapOptions &
-    WithReadPowers &
-    WithPolicyOverride &
-    WithTrustRoot & {
-      compartmentDescriptorTransforms?: CompartmentDescriptorTransform[]
-    }
->
-
-/**
- * Options for the `PolicyGeneratorContext` constructor
- *
- * @template RootModule If a `string`, then this is the name of the root module,
- *   which lives in the root compartment. We can use this to distinguish
- *   `PolicyGeneratorContext` instances in which the associated compartment is
- *   _not_ the entry compartment (if needed). Generally, this can be ignored.
- * @internal
- */
-export type PolicyGeneratorContextOptions<
-  RootModule extends string | void = void,
-> = Simplify<
-  WithReadPowers &
-    WithIsBuiltin &
-    WithLog & {
-      /**
-       * If set, this implies the associated {@link CompartmentDescriptor} is the
-       * entry descriptor.
-       */
-      rootModule?: RootModule
-    }
+export type LoadAndGeneratePolicyOptions = ComposeOptions<
+  [
+    WithLoadForMapOptions,
+    WithReadPowersAndTrust,
+    WithPolicyOverride,
+    WithProjectRoot,
+  ]
 >
 
 /**
@@ -136,79 +105,52 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
 /**
  * Options for `readPolicy()`
  *
- * @interal
+ * @internal
  */
-export type ReadPolicyOptions = WithReadFile
+export type ReadPolicyOptions = ComposeOptions<[WithReadFile]>
 
 /**
- * Options for `readPolicyoverride()`
+ * Options for `readPolicyOverride()`
  *
- * @interal
+ * @internal
  */
-export type ReadPolicyOverrideOptions = WithReadFile
+export type ReadPolicyOverrideOptions = ComposeOptions<[WithReadFile]>
 
 /**
  * Options for `resolveBinScript()`
  *
- * @interal
+ * @internal
  */
-export type ResolveBinScriptOptions = Simplify<
-  WithFs & {
-    /**
-     * Directory to begin looking for the script in
-     */
-    from?: string
-  }
->
+export type ResolveBinScriptOptions = ComposeOptions<[WithFs, WithFrom]>
+
+/**
+ * Options containing a `from` property; used for path resolution
+ *
+ * @internal
+ */
+export interface WithFrom {
+  /**
+   * Where to resolve from
+   */
+  from?: string | URL
+}
+
+/**
+ * Options for `resolveEntrypoint()`
+ */
+export type ResolveEntrypointOptions = ComposeOptions<[WithFrom]>
 
 /**
  * Options for `resolveWorkspace()`
  *
- * @interal
+ * @internal
  */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
 
 /**
- * Options for `inspectModuleRecords()`
- *
- * @interal
- */
-export type InspectModuleRecordsOptions = Simplify<
-  WithLog & WithDebug & WithTrustRoot
->
-
-/**
- * Possible options for creating a `LavamoatModuleRecord` within the context of
- * this package.
- *
- * - `moduleInitializer` is only used by the `lavamoat-core` kernel;
- *   `@endo/compartment-mapper`'s parsers handle this for us
- * - `ast` is created internally by the module inspector and we needn't provide it
- *
- * @interal
- */
-export type SimpleLavamoatModuleRecordOptions = Omit<
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  LavamoatModuleRecordOptions,
-  'ast' | 'moduleInitializer'
->
-
-/**
- * The canonical name of a package as used in policy
- *
- * {@link ATTENUATORS_COMPARTMENT} does not appear in policy and is an Endo-ism.
- *
- * @interal
- */
-export type CanonicalName = LiteralUnion<
-  typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
-  string
->
-
-/**
  * N array of required properties for {@link ReadNowPowers}
  *
- * @interal
+ * @internal
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
@@ -220,30 +162,30 @@ export type RequiredReadNowPowers = ReadonlyArray<
 /**
  * Options for `reportInvalidOverrides()`
  *
- * @interal
+ * @internal
  */
-export type ReportInvalidOverridesOptions = WithPolicyOverride &
-  WithPolicyOverridePath &
-  WithLog
-
-/**
- * Result of `generatePolicy()`
- *
- * @interal
- */
-export type GenerateResult<T extends LavaMoatPolicy = LavaMoatPolicy> = {
-  policy: T
-  compartmentMap: CompartmentMapDescriptor
-}
-
-/**
- * Options for `compartmentMapToPolicy()`
- *
- * @interal
- */
-export type CompartmentMapToPolicyOptions = Simplify<
-  BuildModuleRecordsOptions & WithPolicyOverride & WithDebug & WithTrustRoot
+export type ReportInvalidOverridesOptions = ComposeOptions<
+  [
+    WithPolicy,
+    /**
+     * `policyOverridePath` is used only for display purposes; we do not
+     * actually attempt to read the policy override file
+     */
+    WithPolicyPath,
+    WithLog,
+    {
+      maxSuggestions?: number
+      what?: 'policy' | 'policy overrides'
+    },
+  ]
 >
+
+/**
+ * Options for `reportSesViolations()`
+ *
+ * @internal
+ */
+export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
 
 /**
  * Result of `loadCompartmentMap()`
@@ -251,16 +193,205 @@ export type CompartmentMapToPolicyOptions = Simplify<
  * @internal
  */
 export interface LoadCompartmentMapResult {
-  compartmentMap: CompartmentMapDescriptor
-  sources: Sources
-  renames: Record<string, string>
+  policy: MergedLavaMoatPolicy
+  packageJsonMap: Map<string, PackageJson>
 }
 
-export type CompartmentDescriptorTransform = (
-  compartmentDescriptor: CompartmentDescriptor,
-  options?: CompartmentDescriptorTransformOptions
+/**
+ * Options for `makeNodeCompartmentMap()`
+ *
+ * @internal
+ */
+export type MakeNodeCompartmentMapOptions = ComposeOptions<
+  [
+    WithLog,
+    WithReadPowersAndTrustAndEndoPolicy,
+    WithDev,
+    WithPolicyOverrideOnly,
+  ]
+>
+
+/**
+ * Result of `makeNodeCompartmentMap()`
+ *
+ * @internal
+ */
+export interface MakeNodeCompartmentMapResult {
+  packageJsonMap: Map<CanonicalName, PackageJson>
+  packageCompartmentMap: PackageCompartmentMapDescriptor
+  unknownCanonicalNames: Set<CanonicalName>
+  knownCanonicalNames: Set<CanonicalName>
+  rootUsePolicy?: CanonicalName
+}
+
+/**
+ * Proper names of SES violation types
+ *
+ * @internal
+ */
+export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
+
+/**
+ * Options for `makeGlobalsAttenuator()`
+ *
+ * @internal
+ */
+export type MakeGlobalsAttenuatorOptions = ComposeOptions<
+  [WithPolicy, WithScuttleGlobalThis]
+>
+
+/**
+ * Options containing a `policy` prop
+ *
+ * @template T The type of the resources in the policy
+ * @internal
+ */
+export interface WithPolicy<T extends Resources = Resources> {
+  policy?: LavaMoatPolicy<T>
+}
+
+export interface WithPolicyPath {
+  policyPath?: string | URL
+}
+
+/**
+ * Base message type with required type property and id
+ *
+ * @internal
+ */
+export interface BaseMessage {
+  /** Message type discriminant */
+  type: string
+  /** Task identifier */
+  id: string
+}
+
+/**
+ * Options for {@link WorkerPool} constructor
+ *
+ * @template _TMessage Message type that extends BaseMessage
+ * @template _TResponse Response type that extends BaseMessage
+ * @internal
+ */
+export interface WorkerPoolOptions<
+  _TMessage extends BaseMessage = BaseMessage,
+  _TResponse extends BaseMessage = BaseMessage,
+> {
+  /** How long workers can be idle before termination (ms) */
+  idleTimeout?: number
+}
+
+/**
+ * Message type for requesting inspection
+ *
+ * @internal
+ */
+export interface InspectMessage {
+  /** Message type (discriminant) */
+  type: (typeof MessageTypes)['Inspect']
+  /** Source bytes */
+  source: Uint8Array
+  /** Type of source */
+  sourceType: SourceType
+  /** Identifier for the source (file:// URL) */
+  id: FileUrlString
+}
+
+/**
+ * A single structured violation with location information
+ *
+ * @internal
+ */
+export interface StructuredViolation {
+  /** The file path where the violation occurred */
+  path: string
+  /** The line number */
+  line: number
+  /** The column number */
+  column: number
+  /** The violation type */
+  type: string
+}
+
+/**
+ * Result of structured violations inspection
+ *
+ * @internal
+ */
+export interface StructuredViolationsResult {
+  /** Primordial mutation violations */
+  primordialMutations: StructuredViolation[]
+  /** Strict mode violations */
+  strictModeViolations: StructuredViolation[]
+  /** Dynamic require violations */
+  dynamicRequires: StructuredViolation[]
+}
+
+/**
+ * Message type for responding with global policy
+ *
+ * @internal
+ */
+export interface InspectionResultsMessage {
+  /** Message type (discriminant) */
+  type: (typeof MessageTypes)['InspectionResults']
+  /** The resulting global policy */
+  globalPolicy: GlobalPolicy | null
+  /** The resulting builtin policy */
+  builtinPolicy: BuiltinPolicy | null
+  /** The resulting SES compatibility violations */
+  violations?: StructuredViolationsResult | null
+  /** Identifier for the source (file:// URL) */
+  id: FileUrlString
+}
+
+/**
+ * Message type for responding with an error
+ *
+ * @internal
+ */
+export interface ErrorMessage {
+  /** Message type (discriminant) */
+  type: (typeof MessageTypes)['Error']
+  /** Error message */
+  error: string
+  /** Identifier for the source (file:// URL) */
+  id: FileUrlString
+}
+
+/**
+ * Callback used to report the progress of the module inspection process
+ *
+ * @param {number} messageCount The number of messages inspected so far
+ * @param {Set<FileUrlString>} inspectedModules The modules that have been
+ *   inspected so far
+ * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
+ *   be inspected
+ * @returns {number} The new message count
+ */
+export type ReportModuleInspectionProgressFn = (
+  messageCount: number,
+  inspectedModules: Set<FileUrlString>,
+  modulesToInspect: Set<FileUrlString>
+) => number
+
+/**
+ * Callback used to report the end of the module inspection process
+ *
+ * @param {Set<FileUrlString>} inspectedModules The modules that have been
+ *   inspected so far
+ * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
+ *   be inspected
+ */
+export type ReportModuleInspectionProgressEndFn = (
+  inspectedModules: Set<FileUrlString>,
+  modulesToInspect: Set<FileUrlString>
 ) => void
 
-export type CompartmentDescriptorTransformOptions = Simplify<
-  WithTrustRoot & WithLog
->
+/**
+ * Object returned by `createModuleInspectionProgressReporter`
+ */
+export interface ModuleInspectionProgressReporter {
+  reportModuleInspectionProgress: ReportModuleInspectionProgressFn
+  reportModuleInspectionProgressEnd: ReportModuleInspectionProgressEndFn
+}

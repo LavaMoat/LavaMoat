@@ -5,7 +5,8 @@
  * @packageDocumentation
  */
 
-import { wrapFunctionConstructor } from './function-wrapper.js'
+import { endowmentsToolkit } from 'lavamoat-core'
+const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper 
 
 /**
  * @import {SomeGlobalThis, ContextTestFn} from '../internal.js'
@@ -30,7 +31,7 @@ export const makeExecutionCompartment = (originalGlobalThis) => {
      * @param {CompartmentOptions} [options]
      */
     constructor(options) {
-      super(options)
+      super({ ...options, noAggregateLoadErrors: true })
 
       const { globalThis: compartmentGlobalThis } = this
 
@@ -60,7 +61,9 @@ export const makeExecutionCompartment = (originalGlobalThis) => {
         }
       )
 
-      // XXX: This is 100% absolutely necessary, and we don't yet know why
+      // W're replacing the Function global, but want to prevent 
+      // identity discontinuity on functions between compartments, 
+      // so the prototype must match
       Object.defineProperty(NewFunctionCtor, 'prototype', {
         value: OriginalFunctionCtor.prototype,
       })
