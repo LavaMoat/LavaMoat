@@ -120,6 +120,10 @@ export interface FixtureOptions {
    * dir.
    */
   entrypointFilename?: string
+
+  policyPath?: string
+
+  policyOverridePath?: string
 }
 
 /**
