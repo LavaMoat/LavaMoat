@@ -26,13 +26,18 @@ export const fixtureFinder = (referrer) => {
    */
   const fixture = (
     name,
-    { entrypoint, entrypointFilename = DEFAULT_ENTRYPOINT_FILENAME } = {}
+    {
+      entrypoint,
+      entrypointFilename = DEFAULT_ENTRYPOINT_FILENAME,
+      policyPath,
+      policyOverridePath,
+    } = {}
   ) => {
     const dir = fileURLToPath(new URL(`./fixture/${name}`, referrer))
     // do not compute entrypoint relative to dir if it already exists
     entrypoint ??= path.join(dir, entrypointFilename)
-    const policyPath = path.join(dir, DEFAULT_POLICY_PATH)
-    const policyOverridePath = path.join(dir, DEFAULT_POLICY_OVERRIDE_PATH)
+    policyPath ??= path.join(dir, DEFAULT_POLICY_PATH)
+    policyOverridePath ??= path.join(dir, DEFAULT_POLICY_OVERRIDE_PATH)
     return { entrypoint, dir, policyPath, policyOverridePath }
   }
   return fixture
