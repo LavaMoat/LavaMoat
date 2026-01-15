@@ -1,10 +1,7 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
-import {
-  DEFAULT_POLICY_FILENAME,
-  DEFAULT_POLICY_OVERRIDE_FILENAME,
-} from '../../src/constants.js'
+import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
 import { fixtureFinder } from '../test-util.js'
 import { createCLIMacros } from './cli-macros.js'
@@ -16,7 +13,10 @@ const basic = fixture('basic')
 const echo = fixture('basic', { entrypoint: 'echo.js' })
 const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
 const deptree = fixture('deptree')
-const devDeptree = fixture('deptree', { entrypoint: 'tool.js' })
+const devDeptree = fixture('deptree', {
+  entrypoint: 'tool.js',
+  policyPath: 'lavamoat/node/dev-policy.json',
+})
 const missingFromDisk = fixture('missing-from-disk')
 const missingFromDescriptors = fixture('missing-from-descriptors')
 const circularRootDep = fixture('circular-root-dep')
@@ -98,8 +98,7 @@ test(
   ['run', missingFromDisk.entrypoint, '--project-root', missingFromDisk.dir],
   {
     code: 1,
-    stderr:
-      /The following entry found in policy were not associated with any Compartment and may be invalid:\n\s+- resources\["undeclared-dep"\]/,
+    stderr: /Cannot find package 'incomplete-pkg' imported from/,
   }
 )
 
@@ -115,21 +114,20 @@ test('--dev processes dev deps', async (t) => {
 
   const tempdir = await makeTempdir(t)
   try {
-    const { code } = await runCLI(
+    const { code, stdout } = await runCLI(
       [
         'run',
         devDeptree.entrypoint,
         '--dev',
         '--policy',
-        tempdir.join(`dev-${DEFAULT_POLICY_FILENAME}`),
+        devDeptree.policyPath,
         '--policy-override',
-        tempdir.join(`dev-${DEFAULT_POLICY_OVERRIDE_FILENAME}`),
-        '--generate-recklessly',
-        '--write',
+        devDeptree.policyOverridePath,
       ],
       t,
       { cwd: devDeptree.dir }
     )
+    t.is(stdout.trim(), 'DEV-PKG LOADED')
     t.is(code, undefined)
   } finally {
     await tempdir[Symbol.asyncDispose]()
