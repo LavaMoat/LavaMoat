@@ -275,7 +275,7 @@ function getPackageNameForModulePath(canonicalNameMap, modulePath) {
   return packageName
 }
 
-const pathSeparator = path.sep;
+const pathSeparator = path.sep
 
 /**
  * @param {CanonicalNameMap} canonicalNameMap
@@ -289,6 +289,12 @@ function getPackageDirForModulePath(canonicalNameMap, modulePath) {
       return subPath
     }
     subPath = subPath.substring(0, subPath.lastIndexOf(pathSeparator))
+  }
+  if (
+    canonicalNameMap.has(pathSeparator) &&
+    modulePath.startsWith(pathSeparator)
+  ) {
+    return pathSeparator
   }
   return undefined
 }
