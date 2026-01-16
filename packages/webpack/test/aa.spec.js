@@ -64,11 +64,11 @@ const lookupFixture = {
   canonicalNameMap: new Map(
     Object.entries({
       '/': '$root$',
-      '/node_modules/leftpad/': 'leftpad',
+      '/node_modules/leftpad': 'leftpad',
       '/node_modules/fast-json-patch': 'fast-json-patch',
       '/node_modules/fast-json-patch/module': 'fast-json-patch',
-      '/node_modules/@ethereumjs/util/dist/': '@ethereumjs/util',
-      '/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/':
+      '/node_modules/@ethereumjs/util/dist': '@ethereumjs/util',
+      '/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist':
         '@ethereumjs/util>ethereum-cryptography',
     })
   ),
