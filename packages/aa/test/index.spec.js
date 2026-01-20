@@ -48,6 +48,15 @@ test('project 1', async (t) => {
   )
 })
 
+test('Keys in canonicalNameMap must not end with slashes', async (t) => {
+  const canonicalNameMap = await loadCanonicalNameMap({
+    rootDir: path.join(__dirname, 'projects', '1'),
+  })
+  t.true(
+    [...canonicalNameMap.keys()].every((key) => !key.endsWith(path.sep))
+  )
+})
+
 test('project 2', async (t) => {
   const canonicalNameMap = await loadCanonicalNameMap({
     rootDir: path.join(__dirname, 'projects', '2'),
