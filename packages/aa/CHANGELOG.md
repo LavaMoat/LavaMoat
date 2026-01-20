@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.5](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.4...aa-v4.3.5) (2026-01-20)
+
+
+### Bug Fixes
+
+* performant implementation of getPackageDirForModulePath in aa and minor memoization in lavamoat-node ([#1878](https://github.com/LavaMoat/LavaMoat/issues/1878)) ([467c248](https://github.com/LavaMoat/LavaMoat/commit/467c248a80b4706b6f51da13fca67d1a64c2dc91))
+
 ## [4.3.4](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.3...aa-v4.3.4) (2025-08-25)
 
 
