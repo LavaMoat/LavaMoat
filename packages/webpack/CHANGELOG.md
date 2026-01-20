@@ -18,6 +18,20 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.5.7](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.6...webpack-v1.5.7) (2026-01-20)
+
+
+### Bug Fixes
+
+* performant implementation of getPackageDirForModulePath in aa and minor memoization in lavamoat-node ([#1878](https://github.com/LavaMoat/LavaMoat/issues/1878)) ([467c248](https://github.com/LavaMoat/LavaMoat/commit/467c248a80b4706b6f51da13fca67d1a64c2dc91))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.4 to ^4.3.5
+
 ## [1.5.6](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.5...webpack-v1.5.6) (2025-12-02)
 
 
