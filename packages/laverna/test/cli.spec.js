@@ -21,8 +21,10 @@ const FIXTURE_DIR = path.join(__dirname, 'fixture')
  * {@link runCli} resolves with this when successful
  *
  * @typedef RunCliResult
- * @property {string} stderr - Stderr of CLI invocation
- * @property {string} stdout - Stdout of CLI invocation
+ * @property {string | Buffer<ArrayBufferLike>} stderr - Stderr of CLI
+ *   invocation
+ * @property {string | Buffer<ArrayBufferLike>} stdout - Stdout of CLI
+ *   invocation
  * @property {string} cmd - Command executed
  * @property {boolean} isError - Whether the result is an error
  * @property {import('node:child_process').ExecFileOptions} opts - Options used
