@@ -24,21 +24,6 @@ module.exports = {
 
     'no-console': 'error',
 
-    // TODO: this needs to be changed to `@typescript-eslint/no-restricted-types` once tseslint is upgraded to v8+
-    // unfortunately, this does not apply to js files
-    '@typescript-eslint/ban-types': [
-      'error',
-      {
-        types: {
-          LavamoatModuleRecordOptions: {
-            message: 'Use SimpleLavamoatModuleRecordOptions instead',
-            fixWith: 'SimpleLavamoatModuleRecordOptions',
-            suggest: ['SimpleLavamoatModuleRecordOptions'],
-          },
-        },
-      },
-    ],
-
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -64,6 +49,8 @@ module.exports = {
 
         // this plugin has trouble finding memfs
         'n/no-unpublished-import': 'off',
+        // this is wonky too
+        'n/no-missing-import': 'off'
       },
     },
     {
