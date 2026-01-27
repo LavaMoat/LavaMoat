@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Class, ValueOf } from 'type-fest'
+
 import type { ErrorCodes } from './error-code.js'
 
 export type ErrorCode = ValueOf<typeof ErrorCodes>
@@ -13,6 +14,7 @@ export interface LavaMoatError<Code extends ErrorCode, Cause = unknown>
    * Underlying cause/error, if any
    */
   readonly cause?: Cause
+
   /**
    * Unique code for this error. This will be the same value as
    * {@link LavaMoatErrorClass.code}
@@ -23,6 +25,22 @@ export interface LavaMoatError<Code extends ErrorCode, Cause = unknown>
   readonly code: Code
 
   readonly message: string
+}
+
+/**
+ * The _class_ of a {@link LavaMoatError}.
+ */
+export type LavaMoatErrorClass<
+  Code extends ErrorCode,
+  Options extends ErrorOptions = ErrorOptions,
+> = Class<LavaMoatError<Code, Options>, LavaMoatErrorClassParams<Options>> & {
+  /**
+   * Unique code for this error. This will be the same value as
+   * {@link LavaMoatError.code}
+   *
+   * This field is enumerable.
+   */
+  readonly code: Code
 }
 
 /**
@@ -40,21 +58,5 @@ export type LavaMoatErrorClassParams<
   Partial<Options> extends Options
     ? [message: string, errOptions?: Options]
     : [message: string, errOptions: Options]
-
-/**
- * The _class_ of a {@link LavaMoatError}.
- */
-export type LavaMoatErrorClass<
-  Code extends ErrorCode,
-  Options extends ErrorOptions = ErrorOptions,
-> = Class<LavaMoatError<Code, Options>, LavaMoatErrorClassParams<Options>> & {
-  /**
-   * Unique code for this error. This will be the same value as
-   * {@link LavaMoatError.code}
-   *
-   * This field is enumerable.
-   */
-  readonly code: Code
-}
 
 export type LavaMoatErrorOptions<T> = ErrorOptions & T
