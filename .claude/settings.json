@@ -1,0 +1,14 @@
+{
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "command": "node ${CLAUDE_PROJECT_DIR}/tools/knowledge-rag/dist/hook.js",
+          "timeout": 30,
+          "type": "command"
+        }
+      ],
+      "matcher": "*"
+    }
+  ]
+}

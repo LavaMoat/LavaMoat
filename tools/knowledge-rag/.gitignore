@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# LanceDB database (regenerate with npm run index)
+.lancedb/
+
+# Build output
+dist/
+
+# Hugging Face model cache (can be large, ~400MB)
+# Models are cached in ~/.cache/huggingface by default

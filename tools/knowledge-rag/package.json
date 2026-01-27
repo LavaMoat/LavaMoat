@@ -1,0 +1,30 @@
+{
+  "name": "@lavamoat/knowledge-rag",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "RAG tool for LavaMoat project knowledge base",
+  "private": true,
+  "bin": {
+    "lavamoat-knowledge": "./dist/server.js",
+    "lavamoat-knowledge-hook": "./dist/hook.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "hook": "tsx src/hook.ts",
+    "index": "tsx src/index.ts",
+    "inspector": "npx @modelcontextprotocol/inspector dist/server.js",
+    "query": "tsx src/query.ts",
+    "server": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.5.1",
+    "@lancedb/lancedb": "^0.15.0",
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  }
+}
