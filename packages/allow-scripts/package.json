@@ -44,7 +44,7 @@
     "bin-links": "4.0.4",
     "npm-normalize-package-bin": "3.0.1",
     "type-fest": "4.41.0",
-    "yargs": "17.7.2"
+    "yargs": "18.0.0"
   },
   "devDependencies": {
     "@types/npmcli__promise-spawn": "6.0.3"
