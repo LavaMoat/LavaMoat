@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/node",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "type": "module",
   "description": "Next-gen LavaMoat for Node.js",
   "repository": {
@@ -59,7 +59,7 @@
     "@lavamoat/types": "0.1.0",
     "@types/node": "18.19.130",
     "chalk": "4.1.2",
-    "lavamoat-core": "^17.1.2",
+    "lavamoat-core": "^17.1.3",
     "loggerr": "4.2.0",
     "ses": "1.14.0",
     "terminal-link": "3.0.0",
