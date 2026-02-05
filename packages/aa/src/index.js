@@ -79,6 +79,10 @@ async function loadCanonicalNameMap({
   includeDevDeps,
   resolve = performantResolve,
 }) {
+  rootDir = path.normalize(rootDir)
+  if (rootDir.endsWith(path.sep) && rootDir !== path.sep) {
+    rootDir = rootDir.slice(0, -1)
+  }
   const canonicalNameMap = /** @type {CanonicalNameMap} */ (new Map())
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({
