@@ -18,6 +18,21 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.5.8](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.7...webpack-v1.5.8) (2026-02-05)
+
+
+### Bug Fixes
+
+* **deps:** update definitelytyped ([2eab347](https://github.com/LavaMoat/LavaMoat/commit/2eab34797e14fa0ff2d2b0aa6fd1ec77cc490900))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.5 to ^4.3.6
+    * lavamoat-core bumped from ^17.1.2 to ^17.1.3
+
 ## [1.5.7](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.6...webpack-v1.5.7) (2026-01-20)
 
 

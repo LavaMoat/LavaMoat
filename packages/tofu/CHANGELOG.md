@@ -1,5 +1,19 @@
 # Changelog
 
+## [8.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.1.0...lavamoat-tofu-v8.1.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* **deps:** update definitelytyped ([2eab347](https://github.com/LavaMoat/LavaMoat/commit/2eab34797e14fa0ff2d2b0aa6fd1ec77cc490900))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >17.1.3
+
 ## [8.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.11...lavamoat-tofu-v8.1.0) (2025-11-19)
 
 

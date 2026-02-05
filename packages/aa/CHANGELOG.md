@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.6](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.5...aa-v4.3.6) (2026-02-05)
+
+
+### Bug Fixes
+
+* **aa:** normalize root path to not contain a trailing slash regardless of what is provided in input ([#1882](https://github.com/LavaMoat/LavaMoat/issues/1882)) ([567c2b8](https://github.com/LavaMoat/LavaMoat/commit/567c2b8709b0c834e234d5962a7cbe5820b22928))
+
 ## [4.3.5](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.4...aa-v4.3.5) (2026-01-20)
 
 
