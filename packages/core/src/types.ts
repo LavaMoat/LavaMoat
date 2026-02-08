@@ -1,11 +1,10 @@
 import type E from './endowmentsToolkit'
+import type { LavaMoatScuttleOpts } from './scuttle'
 
 export type * from './codeSampleFromAstNode'
 export type * from './generatePolicy'
 export * from './index'
 export type * from './moduleRecord'
-export type * from './options'
+export type { LavaMoatOpts } from './options'
 export type * from './parseForPolicy'
-export type { LavaMoatScuttleOpts } from './scuttle'
-export { E as EndowmentsToolkitFactory }
-
+export { E as EndowmentsToolkitFactory, LavaMoatScuttleOpts }
