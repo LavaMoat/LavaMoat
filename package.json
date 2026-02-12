@@ -37,7 +37,7 @@
     "watch:types": "tsc -b --watch"
   },
   "devDependencies": {
-    "@babel/types": "7.27.3",
+    "@babel/types": "7.29.0",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
     "@endo/compartment-mapper": "1.6.3",
