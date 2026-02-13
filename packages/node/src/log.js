@@ -24,6 +24,7 @@ import { Loggerr } from 'loggerr'
  */
 export const log = new Loggerr({
   formatter: 'cli',
+  level: process.env.LAVAMOAT_DEBUG ? Loggerr.DEBUG : Loggerr.INFO,
   streams: [
     process.stderr,
     process.stderr,
@@ -34,5 +35,4 @@ export const log = new Loggerr({
     process.stderr,
     process.stderr,
   ],
-  level: process.env.LAVAMOAT_DEBUG ? Loggerr.DEBUG : Loggerr.INFO,
 })
