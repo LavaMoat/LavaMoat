@@ -4,9 +4,9 @@
   "type": "module",
   "description": "Next-gen LavaMoat for Node.js",
   "repository": {
+    "directory": "packages/node",
     "type": "git",
-    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
-    "directory": "packages/node"
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git"
   },
   "homepage": "https://lavamoat.github.io",
   "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
@@ -21,20 +21,20 @@
   },
   "exports": {
     ".": {
-      "types": "./types/src/index.d.ts",
-      "import": "./src/index.js"
+      "import": "./src/index.js",
+      "types": "./types/src/index.d.ts"
     },
     "./cli": {
-      "types": "./types/src/cli.d.ts",
-      "import": "./src/cli.js"
+      "import": "./src/cli.js",
+      "types": "./types/src/cli.d.ts"
     },
     "./execute": {
-      "types": "./types/src/exec/execute.d.ts",
-      "import": "./src/exec/execute.js"
+      "import": "./src/exec/execute.js",
+      "types": "./types/src/exec/execute.d.ts"
     },
     "./load": {
-      "types": "./types/src/exec/load.d.ts",
-      "import": "./src/exec/load.js"
+      "import": "./src/exec/load.js",
+      "types": "./types/src/exec/load.d.ts"
     },
     "./package.json": "./package.json"
   },
@@ -50,16 +50,19 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",
+    "test:cover": "c8 --check-coverage ava",
     "test:run": "ava",
     "test:update-snapshots": "ava -u"
   },
   "dependencies": {
+    "@babel/parser": "7.27.3",
     "@endo/compartment-mapper": "1.6.3",
     "@endo/evasive-transform": "2.0.2",
-    "@lavamoat/types": "0.1.0",
+    "@lavamoat/types": "^0.1.0",
     "@types/node": "18.19.130",
     "chalk": "4.1.2",
     "lavamoat-core": "^17.1.3",
+    "lavamoat-tofu": "^8.0.11",
     "loggerr": "4.2.0",
     "ses": "1.14.0",
     "terminal-link": "3.0.0",

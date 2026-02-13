@@ -1,15 +1,15 @@
 import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
+import type { LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import { type ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
-import type { ScuttleGlobalThisOptions } from '../src/types.ts'
 
 export interface RunnerWorkerData {
   entryPath: string
   policy: LavaMoatPolicy
   vol: NestedDirectoryJSON
-  scuttleGlobalThis: ScuttleGlobalThisOptions
+  scuttleGlobalThis: LavaMoatScuttleOpts
 }
 
 export type TestCLIExpectationFn<Ctx = unknown> = (
@@ -104,4 +104,34 @@ export interface TestExecForJSONMacroOptions extends TestExecMacroOptions {
    * The default is `/index.js`.
    */
   jsonEntrypoint?: string | URL
+}
+
+/**
+ * Options for the function returned by the `fixtureFinder` factory
+ */
+export interface FixtureOptions {
+  /**
+   * Entrypoint to use _verbatim_. This is useful when combined with `--bin`
+   */
+  entrypoint?: string
+
+  /**
+   * Filename of the entrypoint which will be computed relative to the fixture
+   * dir.
+   */
+  entrypointFilename?: string
+
+  policyPath?: string
+
+  policyOverridePath?: string
+}
+
+/**
+ * Data structure representing information about a fixture
+ */
+export interface Fixture {
+  entrypoint: string
+  policyPath: string
+  policyOverridePath: string
+  dir: string
 }
