@@ -2,7 +2,7 @@
 
 > Warning: This software is _alpha_ quality. Expect bugs and breaking changes!
 
-**`@lavamoat/node` is a [Hardened JavaScript][] runtime** for Node.js v18.0.0+ that provides _per-package_ security policy enforcement.
+**`@lavamoat/node` is a [Hardened JavaScript][] runtime** for Node.js v20.19.0+ that provides _per-package_ security policy enforcement.
 
 `@lavamoat/node`:
 
@@ -48,7 +48,7 @@ LavaMoat parses code _only_ during policy generation—never at runtime. Policy 
 
 ## Installation
 
-`@lavamoat/node` requires Node.js v18.0.0 or newer.
+`@lavamoat/node` requires Node.js v20.19.0 or newer.
 
 ```sh
 npm install @lavamoat/node
