@@ -14,7 +14,7 @@
   "author": "naugtur",
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
   },
   "bin": {
     "git-safe-dependencies": "src/cli.js",
