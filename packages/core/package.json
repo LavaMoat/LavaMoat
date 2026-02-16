@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "17.1.1",
+  "version": "17.1.3",
   "description": "LavaMoat kernel and utils",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
   },
   "bin": {
-    "lavamoat-sort-policy": "./src/policy-sort-cli.js"
+    "lavamoat-sort-policy": "src/policy-sort-cli.js"
   },
   "main": "src/index.js",
   "types": "./types/src/types.d.ts",
@@ -41,7 +41,7 @@
     "@babel/types": "7.27.3",
     "@lavamoat/types": "^0.1.0",
     "json-stable-stringify": "1.3.0",
-    "lavamoat-tofu": "^8.1.0",
+    "lavamoat-tofu": "^8.1.1",
     "merge-deep": "3.0.3",
     "ses": "1.14.0"
   },

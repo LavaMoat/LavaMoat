@@ -117,7 +117,11 @@ function createModuleResolver({ projectRoot, resolutions, canonicalNameMap }) {
 }
 
 function createModuleLoader({ canonicalNameMap }) {
+  const memo = new Map()
   return function loadModuleData(absolutePath) {
+    if( memo.has(absolutePath)) {
+      return memo.get(absolutePath)
+    }
     // load builtin modules (eg "fs")
     if (resolve.isCore(absolutePath)) {
       return {
@@ -200,14 +204,16 @@ function createModuleLoader({ canonicalNameMap }) {
         canonicalNameMap,
         absolutePath
       )
+      const moduleData = {
 
-      return {
         type: 'js',
         file: absolutePath,
         package: packageName,
         source: wrappedContent,
         id: absolutePath,
       }
+      memo.set(absolutePath, moduleData)
+      return moduleData
     }
   }
 }
