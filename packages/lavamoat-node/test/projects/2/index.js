@@ -18,3 +18,5 @@ function getHash(inputHexString) {
     .digest()
     .toString('hex')
 }
+
+module.exports = { keccak256: result }
