@@ -1,4 +1,4 @@
-/* eslint-disable ava/use-t-well */
+ 
 const test = require('ava')
 
 const {

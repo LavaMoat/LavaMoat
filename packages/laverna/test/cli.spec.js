@@ -1,4 +1,4 @@
-// eslint-disable-next-line ava/use-test
+ 
 const { default: test } = require('ava')
 const { promisify } = require('node:util')
 const execFile = promisify(require('node:child_process').execFile)

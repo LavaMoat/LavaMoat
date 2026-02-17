@@ -1,4 +1,4 @@
-/* eslint-disable ava/use-t-well */
+ 
 const test = require('ava')
 const fs = require('node:fs')
 const path = require('node:path')

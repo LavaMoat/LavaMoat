@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* eslint-disable no-restricted-globals */
-/* eslint-disable n/shebang */
+ 
 // @ts-check
 
 const { bold, magenta, gray, italic, cyan, underline } = require('kleur')

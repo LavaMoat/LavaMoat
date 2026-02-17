@@ -146,7 +146,7 @@
         // this is passed to the module initializer
         // it adds the context of the parent module
         // this could be replaced via "Function.prototype.bind" if its more performant
-        // eslint-disable-next-line no-inner-declarations
+         
         function requireRelativeWithContext (requestedName) {
           const parentModuleExports = moduleObj.exports
           const parentModuleData = moduleData

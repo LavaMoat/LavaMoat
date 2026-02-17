@@ -218,7 +218,7 @@ function processOnePackageInLogicalTree(
 
   // deps are already sorted by preference for paths
   for (const depName of depsToWalk) {
-    let depPackageJsonPath = wrappedResolveSync(resolve, depName, packageDir)
+    const depPackageJsonPath = wrappedResolveSync(resolve, depName, packageDir)
     // ignore unresolved deps
     if (!depPackageJsonPath) {
       continue

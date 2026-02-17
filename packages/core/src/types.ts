@@ -7,4 +7,4 @@ export * from './index'
 export type * from './moduleRecord'
 export type { LavaMoatOpts } from './options'
 export type * from './parseForPolicy'
-export { E as EndowmentsToolkitFactory, LavaMoatScuttleOpts }
+export type { E as EndowmentsToolkitFactory, LavaMoatScuttleOpts }

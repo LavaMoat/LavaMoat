@@ -44,7 +44,6 @@ export const readPolicy = async (
   /** @type {unknown} */
   let allegedPolicy
   try {
-    // eslint-disable-next-line @jessie.js/safe-await-separator
     allegedPolicy = await readJsonFile(policyPath, { readFile })
   } catch (err) {
     if (err instanceof SyntaxError) {
@@ -92,7 +91,6 @@ export const maybeReadPolicyOverride = async (
   /** @type {unknown} */
   let allegedPolicy
   try {
-    // eslint-disable-next-line @jessie.js/safe-await-separator
     allegedPolicy = await readJsonFile(policyOverridePath, { readFile })
   } catch (err) {
     if (err instanceof SyntaxError) {
@@ -313,7 +311,6 @@ export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
    */
   let createdDir
   try {
-    // eslint-disable-next-line @jessie.js/safe-await-separator
     createdDir = await fs.promises.mkdir(policyDir, {
       recursive: true,
     })

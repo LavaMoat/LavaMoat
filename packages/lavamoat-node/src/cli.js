@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable no-eval */
+ 
 
 const yargs = require('yargs')
 const yargsFlags = require('./yargsFlags')

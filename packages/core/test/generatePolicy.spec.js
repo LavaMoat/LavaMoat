@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-expressions, no-extend-native */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const { EOL } = require('node:os')
 const test = require('ava')
 const { createModuleInspector } = require('../src/generatePolicy')

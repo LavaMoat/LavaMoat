@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-namespace */
+ 
 
 /**
  * Because SES will barf if it encounters `import(...)`--even in comments--to

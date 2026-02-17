@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-/* eslint-disable n/shebang */
+ 
 
 // @ts-check
 const path = require('node:path')

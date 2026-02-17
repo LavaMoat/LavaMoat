@@ -1,7 +1,7 @@
 module.exports = { makeInitStatsHook }
 
 function makeInitStatsHook({ onStatsReady }) {
-  let statModuleStack = []
+  const statModuleStack = []
   return reportStatsHook
 
   function reportStatsHook(event, moduleId) {

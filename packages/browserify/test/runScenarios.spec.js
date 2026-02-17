@@ -7,7 +7,7 @@ test('Run scenarios with precompiled modules', async (t) => {
   for await (const scenario of loadScenarios()) {
     t.log(`Running Browserify Scenario: ${scenario.name}`)
     await runAndTestScenario(t, scenario, ({ scenario }) =>
-      // eslint-disable-next-line ava/use-t-well
+       
       runScenario({ scenario, log: t.log.bind(t) })
     )
   }

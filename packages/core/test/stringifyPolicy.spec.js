@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-expressions, no-extend-native */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const test = require('ava')
 const { jsonStringifySortedPolicy } = require('../src/stringifyPolicy')
 const { createConfigForTest, generateConfigFromFiles } = require('./util')
