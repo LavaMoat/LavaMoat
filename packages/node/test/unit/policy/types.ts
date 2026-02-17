@@ -1,10 +1,12 @@
 // FIXME: why did I have to add this? failing in CI
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 
-import { type ReadNowPowers } from '@endo/compartment-mapper'
 import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
+
+import { type ReadNowPowers } from '@endo/compartment-mapper'
 import { type Volume } from 'memfs/lib/volume.js'
+
 import type {
   ComposeOptions,
   GeneratePolicyOptions,
@@ -13,38 +15,42 @@ import type {
   WithLog,
   WithPolicyOverrideOnly,
 } from '../../../src/types.js'
+
 import { type FixtureOptions } from '../../types.js'
 
 /**
- * Options for `testPolicyFoModule` and `testPolicyForScript`
+ * Options for `scaffoldFixture` in `policy-macros.js`
  *
  * @internal
  */
-export type TestPolicyMacroOptions = ComposeOptions<
-  [
-    WithPolicyOverrideOnly,
-    WithLog,
-    {
+export type ScaffoldFixtureOptions = {
       /**
-       * Expected policy result
+   * The type of fixture to generate
+   *
+   * @defaultValue 'module'
        */
-      expected?: LavaMoatPolicy
-    },
-  ]
->
+  sourceType?: SourceType
+}
 
 /**
- * Options bag containing `expected` policy or an expectation function
+ * Return type of `scaffoldFixture` in `policy-macros.js`
  *
  * @internal
  */
-export type WithExpected<Context = unknown> = {
-  /**
-   * Expected policy or a function receiving the policy or an assertion
-   * function.
-   */
-  expected?: LavaMoatPolicy | TestPolicyExpectationFn<Context>
+export type ScaffoldFixtureResult = {
+  readPowers: ReadNowPowers
+  vol: Volume
 }
+
+  /**
+ * Expectation function for {@link TestPolicyForJSONOptions}
+ *
+ * @internal
+   */
+export type TestPolicyExpectationFn<Context = unknown> = (
+  t: ExecutionContext<Context>,
+  policy: MergedLavaMoatPolicy
+) => Promise<void> | void
 
 /**
  * Options for the `testPolicyForFixture` macro
@@ -62,7 +68,7 @@ export type TestPolicyForFixtureOptions<Context = unknown> = ComposeOptions<
  */
 export type TestPolicyForJSONOptions<Context = unknown> = ComposeOptions<
   [
-    Omit<GeneratePolicyOptions, 'readPowers' | 'policyOverridePath'>,
+    Omit<GeneratePolicyOptions, 'policyOverridePath' | 'readPowers'>,
     WithExpected<Context>,
     {
       /**
@@ -80,35 +86,32 @@ export type TestPolicyForJSONOptions<Context = unknown> = ComposeOptions<
 >
 
 /**
- * Expectation function for {@link TestPolicyForJSONOptions}
+ * Options for `testPolicyFoModule` and `testPolicyForScript`
  *
  * @internal
  */
-export type TestPolicyExpectationFn<Context = unknown> = (
-  t: ExecutionContext<Context>,
-  policy: MergedLavaMoatPolicy
-) => void | Promise<void>
+export type TestPolicyMacroOptions = ComposeOptions<
+  [
+    WithPolicyOverrideOnly,
+    WithLog,
+    {
+/**
+       * Expected policy result
+ */
+      expected?: LavaMoatPolicy
+    },
+  ]
+>
 
 /**
- * Return type of `scaffoldFixture` in `policy-macros.js`
+ * Options bag containing `expected` policy or an expectation function
  *
  * @internal
  */
-export type ScaffoldFixtureResult = {
-  vol: Volume
-  readPowers: ReadNowPowers
-}
-
-/**
- * Options for `scaffoldFixture` in `policy-macros.js`
- *
- * @internal
- */
-export type ScaffoldFixtureOptions = {
+export type WithExpected<Context = unknown> = {
   /**
-   * The type of fixture to generate
-   *
-   * @defaultValue 'module'
+   * Expected policy or a function receiving the policy or an assertion
+   * function.
    */
-  sourceType?: SourceType
+  expected?: LavaMoatPolicy | TestPolicyExpectationFn<Context>
 }

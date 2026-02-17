@@ -19,11 +19,11 @@ import { ErrorCodes } from './error-code.js'
  */
 const createLavaMoatError = (name, code, ctor) => {
   Object.defineProperties(ctor, {
-    code: { value: code, enumerable: true },
+    code: { enumerable: true, value: code },
     name: { value: name },
   })
   Object.defineProperties(ctor.prototype, {
-    code: { value: code, enumerable: true },
+    code: { enumerable: true, value: code },
     name: { value: name },
     [Symbol.toStringTag]: { value: name },
   })

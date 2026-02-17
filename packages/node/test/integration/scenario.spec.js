@@ -7,6 +7,7 @@ import test from 'ava'
 import { loadScenarios } from 'lavamoat-core/test/scenarios/index.js'
 // @ts-expect-error - needs types
 import { runAndTestScenario } from 'lavamoat-core/test/util.js'
+
 import { createScenarioRunner } from './scenario-util.js'
 
 /**
@@ -17,6 +18,7 @@ import { createScenarioRunner } from './scenario-util.js'
  * Macro to test a scenario
  */
 const testScenario = test.macro(
+
   /**
    * @param {ExecutionContext} t
    * @param {any} scenario

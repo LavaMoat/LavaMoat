@@ -6,6 +6,7 @@
  */
 
 import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
+
 import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
@@ -29,7 +30,13 @@ export const DEFAULT_ENDO_OPTIONS = freeze(
     globals: globalThis,
     importHook,
     importNowHook,
-    syncModuleTransforms,
+    languageForExtension: {
+      /**
+       * This makes extensionless files default to CommonJS.
+       */
+      '': 'cjs',
+      [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
+    },
     parserForLanguage: {
       /**
        * @remarks
@@ -41,12 +48,6 @@ export const DEFAULT_ENDO_OPTIONS = freeze(
       ...defaultParserForLanguage,
       [NATIVE_PARSER_NAME]: parseNative,
     },
-    languageForExtension: {
-      [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
-      /**
-       * This makes extensionless files default to CommonJS.
-       */
-      '': 'cjs',
-    },
+    syncModuleTransforms,
   })
 )

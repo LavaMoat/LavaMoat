@@ -2,6 +2,7 @@ import '../../src/preamble.js'
 
 import test from 'ava'
 import { fs, vol } from 'memfs'
+
 import * as constants from '../../src/constants.js'
 import { ErrorCodes } from '../../src/error-code.js'
 import {
@@ -66,14 +67,14 @@ test('readPolicyOverride - reads and validates policy override from disk (defaul
 
 test('loadPolicies - loads and merges policies from disk', async (t) => {
   vol.fromJSON({
-    '/policy.json': JSON.stringify({ resources: {} }),
     '/policy-override.json': JSON.stringify({ resources: {} }),
+    '/policy.json': JSON.stringify({ resources: {} }),
   })
   const policy = await loadPolicies('/policy.json', {
     policyOverridePath: '/policy-override.json',
     readFile: /** @type {any} */ (fs.promises.readFile),
   })
-  t.deepEqual(policy, { resources: {}, [constants.MERGED_POLICY_FIELD]: true })
+  t.deepEqual(policy, { [constants.MERGED_POLICY_FIELD]: true, resources: {} })
 })
 
 test('isPolicy - returns true for valid policy', (t) => {
@@ -107,9 +108,9 @@ test('isTrusted - returns true for implicitly trusted policy', (t) => {
 })
 
 test('isTrusted - returns true for empty root policy', (t) => {
-  t.true(isTrusted({ root: {}, resources: {} }))
+  t.true(isTrusted({ resources: {}, root: {} }))
 })
 
 test('isTrusted - returns false for root policy w/ usePolicy', (t) => {
-  t.false(isTrusted({ root: { usePolicy: 'foo' }, resources: {} }))
+  t.false(isTrusted({ resources: {}, root: { usePolicy: 'foo' } }))
 })
