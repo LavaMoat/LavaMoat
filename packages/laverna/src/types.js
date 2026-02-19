@@ -150,4 +150,4 @@
  * @this {Laverna}
  */
 
-module.exports = {}
+export {}

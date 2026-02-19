@@ -7,30 +7,31 @@
  * @see {@link https://npm.im/memfs}
  */
 
-const kleur = require('kleur')
-const crypto = require('node:crypto')
-const { glob: realGlob } = require('glob')
-const { EventEmitter } = require('node:events')
+import { colors } from '@lavamoat/vog'
+import { glob } from 'glob'
+import crypto from 'node:crypto'
+import { EventEmitter } from 'node:events'
 // eslint-disable-next-line ava/use-test
-const { default: anyTest } = require('ava')
-const { memfs, fs } = require('memfs')
-const { Laverna } = require('../src')
-const { mock } = require('node:test')
+import anyTest from 'ava'
+import { fs, memfs } from 'memfs'
+import { mock } from 'node:test'
+import { stripVTControlCharacters } from 'node:util'
+import { Laverna } from '../src/index.js'
 
 /**
  * Test context object for our tests
  *
  * @typedef PublishTestContext
  * @property {{ error: import('node:test').Mock<Console['error']> }} console
- * @property {import('node:test').Mock<import('../src/types').SpawnFn>} spawn
+ * @property {import('node:test').Mock<import('../src/types.js').SpawnFn>} spawn
  * @property {(
- *   opts?: import('../src/types').LavernaOptions,
- *   caps?: import('../src/types').LavernaCapabilities
+ *   opts?: import('../src/types.js').LavernaOptions,
+ *   caps?: import('../src/types.js').LavernaCapabilities
  * ) => Promise<void>} runLaverna
  * @property {(
  *   pkgNames: string[],
- *   opts?: import('../src/types').LavernaOptions,
- *   caps?: import('../src/types').LavernaCapabilities
+ *   opts?: import('../src/types.js').LavernaOptions,
+ *   caps?: import('../src/types.js').LavernaCapabilities
  * ) => Promise<void>} runInvokePublish
  */
 
@@ -61,7 +62,7 @@ function getRandomPkgName() {
  * Base options for {@link Laverna}, providing some stubs.
  */
 const BASE_OPTS = Object.freeze(
-  /** @type {import('../src/types').LavernaOptions} */ ({
+  /** @type {import('../src/types.js').LavernaOptions} */ ({
     /**
      * Because the root of the phony `memfs` filesystem is `/`, we use it here.
      */
@@ -83,12 +84,12 @@ const BASE_OPTS = Object.freeze(
  * Base capabilities for {@link Laverna}, providing some stubs.
  */
 const BASE_CAPS = Object.freeze(
-  /** @type {import('../src/types').LavernaCapabilities} */ ({
+  /** @type {import('../src/types.js').LavernaCapabilities} */ ({
     /**
      * The phony `fs` is given to `glob`--it supports a custom `fs` module--so
      * it can find files in there.
      */
-    glob: realGlob,
+    glob,
     /**
      * Node.js' `exec` returns more than Laverna needs; this will work for our
      * purposes
@@ -105,7 +106,11 @@ const BASE_CAPS = Object.freeze(
 
 test.before(() => {
   // this disables ANSI escapes in output for easier comparison
-  kleur.enabled = false
+  process.env.NO_COLOR = '1'
+})
+
+test.after(() => {
+  delete process.env.NO_COLOR
 })
 
 test.beforeEach((t) => {
@@ -155,8 +160,8 @@ test.beforeEach((t) => {
    * Does not create a child process
    *
    * @param {string[]} pkgNames
-   * @param {import('../src/types').LavernaOptions} opts
-   * @param {import('../src/types').LavernaCapabilities} caps
+   * @param {import('../src/types.js').LavernaOptions} opts
+   * @param {import('../src/types.js').LavernaCapabilities} caps
    * @returns {Promise<void>}
    */
   const runInvokePublish = async (pkgNames, opts = {}, caps = {}) => {
@@ -180,8 +185,8 @@ test.beforeEach((t) => {
    *
    * Does not create a child process
    *
-   * @param {import('../src/types').LavernaOptions} opts
-   * @param {import('../src/types').LavernaCapabilities} caps
+   * @param {import('../src/types.js').LavernaOptions} opts
+   * @param {import('../src/types.js').LavernaCapabilities} caps
    * @returns {Promise<void>}
    */
   const runLaverna = async (opts = {}, caps = {}) => {
@@ -352,9 +357,12 @@ test('publishWorkspaces - `npm view` returns a single version', async (t) => {
   const args = t.context.console.error.mock.calls.flatMap(
     (call) => call.arguments
   )
+
   t.true(
     args.some((arg) =>
-      `${arg}`.includes('These package(s) will be published:\nworkspace1@1.0.0')
+      /These package\(s\) will be published:\n\s*workspace1@1\.0\.0/.test(
+        `${stripVTControlCharacters(arg)}`
+      )
     )
   )
 })
@@ -731,7 +739,9 @@ test('publishWorkspaces - new package', async (t) => {
   )
   t.true(
     args.some((arg) =>
-      `${arg}`.includes(`Package super-not-real confirmed as new`)
+      `${stripVTControlCharacters(arg)}`.includes(
+        `Package super-not-real confirmed as new`
+      )
     )
   )
 })
@@ -826,8 +836,8 @@ test('publishWorkspaces - known packages - new versions', async (t) => {
   )
   t.true(
     args.some((arg) =>
-      `${arg}`.includes(
-        'These package(s) will be published:\nlavamoat-tofu@9000.31337.42\nlavamoat@31337.42.9000'
+      /These package\(s\) will be published:\n\s*lavamoat@31337\.42\.9000\n\s*lavamoat-tofu@9000\.31337\.42/.test(
+        `${stripVTControlCharacters(arg)}`
       )
     )
   )
@@ -863,7 +873,9 @@ test('publishWorkspaces - known packages - duplicate package names', async (t) =
         getVersionsFactory: () => async () => ['1.0.6'],
       }
     ),
-    { message: `Duplicate package name(s) found in workspaces: lavamoat` }
+    {
+      message: `Duplicate package name(s) found in workspaces: ${colors.bold('lavamoat')}`,
+    }
   )
 })
 
