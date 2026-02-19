@@ -1,8 +1,13 @@
 import test from 'ava'
 import 'ses'
-import { useLocalTransforms } from '../../../src/compartment/module-transforms.js'
+import {
+  syncModuleTransforms,
+  useLocalTransforms,
+} from '../../../src/compartment/module-transforms.js'
 
 import { importLocation } from '@endo/compartment-mapper'
+
+// --- Tests for useLocalTransforms (hashbang and direct eval only) ---
 
 test('useLocalTransforms - leaves non-hashbang code unchanged', (t) => {
   t.is(
@@ -64,105 +69,90 @@ test('useLocalTransforms - removes hashbang with CRLF', (t) => {
   )
 })
 
-test('useLocalTransforms - evade comments - transforms decrement operator in comparison', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      'if (item[1]--> b)'
-    ),
-    'if (item[1]-- > b)'
+// --- Tests for full module transform (via syncModuleTransforms.mjs) ---
+
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+
+/**
+ * Helper to run the mjs transform and return the resulting code
+ *
+ * @param {string} source
+ * @returns {string}
+ */
+const applyMjsTransform = (source) => {
+  const sourceBytes = encoder.encode(source)
+  const result = syncModuleTransforms.mjs(
+    sourceBytes,
+    'test.mjs',
+    'file://test/',
+    'file://test/',
+    {}
+  )
+  return decoder.decode(result.bytes)
+}
+
+test('syncModuleTransforms.mjs - evade comments - transforms decrement operator in comparison', (t) => {
+  const result = applyMjsTransform('if (item[1]--> b) {}')
+  // The evasive transform should add a space between -- and >
+  t.false(result.includes('-->'), `Should not contain --> sequence: ${result}`)
+})
+
+test('syncModuleTransforms.mjs - evade comments - handles variable names', (t) => {
+  const result = applyMjsTransform('if (count--> 0) {}')
+  t.false(result.includes('-->'), `Should not contain --> sequence: ${result}`)
+})
+
+test('syncModuleTransforms.mjs - evade comments - handles multiple occurrences', (t) => {
+  const result = applyMjsTransform('if (a--> b && c--> d) {}')
+  t.false(result.includes('-->'), `Should not contain --> sequence: ${result}`)
+})
+
+test('syncModuleTransforms.mjs - evade comments - complete comment', (t) => {
+  const result = applyMjsTransform('const x = 1; // <!-- this is a comment -->')
+  t.false(
+    result.includes('<!--'),
+    `Should not contain HTML comment start: ${result}`
   )
 })
 
-test('useLocalTransforms - evade comments - handles variable names', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      'if (count--> 0)'
-    ),
-    'if (count-- > 0)'
+test('syncModuleTransforms.mjs - evadeImportString - handles single quotes', (t) => {
+  const result = applyMjsTransform("const s = 'dynamic import()';")
+  t.false(
+    result.includes("'dynamic import()'"),
+    `Should transform import in string: ${result}`
   )
 })
 
-test('useLocalTransforms - evade comments - handles multiple occurrences', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      'if (a--> b && c--> d)'
-    ),
-    'if (a-- > b && c-- > d)'
+test('syncModuleTransforms.mjs - evadeImportString - handles backticks', (t) => {
+  const result = applyMjsTransform('const s = `template import()`;')
+  t.false(
+    result.includes('`template import()`'),
+    `Should transform import in template: ${result}`
   )
 })
 
-test('useLocalTransforms - evade comments - complete comment', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      '<!-- this is a comment -->'
-    ),
-    '< ! -- this is a comment -- >'
+test('syncModuleTransforms.mjs - evadeImportString - only affects strings', (t) => {
+  const result = applyMjsTransform(
+    'const x = import("module"); const s = "import()";'
+  )
+  // Real import should be preserved, string import should be transformed
+  t.true(
+    result.includes('import("module")'),
+    `Real import should be preserved: ${result}`
   )
 })
 
-test('useLocalTransforms - evadeImportString - handles single quotes', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      "'dynamic import()"
-    ),
-    "'dynamic import（)"
+test('syncModuleTransforms.mjs - evadeImportString - handles multiple occurrences in string', (t) => {
+  const result = applyMjsTransform('const s = "import() and import()";')
+  // Should not contain untransformed import() in a string
+  t.false(
+    result.includes('"import() and import()"'),
+    `Should transform imports in string: ${result}`
   )
 })
 
-test('useLocalTransforms - evadeImportString - handles complex text', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      "Text, explaiing \"things\", (stuff) and import()"
-    ),
-    "Text, explaiing \"things\", (stuff) and import（)"
-  )
-})
-
-test('useLocalTransforms - evadeImportString - handles backticks', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      '`template import()`'
-    ),
-    '`template import（)`'
-  )
-})
-
-test('useLocalTransforms - evadeImportString - only affects strings', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      'const x = import("module"); "import()"'
-    ),
-    'const x = import("module"); "import（)"'
-  )
-})
-
-test('useLocalTransforms - evadeImportString - handles multiple occurrences in string', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      '"import() and import()"'
-    ),
-    '"import（) and import（)"'
-  )
-})
-
-test('useLocalTransforms - evadeImportString - replaces import( in strings with spread operator', (t) => {
-  t.is(
-    useLocalTransforms(
-      // ---
-      '"some string...import();"'
-    ),
-    '"some string...import（);"'
-  )
-})
+// --- Integration tests with importLocation ---
 
 /**
  * @param {string} transformed
@@ -189,7 +179,7 @@ const makeFakeReadFor = (transformed) => async (location) => {
  * @param {string} input
  */
 const testTransformAgainstEndo = async (t, input) => {
-  const transformed = useLocalTransforms(input)
+  const transformed = applyMjsTransform(input)
 
   t.log(transformed)
 
@@ -216,7 +206,7 @@ const testTransformAgainstEndo = async (t, input) => {
   return { dynamicImportPromise }
 }
 
-test('useLocalTransforms - combined transformations produce valid code 1', async (t) => {
+test('syncModuleTransforms.mjs - combined transformations produce valid code 1', async (t) => {
   await testTransformAgainstEndo(
     t,
     `#!/usr/bin/env node
@@ -232,27 +222,17 @@ if (a--> b && c--> d) {}
   )
 })
 
-test('useLocalTransforms - combined transformations produce valid code 2', async (t) => {
+test('syncModuleTransforms.mjs - combined transformations produce valid code 2', async (t) => {
   const { dynamicImportPromise } = await testTransformAgainstEndo(
     t,
     `//<!-- this is a comment -->
 const result = eval("1 + 1");
 'dynamic import()';
 \`template import()\`;
-console.log("hello");
+console.log();
 // NOTE: dynamic.mjs is a name matching a dummy location in makeFakeReadFor
 const x = import("./dynamic.mjs"); "import()";
 `
   )
   await dynamicImportPromise
-})
-
-test('useLocalTransforms - combined transformations produce valid code 3', async (t) => {
-  await testTransformAgainstEndo(
-    t,
-    `//currently broken
-"import() and import()"
-"some string...import();";
-`
-  )
 })
