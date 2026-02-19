@@ -99,9 +99,6 @@ const lockdownDefaults = /** @type {const} */ ({
   errorTaming: 'unsafe',
   // shows the full call stack
   stackFiltering: 'verbose',
-  // avoid instrumenting for catching uncaught errors
-  errorTrapping: 'none',
-  unhandledRejectionTrapping: 'none',
   // prevents most common override mistake cases from tripping up users
   overrideTaming: 'severe',
   // preserves JS locale methods, to avoid confusing users
