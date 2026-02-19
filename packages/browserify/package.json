@@ -43,7 +43,7 @@
     "lavamoat-core": "^17.1.3",
     "pify": "5.0.0",
     "readable-stream": "4.7.0",
-    "source-map": "0.7.4",
+    "source-map": "0.7.6",
     "through2": "4.0.2"
   },
   "devDependencies": {
