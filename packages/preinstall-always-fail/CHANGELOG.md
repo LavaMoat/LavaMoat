@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v2.1.1...preinstall-always-fail-v3.0.0) (2026-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Bug Fixes
+
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
 ## [2.1.1](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v2.1.0...preinstall-always-fail-v2.1.1) (2025-06-24)
 
 

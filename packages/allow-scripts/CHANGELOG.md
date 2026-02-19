@@ -6,6 +6,24 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [4.0.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.4.3...allow-scripts-v4.0.0) (2026-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Bug Fixes
+
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.6 to ^5.0.0
+
 ## [3.4.3](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.4.2...allow-scripts-v3.4.3) (2026-02-05)
 
 
