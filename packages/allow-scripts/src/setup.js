@@ -1,3 +1,10 @@
+/**
+ * @import {
+ *   AreBinsBlockedParams,
+ *   WriteRcFileContentParams
+ * } from './types/common.js'
+ */
+
 const {
   appendFileSync,
   existsSync,
