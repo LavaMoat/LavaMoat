@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.0.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.6...aa-v5.0.0) (2026-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Bug Fixes
+
+* **aa:** upgrade resolve to v1.22.11 ([#1885](https://github.com/LavaMoat/LavaMoat/issues/1885)) ([dec8e2a](https://github.com/LavaMoat/LavaMoat/commit/dec8e2a760490168d8c3085df58bda708995ff35))
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
 ## [4.3.6](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.5...aa-v4.3.6) (2026-02-05)
 
 

@@ -33,6 +33,28 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [20.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.8...lavamoat-browserify-v20.0.0) (2026-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Bug Fixes
+
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.6 to ^5.0.0
+    * @lavamoat/lavapack bumped from ^7.0.22 to ^8.0.0
+    * lavamoat-core bumped from ^17.1.3 to ^18.0.0
+  * devDependencies
+    * lavamoat bumped from 10.1.1 to 11.0.0
+
 ## [19.0.8](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.7...lavamoat-browserify-v19.0.8) (2026-02-05)
 
 

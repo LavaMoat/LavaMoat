@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v0.1.0...react-native-lockdown-v1.0.0) (2026-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Bug Fixes
+
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
 ## [0.1.0](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v0.0.2...react-native-lockdown-v0.1.0) (2025-07-28)
 
 

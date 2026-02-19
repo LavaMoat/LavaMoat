@@ -6,6 +6,26 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [18.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.3...lavamoat-core-v18.0.0) (2026-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Bug Fixes
+
+* **core:** untangle another tsc confusion in generating .d.ts files ([#1867](https://github.com/LavaMoat/LavaMoat/issues/1867)) ([5ce9b96](https://github.com/LavaMoat/LavaMoat/commit/5ce9b9613d5b1601f24a320a07e7e8eccb96aa18))
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.1.0 to ^1.0.0
+    * lavamoat-tofu bumped from ^8.1.1 to ^9.0.0
+
 ## [17.1.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.2...lavamoat-core-v17.1.3) (2026-02-05)
 
 
