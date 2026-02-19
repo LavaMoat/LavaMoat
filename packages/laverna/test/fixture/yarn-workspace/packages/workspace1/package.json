@@ -1,0 +1,7 @@
+{
+  "name": "@test/workspace1",
+  "version": "31337.420.69",
+  "dependencies": {
+    "some-dep": "workspace:^"
+  }
+}

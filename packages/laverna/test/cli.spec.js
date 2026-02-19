@@ -302,3 +302,22 @@ test(
     t.true(result.stderr.includes('@lavamoat/lavamutt@0.1.0'))
   }
 )
+
+test(
+  'cli - yarn workspace detection',
+  testProject,
+  { name: 'yarn-workspace', args: ['--newPkg=@test/workspace1'] },
+  async (t, result) => {
+    // The actual yarn command may fail (yarn might not be installed, or the
+    // workspace isn't a real yarn project), but we can still verify that
+    // laverna detected yarn mode and logged the detection message.
+    t.true(
+      result.stderr.includes('yarn.lock'),
+      'should log yarn.lock detection'
+    )
+    t.true(
+      result.stderr.includes('yarn npm publish'),
+      'should mention yarn npm publish'
+    )
+  }
+)
