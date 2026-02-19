@@ -31,7 +31,7 @@
     "lint:deps": "depcheck"
   },
   "dependencies": {
-    "@babel/types": "7.27.3"
+    "@babel/types": "7.29.0"
   },
   "publishConfig": {
     "access": "public"
