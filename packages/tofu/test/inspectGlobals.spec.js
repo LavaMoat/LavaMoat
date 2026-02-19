@@ -19,7 +19,7 @@ testInspect(
   {},
   () => {
     const x = xyz(
-      // eslint-disable-next-line no-unexpected-multiline
+       
       function (a) {
         return a
       }

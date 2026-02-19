@@ -65,7 +65,7 @@ testInspect(
   'cjs - include if no prefix for builtin provided',
   {},
   () => {
-    // eslint-disable-next-line node-import/prefer-node-protocol
+     
     require('fs').readFileSync
   },
   {

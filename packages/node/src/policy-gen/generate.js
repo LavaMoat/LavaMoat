@@ -285,7 +285,7 @@ export const generatePolicy = async (
     log.info(`Wrote debug policy to ${nicePolicyDebugPath}`)
     // do not attempt to use the `delete` keyword with typescript. you have been
     // warned!
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const { debugInfo: _, ...corePolicy } = /** @type {LavaMoatPolicyDebug} */ (
       debugPolicy
     )

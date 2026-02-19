@@ -6,7 +6,7 @@ const { pathToFileURL } = require('node:url')
 const { isWindows, portableExecPath } = require('./utils.js')
 
 const NPM_CMD = isWindows ? 'npm.cmd' : 'npm'
-/* eslint-disable ava/no-skip-test */
+ 
 const skipOnWindows = isWindows
   ? (description, ...args) =>
       test.skip('[no Windows support] ' + description, ...args)
@@ -64,13 +64,13 @@ const run = (t, args, cwd) => {
 
 test('cli - auto command', (t) => {
   // set up the directories
-  let projectRoot = path.join(__dirname, 'projects', '1')
+  const projectRoot = path.join(__dirname, 'projects', '1')
 
   // delete any existing package.json
   fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
 
   // npm init -y
-  let initResult = spawnSync(
+  const initResult = spawnSync(
     NPM_CMD,
     ['init', '-y'],
     realisticEnvOptions(projectRoot)
@@ -115,7 +115,7 @@ test('cli - auto command', (t) => {
 
 skipOnWindows('cli - auto command with experimental bins', (t) => {
   // set up the directories
-  let projectRoot = path.join(__dirname, 'projects', '1')
+  const projectRoot = path.join(__dirname, 'projects', '1')
 
   fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
 
@@ -149,7 +149,7 @@ skipOnWindows('cli - auto command with experimental bins', (t) => {
 
 test('cli - run command - good dep at the root', (t) => {
   // set up the directories
-  let projectRoot = path.join(__dirname, 'projects', '2')
+  const projectRoot = path.join(__dirname, 'projects', '2')
 
   // clean up from a previous run
   // the force option is only here to stop rm complaining if target is missing
@@ -181,7 +181,7 @@ skipOnWindows(
   'cli - run command - good dep at the root with experimental bins',
   (t) => {
     // set up the directories
-    let projectRoot = path.join(__dirname, 'projects', '2')
+    const projectRoot = path.join(__dirname, 'projects', '2')
 
     // clean up from a previous run
     // the force option is only here to stop rm complaining if target is missing
@@ -220,7 +220,7 @@ skipOnWindows(
 
 test('cli - run command - good dep as a sub dep', (t) => {
   // set up the directories
-  let projectRoot = path.join(__dirname, 'projects', '3')
+  const projectRoot = path.join(__dirname, 'projects', '3')
 
   // clean up from a previous run
   // the force option is only here to stop rm complaining if target is missing
@@ -342,7 +342,7 @@ skipOnWindows(
   'cli - run command - good dep as a sub dep with experimental bins',
   (t) => {
     // set up the directories
-    let projectRoot = path.join(__dirname, 'projects', '3')
+    const projectRoot = path.join(__dirname, 'projects', '3')
 
     // clean up from a previous run
     // the force option is only here to stop rm complaining if target is missing

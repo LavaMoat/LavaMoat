@@ -149,7 +149,7 @@ function makeResolveHook({ projectRoot, resolutions = {}, canonicalNameMap }) {
     }
     // utilize node's internal resolution algo
     const { resolve } = createRequire(new URL(`file://${referrer}`))
-    /* eslint-disable no-useless-catch */
+     
     let resolved
     try {
       resolved = resolve(requestedName)

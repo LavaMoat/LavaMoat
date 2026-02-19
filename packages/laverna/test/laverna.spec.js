@@ -11,7 +11,7 @@ const kleur = require('kleur')
 const crypto = require('node:crypto')
 const { glob: realGlob } = require('glob')
 const { EventEmitter } = require('node:events')
-// eslint-disable-next-line ava/use-test
+ 
 const { default: anyTest } = require('ava')
 const { memfs, fs } = require('memfs')
 const { Laverna } = require('../src')

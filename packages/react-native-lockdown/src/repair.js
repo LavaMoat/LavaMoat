@@ -39,7 +39,7 @@ const dumbPolyfillExposedInternals = Object.entries(Promise).filter(
   }
 )
 
-// eslint-disable-next-line no-undef
+ 
 repairIntrinsics({
   errorTaming: 'unsafe',
   consoleTaming: 'unsafe',

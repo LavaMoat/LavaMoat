@@ -105,7 +105,7 @@ export type PolicyGeneratorContextOptions<
 export type SomeFunction =
   | (new (...args: any[]) => any)
   | ((...args: any[]) => any)
-  // eslint-disable-next-line @typescript-eslint/ban-types
+   
   | Function
 
 /**
@@ -188,7 +188,7 @@ export type InspectModuleRecordsOptions = Simplify<
  * @interal
  */
 export type SimpleLavamoatModuleRecordOptions = Omit<
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-restricted-types
   LavamoatModuleRecordOptions,
   'ast' | 'moduleInitializer'
 >
@@ -212,7 +212,7 @@ export type CanonicalName = LiteralUnion<
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
-    // eslint-disable-next-line @typescript-eslint/ban-types
+     
     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
   }[ReadNowPowersProp]
 >

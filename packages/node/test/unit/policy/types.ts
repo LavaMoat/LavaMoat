@@ -1,5 +1,5 @@
 // FIXME: why did I have to add this? failing in CI
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+ 
 
 import { type ReadNowPowers } from '@endo/compartment-mapper'
 import type { LavaMoatPolicy } from '@lavamoat/types'

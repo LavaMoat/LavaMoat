@@ -115,7 +115,7 @@ function addPackage(name) {
     cmdArgs = ['add', '-D', name]
   }
 
-  let result = spawnSync(cmd, cmdArgs, {})
+  const result = spawnSync(cmd, cmdArgs, {})
 
   if (result.status !== 0) {
     process.stderr.write(result.stderr)

@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-expressions, no-extend-native */
+ 
 const test = require('ava')
 const { mergePolicy } = require('../src/mergePolicy')
 

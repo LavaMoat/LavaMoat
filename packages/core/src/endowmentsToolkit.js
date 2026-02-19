@@ -496,7 +496,7 @@ function endowmentsToolkit({
   function getPropertyDescriptorDeep(target, key) {
     /** @type {object | null} */
     let receiver = target
-    // eslint-disable-next-line no-constant-condition
+     
     while (true) {
       // abort if this is the end of the prototype chain.
       if (!receiver) {
@@ -513,7 +513,7 @@ function endowmentsToolkit({
         receiver = Reflect.getPrototypeOf(receiver)
       } else {
         // prototype lookup for primitives
-        // eslint-disable-next-line no-proto
+         
         receiver = /** @type {any} */ (receiver).__proto__
       }
     }

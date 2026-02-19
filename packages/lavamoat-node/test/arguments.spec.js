@@ -1,4 +1,4 @@
-/* eslint-disable ava/no-skip-test */
+ 
 const test = require('ava')
 const { runScenario } = require('./util')
 const {
