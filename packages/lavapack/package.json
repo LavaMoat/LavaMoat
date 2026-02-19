@@ -23,7 +23,6 @@
   ],
   "scripts": {
     "build": "node ./src/build-runtime.js",
-    "lint:deps": "depcheck",
     "rebuild": "npm run build",
     "test": "ava"
   },
