@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "undeclared-dep": {
+      "builtin": {
+        "node:util": true
+      }
+    }
+  }
+}
+
+
+

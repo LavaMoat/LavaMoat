@@ -23,11 +23,14 @@ const { freeze, keys, assign } = Object
  * @returns {Readonly<ThirdPartyStaticModuleInterface>}
  */
 const makeStaticModuleInterface = (ns) => {
+  const exports = isObject(ns)
+    ? new Set([...keys(ns), 'default'])
+    : new Set(['default'])
   return freeze(
     /** @type {ThirdPartyStaticModuleInterface} */ ({
       // builtins have no imports (as far as we're concerned)
       imports: [],
-      exports: isObject(ns) ? keys(ns) : [],
+      exports: [...exports],
       execute: (moduleExports) => {
         // this is a no-op if `ns` is a non-object
         moduleExports.default = ns

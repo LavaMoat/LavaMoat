@@ -13,10 +13,11 @@ const { makeInitStatsHook } = require('./makeInitStatsHook')
 const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const endowmentsToolkit = require('./endowmentsToolkit')
 const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
-const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
+const { MODULE_REFS, DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
 
 module.exports = {
   DEFAULT_GLOBAL_THIS_REFS,
+  MODULE_REFS,
   // generating the kernel
   generateKernel,
   // generating lavamoat config

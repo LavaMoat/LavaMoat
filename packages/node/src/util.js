@@ -4,27 +4,19 @@
  * @remraks
  * This is an anti-pattern. Or so I've heard.
  *
- * TODO: Everything here should support capabilities in one form or another
- *
  * @packageDocumentation
  */
-import chalk from 'chalk'
-import nodePath from 'node:path'
 import nodeUrl from 'node:url'
-import {
-  DEFAULT_POLICY_DEBUG_FILENAME,
-  DEFAULT_POLICY_OVERRIDE_FILENAME,
-} from './constants.js'
 import { assertAbsolutePath } from './fs.js'
-
-const { isArray: isArray_ } = Array
-const { freeze, keys } = Object
 
 /**
  * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
  * @import {RequiredReadNowPowers} from './internal.js'
  * @import {SetNonNullable} from 'type-fest'
+ * @import {FileUrlString} from './types.js'
  */
+const { isArray: isArray_ } = Array
+const { freeze, keys } = Object
 
 /**
  * Converts a {@link URL} or `string` to a URL-like `string` starting with the
@@ -35,18 +27,22 @@ const { freeze, keys } = Object
  * @remarks
  * This is the format that `@endo/compartment-mapper` often expects.
  * @param {URL | string} url URL or path
- * @returns {string} URL-like string
+ * @returns {FileUrlString} URL-like string
  * @internal
  */
-export const toEndoURL = (url) =>
-  url instanceof URL
-    ? url.href
-    : url.startsWith('file://')
-      ? url
-      : nodeUrl.pathToFileURL(url).href
+export const toFileURLString = (url) =>
+  /** @type {FileUrlString} */ (
+    url instanceof URL
+      ? url.href
+      : url.startsWith('file://')
+        ? url
+        : nodeUrl.pathToFileURL(url).href
+  )
 
 /**
  * Type guard for an object.
+ *
+ * This includes functions and arrays, but not `null`.
  *
  * @param {unknown} value
  * @returns {value is object}
@@ -55,7 +51,7 @@ export const toEndoURL = (url) =>
 export const isObject = (value) => Object(value) === value
 
 /**
- * Type guard for a non-array object
+ * Type guard for a non-array object. Functions OK
  *
  * @param {unknown} value
  * @returns {value is object & {length?: never}}
@@ -108,6 +104,7 @@ export const isBoolean = (value) => typeof value === 'boolean'
  * @param {T} obj Some object
  * @param {K} prop Some property which might be in `obj`
  * @returns {obj is Omit<T, K> & {[key in K]: SetNonNullable<T, K>}}
+ * @internal
  * @see {@link https://github.com/microsoft/TypeScript/issues/44253}
  */
 export const hasValue = (obj, prop) => {
@@ -180,51 +177,16 @@ export const keysOr = (value, defaultKeys = []) =>
  *
  * @param {unknown} value
  * @returns {value is (...args: any[]) => any}
+ * @internal
  */
 export const isFunction = (value) => typeof value === 'function'
-
-/**
- * Given a filepath, displays it as relative or absolute depending on which is
- * fewer characters. Ergo, the "human-readable" path.
- *
- * @param {string | URL} filepath
- * @returns {string}
- * @internal
- */
-export const hrPath = (filepath) => {
-  filepath = toPath(filepath)
-  if (nodePath.isAbsolute(filepath)) {
-    const relativePath = nodePath.relative(process.cwd(), filepath)
-    if (relativePath && relativePath.length < filepath.length) {
-      filepath = relativePath
-    }
-  } else {
-    const absolutePath = nodePath.resolve(filepath)
-    if (absolutePath.length < filepath.length) {
-      filepath = absolutePath
-    }
-  }
-  return chalk.greenBright(filepath)
-}
-
-/**
- * For display of package names or canonical names.
- *
- * @param {string} name
- * @returns {string}
- * @internal
- */
-export const hrLabel = (name) => {
-  return name.includes('>')
-    ? name.split('>').map(hrLabel).join(chalk.magenta('>'))
-    : chalk.magentaBright(name)
-}
 
 /**
  * Type guard for a "path-like" value
  *
  * @param {unknown} value
  * @returns {value is string | URL}
+ * @internal
  */
 export const isPathLike = (value) => isString(value) || value instanceof URL
 
@@ -235,6 +197,7 @@ export const isPathLike = (value) => isString(value) || value instanceof URL
  *   `file://` scheme
  * @param {FileURLToPathFn} [fileURLToPath] `fileURLToPath` implementation
  * @returns {string} A filepath
+ * @internal
  */
 export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
   return value instanceof URL || value.startsWith('file://')
@@ -243,45 +206,95 @@ export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
 }
 
 /**
- * Formats "code"; use when referring to code or configuration
+ * Converts a path-like value to an absolute path, asserting that it is
+ * absolute.
  *
- * @param {string} value
- * @returns {string}
+ * @param {string | URL} pathLike Path-like value to convert to an absolute
+ *   path.
+ * @param {string} [assertionMessage] Custom assertion message
+ * @returns {string} Absolute path
+ * @internal
  */
-export const hrCode = (value) => {
-  return chalk.bgGrey.whiteBright(value)
-}
-
-/**
- * Given path to a policy file, returns the sibling path to the policy override
- * file
- *
- * @param {string | URL} policyPath
- * @returns {string}
- */
-export const makeDefaultPolicyOverridePath = (policyPath) => {
-  const path = toPath(policyPath)
+export const toAbsolutePath = (pathLike, assertionMessage) => {
+  const path = toPath(pathLike)
   assertAbsolutePath(
     path,
-    `${hrCode('policyPath')} must be an absolute path; got ${path}`
+    assertionMessage ?? `Expected an absolute path; got ${path}`
   )
-  const policyDir = nodePath.dirname(path)
-  return nodePath.join(policyDir, DEFAULT_POLICY_OVERRIDE_FILENAME)
+  return path
 }
 
+// #region to-keypath
 /**
- * Given path to a policy file, returns the sibling path to the policy debug
- * file
+ * Matches a string that can be displayed as an integer when converted to a
+ * string (via `toString()`). This would represent the index of an array.
  *
- * @param {string | URL} policyPath
+ * It may not be a
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isSafeInteger safe integer},
+ * but it's an integer.
+ */
+const INT_STRING_REGEXP = /^(?:0|[1-9][0-9]*)$/
+
+/**
+ * Anything matching this will need to be in
+ */
+const DOT_NOTATION_ALLOWED = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/
+
+/**
+ * Matches a string wrapped in single or double quotes
+ */
+const WRAPPED_QUOTE_REGEXP = /^["'](?<content>.+)["']$/
+
+/**
+ * Returns `true` if `key` can be coerced to an integer, which will cause it to
+ * be wrapped in brackets (`[${key}]`) when used as a key in an object
+ *
+ * @param {string} key Some string
+ * @returns {boolean} `true` if `key` can be coerced to an integer
+ */
+const isIntegerLike = (key) => INT_STRING_REGEXP.test(key)
+
+/**
+ * Converts a "keypath" array to a string using dots or braces as appropriate
+ *
+ * @template {readonly string[]} const T Array of strings
+ * @param {T} path "keypath" array
  * @returns {string}
  */
-export const makeDefaultPolicyDebugPath = (policyPath) => {
-  const path = toPath(policyPath)
-  assertAbsolutePath(
-    path,
-    `${hrCode('policyPath')} must be an absolute path; got ${path}`
-  )
-  const policyDir = nodePath.dirname(path)
-  return nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
+export const toKeypath = (path) => {
+  if (!path?.length) {
+    return ''
+  }
+  return path.reduce((output, key) => {
+    key = key.replace(WRAPPED_QUOTE_REGEXP, '$<content>')
+
+    if (isIntegerLike(key)) {
+      return `${output}[${key}]`
+    }
+    return DOT_NOTATION_ALLOWED.test(key)
+      ? `${output}.${key}`
+      : `${output}["${key}"]`
+  })
 }
+// #endregion
+
+/**
+ * Returns the singular or plural form of a word based on count.
+ *
+ * @example
+ *
+ * ```js
+ * pluralize(1, 'item') // => 'item'
+ * pluralize(0, 'item') // => 'items'
+ * pluralize(5, 'item') // => 'items'
+ * pluralize(2, 'ox', 'oxen') // => 'oxen'
+ * ```
+ *
+ * @param {number} count The count to check
+ * @param {string} singular The singular form of the word
+ * @param {string} [plural] The plural form (defaults to `singular + 's'`)
+ * @returns {string} The appropriate form of the word
+ * @internal
+ */
+export const pluralize = (count, singular, plural = `${singular}s`) =>
+  count === 1 ? singular : plural

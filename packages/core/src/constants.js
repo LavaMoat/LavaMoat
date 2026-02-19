@@ -37,4 +37,17 @@ const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(Object.values(GLOBAL_THIS_REFS))
  */
 const POLICY_WRITE = 'write'
 
-module.exports = { GLOBAL_THIS_REFS, DEFAULT_GLOBAL_THIS_REFS, POLICY_WRITE }
+/**
+ * Symbols that look like globals but aren't; indexed by source type.
+ */
+const MODULE_REFS = /** @type {const} */ ({
+  module: ['arguments', 'import', 'export'],
+  script: ['arguments', 'require', 'module', 'exports'],
+})
+
+module.exports = {
+  MODULE_REFS,
+  GLOBAL_THIS_REFS,
+  DEFAULT_GLOBAL_THIS_REFS,
+  POLICY_WRITE,
+}

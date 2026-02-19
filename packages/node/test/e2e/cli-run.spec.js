@@ -1,27 +1,25 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
+import { isPolicy, readPolicy } from '../../src/policy-util.js'
+import { fixtureFinder } from '../test-util.js'
 import { createCLIMacros } from './cli-macros.js'
+import { makeTempdir, runCLI } from './cli-util.js'
 
-/**
- * Path to the "basic" fixture entry point
- */
-const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
-  new URL('./fixture/basic/app.js', import.meta.url)
-)
+const fixture = fixtureFinder(import.meta.url)
 
-/**
- * The "basic" fixture's directory
- */
-const BASIC_FIXTURE_ENTRYPOINT_DIR = path.dirname(BASIC_FIXTURE_ENTRYPOINT)
-
-const UNTRUSTED_FIXTURE_ENTRYPOINT = 'lard-o-matic'
-
-const UNTRUSTED_FIXTURE_DIR = fileURLToPath(
-  new URL('./fixture/extensionless/', import.meta.url)
-)
+const basic = fixture('basic')
+const echo = fixture('basic', { entrypoint: 'echo.js' })
+const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
+const deptree = fixture('deptree')
+const devDeptree = fixture('deptree', {
+  entrypoint: 'tool.js',
+  policyPath: 'lavamoat/node/dev-policy.json',
+})
+const missingFromDisk = fixture('missing-from-disk')
+const missingFromDescriptors = fixture('missing-from-descriptors')
+const circularRootDep = fixture('circular-root-dep')
 
 const { testCLI } = createCLIMacros(test)
 
@@ -42,74 +40,138 @@ test(
 test(
   'basic',
   testCLI,
-  ['run', BASIC_FIXTURE_ENTRYPOINT, '--root', BASIC_FIXTURE_ENTRYPOINT_DIR],
+  ['run', basic.entrypoint, '--project-root', basic.dir],
   'hello world'
 )
 
 test(
   'extra positionals',
   testCLI,
-  [
-    'run',
-    BASIC_FIXTURE_ENTRYPOINT,
-    '--root',
-    BASIC_FIXTURE_ENTRYPOINT_DIR,
-    'howdy',
-  ],
+  ['run', basic.entrypoint, '--project-root', basic.dir, 'howdy'],
   { code: 1, stderr: /unknown argument/i }
 )
 
 test(
   'extra non-option arguments (positionals)',
   testCLI,
-  [
-    'run',
-    BASIC_FIXTURE_ENTRYPOINT,
-    '--root',
-    BASIC_FIXTURE_ENTRYPOINT_DIR,
-    '--',
-    'howdy',
-  ],
+  ['run', basic.entrypoint, '--project-root', basic.dir, '--', 'howdy'],
   'howdy world'
 )
 
 test(
-  'extra non-option arguments (positionals and options)',
+  'extra non-option arguments are passed cleanly (positionals and options)',
   testCLI,
   [
     'run',
-    BASIC_FIXTURE_ENTRYPOINT,
-    '--root',
-    BASIC_FIXTURE_ENTRYPOINT_DIR,
+    echo.entrypoint,
+    '--project-root',
+    echo.dir,
     '--',
     'howdy',
     '--yelling',
   ],
-  'HOWDY WORLD'
+  'howdy --yelling'
 )
 
 test(
   'untrusted entrypoint',
   testCLI,
-  [
-    'run',
-    UNTRUSTED_FIXTURE_ENTRYPOINT,
-    '--bin',
-    '--root',
-    UNTRUSTED_FIXTURE_DIR,
-  ],
+  ['run', bin.entrypoint, '--bin', '--project-root', bin.dir],
   'scripty test'
 )
 
-test.todo('--dev flag')
+test(
+  'package missing from all package descriptors',
+  testCLI,
+  [
+    'run',
+    missingFromDescriptors.entrypoint,
+    '--project-root',
+    missingFromDescriptors.dir,
+  ],
+  { code: 1, stderr: /Cannot find package 'undeclared-dep'/ }
+)
 
-test.todo('package missing from all package descriptors')
+test(
+  'package missing from disk',
+  testCLI,
+  ['run', missingFromDisk.entrypoint, '--project-root', missingFromDisk.dir],
+  {
+    code: 1,
+    stderr: /Cannot find package 'incomplete-pkg' imported from/,
+  }
+)
 
-test.todo('package missing from disk')
+test(
+  'entry module is depended upon by a descendant',
+  testCLI,
+  ['run', circularRootDep.entrypoint, '--project-root', circularRootDep.dir],
+  'child-pkg got: helper from root'
+)
 
-test.todo('package only present in policy override')
+test('--dev processes dev deps', async (t) => {
+  t.plan(2)
 
-test.todo('entry module is depended upon by a descendant')
+  const tempdir = await makeTempdir(t)
+  try {
+    const { code, stdout } = await runCLI(
+      [
+        'run',
+        devDeptree.entrypoint,
+        '--dev',
+        '--policy',
+        devDeptree.policyPath,
+        '--policy-override',
+        devDeptree.policyOverridePath,
+      ],
+      t,
+      { cwd: devDeptree.dir }
+    )
+    t.is(stdout.trim(), 'DEV-PKG LOADED')
+    t.is(code, undefined)
+  } finally {
+    await tempdir[Symbol.asyncDispose]()
+  }
+})
 
-// needs impl
-test.todo('writing policy.json to disk w/ contents of policy override')
+test('overrides merged back into policy', async (t) => {
+  t.plan(2)
+
+  const tempdir = await makeTempdir(t)
+
+  try {
+    const policyPath = tempdir.join(
+      `run-override-merge-${DEFAULT_POLICY_FILENAME}`
+    )
+
+    await runCLI(
+      [
+        deptree.entrypoint,
+        '--policy',
+        policyPath,
+        '--policy-override',
+        deptree.policyOverridePath,
+        '--generate-recklessly',
+        '--write',
+      ],
+      t,
+      { cwd: deptree.dir }
+    )
+
+    const policy = await readPolicy(policyPath)
+    t.true(isPolicy(policy))
+
+    t.like(policy, {
+      resources: {
+        'another-pkg': {
+          globals: {
+            'console.error': true,
+            'console.log': true,
+          },
+        },
+      },
+    })
+  } finally {
+    await tempdir[Symbol.asyncDispose]()
+  }
+})

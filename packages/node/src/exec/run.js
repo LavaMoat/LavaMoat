@@ -11,43 +11,16 @@ import {
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
 import { TrustMismatchError } from '../error.js'
+import { hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
-import { hrCode, hrPath } from '../util.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
 
 /**
- * @import {LavaMoatPolicy} from '@lavamoat/types'
- * @import {ExecuteOptions, LoadPoliciesOptions, RunOptions} from '../types.js';
- */
-
-/**
- * Runs a module or script with provided LavaMoat policy
- *
- * Allows creation of read powers from raw interfaces; see {@link makeReadPowers}
- *
- * @template [T=unknown] Exports of module, if known. Default is `unknown`
- * @overload
- * @param {string | URL} entrypoint Entry point of application
- * @param {LavaMoatPolicy} policy LavaMoat policy
- * @param {RunOptions} [options] Options
- * @returns {Promise<T>} Exports of executed module
- */
-
-/**
- * Runs a module or script with provided LavaMoat policy from a path
- *
- * Allows creation of read powers from raw interfaces; see {@link makeReadPowers}
- *
- * @template [T=unknown] Exports of module, if known. Default is `unknown`
- * @overload
- * @param {string | URL} entrypoint Entry point of application
- * @param {string | URL} policyPath Path to LavaMoat policy
- * @param {RunOptions} [options] Options
- * @returns {Promise<T>} Exports of executed module
+ * @import {ExecuteOptions, LoadPoliciesOptions, MergedLavaMoatPolicy, RunOptions} from '../types.js';
  */
 
 /**
@@ -59,19 +32,18 @@ import { execute } from './execute.js'
  * Mainly a wrapper around {@link execute}
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypoint Entry point of application
- * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy
  * @param {RunOptions} [options] Options
  * @returns {Promise<T>} Exports of executed module
  */
 export const run = async (
   entrypoint,
-  policyOrPolicyPath,
   {
     dev = false,
     trustRoot,
     projectRoot,
     readFile = nodeFs.promises.readFile,
     log = defaultLog,
+    scuttleGlobalThis,
     ...options
   } = {}
 ) => {
@@ -94,29 +66,39 @@ export const run = async (
         }),
   }
 
-  const policy = await loadPolicies(policyOrPolicyPath, loadPoliciesOptions)
+  const policy = await loadPolicies(
+    options.policy ?? options.policyPath,
+    loadPoliciesOptions
+  )
 
   // because we have a merged policy, we don't need to provide overrides to `toEndoPolicy`
   const endoPolicy = await toEndoPolicy(policy, { projectRoot })
-  // this must be done against the merged policy, not the original.
+
   assertTrustRootMatchesPolicy(policy, entrypoint, trustRoot)
 
   /** @type {ExecuteOptions} */
   const executeOptions = {
     Compartment: makeExecutionCompartment(globalThis),
     modules: {
+      // We are passing the default attenuator in as an exit module. It's not required
+      // for it to be a package then, but if we have a prototype pollution or RCE
+      // in the attenuator, we're exposing the outside instead of the attenuators
+      // compartment. It's a tradeoff. We could address it by manually creating a separate
+      // compartment for defining the attenuator in.
       [DEFAULT_ATTENUATOR]: {
         attenuateGlobals: makeGlobalsAttenuator({
           policy,
-          scuttleGlobalThis: options.scuttleGlobalThis,
+          scuttleGlobalThis,
         }),
         attenuateModule,
       },
     },
-    policy: endoPolicy,
+    endoPolicy,
     dev,
     log,
     readPowers: makeReadPowers(options),
+    trustRoot,
+    policy,
   }
 
   return execute(entrypoint, executeOptions)
@@ -128,7 +110,7 @@ export const run = async (
  *
  * @remarks
  * This only makes sense prior to execution.
- * @param {LavaMoatPolicy} policy LavaMoat policy
+ * @param {MergedLavaMoatPolicy} policy LavaMoat policy
  * @param {string | URL} entrypoint Path to entry point (for error message)
  * @param {boolean} trustRoot Whether we plan to trust the root environment
  */

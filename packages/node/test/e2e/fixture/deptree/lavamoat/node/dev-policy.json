@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "dev-pkg": {
+      "builtin": {
+        "node:util": true
+      },
+      "globals": {
+        "console.log": true
+      }
+    }
+  }
+}

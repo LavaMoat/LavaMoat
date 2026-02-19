@@ -5,7 +5,10 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "shared-pkg": "^2.0.0",
-    "another-pkg": "^1.0.0"
+    "another-pkg": "^1.0.0",
+    "shared-pkg": "^2.0.0"
+  },
+  "devDependencies": {
+    "dev-pkg": "^1.0.0"
   }
 }

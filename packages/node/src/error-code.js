@@ -17,12 +17,12 @@ export const ErrorCodes = Object.freeze(
     ExecutionFailure: 'LMN_EXECUTION_FAILURE',
     ConversionFailure: 'LMN_CONVERSION_FAILURE',
     InvalidArguments: 'LMN_INVALID_ARGUMENTS',
-    InvalidCompartment: 'LMN_INVALID_COMPARTMENT',
     InvalidPolicy: 'LMN_INVALID_POLICY',
-    NoExecutable: 'LMN_NO_EXECUTABLE',
+    NoBinScript: 'LMN_NO_BIN_SCRIPT',
     NoPolicy: 'LMN_NO_POLICY',
     NoWorkspace: 'LMN_NO_WORKSPACE',
     PermissionDenied: 'LMN_PERMISSION_DENIED',
     TrustMismatch: 'LMN_TRUST_MISMATCH',
+    WritePolicyFailure: 'LMN_WRITE_POLICY_FAILURE',
   })
 )

@@ -1,5 +1,5 @@
 /**
- * @import {ErrorCode, LavaMoatErrorClass, LavaMoatErrorClassParams} from './errors.js'
+ * @import {ErrorCode, LavaMoatErrorClass, LavaMoatErrorClassParams, LavaMoatErrorOptions} from './errors.js'
  * @import {Class} from 'type-fest'
  */
 import { ErrorCodes } from './error-code.js'
@@ -17,7 +17,7 @@ import { ErrorCodes } from './error-code.js'
  * @param {Class<Error, LavaMoatErrorClassParams<Options>>} ctor
  * @returns {LavaMoatErrorClass<Code, Options>}
  */
-export const createLavaMoatError = (name, code, ctor) => {
+const createLavaMoatError = (name, code, ctor) => {
   Object.defineProperties(ctor, {
     code: { value: code, enumerable: true },
     name: { value: name },
@@ -66,12 +66,6 @@ export const InvalidArgumentsError = createLavaMoatError(
   class extends Error {}
 )
 
-export const InvalidCompartmentError = createLavaMoatError(
-  'InvalidCompartmentError',
-  ErrorCodes.InvalidCompartment,
-  class extends Error {}
-)
-
 export const InvalidPolicyError = createLavaMoatError(
   'InvalidPolicyError',
   ErrorCodes.InvalidPolicy,
@@ -81,9 +75,7 @@ export const InvalidPolicyError = createLavaMoatError(
 
     /**
      * @param {string} message
-     * @param {Object} options
-     * @param {unknown} [options.cause]
-     * @param {string} [options.filepath]
+     * @param {LavaMoatErrorOptions<{ filepath?: string }>} options
      */
     constructor(message, { cause, filepath } = {}) {
       super(message, { cause })
@@ -92,15 +84,19 @@ export const InvalidPolicyError = createLavaMoatError(
   }
 )
 
-export const NoExecutableError = createLavaMoatError(
-  'NoExecutableError',
-  ErrorCodes.NoExecutable,
+/**
+ * Error thrown if no bin script entrypoint could found
+ */
+export const NoBinScriptError = createLavaMoatError(
+  'NoBinScriptError',
+  ErrorCodes.NoBinScript,
   class extends Error {}
 )
 
 /**
  * Error thrown if policy cannot be found
- */ export const NoPolicyError = createLavaMoatError(
+ */
+export const NoPolicyError = createLavaMoatError(
   'NoPolicyError',
   ErrorCodes.NoPolicy,
   class extends Error {}
@@ -125,11 +121,20 @@ export const PermissionDeniedError = createLavaMoatError(
 )
 
 /**
- * Error thrown if an policy with an untrusted root is attempted to be run in a
+ * Error thrown if a policy with an untrusted root is attempted to be run in a
  * trusted context
  */
 export const TrustMismatchError = createLavaMoatError(
   'TrustMismatchError',
   ErrorCodes.TrustMismatch,
+  class extends Error {}
+)
+
+/**
+ * Error thrown if a policy cannot be written to disk
+ */
+export const WritePolicyError = createLavaMoatError(
+  'WritePolicyError',
+  ErrorCodes.WritePolicyFailure,
   class extends Error {}
 )
