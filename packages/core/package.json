@@ -38,7 +38,7 @@
     "test:ses": "bash ./test/ses.sh"
   },
   "dependencies": {
-    "@babel/types": "7.27.3",
+    "@babel/types": "7.29.0",
     "@lavamoat/types": "^0.1.0",
     "json-stable-stringify": "1.3.0",
     "lavamoat-tofu": "^8.1.1",

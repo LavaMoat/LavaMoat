@@ -45,7 +45,7 @@
     "webpack": "^5.80.2"
   },
   "dependencies": {
-    "@babel/parser": "7.28.3",
+    "@babel/parser": "7.29.0",
     "@lavamoat/aa": "^4.3.6",
     "@lavamoat/types": "^0.1.0",
     "browser-resolve": "2.0.0",
@@ -54,8 +54,8 @@
     "ses": "1.14.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "7.27.2",
-    "@babel/preset-typescript": "7.27.1",
+    "@babel/preset-env": "7.29.0",
+    "@babel/preset-typescript": "7.28.5",
     "@types/browser-resolve": "2.0.5",
     "babel-loader": "10.0.0",
     "css-loader": "7.1.2",
