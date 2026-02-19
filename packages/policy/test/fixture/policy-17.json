@@ -1,0 +1,20 @@
+{
+  "resources": {
+    "a": {
+      "globals": {
+        "Buffer.from": true
+      },
+      "packages": {
+        "b": true
+      }
+    },
+    "b": {
+      "builtin": {
+        "crypto.createHash": true
+      },
+      "globals": {
+        "Buffer.isBuffer": true
+      }
+    }
+  }
+}

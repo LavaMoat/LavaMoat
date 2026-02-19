@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "nodejs-package": {
+      "builtin": {
+        "node:fs.readdirSync": true
+      }
+    }
+  }
+}
