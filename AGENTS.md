@@ -9,7 +9,7 @@ LavaMoat is a JavaScript supply chain security toolkit providing runtime protect
 Bootstrap the development environment with these exact commands:
 
 ```bash
-# Verify Node.js version (requirement: ^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0)
+# Verify Node.js version (requirement: ^20.19.0 || ^22.5.1 || ^24.0.0)
 node --version
 
 # Verify npm version (requirement: >=7.0.0)

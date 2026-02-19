@@ -34,7 +34,7 @@ Perhaps more importantly, **Laverna**:
 
 ## Supported Environments
 
-- Node.js v18.13.0+
+- Node.js v20.19.0+
 - `npm` v8.19.3+
 
 ## Install
