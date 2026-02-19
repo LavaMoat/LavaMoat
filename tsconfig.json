@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowJs": true
   },
-  "extends": "@tsconfig/node18/tsconfig.json",
+  "extends": "@tsconfig/node20/tsconfig.json",
   "files": [],
   // the workspaces which are consumed as libraries by other workspaces should
   // be first in this list
