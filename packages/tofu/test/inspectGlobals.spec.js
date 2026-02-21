@@ -238,6 +238,17 @@ testInspect(
 )
 
 testInspect(
+  'get granular platform api - but avoid going down to Function methods',
+  { globalRefs: ['globalThis'] },
+  () => {
+    fetch.bind(globalThis)
+  },
+  {
+    fetch: 'read',
+  }
+)
+
+testInspect(
   'get granular platform api when nested under global',
   {
     globalRefs: ['window'],
