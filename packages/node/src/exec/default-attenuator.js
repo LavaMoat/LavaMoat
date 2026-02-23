@@ -81,6 +81,17 @@ export const makeGlobalsAttenuator = ({
     knownWritableFields,
   })
 
+  const scuttler = (globalThis, globalThisCompartment) => {
+    copyWrappedGlobals(globalThis, globalThisCompartment, [
+      'globalThis',
+      'global',
+    ])
+    scuttle(globalThis, {
+      ...scuttleGlobalThis,
+      enabled: !!scuttleGlobalThis.enabled,
+    })
+  }
+
   /** @type {object} */
   let rootCompartmentGlobalThis
 
@@ -107,25 +118,11 @@ export const makeGlobalsAttenuator = ({
       // wish. Tempting. Slightly less secure, because if we have a prototype
       // pollution or RCE in the attenuator, we're exposing the outside instead
       // of the attenuators compartment.
-      copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
-        'globalThis',
-        'global',
-      ])
-      scuttle(originalGlobalThis, {
-        ...scuttleGlobalThis,
-        enabled: !!scuttleGlobalThis.enabled,
-      })
+      scuttler(originalGlobalThis, packageCompartmentGlobalThis)
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis
-        copyWrappedGlobals(originalGlobalThis, rootCompartmentGlobalThis, [
-          'globalThis',
-          'global',
-        ])
-        scuttle(originalGlobalThis, {
-          ...scuttleGlobalThis,
-          enabled: !!scuttleGlobalThis.enabled,
-        })
+        scuttler(originalGlobalThis, rootCompartmentGlobalThis)
       }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
