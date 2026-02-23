@@ -42,6 +42,22 @@
 * **webpack:** unlockedChunksUnsafe option to refrain from protecting selected chunks ([#1375](https://github.com/PEAC337/LavaMoat/issues/1375)) ([1f24683](https://github.com/PEAC337/LavaMoat/commit/1f24683e2e6cddefbc492c0925d0d7d5e3b995c0))
 * **webpack:** use the final module info in connections to handle the optimizations webpack sideEffect option does. wip ([9c7b305](https://github.com/PEAC337/LavaMoat/commit/9c7b3050460b4cc79b04ac422bdfb69540893bd9))
 * **webpack:** webpack context modules and chunk lazy loading support ([#1553](https://github.com/PEAC337/LavaMoat/issues/1553)) ([3602f65](https://github.com/PEAC337/LavaMoat/commit/3602f6598196ec99287fe239aa1708d9f80c0e0c))
+## [1.5.8](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.7...webpack-v1.5.8) (2026-02-05)
+
+
+### Bug Fixes
+
+* **deps:** update definitelytyped ([2eab347](https://github.com/LavaMoat/LavaMoat/commit/2eab34797e14fa0ff2d2b0aa6fd1ec77cc490900))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.5 to ^4.3.6
+    * lavamoat-core bumped from ^17.1.2 to ^17.1.3
+
+## [1.5.7](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.6...webpack-v1.5.7) (2026-01-20)
 
 
 ### Bug Fixes
@@ -76,6 +92,7 @@
 * **webpack:** strip policy meta from the policy that goes into the bundle, fix related tests ([645d0f2](https://github.com/PEAC337/LavaMoat/commit/645d0f2311a9871694b6bf14bb4ce3c81b2311c8))
 * **webpack:** support regex in scuttling exceptions ([#1529](https://github.com/PEAC337/LavaMoat/issues/1529)) ([45c0308](https://github.com/PEAC337/LavaMoat/commit/45c0308c655c9903f9bdfa17a30460b10f22a219))
 * **webpack:** undo the forced overwrite of parent and top references ([#1666](https://github.com/PEAC337/LavaMoat/issues/1666)) ([adec627](https://github.com/PEAC337/LavaMoat/commit/adec627069e201a7353a89876d0964dd54e1fa9b))
+* performant implementation of getPackageDirForModulePath in aa and minor memoization in lavamoat-node ([#1878](https://github.com/LavaMoat/LavaMoat/issues/1878)) ([467c248](https://github.com/LavaMoat/LavaMoat/commit/467c248a80b4706b6f51da13fca67d1a64c2dc91))
 
 
 ### Dependencies

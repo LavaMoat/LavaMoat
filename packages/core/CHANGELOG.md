@@ -64,6 +64,7 @@
 * make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/PEAC337/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
 * typescript got confused into creating a cyclic reference in types for scuttling in core ([5e25a36](https://github.com/PEAC337/LavaMoat/commit/5e25a361094a7b3ed7ae2744cd405910f9dc3baa))
 * upgrade ses to v1.11.0 ([a12dae1](https://github.com/PEAC337/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+## [17.1.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.2...lavamoat-core-v17.1.3) (2026-02-05)
 
 
 ### Dependencies
@@ -72,6 +73,7 @@
   * dependencies
     * @lavamoat/types bumped from ^0.1.0 to ^0.2.0
     * lavamoat-tofu bumped from ^8.1.0 to ^8.2.0
+    * lavamoat-tofu bumped from ^8.1.0 to ^8.1.1
 
 ## [17.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.1...lavamoat-core-v17.1.2) (2025-12-02)
 

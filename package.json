@@ -10,7 +10,7 @@
     "packages/*"
   ],
   "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
+    "node": "^20.19.0 || ^22.5.1 || ^24.0.0",
     "npm": ">=7.0.0"
   },
   "scripts": {
@@ -41,11 +41,11 @@
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
     "@endo/compartment-mapper": "1.6.3",
-    "@tsconfig/node18": "18.2.4",
+    "@tsconfig/node20": "20.1.0",
     "@types/lint-staged": "13.3.0",
-    "@types/node": "18.19.112",
+    "@types/node": "18.19.130",
     "@types/wallabyjs": "0.0.15",
-    "@types/yargs": "17.0.33",
+    "@types/yargs": "17.0.35",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "ava": "6.2.0",

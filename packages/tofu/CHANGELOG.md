@@ -7,6 +7,7 @@
 
 * **core:** add informative errors when the result of policy merge contains invalid entries ([#1848](https://github.com/PEAC337/LavaMoat/issues/1848)) ([fefd457](https://github.com/PEAC337/LavaMoat/commit/fefd457d53c2944fe3d2ee719cd741f5eafb8987))
 * **tofu:** enable deep dependency analysis of ES modules ([e5d1818](https://github.com/PEAC337/LavaMoat/commit/e5d181806788134b9b0b37ef58b0576056ac215a))
+## [8.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.1.0...lavamoat-tofu-v8.1.1) (2026-02-05)
 
 
 ### Bug Fixes
@@ -30,6 +31,7 @@
 * **deps:** update dependency type-fest to v4.41.0 ([#1657](https://github.com/PEAC337/LavaMoat/issues/1657)) ([19e9bf1](https://github.com/PEAC337/LavaMoat/commit/19e9bf144c8c43f530501bc500480fed16f995ac))
 * make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/PEAC337/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
 * **tofu:** Deprecate codeSampleFromAstNode and undo breaking change ([b43a23d](https://github.com/PEAC337/LavaMoat/commit/b43a23dbedeff3583c2425891a51f1ef0a434bc8))
+* **deps:** update definitelytyped ([2eab347](https://github.com/LavaMoat/LavaMoat/commit/2eab34797e14fa0ff2d2b0aa6fd1ec77cc490900))
 
 
 ### Dependencies
@@ -39,6 +41,8 @@
     * @lavamoat/types bumped from ^0.1.0 to ^0.2.0
   * peerDependencies
     * lavamoat-core bumped from >15.4.0 to >18.0.0
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >17.1.3
 
 ## [8.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.11...lavamoat-tofu-v8.1.0) (2025-11-19)
 

@@ -96,6 +96,7 @@
 * **node:** better UX for specifying entrypoints ([5598351](https://github.com/PEAC337/LavaMoat/commit/5598351e9656239dc3d8e8e8936c5f75148ff3fb))
 * **node:** create @lavamoat/node ([ab09d8f](https://github.com/PEAC337/LavaMoat/commit/ab09d8f3aeb6cee17d8291431bcd5e39871e1fae))
 * **node:** support untrusted entrypoints ([fa2b46e](https://github.com/PEAC337/LavaMoat/commit/fa2b46e2a66fdf45e5f1868d6fdfb76fbcc2ca0e))
+## [0.4.11](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.10...node-v0.4.11) (2026-02-05)
 
 
 ### Bug Fixes
@@ -130,6 +131,7 @@
 * **node:** update ses to v1.10.0 ([13aeb82](https://github.com/PEAC337/LavaMoat/commit/13aeb8277bd9a7a42c53293b595ff6a807d47b57))
 * **types:** remove global Object.hasOwn type ([ee9f86b](https://github.com/PEAC337/LavaMoat/commit/ee9f86b764b2a18b5863cd769d545692420ebf5a)), closes [#1817](https://github.com/PEAC337/LavaMoat/issues/1817)
 * upgrade ses to v1.11.0 ([a12dae1](https://github.com/PEAC337/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+* **deps:** update definitelytyped ([2eab347](https://github.com/LavaMoat/LavaMoat/commit/2eab34797e14fa0ff2d2b0aa6fd1ec77cc490900))
 
 
 ### Dependencies
@@ -138,6 +140,7 @@
   * dependencies
     * @lavamoat/types bumped from 0.1.0 to 0.2.0
     * lavamoat-core bumped from ^17.1.2 to ^18.0.0
+    * lavamoat-core bumped from ^17.1.2 to ^17.1.3
 
 ## [0.4.10](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.9...node-v0.4.10) (2025-12-02)
 

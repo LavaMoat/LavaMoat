@@ -1,6 +1,7 @@
 {
   "name": "@lavamoat/node",
   "version": "0.2.0",
+  "version": "0.4.11",
   "type": "module",
   "description": "Next-gen LavaMoat for Node.js",
   "repository": {
@@ -13,7 +14,7 @@
   "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
+    "node": "^20.19.0 || ^22.5.1 || ^24.0.0",
     "npm": ">=9.0.0"
   },
   "bin": {
@@ -60,6 +61,10 @@
     "@types/node": "18.19.112",
     "chalk": "4.1.2",
     "lavamoat-core": "^18.0.0",
+    "@lavamoat/types": "0.1.0",
+    "@types/node": "18.19.130",
+    "chalk": "4.1.2",
+    "lavamoat-core": "^17.1.3",
     "loggerr": "4.2.0",
     "ses": "1.14.0",
     "terminal-link": "3.0.0",

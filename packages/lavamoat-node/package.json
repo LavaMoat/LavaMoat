@@ -1,6 +1,7 @@
 {
   "name": "lavamoat",
   "version": "11.0.0",
+  "version": "10.1.1",
   "description": "",
   "repository": {
     "type": "git",
@@ -14,7 +15,7 @@
   "author": "kumavis",
   "license": "MIT",
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 <20.15.0 || ^20.17.0 || ^22.5.1 || ^24.0.0"
+    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
   },
   "bin": {
     "lavamoat": "src/cli.js",
@@ -46,6 +47,12 @@
     "htmlescape": "1.1.1",
     "lavamoat-core": "^18.0.0",
     "lavamoat-tofu": "^8.2.0",
+    "@lavamoat/aa": "^4.3.6",
+    "bindings": "1.5.0",
+    "corepack": "0.33.0",
+    "htmlescape": "1.1.1",
+    "lavamoat-core": "^17.1.3",
+    "lavamoat-tofu": "^8.1.1",
     "node-gyp-build": "4.8.4",
     "resolve": "1.22.10",
     "yargs": "17.7.2"

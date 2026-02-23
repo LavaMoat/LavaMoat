@@ -24,6 +24,16 @@
 * **deps:** update dependency type-fest to v4.40.0 ([#1619](https://github.com/PEAC337/LavaMoat/issues/1619)) ([4e20306](https://github.com/PEAC337/LavaMoat/commit/4e20306371ae605fc414dd645b8e422a68c71b93))
 * **deps:** update dependency type-fest to v4.40.1 ([#1624](https://github.com/PEAC337/LavaMoat/issues/1624)) ([b918dcc](https://github.com/PEAC337/LavaMoat/commit/b918dcc7d7ea2b0a4779eecaa7a853c73ecc5246))
 * **deps:** update dependency type-fest to v4.41.0 ([#1657](https://github.com/PEAC337/LavaMoat/issues/1657)) ([19e9bf1](https://github.com/PEAC337/LavaMoat/commit/19e9bf144c8c43f530501bc500480fed16f995ac))
+## [3.4.3](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.4.2...allow-scripts-v3.4.3) (2026-02-05)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.5 to ^4.3.6
+
+## [3.4.2](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.4.1...allow-scripts-v3.4.2) (2026-01-20)
 
 
 ### Dependencies

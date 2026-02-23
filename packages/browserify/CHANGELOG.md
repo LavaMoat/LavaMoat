@@ -59,6 +59,20 @@
 * **deps:** update dependency readable-stream to v4.7.0 ([#1617](https://github.com/PEAC337/LavaMoat/issues/1617)) ([9cb1e4b](https://github.com/PEAC337/LavaMoat/commit/9cb1e4be3547de0763be5055ac50eb211d658af5))
 * indicate breaking change propagation: stop overwriting the policy file while loading. ([#1835](https://github.com/PEAC337/LavaMoat/issues/1835)) ([81f2cb0](https://github.com/PEAC337/LavaMoat/commit/81f2cb0bf00e61c9ddfb637ad20deacba95ca967))
 * make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/PEAC337/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+## [19.0.8](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.7...lavamoat-browserify-v19.0.8) (2026-02-05)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.5 to ^4.3.6
+    * @lavamoat/lavapack bumped from ^7.0.21 to ^7.0.22
+    * lavamoat-core bumped from ^17.1.2 to ^17.1.3
+  * devDependencies
+    * lavamoat bumped from 10.1.0 to 10.1.1
+
+## [19.0.7](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.6...lavamoat-browserify-v19.0.7) (2026-01-20)
 
 
 ### Dependencies
@@ -70,6 +84,8 @@
     * lavamoat-core bumped from ^17.1.2 to ^18.0.0
   * devDependencies
     * lavamoat bumped from 10.0.5 to 11.0.0
+  * devDependencies
+    * lavamoat bumped from 10.0.5 to 10.1.0
 
 ## [19.0.6](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.5...lavamoat-browserify-v19.0.6) (2025-12-02)
 

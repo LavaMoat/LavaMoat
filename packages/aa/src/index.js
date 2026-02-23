@@ -79,6 +79,10 @@ async function loadCanonicalNameMap({
   includeDevDeps,
   resolve = performantResolve,
 }) {
+  rootDir = path.normalize(rootDir)
+  if (rootDir.endsWith(path.sep) && rootDir !== path.sep) {
+    rootDir = rootDir.slice(0, -1)
+  }
   const canonicalNameMap = /** @type {CanonicalNameMap} */ (new Map())
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({
@@ -275,33 +279,28 @@ function getPackageNameForModulePath(canonicalNameMap, modulePath) {
   return packageName
 }
 
+const pathSeparator = path.sep
+
 /**
  * @param {CanonicalNameMap} canonicalNameMap
  * @param {string} modulePath
  * @returns {string | undefined}
  */
 function getPackageDirForModulePath(canonicalNameMap, modulePath) {
-  // find which of these directories the module is in
-  const matchingPackageDirs = Array.from(canonicalNameMap.keys()).filter(
-    (packageDir) => modulePath.startsWith(packageDir)
-  )
-  if (matchingPackageDirs.length === 0) {
-    return undefined
-    // throw new Error(`Could not find package for module path: "${modulePath}" out of these package dirs:\n${Array.from(canonicalNameMap.keys()).join('\n')}`)
+  let subPath = modulePath
+  while (subPath.length > 0) {
+    if (canonicalNameMap.has(subPath)) {
+      return subPath
+    }
+    subPath = subPath.substring(0, subPath.lastIndexOf(pathSeparator))
   }
-  const longestMatch = matchingPackageDirs.reduce(takeLongest)
-  return longestMatch
-}
-
-/**
- * For comparing string lengths
- *
- * @param {string} a
- * @param {string} b
- * @returns {string}
- */
-function takeLongest(a, b) {
-  return a.length > b.length ? a : b
+  if (
+    canonicalNameMap.has(pathSeparator) &&
+    modulePath.startsWith(pathSeparator)
+  ) {
+    return pathSeparator
+  }
+  return undefined
 }
 
 /**

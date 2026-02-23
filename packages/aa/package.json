@@ -1,11 +1,12 @@
 {
   "name": "@lavamoat/aa",
   "version": "4.3.5",
+  "version": "4.3.6",
   "description": "LavaMoat's secure package naming convention",
   "author": "kumavis",
   "license": "MIT",
   "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
+    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
   },
   "bin": {
     "lavamoat-ls": "src/cli.js"
@@ -28,6 +29,9 @@
     "test": "npm run test:run",
     "test:run": "ava"
   },
+  "dependencies": {
+    "resolve": "1.22.11"
+  },
   "devDependencies": {
     "@types/resolve": "1.20.6"
   },
@@ -39,8 +43,5 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  },
-  "dependencies": {
-    "resolve": "1.22.10"
   }
 }
