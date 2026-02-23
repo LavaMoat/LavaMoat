@@ -84,7 +84,7 @@
 * **types:** remove global Object.hasOwn type ([ee9f86b](https://github.com/PEAC337/LavaMoat/commit/ee9f86b764b2a18b5863cd769d545692420ebf5a)), closes [#1817](https://github.com/PEAC337/LavaMoat/issues/1817)
 * upgrade ses to v1.11.0 ([a12dae1](https://github.com/PEAC337/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
 
-## [0.0.1](https://github.com/PEAC337/LavaMoat/compare/node-v0.4.10...node-v0.0.1) (2025-12-05)
+## [0.0.1](https://github.com/PEAC337/LavaMoat/releases/tag/node-v0.0.1) (2025-12-05)
 
 
 ### Features
