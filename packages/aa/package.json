@@ -1,5 +1,6 @@
 {
   "name": "@lavamoat/aa",
+  "version": "4.3.5",
   "version": "4.3.6",
   "description": "LavaMoat's secure package naming convention",
   "author": "kumavis",

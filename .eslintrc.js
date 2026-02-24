@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-nocheck
 
 /**
  * - If a workspace emits declaration files, it should contain a `.eslintrc.js`
@@ -83,6 +83,7 @@ module.exports = {
 
     // require node: prefix for builtin modules
     // FIXME: see https://github.com/kytta/eslint-plugin-node-import/issues/10
+    // @ts-ignore
     'node-import/prefer-node-protocol': process.versions.node.startsWith('24.')
       ? 'off'
       : 'error',

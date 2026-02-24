@@ -1,5 +1,6 @@
 {
   "name": "lavamoat",
+  "version": "11.0.0",
   "version": "10.1.1",
   "description": "",
   "repository": {
@@ -40,6 +41,12 @@
   "dependencies": {
     "@babel/code-frame": "7.27.1",
     "@babel/highlight": "7.25.9",
+    "@lavamoat/aa": "^4.3.5",
+    "bindings": "1.5.0",
+    "corepack": "0.33.0",
+    "htmlescape": "1.1.1",
+    "lavamoat-core": "^18.0.0",
+    "lavamoat-tofu": "^8.2.0",
     "@lavamoat/aa": "^4.3.6",
     "bindings": "1.5.0",
     "corepack": "0.33.0",
