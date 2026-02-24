@@ -37,7 +37,7 @@ const ECMASCRIPT_VERSION = 2021
 const MIN_NODE_VERSION = '16.20.0'
 
 /**
- * @type {import('.eslintrc.js').Linter.Config}
+ * @type {import('eslint').Linter.Config}
  */
 module.exports = {
   root: true,
