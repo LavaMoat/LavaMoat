@@ -90,6 +90,13 @@ export const loadAndGeneratePolicy = async (
     policyOverride,
   })
 
+  console.log(
+    'packageCompartmentMap',
+    entrypointPath,
+    prodOnly,
+    packageCompartmentMap
+  )
+
   /* c8 ignore next */
   if (!trustRoot && !rootUsePolicy) {
     // should never happen
