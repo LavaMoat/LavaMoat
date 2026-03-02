@@ -86,7 +86,7 @@ export const makeNodeCompartmentMap = async (
   entrypointPath,
   {
     readPowers = defaultReadPowers,
-    dev,
+    dev = true,
     log = defaultLog,
     endoPolicy,
     policyOverride,
@@ -145,6 +145,7 @@ export const makeNodeCompartmentMap = async (
           location,
           /** @type {PackageJson} */ (packageDescriptor)
         )
+        console.log('packageDataHook', { location, canonicalName, name })
       }
     },
     /**
@@ -152,6 +153,7 @@ export const makeNodeCompartmentMap = async (
      * the compartment map
      */
     unknownCanonicalNameHook: ({ canonicalName }) => {
+      console.log('unknownCanonicalNameHook', { canonicalName })
       unknownCanonicalNames.add(canonicalName)
     },
   }

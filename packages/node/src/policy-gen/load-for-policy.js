@@ -71,7 +71,7 @@ export const loadAndGeneratePolicy = async (
     policyOverride,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     log = defaultLog,
-    dev,
+    dev = true,
     ...options
   } = {}
 ) => {
@@ -88,6 +88,13 @@ export const loadAndGeneratePolicy = async (
     trustRoot,
     policyOverride,
   })
+
+  console.log(
+    'packageCompartmentMap',
+    entrypointPath,
+    dev,
+    packageCompartmentMap
+  )
 
   /* c8 ignore next */
   if (!trustRoot && !rootUsePolicy) {
@@ -230,6 +237,10 @@ export const loadAndGeneratePolicy = async (
        * compatibility violations.
        */
       moduleSourceHook: ({ moduleSource, canonicalName: rawCanonicalName }) => {
+        console.log('moduleSourceHook', {
+          moduleSource,
+          rawCanonicalName,
+        })
         if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
           log.debug('Root module is trusted; skipping inspection')
           return
