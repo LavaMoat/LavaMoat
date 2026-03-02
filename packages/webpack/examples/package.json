@@ -7,7 +7,9 @@
   "main": "app.js",
   "keywords": [],
   "scripts": {
-    "test": "webpack --config webpack.config.js"
+    "test": "webpack --config webpack.config.js",
+    "lm1": "lavamoat generate build.mjs",
+    "lm2": "lavamoat  build.mjs"
   },
   "dependencies": {
     "@ethereumjs/util": "^10.0.0",
@@ -17,6 +19,7 @@
     "leftpad": "^0.0.1"
   },
   "devDependencies": {
+    "@lavamoat/node": "file:../../node",
     "@types/webpack": "^5.28.1",
     "css-loader": "^6.7.3",
     "esbuild-loader": "^3.0.1",
