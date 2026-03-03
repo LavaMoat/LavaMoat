@@ -5,6 +5,7 @@
  * @internal
  */
 
+import { availableParallelism } from 'node:os'
 import { Worker } from 'node:worker_threads'
 
 /**
@@ -12,9 +13,15 @@ import { Worker } from 'node:worker_threads'
  */
 
 /**
- * Default idle timeout for workers (5 seconds)
+ * Default idle timeout for workers
  */
-const DEFAULT_WORKER_IDLE_TIMEOUT = 5000
+const DEFAULT_WORKER_IDLE_TIMEOUT = 1000
+
+/**
+ * Default max workers: one fewer than available parallelism, leaving a core
+ * free for the main thread. Always at least 1.
+ */
+const DEFAULT_MAX_WORKERS = Math.max(1, availableParallelism() - 1)
 
 /**
  * @template {BaseMessage} TMessage - Message type that extends BaseMessage
@@ -28,12 +35,17 @@ export class WorkerPool {
    */
   constructor(
     workerScript,
-    { idleTimeout = DEFAULT_WORKER_IDLE_TIMEOUT } = {}
+    {
+      idleTimeout = DEFAULT_WORKER_IDLE_TIMEOUT,
+      maxWorkers = DEFAULT_MAX_WORKERS,
+    } = {}
   ) {
     /** @type {string | URL} */
     this.workerScript = workerScript
     /** @type {number} */
     this.idleTimeout = idleTimeout
+    /** @type {number} */
+    this.maxWorkers = Math.max(1, maxWorkers)
 
     /** @type {Worker[]} */
     this.availableWorkers = []
@@ -53,20 +65,35 @@ export class WorkerPool {
     this.workerTimeouts = new Map()
     /** @type {Set<Worker>} */
     this.allWorkers = new Set()
+
+    /**
+     * Tasks waiting for an available worker when at capacity.
+     *
+     * @type {{
+     *   message: TMessage
+     *   completionType: string
+     *   resolve: Function
+     *   reject: Function
+     * }[]}
+     */
+    this.taskQueue = []
   }
 
   /**
-   * Get or create a worker
+   * Get or create a worker, returning `undefined` when at capacity with no idle
+   * workers available.
    *
-   * @returns {Worker}
+   * @returns {Worker | undefined}
    */
   getWorker() {
     let worker = this.availableWorkers.pop()
-
     if (!worker) {
+      if (this.allWorkers.size >= this.maxWorkers) {
+        return undefined
+      }
       worker = new Worker(this.workerScript)
       this.allWorkers.add(worker)
-      const boundWorker = worker // Capture for closure
+      const boundWorker = worker
       worker.on('message', (message) => {
         this.handleWorkerMessage(boundWorker, message)
       })
@@ -144,11 +171,25 @@ export class WorkerPool {
   }
 
   /**
-   * Return worker to pool or schedule for termination
+   * Return worker to pool, dispatching a queued task if one is waiting, or
+   * scheduling the worker for idle termination otherwise.
    *
    * @param {Worker} worker
    */
   returnWorker(worker) {
+    const queued = this.taskQueue.shift()
+    if (queued) {
+      const taskId = queued.message.id
+      this.pendingTasks.set(taskId, {
+        worker,
+        resolve: queued.resolve,
+        reject: queued.reject,
+        completionType: queued.completionType,
+      })
+      worker.postMessage(queued.message)
+      return
+    }
+
     this.availableWorkers.push(worker)
 
     // Schedule worker termination after idle timeout
@@ -166,7 +207,10 @@ export class WorkerPool {
   }
 
   /**
-   * Send task to worker pool
+   * Send task to worker pool.
+   *
+   * If the pool is at capacity, the task is queued and will be dispatched when
+   * a worker becomes available.
    *
    * @param {TMessage} message - The message to send to the worker
    * @param {string} completionType - The message type that indicates task
@@ -176,6 +220,12 @@ export class WorkerPool {
   sendTask(message, completionType) {
     return new Promise((resolve, reject) => {
       const worker = this.getWorker()
+
+      if (!worker) {
+        this.taskQueue.push({ message, completionType, resolve, reject })
+        return
+      }
+
       const taskId = message.id
 
       this.pendingTasks.set(taskId, {
@@ -213,11 +263,20 @@ export class WorkerPool {
    * @returns {number}
    */
   get totalWorkerCount() {
-    return this.availableWorkers.length + this.pendingTasks.size
+    return this.allWorkers.size
   }
 
   /**
-   * Terminate all workers and clear timeouts
+   * Get count of tasks waiting for a worker
+   *
+   * @returns {number}
+   */
+  get queuedTaskCount() {
+    return this.taskQueue.length
+  }
+
+  /**
+   * Terminate all workers, reject pending and queued tasks, and clear timeouts
    */
   terminate() {
     // Clear all timeouts
@@ -226,11 +285,19 @@ export class WorkerPool {
     }
     this.workerTimeouts.clear()
 
+    const terminationError = new Error('Worker pool terminated')
+
     // Reject pending tasks
     for (const task of this.pendingTasks.values()) {
-      task.reject(new Error('Worker pool terminated'))
+      task.reject(terminationError)
     }
     this.pendingTasks.clear()
+
+    // Reject queued tasks
+    for (const task of this.taskQueue) {
+      task.reject(terminationError)
+    }
+    this.taskQueue.length = 0
 
     // Terminate ALL workers (not just available ones)
     for (const worker of this.allWorkers) {

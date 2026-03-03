@@ -279,6 +279,15 @@ export interface WorkerPoolOptions<
 > {
   /** How long workers can be idle before termination (ms) */
   idleTimeout?: number
+
+  /**
+   * Maximum number of concurrent workers.
+   *
+   * Defaults to `os.availableParallelism() - 1` (minimum 1). Tasks submitted
+   * when all workers are busy will queue and dispatch as workers become
+   * available.
+   */
+  maxWorkers?: number
 }
 
 /**

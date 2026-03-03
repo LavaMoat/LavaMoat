@@ -73,7 +73,7 @@ test.serial('WorkerPool constructor - uses default idle timeout', (t) => {
   )
 
   t.is(pool.workerScript, TEST_WORKER_PATH)
-  t.is(pool.idleTimeout, 5000) // DEFAULT_WORKER_IDLE_TIMEOUT
+  t.is(pool.idleTimeout, 1000) // DEFAULT_WORKER_IDLE_TIMEOUT
 })
 
 test.serial('WorkerPool constructor - accepts custom idle timeout', (t) => {
