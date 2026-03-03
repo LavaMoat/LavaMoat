@@ -386,7 +386,14 @@ export const isPolicy = (value) => {
     isObjectyObject(value) &&
     hasValue(value, 'resources') &&
     isObjectyObject(value.resources) &&
-    (!('root' in value) || isObjectyObject(value.root))
+    (!('root' in value) || isObjectyObject(value.root)) &&
+    (!('include' in value) ||
+      (Array.isArray(value.include) &&
+        value.include.every(
+          (item) =>
+            isString(item) ||
+            (isObjectyObject(item) && 'name' in item && 'entry' in item)
+        )))
   )
 }
 
