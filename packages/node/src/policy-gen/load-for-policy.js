@@ -23,7 +23,7 @@ import {
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { log as defaultLog } from '../log.js'
+import { log as defaultLog, Loggerr } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
 import {
   createModuleInspectionProgressReporter,
@@ -45,7 +45,6 @@ import { WorkerPool } from '../worker-pool.js'
  * @import {CanonicalName, ModuleSourceHookModuleSource} from '@endo/compartment-mapper'
  * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
  * @import {MergedLavaMoatPolicy, FileUrlString, SourceType} from '../types.js'
- * @import {Loggerr} from 'loggerr'
  */
 
 const inspectorPath = fileURLToPath(new URL('./inspector.js', import.meta.url))
@@ -167,7 +166,7 @@ export const loadAndGeneratePolicy = async (
   const violationsForPackage = new Map()
 
   const { reportModuleInspectionProgress, reportModuleInspectionProgressEnd } =
-    createModuleInspectionProgressReporter()
+    createModuleInspectionProgressReporter(log.level > Loggerr.INFO)
 
   const inspectModuleSource = createModuleSourceInspector(
     log,
