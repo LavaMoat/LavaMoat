@@ -67,8 +67,8 @@ export interface LavaMoatEndoPackagePolicyOptions {
   native?: boolean
 }
 
-export interface WithDev {
-  dev?: boolean
+export interface WithProdOnly {
+  prodOnly?: boolean
 }
 
 /**
@@ -263,7 +263,7 @@ export type WithLoadForMapOptions = ComposeOptions<
   [
     Except<ImportLocationOptions, 'importHook' | 'log' | '_preload'>,
     WithLog,
-    WithDev,
+    WithProdOnly,
   ]
 >
 
@@ -289,7 +289,7 @@ export type ExecuteOptions = ComposeOptions<
     >,
     WithReadPowersAndTrustAndEndoPolicy,
     WithLog,
-    WithDev,
+    WithProdOnly,
     WithPolicyOnly,
   ]
 >
@@ -385,7 +385,7 @@ export type MakeReadPowersOptions = WithRawReadPowers
 export type RunOptions = ComposeOptions<
   [
     WithRawReadPowers,
-    WithDev,
+    WithProdOnly,
     WithTrustRoot,
     WithScuttleGlobalThis,
     WithLog,

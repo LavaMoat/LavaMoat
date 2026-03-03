@@ -86,7 +86,7 @@ export const makeNodeCompartmentMap = async (
   entrypointPath,
   {
     readPowers = defaultReadPowers,
-    dev,
+    prodOnly,
     log = defaultLog,
     endoPolicy,
     policyOverride,
@@ -120,7 +120,7 @@ export const makeNodeCompartmentMap = async (
   /** @type {MapNodeModulesOptions} */
   const mapNodeModulesOptions = {
     conditions: new Set(DEFAULT_CONDITIONS),
-    dev,
+    dev: !prodOnly,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
     policy: endoPolicy,
     log: log.debug.bind(log),

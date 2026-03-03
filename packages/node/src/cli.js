@@ -259,8 +259,8 @@ const main = async (args = hideBin(process.argv)) => {
       },
       // #endregion
 
-      dev: {
-        describe: 'Include development dependencies',
+      'prod-only': {
+        describe: 'Exclude development dependencies',
         type: 'boolean',
         global: true,
         group: BEHAVIOR_GROUP,
@@ -416,7 +416,7 @@ const main = async (args = hideBin(process.argv)) => {
           entrypoint,
           policy: policyPath,
           'policy-override': policyOverridePath,
-          dev,
+          'prod-only': prodOnly,
           'project-root': projectRoot,
           scuttle: scuttleGlobalThis,
           write,
@@ -447,7 +447,7 @@ const main = async (args = hideBin(process.argv)) => {
             policyPath,
             policyOverridePath,
             write,
-            dev,
+            prodOnly,
             trustRoot,
             projectRoot,
           })
@@ -458,7 +458,7 @@ const main = async (args = hideBin(process.argv)) => {
         await run(entrypoint, {
           policyOverridePath,
           trustRoot,
-          dev,
+          prodOnly,
           projectRoot,
           scuttleGlobalThis,
           ...(policy ? { policy } : { policyPath }),
@@ -490,7 +490,7 @@ const main = async (args = hideBin(process.argv)) => {
         entrypoint,
         policy: policyPath,
         'policy-override': policyOverridePath,
-        dev,
+        'prod-only': prodOnly,
         write,
       }) => {
         const trustRoot = shouldTrustRoot(entrypoint)
@@ -504,7 +504,7 @@ const main = async (args = hideBin(process.argv)) => {
           write,
           policyPath,
           policyOverridePath,
-          dev,
+          prodOnly,
           trustRoot,
         })
 

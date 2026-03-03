@@ -180,7 +180,7 @@ test('--no-write outputs to STDOUT (and does not write)', async (t) => {
   })
 })
 
-test('--dev processes dev deps', async (t) => {
+test('dev deps are included by default', async (t) => {
   t.plan(2)
 
   const policyPath = t.context.tempdir.join(`dev-${DEFAULT_POLICY_FILENAME}`)
@@ -191,7 +191,6 @@ test('--dev processes dev deps', async (t) => {
       dev.entrypoint,
       '--policy',
       policyPath,
-      '--dev',
       '--policy-override',
       dev.policyOverridePath,
     ],

@@ -71,7 +71,7 @@ export const loadAndGeneratePolicy = async (
     policyOverride,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     log = defaultLog,
-    dev,
+    prodOnly,
     ...options
   } = {}
 ) => {
@@ -83,7 +83,7 @@ export const loadAndGeneratePolicy = async (
     rootUsePolicy,
   } = await makeNodeCompartmentMap(entrypointPath, {
     readPowers,
-    dev,
+    prodOnly,
     log,
     trustRoot,
     policyOverride,

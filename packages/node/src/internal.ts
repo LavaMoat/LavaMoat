@@ -25,7 +25,7 @@ import type {
   FileUrlString,
   MergedLavaMoatPolicy,
   SourceType,
-  WithDev,
+  WithProdOnly,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
@@ -206,7 +206,7 @@ export type MakeNodeCompartmentMapOptions = ComposeOptions<
   [
     WithLog,
     WithReadPowersAndTrustAndEndoPolicy,
-    WithDev,
+    WithProdOnly,
     WithPolicyOverrideOnly,
   ]
 >

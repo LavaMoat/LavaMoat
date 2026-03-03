@@ -38,7 +38,7 @@ import { execute } from './execute.js'
 export const run = async (
   entrypoint,
   {
-    dev = false,
+    prodOnly = false,
     trustRoot,
     projectRoot,
     readFile = nodeFs.promises.readFile,
@@ -94,7 +94,7 @@ export const run = async (
       },
     },
     endoPolicy,
-    dev,
+    prodOnly,
     log,
     readPowers: makeReadPowers(options),
     trustRoot,
