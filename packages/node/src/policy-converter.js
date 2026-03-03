@@ -299,6 +299,9 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
       resources[rootPolicyRef] = {}
     }
     entry = resources[rootPolicyRef]
+    // we have to delete it from the list of resources or the "unknown canonical
+    // name" hook will fire for it
+    delete resources[rootPolicyRef]
   } else {
     entry = ENDO_POLICY_ENTRY_TRUSTED
   }

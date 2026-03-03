@@ -1,12 +1,4 @@
 {
-  "entry": {
-    "builtin": {
-      "util.format": true
-    },
-    "globals": {
-      "console.log": true
-    }
-  },
   "resources": {
     "lard-o-matic": {
       "builtin": {
@@ -16,5 +8,8 @@
         "console.log": true
       }
     }
+  },
+  "root": {
+    "usePolicy": "lard-o-matic"
   }
 }
