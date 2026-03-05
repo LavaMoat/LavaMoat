@@ -33,9 +33,9 @@ import {
   inspectRequires,
   inspectSesCompat,
 } from 'lavamoat-tofu'
-import { builtinModules } from 'node:module'
 import { isMainThread, parentPort } from 'node:worker_threads'
 import {
+  ALL_BUILTIN_MODULES,
   MessageTypes,
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
@@ -66,17 +66,11 @@ if (!isMainThread && parentPort) {
   throw new Error('This module is intended to be run as a Worker thread.')
 }
 
-const { getOwnPropertyNames } = Object
-
-/**
- * Array of all builtin modules, including both bare names (e.g., 'fs') and
- * node: protocol names (e.g., 'node:fs')
- */
-const ALL_BUILTIN_MODULES = builtinModules.flatMap((name) =>
-  name.startsWith('node:') ? [name] : [name, `node:${name}`]
-)
+const { getOwnPropertyNames, freeze } = Object
 
 const globalObjPrototypeRefs = getOwnPropertyNames(Object.prototype)
+
+const builtinModules = freeze([...ALL_BUILTIN_MODULES])
 
 /**
  * Type guard to check if a message is an {@link InspectMessage}
@@ -191,11 +185,8 @@ const createGlobalPolicy = (ast, sourceType) => {
  * @returns {Set<string>} The set of builtin modules imported
  */
 const inspectBuiltins = (ast) => {
-  const esmModuleBuiltins = inspectEsmImports(ast, ALL_BUILTIN_MODULES)
-  const { cjsImports: cjsModuleBuiltins } = inspectRequires(
-    ast,
-    ALL_BUILTIN_MODULES
-  )
+  const esmModuleBuiltins = inspectEsmImports(ast, builtinModules)
+  const { cjsImports: cjsModuleBuiltins } = inspectRequires(ast, builtinModules)
   if (cjsModuleBuiltins.length + esmModuleBuiltins.length === 0) {
     return new Set()
   }

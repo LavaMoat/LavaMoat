@@ -14,6 +14,7 @@ import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
+  ALL_BUILTIN_MODULES,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
   LANGUAGE_CJS,
   LANGUAGE_MJS,
@@ -23,6 +24,7 @@ import {
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
+import { hrLabel } from '../format.js'
 import { log as defaultLog, Loggerr } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
 import {
@@ -229,6 +231,14 @@ export const loadAndGeneratePolicy = async (
        * compatibility violations.
        */
       moduleSourceHook: ({ moduleSource, canonicalName: rawCanonicalName }) => {
+        if ('exit' in moduleSource && moduleSource.exit) {
+          if (!ALL_BUILTIN_MODULES.has(moduleSource.exit)) {
+            log.warning(
+              `${hrLabel(moduleSource.exit)} is not a builtin module, but was loaded as a builtin from ${hrLabel(rawCanonicalName)}. This may be due to an implicit dependency; ensure ${hrLabel(moduleSource.exit)} is explicitly listed as a dependency in ${hrLabel(rawCanonicalName)}'s package.json.`
+            )
+          }
+          return
+        }
         if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
           log.debug('Root module is trusted; skipping inspection')
           return

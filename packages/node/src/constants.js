@@ -5,6 +5,7 @@
  *
  * _Type a string more than once? Make it a constant!_
  */
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 
 const { freeze } = Object
@@ -225,7 +226,7 @@ export const LANGUAGE_CJS = 'cjs'
 /**
  * Message types for the worker `./policy-gen/inspector.js`
  */
-export const MessageTypes = Object.freeze(
+export const MessageTypes = freeze(
   /** @type {const} */ ({
     Inspect: 'inspect',
     InspectionResults: 'inspectionResults',
@@ -236,9 +237,21 @@ export const MessageTypes = Object.freeze(
 /**
  * Source types, as a const enum
  */
-export const SourceTypes = Object.freeze(
+export const SourceTypes = freeze(
   /** @type {const} */ ({
     Module: SOURCE_TYPE_MODULE,
     Script: SOURCE_TYPE_SCRIPT,
   })
+)
+
+/**
+ * Set of all builtin modules, including both bare names (e.g., 'fs') and node:
+ * protocol names (e.g., 'node:fs')
+ */
+export const ALL_BUILTIN_MODULES = freeze(
+  new Set(
+    builtinModules.flatMap((name) =>
+      name.startsWith('node:') ? [name] : [name, `node:${name}`]
+    )
+  )
 )
