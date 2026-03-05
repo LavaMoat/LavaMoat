@@ -98,7 +98,9 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
    */
   const policyItem = {}
 
+  /** @type {[string, boolean][]} */
   const dot = []
+  /** @type {[string, boolean][]} */
   const noDot = []
   for (const [key, value] of entries(item)) {
     if (key.includes('.')) {
@@ -129,13 +131,7 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
     }
   }
   for (const [key, value] of noDot) {
-    // if(!policyItem.hasOwnProperty(key)) {
-    //   policyItem[key] = value
-    // }
-    // I considered this, but if the policy specifies true for the top policy item, it should override all the detailed attenuation as redundant unfortunately
-    if (policyItem[key]) {
-      policyItem[key] = value
-    }
+    policyItem[key] = value
   }
   return policyItem
 }
