@@ -98,27 +98,42 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
    */
   const policyItem = {}
 
+  const dot = []
+  const noDot = []
   for (const [key, value] of entries(item)) {
     if (key.includes('.')) {
-      let [builtinName, ...rest] = key.split('.')
-      let propName = rest.join('.')
-      const itemForBuiltin = policyItem[builtinName]
-      if (isBoolean(itemForBuiltin)) {
-        throw new ConversionError(
-          'Expected a FullAttenuationDefinition; got a boolean'
-        )
-      }
-      if (isArray(itemForBuiltin)) {
-        throw new ConversionError(
-          'Expected a FullAttenuationDefinition; got an array'
-        )
-      }
-      const otherParams = itemForBuiltin?.params ?? []
-      policyItem[builtinName] = {
-        attenuate: DEFAULT_ATTENUATOR,
-        params: [...otherParams, propName],
-      }
+      dot.push([key, value])
     } else {
+      noDot.push([key, value])
+    }
+  }
+
+  for (const [key] of dot) {
+    let [builtinName, ...rest] = key.split('.')
+    let propName = rest.join('.')
+    const itemForBuiltin = policyItem[builtinName]
+    if (isBoolean(itemForBuiltin)) {
+      throw new ConversionError(
+        `Expected a FullAttenuationDefinition; got a boolean for ${key}`
+      )
+    }
+    if (isArray(itemForBuiltin)) {
+      throw new ConversionError(
+        'Expected a FullAttenuationDefinition; got an array'
+      )
+    }
+    const otherParams = itemForBuiltin?.params ?? []
+    policyItem[builtinName] = {
+      attenuate: DEFAULT_ATTENUATOR,
+      params: [...otherParams, propName],
+    }
+  }
+  for (const [key, value] of noDot) {
+    // if(!policyItem.hasOwnProperty(key)) {
+    //   policyItem[key] = value
+    // }
+    // I considered this, but if the policy specifies true for the top policy item, it should override all the detailed attenuation as redundant unfortunately
+    if (policyItem[key]) {
       policyItem[key] = value
     }
   }
