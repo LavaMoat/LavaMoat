@@ -6,10 +6,16 @@
  */
 
 import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
-import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
+import {
+  MTS_PARSER_FILE_EXT,
+  MTS_PARSER_NAME,
+  NATIVE_PARSER_FILE_EXT,
+  NATIVE_PARSER_NAME,
+} from '../constants.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
+import { withTypeStripping } from './with-type-stripping.js'
 
 /**
  * @import {CaptureLiteOptions} from '@endo/compartment-mapper';
@@ -40,8 +46,10 @@ export const DEFAULT_ENDO_OPTIONS = freeze(
        */
       ...defaultParserForLanguage,
       [NATIVE_PARSER_NAME]: parseNative,
+      [MTS_PARSER_NAME]: withTypeStripping(defaultParserForLanguage.mjs),
     },
     languageForExtension: {
+      [MTS_PARSER_FILE_EXT]: MTS_PARSER_NAME,
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
       /**
        * This makes extensionless files default to CommonJS.
