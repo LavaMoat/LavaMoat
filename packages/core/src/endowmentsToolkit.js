@@ -77,6 +77,13 @@ function endowmentsToolkit({
     if (!packagePolicy.globals) {
       return {}
     }
+    if (
+      packagePolicy.globals.process &&
+      packagePolicy.globals['process.argv']
+    ) {
+      packagePolicy.globals.process = false
+    }
+    process._rawDebug('getEndowmentsForConfig', { packagePolicy })
     // validate read access from packagePolicy
     /** @type {string[]} */
     const whitelistedReads = []
@@ -256,7 +263,7 @@ function endowmentsToolkit({
       // dont attempt to extend a getter or trigger a setter
       if (!('value' in targetPropDesc)) {
         throw new Error(
-          `unable to copy on to targetRef, targetRef has a getter at "${currentPath}"`
+          `unable to copy on to targetRef, targetRef has a getter at "${currentPath}".${knownWritableFields.has(currentPath) ? 'it is a known writable field' : ' not a known writable field'}`
         )
       }
       // value must be extensible (cant write properties onto it)

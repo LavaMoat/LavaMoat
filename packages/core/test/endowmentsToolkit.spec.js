@@ -522,3 +522,45 @@ test('copyWrappedGlobals - static methods on wrapped functions', (t) => {
   t.is(typeof target.Array.from, 'function')
   t.is(typeof target.Uint8Array.from, 'function')
 })
+
+test('endowmentsToolkit - integration test under node.js', async (t) => {
+const originalGlobalThis = globalThis;
+
+          rootCompartmentGlobalThis = new Compartment().globalThis
+          copyWrappedGlobals(originalGlobalThis, rootCompartmentGlobalThis, [
+            'globalThis',
+            'global',
+          ])
+          // scuttle(originalGlobalThis, {
+          //   ...scuttleGlobalThis,
+          //   enabled: !!scuttleGlobalThis.enabled,
+          // })
+        }
+        const endowments = getEndowmentsForConfig(
+          rootCompartmentGlobalThis,
+          /**
+           * **HAZARD**: In this block, `policy` is of type
+           * `Omit<GlobalAttenuatorParams, RootPolicy>` (a.k.a.
+           * `WritablePropertyPolicy`); the value comes _directly_ from an Endo
+           * `Policy`. `policy` _corresponds to_ LM's `GlobalPolicy`, but is
+           * _not_ the same value from the original LavaMoat policy!
+           *
+           * `getEndowmentsForConfig()` accepts a LavaMoat `ResourcePolicy`
+           * having a `globals` prop (a `GlobalPolicy`). Since we control the
+           * types of the parameters provided to the attenuator
+           * (`GlobalAttenuatorParams`), we've made those parameters (the first
+           * of which is `policy`) structurally compatible with a
+           * `GlobalPolicy`. Below, we're creating a phony `ResourcePolicy` to
+           * make it fit.
+           */
+          { globals: policy },
+          // Not sure if it works, but with this as a 3rd argument, in theory,
+          // each compartment would unwrap functions to the root compartment's
+          // globalThis, where all copied functions are set up to unwrap to actual
+          // globalThis instead I'm opting for a single unwrap since we now have
+          // access to the actual globalThis
+          originalGlobalThis,
+          packageCompartmentGlobalThis
+        )
+
+      })

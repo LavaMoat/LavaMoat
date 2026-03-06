@@ -45,8 +45,8 @@ export const attenuateModule = (params, originalObject) => {
 /**
  * Creates a global attenuator
  *
- * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
- * use ExecutionCompartment if you want to customize globals regardless of policy
+ * **REMEMBER: The attenuator is _not applied_ to packages without policy!** use
+ * ExecutionCompartment if you want to customize globals regardless of policy
  *
  * @param {MakeGlobalsAttenuatorOptions} [options]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
@@ -56,6 +56,8 @@ export const makeGlobalsAttenuator = ({
   policy: { resources } = { resources: {} },
   scuttleGlobalThis = { enabled: false },
 } = {}) => {
+  process._rawDebug('-----makeGlobalsAttenuator')
+
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
 
@@ -87,72 +89,78 @@ export const makeGlobalsAttenuator = ({
     if (!policy) {
       return
     }
+    process._rawDebug('_______Attenuator')
 
-    if (policy === ENDO_POLICY_ITEM_ROOT) {
-      if (rootCompartmentGlobalThis) {
-        throw new AttenuationError(
-          'Root compartment globalThis already initialized; this is a bug'
-        )
-      }
-      rootCompartmentGlobalThis = packageCompartmentGlobalThis
-      // ^ A naive approach is taken of assuming the root compartment mut be the
-      // first compartment being passed.
-      // related: https://github.com/LavaMoat/LavaMoat/pull/1749
-      // if we solve the remaining issue (failing test in latest commit) it could address the concern about rootCompartmentGlobalThis being the source of truth for endowments in other compartments creating a dependency on oo compartment being attenuated first.
+    try {
+      if (policy === ENDO_POLICY_ITEM_ROOT) {
+        if (rootCompartmentGlobalThis) {
+          throw new AttenuationError(
+            'Root compartment globalThis already initialized; this is a bug'
+          )
+        }
+        rootCompartmentGlobalThis = packageCompartmentGlobalThis
+        // ^ A naive approach is taken of assuming the root compartment mut be the
+        // first compartment being passed.
+        // related: https://github.com/LavaMoat/LavaMoat/pull/1749
+        // if we solve the remaining issue (failing test in latest commit) it could address the concern about rootCompartmentGlobalThis being the source of truth for endowments in other compartments creating a dependency on oo compartment being attenuated first.
 
-      copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
-        'globalThis',
-        'global',
-      ])
-      scuttle(originalGlobalThis, scuttleGlobalThis)
-    } else {
-      if (!rootCompartmentGlobalThis) {
-        rootCompartmentGlobalThis = new Compartment().globalThis
-        copyWrappedGlobals(originalGlobalThis, rootCompartmentGlobalThis, [
+        copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
           'globalThis',
           'global',
         ])
-        scuttle(originalGlobalThis, {
-          ...scuttleGlobalThis,
-          enabled: !!scuttleGlobalThis.enabled,
+        scuttle(originalGlobalThis, scuttleGlobalThis)
+      } else {
+        if (!rootCompartmentGlobalThis) {
+          rootCompartmentGlobalThis = new Compartment().globalThis
+          copyWrappedGlobals(originalGlobalThis, rootCompartmentGlobalThis, [
+            'globalThis',
+            'global',
+          ])
+          scuttle(originalGlobalThis, {
+            ...scuttleGlobalThis,
+            enabled: !!scuttleGlobalThis.enabled,
+          })
+        }
+        const endowments = getEndowmentsForConfig(
+          rootCompartmentGlobalThis,
+          /**
+           * **HAZARD**: In this block, `policy` is of type
+           * `Omit<GlobalAttenuatorParams, RootPolicy>` (a.k.a.
+           * `WritablePropertyPolicy`); the value comes _directly_ from an Endo
+           * `Policy`. `policy` _corresponds to_ LM's `GlobalPolicy`, but is
+           * _not_ the same value from the original LavaMoat policy!
+           *
+           * `getEndowmentsForConfig()` accepts a LavaMoat `ResourcePolicy`
+           * having a `globals` prop (a `GlobalPolicy`). Since we control the
+           * types of the parameters provided to the attenuator
+           * (`GlobalAttenuatorParams`), we've made those parameters (the first
+           * of which is `policy`) structurally compatible with a
+           * `GlobalPolicy`. Below, we're creating a phony `ResourcePolicy` to
+           * make it fit.
+           */
+          { globals: policy },
+          // Not sure if it works, but with this as a 3rd argument, in theory,
+          // each compartment would unwrap functions to the root compartment's
+          // globalThis, where all copied functions are set up to unwrap to actual
+          // globalThis instead I'm opting for a single unwrap since we now have
+          // access to the actual globalThis
+          originalGlobalThis,
+          packageCompartmentGlobalThis
+        )
+
+        defineProperties(packageCompartmentGlobalThis, {
+          ...getOwnPropertyDescriptors(endowments),
+          // preserve the correct global aliases even if endowments define them differently
+          ...fromEntries(
+            GLOBAL_THIS_REFS.map((ref) => [
+              ref,
+              { value: packageCompartmentGlobalThis },
+            ])
+          ),
         })
       }
-      const endowments = getEndowmentsForConfig(
-        rootCompartmentGlobalThis,
-        /**
-         * **HAZARD**: In this block, `policy` is of type
-         * `Omit<GlobalAttenuatorParams, RootPolicy>` (a.k.a.
-         * `WritablePropertyPolicy`); the value comes _directly_ from an Endo
-         * `Policy`. `policy` _corresponds to_ LM's `GlobalPolicy`, but is _not_
-         * the same value from the original LavaMoat policy!
-         *
-         * `getEndowmentsForConfig()` accepts a LavaMoat `ResourcePolicy` having
-         * a `globals` prop (a `GlobalPolicy`). Since we control the types of
-         * the parameters provided to the attenuator (`GlobalAttenuatorParams`),
-         * we've made those parameters (the first of which is `policy`)
-         * structurally compatible with a `GlobalPolicy`. Below, we're creating
-         * a phony `ResourcePolicy` to make it fit.
-         */
-        { globals: policy },
-        // Not sure if it works, but with this as a 3rd argument, in theory,
-        // each compartment would unwrap functions to the root compartment's
-        // globalThis, where all copied functions are set up to unwrap to actual
-        // globalThis instead I'm opting for a single unwrap since we now have
-        // access to the actual globalThis
-        originalGlobalThis,
-        packageCompartmentGlobalThis
-      )
-
-      defineProperties(packageCompartmentGlobalThis, {
-        ...getOwnPropertyDescriptors(endowments),
-        // preserve the correct global aliases even if endowments define them differently
-        ...fromEntries(
-          GLOBAL_THIS_REFS.map((ref) => [
-            ref,
-            { value: packageCompartmentGlobalThis },
-          ])
-        ),
-      })
+    } catch (e) {
+      console.log(e, packageCompartmentGlobalThis)
     }
   }
 }
