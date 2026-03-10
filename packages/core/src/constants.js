@@ -23,14 +23,18 @@ const GLOBAL_THIS_REFS = Object.freeze(
 
 /**
  * Default global properties that reference `globalThis`
+ *
+ * @type {readonly [
+ *   'window',
+ *   'self',
+ *   'global',
+ *   'globalThis',
+ *   'top',
+ *   'frames',
+ *   'parent',
+ * ]}
  */
 const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(Object.values(GLOBAL_THIS_REFS))
-
-/**
- * A global property that is known to reference `globalThis`
- *
- * @typedef {(typeof DEFAULT_GLOBAL_THIS_REFS)[number]} GlobalThisRef
- */
 
 /**
  * Same as `GlobalPolicyWrite` (see schema)
