@@ -8,6 +8,7 @@
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import chalk from 'chalk'
+import { utils as tofuUtils } from 'lavamoat-tofu'
 import { fileURLToPath } from 'node:url'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
@@ -352,9 +353,17 @@ const compilePolicy = (
   }
 
   for (const [canonicalName, builtinPolicy] of builtinsForPackage) {
+    const reducedKeys = tofuUtils.reduceToTopmostApiCallsFromStrings(
+      keys(builtinPolicy)
+    )
+    /** @type {BuiltinPolicy} */
+    const reducedBuiltinPolicy = {}
+    for (const key of reducedKeys) {
+      reducedBuiltinPolicy[key] = true
+    }
     policy.resources[canonicalName] = {
       ...policy.resources[canonicalName],
-      builtin: builtinPolicy,
+      builtin: reducedBuiltinPolicy,
     }
   }
 
