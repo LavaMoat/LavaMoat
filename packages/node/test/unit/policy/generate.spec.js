@@ -15,16 +15,15 @@ const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
 test('Node.js builtins', testPolicyForJSON, 'builtins.json')
 
 test(
-  'builtin redundancy elimination across modules in same package',
+  'builtin and global redundancy elimination across modules in same package',
   testPolicyForJSON,
-  'builtin-reduction.json',
+  'redundant-policy.json',
   {
     expected: {
       resources: {
         foo: {
-          builtin: {
-            'node:fs': true,
-          },
+          builtin: { 'node:fs': true },
+          globals: { console: true },
         },
       },
     },

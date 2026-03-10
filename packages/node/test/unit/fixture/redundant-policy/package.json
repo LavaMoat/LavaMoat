@@ -1,0 +1,14 @@
+{
+  "name": "redundant-policy",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Tests that builtin and global resources are reduced across modules within a package",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs ../../json-fixture/redundant-policy.json"
+  },
+  "dependencies": {
+    "foo": "0.0.0"
+  }
+}

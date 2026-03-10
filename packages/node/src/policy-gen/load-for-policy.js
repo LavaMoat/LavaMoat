@@ -38,21 +38,20 @@ import { WorkerPool } from '../worker-pool.js'
 
 /**
  * @import {LoadAndGeneratePolicyOptions,
- * LoadCompartmentMapResult,
- * InspectMessage,
- * InspectionResultsMessage,
- * ErrorMessage,
- * ModuleInspectionProgressReporter,
- * StructuredViolationsResult,
- * ReportModuleInspectionProgressFn} from '../internal.js'
+ *   LoadCompartmentMapResult,
+ *   InspectMessage,
+ *   InspectionResultsMessage,
+ *   ErrorMessage,
+ *   StructuredViolationsResult,
+ *   ReportModuleInspectionProgressFn} from '../internal.js'
  * @import {CanonicalName, ModuleSourceHookModuleSource} from '@endo/compartment-mapper'
- * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
+ * @import {BuiltinPolicy, GlobalPolicy, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
  * @import {MergedLavaMoatPolicy, FileUrlString, SourceType} from '../types.js'
  */
 
 const inspectorPath = fileURLToPath(new URL('./inspector.js', import.meta.url))
 
-const { entries, keys } = Object
+const { keys } = Object
 
 /**
  * The nitty-gritty of building a policy from a given entrypoint.
@@ -327,38 +326,36 @@ const compilePolicy = (
 ) => {
   /** @type {LavaMoatPolicy} */
   const policy = { resources: {} }
-  for (const [canonicalName, globalPolicy] of globalsForPackage) {
-    // convert from Map into plain object
-    /** @type {GlobalPolicy} */
-    const plainGlobalPolicy = {}
-    for (const [
-      key,
-      value,
-    ] of /** @type {[name: string, value: GlobalPolicyValue][]} */ (
-      entries(globalPolicy)
-    )) {
-      plainGlobalPolicy[key] = value
-    }
-    policy.resources[canonicalName] = {
-      ...policy.resources[canonicalName],
-      globals: plainGlobalPolicy,
+
+  /**
+   * Reduces per-package policy entries to topmost API calls and merges them
+   * into `policy.resources` under the given key.
+   *
+   * @param {'builtin' | 'globals'} policyKey Key on each resource (e.g.
+   *   `builtin`, `globals`).
+   * @param {Map<CanonicalName, BuiltinPolicy>
+   *   | Map<CanonicalName, GlobalPolicy>} policyForPackage
+   *   Map of per-package policy entries to reduce and merge.
+   */
+  const mergeReducedPolicyIntoResources = (policyKey, policyForPackage) => {
+    for (const [canonicalName, packagePolicy] of policyForPackage) {
+      const reducedKeys = tofuUtils.reduceToTopmostApiCallsFromStrings(
+        keys(packagePolicy)
+      )
+      /** @type {BuiltinPolicy | GlobalPolicy} */
+      const reducedPolicy = {}
+      for (const key of reducedKeys) {
+        reducedPolicy[key] = true
+      }
+      policy.resources[canonicalName] = {
+        ...policy.resources[canonicalName],
+        [policyKey]: reducedPolicy,
+      }
     }
   }
 
-  for (const [canonicalName, builtinPolicy] of builtinsForPackage) {
-    const reducedKeys = tofuUtils.reduceToTopmostApiCallsFromStrings(
-      keys(builtinPolicy)
-    )
-    /** @type {BuiltinPolicy} */
-    const reducedBuiltinPolicy = {}
-    for (const key of reducedKeys) {
-      reducedBuiltinPolicy[key] = true
-    }
-    policy.resources[canonicalName] = {
-      ...policy.resources[canonicalName],
-      builtin: reducedBuiltinPolicy,
-    }
-  }
+  mergeReducedPolicyIntoResources('globals', globalsForPackage)
+  mergeReducedPolicyIntoResources('builtin', builtinsForPackage)
 
   for (const [canonicalName, packagePolicy] of packagesForPackage) {
     policy.resources[canonicalName] = {
