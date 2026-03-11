@@ -5,6 +5,10 @@ const { runAndTestScenario } = require('lavamoat-core/test/util')
 
 test('Run scenarios with precompiled modules', async (t) => {
   for await (const scenario of loadScenarios()) {
+    if (Object.keys(scenario.builtin).length > 0) {
+      t.log(`Skipping Browserify Scenario (uses builtins): ${scenario.name}`)
+      continue
+    }
     t.log(`Running Browserify Scenario: ${scenario.name}`)
     await runAndTestScenario(t, scenario, ({ scenario }) =>
       // eslint-disable-next-line ava/use-t-well
