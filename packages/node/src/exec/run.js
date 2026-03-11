@@ -15,7 +15,7 @@ import { hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
-import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
+import { makeAttenuators } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
 
@@ -76,6 +76,11 @@ export const run = async (
 
   assertTrustRootMatchesPolicy(policy, entrypoint, trustRoot)
 
+  const { attenuateGlobals, attenuateModule } = makeAttenuators({
+    policy,
+    scuttleGlobalThis,
+  })
+
   /** @type {ExecuteOptions} */
   const executeOptions = {
     Compartment: makeExecutionCompartment(globalThis),
@@ -86,10 +91,7 @@ export const run = async (
       // compartment. It's a tradeoff. We could address it by manually creating a separate
       // compartment for defining the attenuator in.
       [DEFAULT_ATTENUATOR]: {
-        attenuateGlobals: makeGlobalsAttenuator({
-          policy,
-          scuttleGlobalThis,
-        }),
+        attenuateGlobals,
         attenuateModule,
       },
     },
