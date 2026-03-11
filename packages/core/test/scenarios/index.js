@@ -1,6 +1,7 @@
 const autogen = require('./autogen')
 const security = require('./security')
 const basic = require('./basic')
+const builtin = require('./builtin')
 const config = require('./config')
 const endowments = require('./endowments')
 const exportsDefense = require('./exportsDefense')
@@ -19,6 +20,7 @@ const scenarios = [
   ...autogen,
   ...security,
   ...basic,
+  ...builtin,
   ...config,
   ...endowments,
   ...exportsDefense,
