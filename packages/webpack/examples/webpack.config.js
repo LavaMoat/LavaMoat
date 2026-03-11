@@ -1,5 +1,5 @@
 // @ts-check
-const LavaMoat = require('../src/plugin.js')
+const LavaMoat = require('@lavamoat/webpack')
 const { ProgressPlugin } = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -41,8 +41,8 @@ module.exports = {
       runChecks: true,
       diagnosticsVerbosity: 1,
       HtmlWebpackPluginInterop: true,
-      // scuttleGlobalThis: { 
-      //   enabled: true, 
+      // scuttleGlobalThis: {
+      //   enabled: true,
       //   exceptions: ['Proxy', /Uint[0-9]+Array/]
       // },
     }),

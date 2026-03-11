@@ -7,9 +7,9 @@
   "main": "app.js",
   "keywords": [],
   "scripts": {
-    "test": "webpack --config webpack.config.js",
     "lm1": "lavamoat generate build.mjs",
-    "lm2": "lavamoat  build.mjs"
+    "lm2": "lavamoat  build.mjs",
+    "test": "webpack --config webpack.config.js"
   },
   "dependencies": {
     "@ethereumjs/util": "^10.0.0",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@lavamoat/node": "file:../../node",
+    "@lavamoat/webpack": "file:../../webpack",
     "@types/webpack": "^5.28.1",
     "css-loader": "^6.7.3",
     "esbuild-loader": "^3.0.1",
@@ -27,6 +28,7 @@
     "mini-css-extract-plugin": "^2.7.5",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.2",
+    "webpack": "^5.99.9",
     "webpack-cli": "^5.1.4",
     "webpack-virtual-modules": "^0.5.0"
   }
