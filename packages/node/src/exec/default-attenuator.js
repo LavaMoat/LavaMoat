@@ -30,29 +30,22 @@ const {
 } = Object
 
 /**
- * Picks stuff in the policy out of the original object
- *
- * @type {ModuleAttenuatorFn<
- *   [string, ...string[]],
- *   Record<string, unknown>
- * >}
- * @internal
- */
-export const attenuateModule = (params, originalObject) => {
-  return fromEntries(params.map((key) => [key, originalObject[key]]))
-}
-
-/**
  * Creates a global attenuator
  *
- * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
- * use ExecutionCompartment if you want to customize globals regardless of policy
+ * **REMEMBER: The attenuator is _not applied_ to packages without policy!** use
+ * ExecutionCompartment if you want to customize globals regardless of policy
  *
  * @param {MakeGlobalsAttenuatorOptions} [options]
- * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
+ * @returns {{
+ *   attenuateGlobals: GlobalAttenuatorFn<GlobalAttenuatorParams>
+ *   attenuateModule: ModuleAttenuatorFn<
+ *     [string, ...string[]],
+ *     Record<string, unknown>
+ *   >
+ * }}
  * @internal
  */
-export const makeGlobalsAttenuator = ({
+export const makeAttenuators = ({
   policy: { resources } = { resources: {} },
   scuttleGlobalThis = { enabled: false },
 } = {}) => {
@@ -72,10 +65,11 @@ export const makeGlobalsAttenuator = ({
     }
   }
 
-  const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
-    handleGlobalWrite: knownWritableFields.size > 0,
-    knownWritableFields,
-  })
+  const { getEndowmentsForConfig, copyWrappedGlobals, attenuateBuiltin } =
+    endowmentsToolkit({
+      handleGlobalWrite: knownWritableFields.size > 0,
+      knownWritableFields,
+    })
 
   /** @type {object} */
   let rootCompartmentGlobalThis
@@ -83,7 +77,11 @@ export const makeGlobalsAttenuator = ({
   /**
    * @type {GlobalAttenuatorFn<GlobalAttenuatorParams>}
    */
-  return ([policy], originalGlobalThis, packageCompartmentGlobalThis) => {
+  const attenuateGlobals = (
+    [policy],
+    originalGlobalThis,
+    packageCompartmentGlobalThis
+  ) => {
     if (!policy) {
       return
     }
@@ -155,12 +153,22 @@ export const makeGlobalsAttenuator = ({
       })
     }
   }
-}
 
-/**
- * Default global attenuator.
- *
- * @type {GlobalAttenuatorFn<GlobalAttenuatorParams>}
- * @internal
- */
-export const attenuateGlobals = makeGlobalsAttenuator()
+  /**
+   * Narrows down the module namespace based on policy
+   *
+   * @type {ModuleAttenuatorFn<
+   *   [string, ...string[]],
+   *   Record<string, unknown>
+   * >}
+   */
+  const attenuateModule = (params, originalObject) => {
+    return attenuateBuiltin(originalObject, params)
+    // NOTE: the way attenuation via Endo works now, it doesn't leverage the explicitlyBanned logic and therefore might be less strict in creating subsets. we might wanna change what's being passed as params here
+  }
+
+  return {
+    attenuateGlobals,
+    attenuateModule,
+  }
+}
