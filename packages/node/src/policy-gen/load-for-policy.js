@@ -190,6 +190,8 @@ export const loadAndGeneratePolicy = async (
       : { compartment: include.name, entry: include.entry }
   )
 
+  /** @type {string[]} */
+  const warnings = []
   try {
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
@@ -232,15 +234,18 @@ export const loadAndGeneratePolicy = async (
        */
       moduleSourceHook: ({ moduleSource, canonicalName: rawCanonicalName }) => {
         if ('exit' in moduleSource && moduleSource.exit) {
-          if (!ALL_BUILTIN_MODULES.has(moduleSource.exit)) {
-            log.warning(
+          if (
+            !ALL_BUILTIN_MODULES.has(moduleSource.exit) &&
+            // these are essentially duplicates; the same thing happens for `foo/package.json` and `foo`.
+            !moduleSource.exit.endsWith('package.json')
+          ) {
+            warnings.push(
               `${hrLabel(moduleSource.exit)} is not a builtin module, but was loaded as a builtin from ${hrLabel(rawCanonicalName)}. This may be due to an implicit dependency; ensure ${hrLabel(moduleSource.exit)} is explicitly listed as a dependency in ${hrLabel(rawCanonicalName)}'s package.json.`
             )
           }
           return
         }
         if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
-          log.debug('Root module is trusted; skipping inspection')
           return
         }
         const canonicalName =
@@ -257,6 +262,10 @@ export const loadAndGeneratePolicy = async (
     // Clear the progress line and move to next line
     if (process.stderr.isTTY) {
       reportModuleInspectionProgressEnd(inspectedModules, modulesToInspect)
+    }
+
+    for (const warning of warnings) {
+      log.warning(warning)
     }
 
     const errors = inspectionResults
