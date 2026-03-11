@@ -161,6 +161,14 @@ export const LAVAMOAT_PKG_POLICY_NATIVE = 'native'
 export const LAVAMOAT_POLICY_ITEM_WRITE = 'write'
 
 /**
+ * Policy item for a readable global.
+ *
+ * This value is considered deprecated and is used for backwards compatibility;
+ * use `true` instead.
+ */
+export const LAVAMOAT_POLICY_ITEM_READ = 'read'
+
+/**
  * Extension for native modules
  */
 export const NATIVE_PARSER_FILE_EXT = 'node'

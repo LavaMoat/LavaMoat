@@ -37,6 +37,7 @@ import {
 import { isMainThread, parentPort } from 'node:worker_threads'
 import {
   ALL_BUILTIN_MODULES,
+  LAVAMOAT_POLICY_ITEM_READ,
   MessageTypes,
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
@@ -130,7 +131,7 @@ const globalMapToGlobalPolicy = (globalMap) => {
 
   for (const [key, value] of globalMap.entries()) {
     // Replace 'read' with true
-    if (value === 'read') {
+    if (value === LAVAMOAT_POLICY_ITEM_READ) {
       result[key] = true
     } else if (value === 'write' && key.includes('.') && !key.endsWith('.')) {
       // Handle 'write' values with dots (not at the end)

@@ -19,6 +19,7 @@ import {
   DEFAULT_TRUST_ROOT_COMPARTMENT,
   LANGUAGE_CJS,
   LANGUAGE_MJS,
+  LAVAMOAT_POLICY_ITEM_READ,
   MessageTypes,
   ROOT_COMPARTMENT,
   SOURCE_TYPE_MODULE,
@@ -354,7 +355,10 @@ const compilePolicy = (
       /** @type {BuiltinPolicy | GlobalPolicy} */
       const reducedPolicy = {}
       for (const key of reducedKeys) {
-        reducedPolicy[key] = true
+        reducedPolicy[key] =
+          packagePolicy[key] === LAVAMOAT_POLICY_ITEM_READ
+            ? true
+            : packagePolicy[key]
       }
       policy.resources[canonicalName] = {
         ...policy.resources[canonicalName],
