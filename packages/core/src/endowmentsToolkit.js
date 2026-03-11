@@ -263,7 +263,7 @@ function endowmentsToolkit({
       // dont attempt to extend a getter or trigger a setter
       if (!('value' in targetPropDesc)) {
         throw new Error(
-          `unable to copy on to targetRef, targetRef has a getter at "${currentPath}".${knownWritableFields.has(currentPath) ? 'it is a known writable field' : ' not a known writable field'}`
+          `unable to copy on to targetRef, targetRef has a getter at "${currentPath}". ${knownWritableFields.has(currentPath) ? 'It looks like mishandling of a known writable field' : 'It looks like an invalid policy where both "a": true and "a.b": true are specified'}`
         )
       }
       // value must be extensible (cant write properties onto it)

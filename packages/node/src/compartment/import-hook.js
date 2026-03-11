@@ -47,8 +47,18 @@ const makeStaticModuleInterface = (ns) => {
  * @internal
  */
 export const importHook = async (specifier) => {
+  process._rawDebug('importHook', { specifier })
+
+  const stack = new Error().stack
+
+  let ns
   /** @type {unknown} */
-  const ns = await import(specifier)
+  try {
+    ns = await import(specifier)
+  } catch (e) {
+    process._rawDebug('import failed: ' + specifier, e.stack, stack)
+    throw e
+  }
 
   return makeStaticModuleInterface(ns)
 }
@@ -62,6 +72,7 @@ export const importHook = async (specifier) => {
 export const importNowHook = (specifier, packageLocation) => {
   const require = Module.createRequire(fileURLToPath(packageLocation))
 
+  process._rawDebug('importNowHook', { specifier, packageLocation })
   /** @type {unknown} */
   const ns = require(specifier)
   return makeStaticModuleInterface(ns)
