@@ -131,21 +131,6 @@ export const ENDO_PKG_POLICY_OPTIONS = 'options'
 export const ENDO_PKG_POLICY_PACKAGES = 'packages'
 
 /**
- * `builtin` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_BUILTIN = 'builtin'
-
-/**
- * `js` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_SOURCE = 'js'
-
-/**
- * `native` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_NATIVE = 'native'
-
-/**
  * Flag for root policy item in a LavaMoat policy
  */
 export const LAVAMOAT_PKG_POLICY_ROOT = '$root$'
