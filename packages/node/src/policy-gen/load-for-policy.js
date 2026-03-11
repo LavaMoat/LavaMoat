@@ -426,6 +426,24 @@ const createModuleSourceInspector = (
   reportModuleInspectionProgress
 ) => {
   /**
+   * Cache of in-flight worker tasks keyed by file URL. When the same physical
+   * file is loaded by multiple compartments, we reuse the single worker task
+   * and fan out the results to each canonical name's policy handler. This
+   * avoids duplicate work _and_ prevents a bug where overlapping `pendingTasks`
+   * Map entries (keyed by the same file URL) would overwrite each other,
+   * orphaning promises that never settle.
+   *
+   * TODO: This cache can likely be removed when Endo stops calling
+   * `moduleSourceHook` for the same module source multiple times.
+   *
+   * @type {Map<
+   *   FileUrlString,
+   *   Promise<InspectionResultsMessage | ErrorMessage>
+   * >}
+   */
+  const workerTaskCache = new Map()
+
+  /**
    * Sends task to inspect a module source to the worker pool and updates the
    * work queue ({@link pendingInspections}) and the set of modules to inspect
    * ({@link modulesToInspect}).
@@ -462,14 +480,6 @@ const createModuleSourceInspector = (
       }
     }
 
-    /** @type {InspectMessage} */
-    const message = {
-      source,
-      id,
-      sourceType,
-      type,
-    }
-
     /**
      * For progress reporting
      */
@@ -484,9 +494,21 @@ const createModuleSourceInspector = (
       rootUsePolicy
     )
 
-    // note that all rejections will be aggregated
-    const inspectionPromise = workerPool
-      .sendTask(message, MessageTypes.InspectionResults)
+    let workerTask = workerTaskCache.get(id)
+    if (!workerTask) {
+      /** @type {InspectMessage} */
+      const message = {
+        source,
+        id,
+        sourceType,
+        type,
+      }
+
+      workerTask = workerPool.sendTask(message, MessageTypes.InspectionResults)
+      workerTaskCache.set(id, workerTask)
+    }
+
+    const inspectionPromise = workerTask
       .catch((error) => {
         log.error(`Error inspecting module ${id}: ${error.message}`)
         throw error
