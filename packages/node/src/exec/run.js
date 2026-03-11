@@ -79,6 +79,7 @@ export const run = async (
   const { attenuateGlobals, attenuateModule } = makeAttenuators({
     policy,
     scuttleGlobalThis,
+    trustRoot,
   })
 
   /** @type {ExecuteOptions} */

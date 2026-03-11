@@ -25,17 +25,18 @@ import type {
   FileUrlString,
   MergedLavaMoatPolicy,
   SourceType,
-  WithProdOnly,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
   WithPolicyOverrideOnly,
+  WithProdOnly,
   WithProjectRoot,
   WithReadFile,
   WithReadPowersAndTrust,
   WithReadPowersAndTrustAndEndoPolicy,
   WithScuttleGlobalThis,
+  WithTrustRoot,
 } from './types.js'
 
 /**
@@ -237,7 +238,7 @@ export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
  * @internal
  */
 export type MakeGlobalsAttenuatorOptions = ComposeOptions<
-  [WithPolicy, WithScuttleGlobalThis]
+  [WithPolicy, WithScuttleGlobalThis, WithTrustRoot]
 >
 
 /**
