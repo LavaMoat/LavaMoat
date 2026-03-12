@@ -1,0 +1,15 @@
+{
+  "resources": {
+    "lard-o-matic": {
+      "builtin": {
+        "util.format": true
+      },
+      "globals": {
+        "console.log": true
+      }
+    }
+  },
+  "root": {
+    "usePolicy": "lard-o-matic"
+  }
+}

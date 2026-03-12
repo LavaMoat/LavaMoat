@@ -5,7 +5,10 @@
  *
  * _Type a string more than once? Make it a constant!_
  */
+import { builtinModules } from 'node:module'
 import path from 'node:path'
+
+const { freeze } = Object
 
 /**
  * Const string to identify the internal attenuators compartment
@@ -16,6 +19,8 @@ import path from 'node:path'
  * TODO: Export from `@endo/compartment-mapper`
  */
 export const ATTENUATORS_COMPARTMENT = '<ATTENUATORS>'
+
+export const ROOT_COMPARTMENT = '$root$'
 
 /**
  * Specifier of the default attenuator
@@ -71,11 +76,6 @@ export const DEFAULT_POLICY_OVERRIDE_PATH = path.normalize(
 export const ENDO_GLOBAL_POLICY_ITEM_WRITE = 'write'
 
 /**
- * The `attenuate` prop of an Endo policy
- */
-export const ENDO_POLICY_ITEM_ATTENUATE = 'attenuate'
-
-/**
  * Policy item for the root entry
  */
 export const ENDO_POLICY_ITEM_ROOT = 'root'
@@ -84,11 +84,6 @@ export const ENDO_POLICY_ITEM_ROOT = 'root'
  * Policy item for any access
  */
 export const ENDO_POLICY_ITEM_WILDCARD = 'any'
-
-/**
- * The `params` prop of an Endo policy
- */
-export const ENDO_POLICY_ITEM_PARAMS = 'params'
 
 /**
  * The `defaultAttenuator` prop of an Endo policy
@@ -136,21 +131,6 @@ export const ENDO_PKG_POLICY_OPTIONS = 'options'
 export const ENDO_PKG_POLICY_PACKAGES = 'packages'
 
 /**
- * `builtin` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_BUILTIN = 'builtin'
-
-/**
- * `js` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_SOURCE = 'js'
-
-/**
- * `native` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_NATIVE = 'native'
-
-/**
  * Flag for root policy item in a LavaMoat policy
  */
 export const LAVAMOAT_PKG_POLICY_ROOT = '$root$'
@@ -164,6 +144,14 @@ export const LAVAMOAT_PKG_POLICY_NATIVE = 'native'
  * Policy item for a writable global
  */
 export const LAVAMOAT_POLICY_ITEM_WRITE = 'write'
+
+/**
+ * Policy item for a readable global.
+ *
+ * This value is considered deprecated and is used for backwards compatibility;
+ * use `true` instead.
+ */
+export const LAVAMOAT_POLICY_ITEM_READ = 'read'
 
 /**
  * Extension for native modules
@@ -188,6 +176,75 @@ export const DEFAULT_TRUST_ROOT_COMPARTMENT = true
  */
 export const PACKAGE_JSON = 'package.json'
 
-export const GLOBAL_THIS_REFS = Object.freeze(
+export const GLOBAL_THIS_REFS = freeze(
   /** @type {const} */ (['global', 'globalThis'])
+)
+
+/**
+ * The variations of SES compatibility problems
+ */
+export const SES_VIOLATION_TYPES = freeze(
+  /** @type {const} */ ({
+    DynamicRequires: 'dynamic requires',
+    PrimordialMutation: 'primordial mutation',
+    StrictModeViolation: 'strict-mode violation',
+  })
+)
+
+/**
+ * Symbol to brand a policy as a "merged" policy
+ */
+export const MERGED_POLICY_FIELD = Symbol.for('@lavamoat/core/mergedPolicy')
+
+/**
+ * Source type for ESM sources
+ */
+export const SOURCE_TYPE_MODULE = 'module'
+
+/**
+ * Source type for CJS sources
+ */
+export const SOURCE_TYPE_SCRIPT = 'script'
+
+/**
+ * From Endo; the ESM "language"
+ */
+export const LANGUAGE_MJS = 'mjs'
+
+/**
+ * From Endo; the CJS "language"
+ */
+export const LANGUAGE_CJS = 'cjs'
+
+/**
+ * Message types for the worker `./policy-gen/inspector.js`
+ */
+export const MessageTypes = freeze(
+  /** @type {const} */ ({
+    Inspect: 'inspect',
+    InspectionResults: 'inspectionResults',
+    Error: 'error',
+  })
+)
+
+/**
+ * Source types, as a const enum
+ */
+export const SourceTypes = freeze(
+  /** @type {const} */ ({
+    Module: SOURCE_TYPE_MODULE,
+    Script: SOURCE_TYPE_SCRIPT,
+  })
+)
+
+/**
+ * Set of all builtin modules, including both bare names (e.g., 'fs') and node:
+ * protocol names (e.g., 'node:fs')
+ */
+export const ALL_BUILTIN_MODULES = freeze(
+  new Set(
+    builtinModules.flatMap((name) =>
+      name.startsWith('node:') ? [name] : [name, `node:${name}`]
+    )
+  )
 )

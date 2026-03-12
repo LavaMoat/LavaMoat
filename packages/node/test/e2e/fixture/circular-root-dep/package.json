@@ -1,0 +1,9 @@
+{
+  "name": "circular-root-dep",
+  "version": "1.0.0",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "child-pkg": "^1.0.0"
+  }
+}

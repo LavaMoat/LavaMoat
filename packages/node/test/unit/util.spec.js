@@ -1,28 +1,26 @@
 import test from 'ava'
-import path from 'node:path'
-import { stripVTControlCharacters } from 'node:util'
 import {
-  devToConditions,
+  prodOnlyToConditions,
   hasValue,
-  hrPath,
   isArray,
   isBoolean,
   isObject,
   isObjectyObject,
   isReadNowPowers,
   isString,
-  toEndoURL,
+  pluralize,
+  toFileURLString,
 } from '../../src/util.js'
 
 test('toURLString - converts URL to URL-like string', (t) => {
   const url = new URL('file:///test/path')
-  t.is(toEndoURL(url), 'file:///test/path')
+  t.is(toFileURLString(url), 'file:///test/path')
 })
 
 test('toURLString - converts path to URL-like string', (t) => {
   const filepath = '/test/path'
   const expected = 'file:///test/path'
-  t.is(toEndoURL(filepath), expected)
+  t.is(toFileURLString(filepath), expected)
 })
 
 test('isObject - returns true for objects', (t) => {
@@ -121,12 +119,12 @@ test('hasValue - returns false if object does not have value', (t) => {
   t.false(hasValue(obj, 'nonexistent'))
 })
 
-test('devToConditions - returns development condition if dev is true', (t) => {
-  t.deepEqual(devToConditions(true), new Set(['development']))
+test('prodOnlyToConditions - returns empty set if prodOnly is true', (t) => {
+  t.deepEqual(prodOnlyToConditions(true), new Set())
 })
 
-test('devToConditions - returns empty set if dev is false', (t) => {
-  t.deepEqual(devToConditions(false), new Set())
+test('prodOnlyToConditions - returns development condition if prodOnly is false', (t) => {
+  t.deepEqual(prodOnlyToConditions(false), new Set(['development']))
 })
 
 test('isReadNowPowers - returns true for valid ReadNowPowers', (t) => {
@@ -146,22 +144,13 @@ test('isReadNowPowers - returns false for invalid ReadNowPowers', (t) => {
   t.false(isReadNowPowers(invalidReadNowPowers))
 })
 
-test('hrPath - returns relative path if shorter than absolute path', (t) => {
-  const absPath = path.resolve('test/path')
-  const relativePath = path.relative(process.cwd(), absPath)
-  t.is(stripVTControlCharacters(hrPath(absPath)), relativePath)
+test('pluralize - returns singular form when count is 1', (t) => {
+  t.is(pluralize(1, 'item'), 'item')
 })
 
-test('hrPath - returns absolute path if shorter than relative path', (t) => {
-  let relativePath = 'test/path'
-  const cwd = process.cwd()
-  while (relativePath.length < cwd.length) {
-    relativePath = path.join('..', relativePath)
-  }
-  const absPath = path.resolve(cwd, relativePath)
-  t.is(
-    stripVTControlCharacters(hrPath(relativePath)),
-    absPath,
-    `${absPath} should be a shorter string than ${relativePath}`
-  )
+test('pluralize - returns plural form when count is not 1', (t) => {
+  t.plan(3)
+  t.is(pluralize(0, 'item'), 'items')
+  t.is(pluralize(5, 'item'), 'items')
+  t.is(pluralize(2, 'ox', 'oxen'), 'oxen')
 })

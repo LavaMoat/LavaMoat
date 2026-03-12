@@ -7,7 +7,6 @@
  */
 
 import { evadeCensorSync } from '@endo/evasive-transform'
-import { applySourceTransforms } from 'lavamoat-core'
 
 const decoder = new TextDecoder()
 const encoder = new TextEncoder()
@@ -45,32 +44,16 @@ const decapitateHashbang = (source) => {
 }
 
 /**
- * Evade things that look like HTML comments but are actually decrement
- * operators used in boolean "less than" expressions
+ * Apply local transforms to source code
  *
- * @remarks
- * TODO: Remove once Endo consumes "preserveFormat"
  * @param {string} source
  * @returns {string}
  */
-const evadeGibson = (source) => {
-  return source.replace(
-    /([$_a-zA-Z0-9]+)--\s+>(?=\s*[$_a-zA-Z0-9]+)/g,
-    '[$1--][0] >'
-  )
-}
+export const useLocalTransforms = (source) => {
+  source = decapitateHashbang(source)
+  source = evadeDirectEvalExpressions(source)
 
-/**
- * Evades SES restrictions on `import`+`(` in strings by replacing `(` with a
- * gremlin
- *
- * @remarks
- * TODO: Remove once Endo consumes "preserveFormat"
- * @param {string} source
- * @returns {string}
- */
-const evadeImportString = (source) => {
-  return source.replace(/(?<=[`"'][\w\d\s,-]*)import\(/g, 'import（')
+  return source
 }
 
 /**
@@ -83,14 +66,9 @@ const evadeImportString = (source) => {
 const createModuleTransform = (parser) => {
   return (sourceBytes, specifier, location, _packageLocation, opts) => {
     let source = decoder.decode(sourceBytes)
-    source = decapitateHashbang(source)
-    // FIXME: this function calls stuff we could get in `ses/tools.js`
-    // except `evadeDirectEvalExpressions`. unclear if we should be using this from `lavamoat-core`
-    source = applySourceTransforms(source)
-    source = evadeDirectEvalExpressions(source)
-    source = evadeGibson(source)
-    source = evadeImportString(source)
+    source = useLocalTransforms(source)
     const { code, map } = evadeCensorSync(source, {
+      // elideComments: true, would clean up a lot
       sourceMap: opts?.sourceMap,
       sourceUrl: new URL(specifier, location).href,
       sourceType: parser === 'mjs' ? 'module' : 'script',
