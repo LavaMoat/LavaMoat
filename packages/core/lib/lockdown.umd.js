@@ -1,4 +1,4 @@
-// ses@1.14.0
+// ses@1.15.0
 (functors => options => {
   'use strict';
 
@@ -95,11 +95,11 @@
       setPrototypeOf: cell("setPrototypeOf"),
       values: cell("values"),
       fromEntries: cell("fromEntries"),
-      hasOwn: cell("hasOwn"),
       speciesSymbol: cell("speciesSymbol"),
       toStringTagSymbol: cell("toStringTagSymbol"),
       iteratorSymbol: cell("iteratorSymbol"),
       matchAllSymbol: cell("matchAllSymbol"),
+      replaceSymbol: cell("replaceSymbol"),
       unscopablesSymbol: cell("unscopablesSymbol"),
       symbolKeyFor: cell("symbolKeyFor"),
       symbolFor: cell("symbolFor"),
@@ -131,7 +131,7 @@
       iteratorPrototype: cell("iteratorPrototype"),
       typedArrayPrototype: cell("typedArrayPrototype"),
       uncurryThis: cell("uncurryThis"),
-      objectHasOwnProperty: cell("objectHasOwnProperty"),
+      hasOwn: cell("hasOwn"),
       arrayFilter: cell("arrayFilter"),
       arrayForEach: cell("arrayForEach"),
       arrayIncludes: cell("arrayIncludes"),
@@ -158,16 +158,14 @@
       setForEach: cell("setForEach"),
       setHas: cell("setHas"),
       iterateSet: cell("iterateSet"),
-      regexpTest: cell("regexpTest"),
       regexpExec: cell("regexpExec"),
+      regexpReplace: cell("regexpReplace"),
       matchAllRegExp: cell("matchAllRegExp"),
+      sealRegexp: cell("sealRegexp"),
       stringEndsWith: cell("stringEndsWith"),
       stringIncludes: cell("stringIncludes"),
       stringIndexOf: cell("stringIndexOf"),
       stringMatch: cell("stringMatch"),
-      generatorNext: cell("generatorNext"),
-      generatorThrow: cell("generatorThrow"),
-      stringReplace: cell("stringReplace"),
       stringSearch: cell("stringSearch"),
       stringSlice: cell("stringSlice"),
       stringSplit: cell("stringSplit"),
@@ -181,12 +179,13 @@
       weaksetHas: cell("weaksetHas"),
       functionToString: cell("functionToString"),
       functionBind: cell("functionBind"),
+      generatorNext: cell("generatorNext"),
+      generatorThrow: cell("generatorThrow"),
       promiseAll: cell("promiseAll"),
       promiseCatch: cell("promiseCatch"),
       promiseThen: cell("promiseThen"),
       finalizationRegistryRegister: cell("finalizationRegistryRegister"),
       finalizationRegistryUnregister: cell("finalizationRegistryUnregister"),
-      getConstructorOf: cell("getConstructorOf"),
       isPrimitive: cell("isPrimitive"),
       isError: cell("isError"),
       identity: cell("identity"),
@@ -242,10 +241,10 @@
       makeError: cell("makeError"),
       annotateError: cell("annotateError"),
       loggedErrorHandler: cell("loggedErrorHandler"),
-      makeAssert: cell("makeAssert"),
       assert: cell("assert"),
       assertEqual: cell("assertEqual"),
       sanitizeError: cell("sanitizeError"),
+      makeAssert: cell("makeAssert"),
     },
     {
       isTypedArray: cell("isTypedArray"),
@@ -524,11 +523,11 @@ function observeImports(map, importName, importIndex) {
       setPrototypeOf: cells[0].setPrototypeOf.set,
       values: cells[0].values.set,
       fromEntries: cells[0].fromEntries.set,
-      hasOwn: cells[0].hasOwn.set,
       speciesSymbol: cells[0].speciesSymbol.set,
       toStringTagSymbol: cells[0].toStringTagSymbol.set,
       iteratorSymbol: cells[0].iteratorSymbol.set,
       matchAllSymbol: cells[0].matchAllSymbol.set,
+      replaceSymbol: cells[0].replaceSymbol.set,
       unscopablesSymbol: cells[0].unscopablesSymbol.set,
       symbolKeyFor: cells[0].symbolKeyFor.set,
       symbolFor: cells[0].symbolFor.set,
@@ -560,7 +559,7 @@ function observeImports(map, importName, importIndex) {
       iteratorPrototype: cells[0].iteratorPrototype.set,
       typedArrayPrototype: cells[0].typedArrayPrototype.set,
       uncurryThis: cells[0].uncurryThis.set,
-      objectHasOwnProperty: cells[0].objectHasOwnProperty.set,
+      hasOwn: cells[0].hasOwn.set,
       arrayFilter: cells[0].arrayFilter.set,
       arrayForEach: cells[0].arrayForEach.set,
       arrayIncludes: cells[0].arrayIncludes.set,
@@ -587,16 +586,14 @@ function observeImports(map, importName, importIndex) {
       setForEach: cells[0].setForEach.set,
       setHas: cells[0].setHas.set,
       iterateSet: cells[0].iterateSet.set,
-      regexpTest: cells[0].regexpTest.set,
       regexpExec: cells[0].regexpExec.set,
+      regexpReplace: cells[0].regexpReplace.set,
       matchAllRegExp: cells[0].matchAllRegExp.set,
+      sealRegexp: cells[0].sealRegexp.set,
       stringEndsWith: cells[0].stringEndsWith.set,
       stringIncludes: cells[0].stringIncludes.set,
       stringIndexOf: cells[0].stringIndexOf.set,
       stringMatch: cells[0].stringMatch.set,
-      generatorNext: cells[0].generatorNext.set,
-      generatorThrow: cells[0].generatorThrow.set,
-      stringReplace: cells[0].stringReplace.set,
       stringSearch: cells[0].stringSearch.set,
       stringSlice: cells[0].stringSlice.set,
       stringSplit: cells[0].stringSplit.set,
@@ -610,12 +607,13 @@ function observeImports(map, importName, importIndex) {
       weaksetHas: cells[0].weaksetHas.set,
       functionToString: cells[0].functionToString.set,
       functionBind: cells[0].functionBind.set,
+      generatorNext: cells[0].generatorNext.set,
+      generatorThrow: cells[0].generatorThrow.set,
       promiseAll: cells[0].promiseAll.set,
       promiseCatch: cells[0].promiseCatch.set,
       promiseThen: cells[0].promiseThen.set,
       finalizationRegistryRegister: cells[0].finalizationRegistryRegister.set,
       finalizationRegistryUnregister: cells[0].finalizationRegistryUnregister.set,
-      getConstructorOf: cells[0].getConstructorOf.set,
       isPrimitive: cells[0].isPrimitive.set,
       isError: cells[0].isError.set,
       identity: cells[0].identity.set,
@@ -786,10 +784,10 @@ function observeImports(map, importName, importIndex) {
       makeError: cells[13].makeError.set,
       note: cells[13].annotateError.set,
       loggedErrorHandler: cells[13].loggedErrorHandler.set,
-      makeAssert: cells[13].makeAssert.set,
       assert: cells[13].assert.set,
       assertEqual: cells[13].assertEqual.set,
       sanitizeError: cells[13].sanitizeError.set,
+      makeAssert: cells[13].makeAssert.set,
     },
     importMeta: {},
   });
@@ -1603,18 +1601,18 @@ const universalThis = globalThis;$h͏_once.universalThis(universalThis);
   setPrototypeOf,
   values,
   fromEntries,
-  hasOwn,
-} = Object;$h͏_once.assign(assign);$h͏_once.create(create);$h͏_once.defineProperties(defineProperties);$h͏_once.entries(entries);$h͏_once.freeze(freeze);$h͏_once.getOwnPropertyDescriptor(getOwnPropertyDescriptor);$h͏_once.getOwnPropertyDescriptors(getOwnPropertyDescriptors);$h͏_once.getOwnPropertyNames(getOwnPropertyNames);$h͏_once.getPrototypeOf(getPrototypeOf);$h͏_once.is(is);$h͏_once.isFrozen(isFrozen);$h͏_once.isSealed(isSealed);$h͏_once.isExtensible(isExtensible);$h͏_once.keys(keys);$h͏_once.objectPrototype(objectPrototype);$h͏_once.seal(seal);$h͏_once.preventExtensions(preventExtensions);$h͏_once.setPrototypeOf(setPrototypeOf);$h͏_once.values(values);$h͏_once.fromEntries(fromEntries);$h͏_once.hasOwn(hasOwn);
+} = Object;$h͏_once.assign(assign);$h͏_once.create(create);$h͏_once.defineProperties(defineProperties);$h͏_once.entries(entries);$h͏_once.freeze(freeze);$h͏_once.getOwnPropertyDescriptor(getOwnPropertyDescriptor);$h͏_once.getOwnPropertyDescriptors(getOwnPropertyDescriptors);$h͏_once.getOwnPropertyNames(getOwnPropertyNames);$h͏_once.getPrototypeOf(getPrototypeOf);$h͏_once.is(is);$h͏_once.isFrozen(isFrozen);$h͏_once.isSealed(isSealed);$h͏_once.isExtensible(isExtensible);$h͏_once.keys(keys);$h͏_once.objectPrototype(objectPrototype);$h͏_once.seal(seal);$h͏_once.preventExtensions(preventExtensions);$h͏_once.setPrototypeOf(setPrototypeOf);$h͏_once.values(values);$h͏_once.fromEntries(fromEntries);
 
        const {
   species: speciesSymbol,
   toStringTag: toStringTagSymbol,
   iterator: iteratorSymbol,
   matchAll: matchAllSymbol,
+  replace: replaceSymbol,
   unscopables: unscopablesSymbol,
   keyFor: symbolKeyFor,
   for: symbolFor,
-} = Symbol;$h͏_once.speciesSymbol(speciesSymbol);$h͏_once.toStringTagSymbol(toStringTagSymbol);$h͏_once.iteratorSymbol(iteratorSymbol);$h͏_once.matchAllSymbol(matchAllSymbol);$h͏_once.unscopablesSymbol(unscopablesSymbol);$h͏_once.symbolKeyFor(symbolKeyFor);$h͏_once.symbolFor(symbolFor);
+} = Symbol;$h͏_once.speciesSymbol(speciesSymbol);$h͏_once.toStringTagSymbol(toStringTagSymbol);$h͏_once.iteratorSymbol(iteratorSymbol);$h͏_once.matchAllSymbol(matchAllSymbol);$h͏_once.replaceSymbol(replaceSymbol);$h͏_once.unscopablesSymbol(unscopablesSymbol);$h͏_once.symbolKeyFor(symbolKeyFor);$h͏_once.symbolFor(symbolFor);
 
        const { isInteger } = Number;$h͏_once.isInteger(isInteger);
 
@@ -1693,12 +1691,29 @@ const { bind } = functionPrototype;
  */
        const uncurryThis = bind.bind(bind.call); // eslint-disable-line @endo/no-polymorphic-call
 
-/**
- * @deprecated Use `hasOwn` instead
- */$h͏_once.uncurryThis(uncurryThis);
-       const objectHasOwnProperty = hasOwn;
+// See https://github.com/endojs/endo/issues/2930
+$h͏_once.uncurryThis(uncurryThis);if(!('hasOwn'in Object)){
+  const ObjectPrototypeHasOwnProperty = objectPrototype.hasOwnProperty;
+  const hasOwnShim = (obj, key) => {
+    if (obj === undefined || obj === null) {
+      // We need to add this extra test because of differences in
+      // the order in which `hasOwn` vs `hasOwnProperty` validates
+      // arguments.
+      throw TypeError('Cannot convert undefined or null to object');
+    }
+    return apply(ObjectPrototypeHasOwnProperty, obj, [key]);
+  };
+  defineProperty(Object, 'hasOwn', {
+    value: hasOwnShim,
+    writable: true,
+    enumerable: false,
+    configurable: true,
+  });
+}
+
+       const { hasOwn } = Object;
 //
-$h͏_once.objectHasOwnProperty(objectHasOwnProperty);const arrayFilter=uncurryThis(arrayPrototype.filter);$h͏_once.arrayFilter(arrayFilter);
+$h͏_once.hasOwn(hasOwn);const arrayFilter=uncurryThis(arrayPrototype.filter);$h͏_once.arrayFilter(arrayFilter);
        const arrayForEach = uncurryThis(arrayPrototype.forEach);$h͏_once.arrayForEach(arrayForEach);
        const arrayIncludes = uncurryThis(arrayPrototype.includes);$h͏_once.arrayIncludes(arrayIncludes);
        const arrayJoin = uncurryThis(arrayPrototype.join);
@@ -1737,32 +1752,53 @@ $h͏_once.iterateMap(iterateMap);const setAdd=uncurryThis(setPrototype.add);$h͏
        const setHas = uncurryThis(setPrototype.has);$h͏_once.setHas(setHas);
        const iterateSet = uncurryThis(setPrototype[iteratorSymbol]);
 //
-$h͏_once.iterateSet(iterateSet);const regexpTest=uncurryThis(regexpPrototype.test);$h͏_once.regexpTest(regexpTest);
-       const regexpExec = uncurryThis(regexpPrototype.exec);$h͏_once.regexpExec(regexpExec);
-       const matchAllRegExp = uncurryThis(regexpPrototype[matchAllSymbol]);
-//
-$h͏_once.matchAllRegExp(matchAllRegExp);const stringEndsWith=uncurryThis(stringPrototype.endsWith);$h͏_once.stringEndsWith(stringEndsWith);
-       const stringIncludes = uncurryThis(stringPrototype.includes);$h͏_once.stringIncludes(stringIncludes);
-       const stringIndexOf = uncurryThis(stringPrototype.indexOf);$h͏_once.stringIndexOf(stringIndexOf);
-       const stringMatch = uncurryThis(stringPrototype.match);$h͏_once.stringMatch(stringMatch);
-       const generatorNext = uncurryThis(generatorPrototype.next);$h͏_once.generatorNext(generatorNext);
-       const generatorThrow = uncurryThis(generatorPrototype.throw);
-
+/**
+ * `regexpExec` is provided in exclusion of `regexpTest`, which would be
+ * vulnerable to RegExp.prototype poisoning.
+ */$h͏_once.iterateSet(iterateSet);
+       const regexpExec = uncurryThis(regexpPrototype.exec);
 /**
  * @type { &
- *   ((thisArg: string, searchValue: { [Symbol.replace](string: string, replaceValue: string): string; }, replaceValue: string) => string) &
- *   ((thisArg: string, searchValue: { [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string; }, replacer: (substring: string, ...args: any[]) => string) => string)
+ *   ((thisArg: RegExp, string: string, replaceValue: string) => string) &
+ *   ((thisArg: RegExp, string: string, replacer: (substring: string, ...args: any[]) => string) => string)
  * }
- */$h͏_once.generatorThrow(generatorThrow);
-       const stringReplace = /** @type {any} */ (
-  uncurryThis(stringPrototype.replace)
-);$h͏_once.stringReplace(stringReplace);
-       const stringSearch = uncurryThis(stringPrototype.search);$h͏_once.stringSearch(stringSearch);
-       const stringSlice = uncurryThis(stringPrototype.slice);$h͏_once.stringSlice(stringSlice);
-       const stringSplit =
-  /** @type {(thisArg: string, splitter: string | RegExp | { [Symbol.split](string: string, limit?: number): string[]; }, limit?: number) => string[]} */ (
-    uncurryThis(stringPrototype.split)
-  );$h͏_once.stringSplit(stringSplit);
+ */$h͏_once.regexpExec(regexpExec);
+       const regexpReplace = /** @type {any} */ (
+  uncurryThis(regexpPrototype[replaceSymbol])
+);$h͏_once.regexpReplace(regexpReplace);
+       const matchAllRegExp = uncurryThis(regexpPrototype[matchAllSymbol]);$h͏_once.matchAllRegExp(matchAllRegExp);
+const { _regexpConstructor, ...regexpDescriptors } =
+  getOwnPropertyDescriptors(regexpPrototype);
+arrayForEach(ownKeys(regexpDescriptors), key => {
+  const desc = regexpDescriptors[/** @type {any} */ (key)];
+  desc.configurable = false;
+  if (desc.writable) desc.writable = false;
+});
+/**
+ * Protect a RegExp instance against RegExp.prototype poisoning ("exec",
+ * "flags", Symbol.replace, etc.).
+ * @type {<T extends RegExp>(regexp: T) => T}
+ */
+       const sealRegexp = regexp =>
+  seal(defineProperties(regexp, regexpDescriptors));
+//
+$h͏_once.sealRegexp(sealRegexp);const stringEndsWith=uncurryThis(stringPrototype.endsWith);$h͏_once.stringEndsWith(stringEndsWith);
+       const stringIncludes = uncurryThis(stringPrototype.includes);$h͏_once.stringIncludes(stringIncludes);
+       const stringIndexOf = uncurryThis(stringPrototype.indexOf);$h͏_once.stringIndexOf(stringIndexOf);
+       const stringMatch = uncurryThis(stringPrototype.match);
+// `stringReplace` is intentionally omitted because it would be vulnerable to
+// RegExp.prototype poisoning; use `regexpReplace(re, str, replacer)` instead
+// (and `sealRegexp` on its regular expressions).
+$h͏_once.stringMatch(stringMatch);const stringSearch=uncurryThis(stringPrototype.search);$h͏_once.stringSearch(stringSearch);
+       const stringSlice = uncurryThis(stringPrototype.slice);
+/**
+ * `stringSplit` should only be used with a string separator; regular
+ * expressions are vulnerable to RegExp.prototype poisoning.
+ * @type {(thisArg: string, separator: string, limit?: number) => string[]}
+ */$h͏_once.stringSlice(stringSlice);
+       const stringSplit = /** @type {any} */ (
+  uncurryThis(stringPrototype.split)
+);$h͏_once.stringSplit(stringSplit);
        const stringStartsWith = uncurryThis(stringPrototype.startsWith);$h͏_once.stringStartsWith(stringStartsWith);
        const iterateString = uncurryThis(stringPrototype[iteratorSymbol]);
 //
@@ -1778,7 +1814,10 @@ $h͏_once.weakmapSet(weakmapSet);const weaksetAdd=uncurryThis(weaksetPrototype.a
 $h͏_once.weaksetHas(weaksetHas);const functionToString=uncurryThis(functionPrototype.toString);$h͏_once.functionToString(functionToString);
        const functionBind = uncurryThis(bind);
 //
-$h͏_once.functionBind(functionBind);const{all}=Promise;
+$h͏_once.functionBind(functionBind);const generatorNext=uncurryThis(generatorPrototype.next);$h͏_once.generatorNext(generatorNext);
+       const generatorThrow = uncurryThis(generatorPrototype.throw);
+//
+$h͏_once.generatorThrow(generatorThrow);const{all}=Promise;
        const promiseAll = promises => apply(all, Promise, [promises]);$h͏_once.promiseAll(promiseAll);
        const promiseCatch = uncurryThis(promisePrototype.catch);
 /** @type {<T, TResult1 = T, TResult2 = never>(thisArg: T, onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null) => Promise<TResult1 | TResult2>} */$h͏_once.promiseCatch(promiseCatch);
@@ -1793,15 +1832,6 @@ $h͏_once.promiseThen(promiseThen);const finalizationRegistryRegister=
   uncurryThis(FinalizationRegistry.prototype.unregister);
 
 /**
- * getConstructorOf()
- * Return the constructor from an instance.
- *
- * @param {Function} fn
- */$h͏_once.finalizationRegistryUnregister(finalizationRegistryUnregister);
-       const getConstructorOf = fn =>
-  reflectGet(getPrototypeOf(fn), 'constructor');
-
-/**
  * TODO Consolidate with `isPrimitive` that's currently in `@endo/pass-style`.
  * Layering constraints make this tricky, which is why we haven't yet figured
  * out how to do this.
@@ -1813,7 +1843,7 @@ $h͏_once.promiseThen(promiseThen);const finalizationRegistryRegister=
  * | bigint
  * | string
  * | symbol)}
- */$h͏_once.getConstructorOf(getConstructorOf);
+ */$h͏_once.finalizationRegistryUnregister(finalizationRegistryUnregister);
        const isPrimitive = val =>
   !val || (typeof val !== 'object' && typeof val !== 'function');
 
@@ -1853,13 +1883,40 @@ $h͏_once.FERAL_EVAL(FERAL_EVAL);const FERAL_FUNCTION=Function;$h͏_once.FERAL_F
 };
 
 // ////////////////// FERAL_STACK_GETTER FERAL_STACK_SETTER ////////////////////
-$h͏_once.noEvalEvaluate(noEvalEvaluate);
-const er1StackDesc = getOwnPropertyDescriptor(Error('er1'), 'stack');
-const er2StackDesc = getOwnPropertyDescriptor(TypeError('er2'), 'stack');
+
+// The error repair mechanism is very similar to code in
+// pass-style/src/error.js and these implementations should be kept in sync.
+
+/**
+ * We gratuitiously construct a TypeError instance using syntax in order to
+ * obviate the possibility that code that ran before SES (for which we are
+ * irreducable vulnerable) may have replaced the global TypeError constructor.
+ * We treat the nature of this error instance as the source of truth for the
+ * nature of runtime constructed errors on the platform, particularly whether
+ * such errors will have an own "stack" property with getters and setters.
+ * At time of writing (2025) we know of no comparable mechanism for obtaining a
+ * host-generated base Error instance, but we corroborate the nature of the
+ * global Error constructor's instances and refuse to initialize SES in an
+ * environment where the syntactic TypeError and global Error produce
+ * inconsistent "stack" properties.
+ * @returns {TypeError}
+ */$h͏_once.noEvalEvaluate(noEvalEvaluate);
+const makeTypeError = () => {
+  try {
+    // @ts-expect-error deliberate TypeError
+    null.null;
+    throw TypeError('obligatory'); // To convince the type flow inferrence.
+  } catch (error) {
+    return error;
+  }
+};
+
+const errorStackDesc = getOwnPropertyDescriptor(Error('obligatory'), 'stack');
+const typeErrorStackDesc = getOwnPropertyDescriptor(makeTypeError(), 'stack');
 
 let feralStackGetter;
 let feralStackSetter;
-if (er1StackDesc && er2StackDesc && er1StackDesc.get) {
+if (typeErrorStackDesc && typeErrorStackDesc.get) {
   // We should only encounter this case on v8 because of its problematic
   // error own stack accessor behavior.
   // Note that FF/SpiderMonkey, Moddable/XS, and the error stack proposal
@@ -1870,16 +1927,17 @@ if (er1StackDesc && er2StackDesc && er1StackDesc.get) {
     // accessor property, but within the same realm, all these accessor
     // properties have the same getter and have the same setter.
     // This is therefore the case that we repair.
-    typeof er1StackDesc.get === 'function' &&
-    er1StackDesc.get === er2StackDesc.get &&
-    typeof er1StackDesc.set === 'function' &&
-    er1StackDesc.set === er2StackDesc.set
+    errorStackDesc &&
+    typeof typeErrorStackDesc.get === 'function' &&
+    typeErrorStackDesc.get === errorStackDesc.get &&
+    typeof typeErrorStackDesc.set === 'function' &&
+    typeErrorStackDesc.set === errorStackDesc.set
   ) {
     // Otherwise, we have own stack accessor properties that are outside
     // our expectations, that therefore need to be understood better
     // before we know how to repair them.
-    feralStackGetter = freeze(er1StackDesc.get);
-    feralStackSetter = freeze(er1StackDesc.set);
+    feralStackGetter = freeze(typeErrorStackDesc.get);
+    feralStackSetter = freeze(typeErrorStackDesc.set);
   } else {
     // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNEXPECTED_ERROR_OWN_STACK_ACCESSOR.md
     throw TypeError(
@@ -2428,11 +2486,11 @@ const arrayBufferMethods = {
   ...(optTransferBufferToImmutable
     ? {
         /**
-         * Transfer the contents to a new Immutable ArrayBuffer
+         * Transfer the contents to a new immutable ArrayBuffer
          *
          * @this {ArrayBuffer} buffer The original buffer.
          * @param {number} [newLength] The start index.
-         * @returns {ArrayBuffer} The sliced immutable ArrayBuffer.
+         * @returns {ArrayBuffer} The new immutable ArrayBuffer.
          */
         transferToImmutable(newLength = undefined) {
           return optTransferBufferToImmutable(this, newLength);
@@ -2505,12 +2563,12 @@ defineProperties(
 
 
 
-/** @import {StringablePayload} from '../../types.js' */
+/** @import {Stringable} from '../../types.js' */
 
 /**
  * Joins English terms with commas and an optional conjunction.
  *
- * @param {(string | StringablePayload)[]} terms
+ * @param {(string | Stringable)[]} terms
  * @param {"and" | "or"} conjunction
  */
        const enJoin = (terms, conjunction) => {
@@ -2681,7 +2739,7 @@ freeze(bestEffortStringify);
 // === 8. ses ./src/error/types.js ===
 ({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([]);// @ts-check
 
-/** @import {GenericErrorConstructor, AssertMakeErrorOptions, DetailsToken, StringablePayload} from '../../types.js' */
+/** @import {GenericErrorConstructor, AssertMakeErrorOptions, DetailsToken, Stringable} from '../../types.js' */
 
 /**
  * @typedef {object} VirtualConsole
@@ -3246,7 +3304,8 @@ freeze(makeNoteLogArgsArrayKit);
 })()
 ,
 // === 13. ses ./src/error/assert.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let RangeError,TypeError,WeakMap,arrayJoin,arrayMap,arrayPop,arrayPush,assign,freeze,defineProperty,globalThis,is,isError,regexpTest,stringIndexOf,stringReplace,stringSlice,stringStartsWith,weakmapDelete,weakmapGet,weakmapHas,weakmapSet,AggregateError,getOwnPropertyDescriptors,ownKeys,create,objectPrototype,hasOwn,an,bestEffortStringify,makeNoteLogArgsArrayKit;$h͏_imports([["../commons.js", [["RangeError",[$h͏_a => (RangeError = $h͏_a)]],["TypeError",[$h͏_a => (TypeError = $h͏_a)]],["WeakMap",[$h͏_a => (WeakMap = $h͏_a)]],["arrayJoin",[$h͏_a => (arrayJoin = $h͏_a)]],["arrayMap",[$h͏_a => (arrayMap = $h͏_a)]],["arrayPop",[$h͏_a => (arrayPop = $h͏_a)]],["arrayPush",[$h͏_a => (arrayPush = $h͏_a)]],["assign",[$h͏_a => (assign = $h͏_a)]],["freeze",[$h͏_a => (freeze = $h͏_a)]],["defineProperty",[$h͏_a => (defineProperty = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]],["is",[$h͏_a => (is = $h͏_a)]],["isError",[$h͏_a => (isError = $h͏_a)]],["regexpTest",[$h͏_a => (regexpTest = $h͏_a)]],["stringIndexOf",[$h͏_a => (stringIndexOf = $h͏_a)]],["stringReplace",[$h͏_a => (stringReplace = $h͏_a)]],["stringSlice",[$h͏_a => (stringSlice = $h͏_a)]],["stringStartsWith",[$h͏_a => (stringStartsWith = $h͏_a)]],["weakmapDelete",[$h͏_a => (weakmapDelete = $h͏_a)]],["weakmapGet",[$h͏_a => (weakmapGet = $h͏_a)]],["weakmapHas",[$h͏_a => (weakmapHas = $h͏_a)]],["weakmapSet",[$h͏_a => (weakmapSet = $h͏_a)]],["AggregateError",[$h͏_a => (AggregateError = $h͏_a)]],["getOwnPropertyDescriptors",[$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]],["ownKeys",[$h͏_a => (ownKeys = $h͏_a)]],["create",[$h͏_a => (create = $h͏_a)]],["objectPrototype",[$h͏_a => (objectPrototype = $h͏_a)]],["hasOwn",[$h͏_a => (hasOwn = $h͏_a)]]]],["./stringify-utils.js", [["an",[$h͏_a => (an = $h͏_a)]],["bestEffortStringify",[$h͏_a => (bestEffortStringify = $h͏_a)]]]],["./types.js", []],["./internal-types.js", []],["./note-log-args.js", [["makeNoteLogArgsArrayKit",[$h͏_a => (makeNoteLogArgsArrayKit = $h͏_a)]]]]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let RangeError,TypeError,WeakMap,arrayJoin,arrayMap,arrayPop,arrayPush,assign,freeze,defineProperty,globalThis,is,isError,regexpExec,regexpReplace,sealRegexp,stringIndexOf,stringSlice,stringStartsWith,weakmapDelete,weakmapGet,weakmapHas,weakmapSet,AggregateError,getOwnPropertyDescriptors,ownKeys,create,objectPrototype,hasOwn,an,bestEffortStringify,makeNoteLogArgsArrayKit;$h͏_imports([["../commons.js", [["RangeError",[$h͏_a => (RangeError = $h͏_a)]],["TypeError",[$h͏_a => (TypeError = $h͏_a)]],["WeakMap",[$h͏_a => (WeakMap = $h͏_a)]],["arrayJoin",[$h͏_a => (arrayJoin = $h͏_a)]],["arrayMap",[$h͏_a => (arrayMap = $h͏_a)]],["arrayPop",[$h͏_a => (arrayPop = $h͏_a)]],["arrayPush",[$h͏_a => (arrayPush = $h͏_a)]],["assign",[$h͏_a => (assign = $h͏_a)]],["freeze",[$h͏_a => (freeze = $h͏_a)]],["defineProperty",[$h͏_a => (defineProperty = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]],["is",[$h͏_a => (is = $h͏_a)]],["isError",[$h͏_a => (isError = $h͏_a)]],["regexpExec",[$h͏_a => (regexpExec = $h͏_a)]],["regexpReplace",[$h͏_a => (regexpReplace = $h͏_a)]],["sealRegexp",[$h͏_a => (sealRegexp = $h͏_a)]],["stringIndexOf",[$h͏_a => (stringIndexOf = $h͏_a)]],["stringSlice",[$h͏_a => (stringSlice = $h͏_a)]],["stringStartsWith",[$h͏_a => (stringStartsWith = $h͏_a)]],["weakmapDelete",[$h͏_a => (weakmapDelete = $h͏_a)]],["weakmapGet",[$h͏_a => (weakmapGet = $h͏_a)]],["weakmapHas",[$h͏_a => (weakmapHas = $h͏_a)]],["weakmapSet",[$h͏_a => (weakmapSet = $h͏_a)]],["AggregateError",[$h͏_a => (AggregateError = $h͏_a)]],["getOwnPropertyDescriptors",[$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]],["ownKeys",[$h͏_a => (ownKeys = $h͏_a)]],["create",[$h͏_a => (create = $h͏_a)]],["objectPrototype",[$h͏_a => (objectPrototype = $h͏_a)]],["hasOwn",[$h͏_a => (hasOwn = $h͏_a)]]]],["./stringify-utils.js", [["an",[$h͏_a => (an = $h͏_a)]],["bestEffortStringify",[$h͏_a => (bestEffortStringify = $h͏_a)]]]],["./types.js", []],["./internal-types.js", []],["./note-log-args.js", [["makeNoteLogArgsArrayKit",[$h͏_a => (makeNoteLogArgsArrayKit = $h͏_a)]]]]]);
+
 
 
 
@@ -3295,24 +3354,28 @@ freeze(makeNoteLogArgsArrayKit);
 
 
 /**
- * @import {BaseAssert, Assert, AssertionFunctions, AssertionUtilities, StringablePayload, DetailsToken, MakeAssert} from '../../types.js'
- * @import {LogArgs, NoteCallback, LoggedErrorHandler} from "./internal-types.js";
+ * @import {BaseAssert, Assert, AssertionFunctions, AssertionUtilities, DeprecatedAssertionUtilities, Stringable, DetailsToken, MakeAssert} from '../../types.js';
+ * @import {LogArgs, NoteCallback, LoggedErrorHandler} from './internal-types.js';
  */
 
-// For our internal debugging purposes, uncomment
+// For internal debugging purposes, uncomment
 // const internalDebugConsole = console;
 
 // /////////////////////////////////////////////////////////////////////////////
 
-/** @type {WeakMap<StringablePayload, any>} */
+/**
+ * Maps the result of a `quote` or `bare` call back to its input value.
+ *
+ * @type {WeakMap<Stringable, any>}
+ */
 const declassifiers = new WeakMap();
 
 /** @type {AssertionUtilities['quote']} */
-const quote = (payload, spaces = undefined) => {
+const quote = (value, spaces = undefined) => {
   const result = freeze({
-    toString: freeze(() => bestEffortStringify(payload, spaces)),
+    toString: freeze(() => bestEffortStringify(value, spaces)),
   });
-  weakmapSet(declassifiers, result, payload);
+  weakmapSet(declassifiers, result, value);
   return result;
 };$h͏_once.quote(quote);
 freeze(quote);
@@ -3322,14 +3385,14 @@ const canBeBare = freeze(/^[\w:-]( ?[\w:-])*$/);
 /**
  * @type {AssertionUtilities['bare']}
  */
-const bare = (payload, spaces = undefined) => {
-  if (typeof payload !== 'string' || !regexpTest(canBeBare, payload)) {
-    return quote(payload, spaces);
+const bare = (text, spaces = undefined) => {
+  if (typeof text !== 'string' || !regexpExec(canBeBare, text)) {
+    return quote(text, spaces);
   }
   const result = freeze({
-    toString: freeze(() => payload),
+    toString: freeze(() => text),
   });
-  weakmapSet(declassifiers, result, payload);
+  weakmapSet(declassifiers, result, text);
   return result;
 };$h͏_once.bare(bare);
 freeze(bare);
@@ -3337,24 +3400,28 @@ freeze(bare);
 // /////////////////////////////////////////////////////////////////////////////
 
 /**
- * @typedef {object} HiddenDetails
+ * @typedef {{ template: TemplateStringsArray | string[], args: any[] }} DetailsParts
  *
- * Captures the arguments passed to the `details` template string tag.
+ * The contents of a `details` template literal tag: literal strings (always at
+ * least one) and arbitrary substitution values from in between them.
  *
- * @property {TemplateStringsArray | string[]} template
- * @property {any[]} args
+ * Unquoted substitution values are sensitive (and are redacted in error
+ * `message` strings), so a DetailsPart must not leak outside of this file.
  */
 
 /**
- * @type {WeakMap<DetailsToken, HiddenDetails>}
+ * Maps the result of a `details` tagged template literal back to a record of
+ * that template literal's contents.
  *
- * Maps from a details token which a `details` template literal returned
- * to a record of the contents of that template literal expression.
+ * @type {WeakMap<DetailsToken, DetailsParts>}
  */
 const hiddenDetailsMap = new WeakMap();
 
 /**
- * @param {HiddenDetails} hiddenDetails
+ * Construct an error message string from `details` template literal contents,
+ * replacing unquoted substitution values with redactions.
+ *
+ * @param {DetailsParts} hiddenDetails
  * @returns {string}
  */
 const getMessageString = ({ template, args }) => {
@@ -3375,16 +3442,14 @@ const getMessageString = ({ template, args }) => {
 };
 
 /**
- * Give detailsTokens a toString behavior. To minimize the overhead of
- * creating new detailsTokens, we do this with an
- * inherited `this` sensitive `toString` method, even though we normally
- * avoid `this` sensitivity. To protect the method from inappropriate
- * `this` application, it does something interesting only for objects
- * registered in `redactedDetails`, which should be exactly the detailsTokens.
+ * Define `toString` behavior for DetailsToken. To minimize the overhead of
+ * creating new instances, we do this with an inherited `this`-sensitive method,
+ * even though we normally avoid such sensitivity. To protect the method from
+ * inappropriate application, it verifies that `this` is registered in
+ * `redactedDetails` before doing interesting work.
  *
- * The printing behavior must not reveal anything redacted, so we just use
- * the same `getMessageString` we use to construct the redacted message
- * string for a thrown assertion error.
+ * The behavior must not reveal anything redacted, so we use `getMessageString`
+ * to return the same value as the message for a thrown assertion-failure error.
  */
 const DetailsTokenProto = freeze({
   toString() {
@@ -3404,16 +3469,15 @@ freeze(DetailsTokenProto.toString);
  * given to `lockdown`, then `unredactedDetails` is used instead.
  *
  * There are some unconditional uses of `redactedDetails` in this module. All
- * of them should be uses where the template literal has no redacted
- * substitution values. In those cases, the two are equivalent.
+ * of them should be uses where the template literal has no redacted (unquoted)
+ * substitution values. In those cases, `redactedDetails` is equivalent to
+ * `unredactedDetails`.
  *
  * @type {AssertionUtilities['details']}
  */
 const redactedDetails = (template, ...args) => {
-  // Keep in mind that the vast majority of calls to `details` creates
-  // a details token that is never used, so this path must remain as fast as
-  // possible. Hence we store what we've got with little processing, postponing
-  // all the work to happen only if needed, for example, if an assertion fails.
+  // In case the result of this call is never used, perform as little processing
+  // as possible here to keep things fast.
   const detailsToken = freeze({ __proto__: DetailsTokenProto });
   weakmapSet(hiddenDetailsMap, detailsToken, { template, args });
   return /** @type {DetailsToken} */ (/** @type {unknown} */ (detailsToken));
@@ -3443,8 +3507,15 @@ const unredactedDetails = (template, ...args) => {
 freeze(unredactedDetails);
 
 
+const leadingSpacePattern = sealRegexp(/^ /);
+const trailingSpacePattern = sealRegexp(/ $/);
+
 /**
- * @param {HiddenDetails} hiddenDetails
+ * Get arguments suitable for a console logger function (e.g., `console.error`)
+ * from `details` template literal contents, unquoting quoted substitution
+ * values.
+ *
+ * @param {DetailsParts} hiddenDetails
  * @returns {LogArgs}
  */
 const getLogArgs = ({ template, args }) => {
@@ -3454,14 +3525,22 @@ const getLogArgs = ({ template, args }) => {
     if (weakmapHas(declassifiers, arg)) {
       arg = weakmapGet(declassifiers, arg);
     }
-    // Remove the extra spaces (since console.error puts them
-    // between each cause).
-    const priorWithoutSpace = stringReplace(arrayPop(logArgs) || '', / $/, '');
-    if (priorWithoutSpace !== '') {
-      arrayPush(logArgs, priorWithoutSpace);
+    // Remove substitution-adjacent spaces from template fixed-string parts
+    // (since console logging inserts its own argument-separating spaces).
+    const prevLiteralPart = regexpReplace(
+      trailingSpacePattern,
+      arrayPop(logArgs) || '',
+      '',
+    );
+    if (prevLiteralPart !== '') {
+      arrayPush(logArgs, prevLiteralPart);
     }
-    const nextWithoutSpace = stringReplace(template[i + 1], /^ /, '');
-    arrayPush(logArgs, arg, nextWithoutSpace);
+    const nextLiteralPart = regexpReplace(
+      leadingSpacePattern,
+      template[i + 1],
+      '',
+    );
+    arrayPush(logArgs, arg, nextLiteralPart);
   }
   if (logArgs[logArgs.length - 1] === '') {
     arrayPop(logArgs);
@@ -3470,11 +3549,11 @@ const getLogArgs = ({ template, args }) => {
 };
 
 /**
- * @type {WeakMap<Error, LogArgs>}
+ * Maps from an error object to arguments suitable for a privileged console
+ * logger function such as `console.error`, including values that may be
+ * redacted in the error's `message`.
  *
- * Maps from an error object to the log args that are a more informative
- * alternative message for that error. When logging the error, these
- * log args should be preferred to `error.message`.
+ * @type {WeakMap<Error, LogArgs>}
  */
 const hiddenMessageLogArgs = new WeakMap();
 
@@ -3545,27 +3624,24 @@ const tagError = (err, optErrorName = err.name) => {
     for (const name of restNames) {
       delete error[name];
     }
-    const droppedNote = create(objectPrototype, restDescs);
+    const dropped = create(objectPrototype, restDescs);
+    const droppedDetails = redactedDetails`originally with properties ${quote(dropped)}`;
     // eslint-disable-next-line no-use-before-define
-    note(
-      error,
-      redactedDetails`originally with properties ${quote(droppedNote)}`,
-    );
+    note(error, droppedDetails);
   }
   for (const name of ownKeys(error)) {
-    // @ts-expect-error TS still confused by symbols as property names
+    // @ts-expect-error TypeScript is still confused by symbols as property keys
     const desc = descs[name];
     if (desc && hasOwn(desc, 'get')) {
-      defineProperty(error, name, {
-        value: error[name]  // invoke the getter to convert to data property
-      });
+      const value = error[name]; // invokes the getter
+      defineProperty(error, name, { value });
     }
   }
   freeze(error);
 };
 
 /**
- * @type {AssertionUtilities['error']}
+ * @type {AssertionUtilities['makeError']}
  */$h͏_once.sanitizeError(sanitizeError);
 const makeError = (
   optDetails = redactedDetails`Assert failed`,
@@ -3577,9 +3653,9 @@ const makeError = (
     sanitize = true,
   } = {},
 ) => {
+  // Promote string-valued `optDetails` into a minimal DetailsParts
+  // consisting of that string as the sole literal part with no substitutions.
   if (typeof optDetails === 'string') {
-    // If it is a string, use it as the literal part of the template so
-    // it doesn't get quoted.
     optDetails = redactedDetails([optDetails]);
   }
   const hiddenDetails = weakmapGet(hiddenDetailsMap, optDetails);
@@ -3595,13 +3671,11 @@ const makeError = (
   ) {
     error = AggregateError(errors || [], messageString, opts);
   } else {
-    error = /** @type {ErrorConstructor} */ (errConstructor)(
-      messageString,
-      opts,
-    );
+    const ErrorCtor = /** @type {ErrorConstructor} */ (errConstructor);
+    error = ErrorCtor(messageString, opts);
+    // Since we need to tolerate `errors` on an AggregateError, we may as well
+    // tolerate it on all errors.
     if (errors !== undefined) {
-      // Since we need to tolerate `errors` on an AggregateError, may as
-      // well tolerate it on all errors.
       defineProperty(error, 'errors', {
         value: errors,
         writable: true,
@@ -3624,11 +3698,10 @@ freeze(makeError);
 
 // /////////////////////////////////////////////////////////////////////////////
 
-const { addLogArgs, takeLogArgsArray } = makeNoteLogArgsArrayKit();
+const { addLogArgs: addNoteLogArgs, takeLogArgsArray: takeAllNoteLogArgs } =
+  makeNoteLogArgsArrayKit();
 
 /**
- * @type {WeakMap<Error, NoteCallback[]>}
- *
  * An augmented console will normally only take the hidden noteArgs array once,
  * when it logs the error being annotated. Once that happens, further
  * annotations of that error should go to the console immediately. We arrange
@@ -3637,14 +3710,16 @@ const { addLogArgs, takeLogArgsArray } = makeNoteLogArgsArrayKit();
  * callback per error, but that depends on console behavior which we should not
  * assume. We make this an array of callbacks so multiple registrations
  * are independent.
+ *
+ * @type {WeakMap<Error, NoteCallback[]>}
  */
-const hiddenNoteCallbackArrays = new WeakMap();
+const hiddenNoteCallbacks = new WeakMap();
 
 /** @type {AssertionUtilities['note']} */
 const note = (error, detailsNote) => {
+  // Promote string-valued `detailsNote` into a minimal DetailsParts consisting
+  // of that string as the sole literal part with no substitutions.
   if (typeof detailsNote === 'string') {
-    // If it is a string, use it as the literal part of the template so
-    // it doesn't get quoted.
     detailsNote = redactedDetails([detailsNote]);
   }
   const hiddenDetails = weakmapGet(hiddenDetailsMap, detailsNote);
@@ -3652,13 +3727,13 @@ const note = (error, detailsNote) => {
     throw TypeError(`unrecognized details ${quote(detailsNote)}`);
   }
   const logArgs = getLogArgs(hiddenDetails);
-  const callbacks = weakmapGet(hiddenNoteCallbackArrays, error);
+  const callbacks = weakmapGet(hiddenNoteCallbacks, error);
   if (callbacks !== undefined) {
     for (const callback of callbacks) {
       callback(error, logArgs);
     }
   } else {
-    addLogArgs(error, logArgs);
+    addNoteLogArgs(error, logArgs);
   }
 };$h͏_once.note(note);
 freeze(note);
@@ -3692,21 +3767,21 @@ const loggedErrorHandler = {
   },
   getMessageLogArgs: error => weakmapGet(hiddenMessageLogArgs, error),
   takeMessageLogArgs: error => {
-    const result = weakmapGet(hiddenMessageLogArgs, error);
+    const logArgs = weakmapGet(hiddenMessageLogArgs, error);
     weakmapDelete(hiddenMessageLogArgs, error);
-    return result;
+    return logArgs;
   },
   takeNoteLogArgsArray: (error, callback) => {
-    const result = takeLogArgsArray(error);
+    const logArgsArray = takeAllNoteLogArgs(error);
     if (callback !== undefined) {
-      const callbacks = weakmapGet(hiddenNoteCallbackArrays, error);
+      const callbacks = weakmapGet(hiddenNoteCallbacks, error);
       if (callbacks) {
         arrayPush(callbacks, callback);
       } else {
-        weakmapSet(hiddenNoteCallbackArrays, error, [callback]);
+        weakmapSet(hiddenNoteCallbacks, error, [callback]);
       }
     }
-    return result || [];
+    return logArgsArray || [];
   },
 };$h͏_once.loggedErrorHandler(loggedErrorHandler);
 freeze(loggedErrorHandler);
@@ -3717,7 +3792,7 @@ freeze(loggedErrorHandler);
 /**
  * @type {MakeAssert}
  */
-const makeAssert = (optRaise = undefined, unredacted = false) => {
+       const makeAssert = (optRaise = undefined, unredacted = false) => {
   const details = unredacted ? unredactedDetails : redactedDetails;
   const assertFailedDetails = details`Check failed`;
 
@@ -3729,7 +3804,6 @@ const makeAssert = (optRaise = undefined, unredacted = false) => {
   ) => {
     const reason = makeError(optDetails, errConstructor, options);
     if (optRaise !== undefined) {
-      // @ts-ignore returns `never` doesn't mean it isn't callable
       optRaise(reason);
     }
     throw reason;
@@ -3739,18 +3813,16 @@ const makeAssert = (optRaise = undefined, unredacted = false) => {
   /** @type {AssertionUtilities['Fail']} */
   const Fail = (template, ...args) => fail(details(template, ...args));
 
-  // Don't freeze or export `baseAssert` until we add methods.
-  // TODO If I change this from a `function` function to an arrow
-  // function, I seem to get type errors from TypeScript. Why?
+  // Don't freeze or export `assert` until we add methods.
   /** @type {BaseAssert} */
-  function baseAssert(
-    flag,
+  const assert = (
+    condition,
     optDetails = undefined,
     errConstructor = undefined,
     options = undefined,
-  ) {
-    flag || fail(optDetails, errConstructor, options);
-  }
+  ) => {
+    condition || fail(optDetails, errConstructor, options);
+  };
 
   /** @type {AssertionFunctions['equal']} */
   const equal = (
@@ -3792,25 +3864,36 @@ const makeAssert = (optRaise = undefined, unredacted = false) => {
   const assertString = (specimen, optDetails = undefined) =>
     assertTypeof(specimen, 'string', optDetails);
 
-  // Note that "assert === baseAssert"
-  /** @type {Assert} */
-  const assert = assign(baseAssert, {
-    error: makeError,
-    fail,
+  /** @type {Pick<AssertionFunctions, keyof AssertionFunctions>} */
+  const assertionFunctions = {
     equal,
     typeof: assertTypeof,
     string: assertString,
+    fail,
+  };
+
+  /** @type {AssertionUtilities} */
+  const assertionUtilities = {
+    makeError,
     note,
     details,
     Fail,
     quote,
     bare,
-    makeAssert,
+  };
+
+  /** @type {DeprecatedAssertionUtilities} */
+  const deprecated = { error: makeError, makeAssert };
+
+  /** @type {Assert} */
+  const finishedAssert = assign(assert, {
+    ...assertionFunctions,
+    ...assertionUtilities,
+    ...deprecated,
   });
-  return freeze(assert);
+  return freeze(finishedAssert);
 };$h͏_once.makeAssert(makeAssert);
 freeze(makeAssert);
-
 
 /** @type {Assert} */
 const assert = makeAssert();$h͏_once.assert(assert);
@@ -4683,6 +4766,11 @@ const CommonMath = {
     seal: fn,
     setPrototypeOf: fn,
     values: fn,
+    'RegisteredSymbol(harden)': {
+      ...fn,
+      // Installed with hardenTaming: 'unsafe'
+      isFake: 'boolean',
+    },
     // https://github.com/tc39/proposal-accessible-object-hasownproperty
     hasOwn: fn,
     // https://github.com/tc39/proposal-array-grouping
@@ -6892,6 +6980,7 @@ function sampleGlobals(globalObject, newPropertyNames) {
   '%ErrorPrototype%': {
     name: true  // set by "precond", "ava", "node-fetch"
   },
+
   '%IteratorPrototype%': {
     toString: true,
     // https://github.com/tc39/proposal-iterator-helpers
@@ -6905,6 +6994,8 @@ function sampleGlobals(globalObject, newPropertyNames) {
  * Moderate enablements are usually good enough for legacy compat.
  */$h͏_once.minEnablements(minEnablements);
        const moderateEnablements = {
+  ...minEnablements,
+
   '%ObjectPrototype%': {
     toString: true,
     valueOf: true,
@@ -6915,6 +7006,10 @@ function sampleGlobals(globalObject, newPropertyNames) {
     push: true, // set by "Google Analytics"
     concat: true, // set by mobx generated code (old TS compiler?)
     [iteratorSymbol]: true  // set by mobx generated code (old TS compiler?)
+  },
+
+  '%IteratorPrototype%': {
+    [iteratorSymbol]: true  // is sometimes used in custom iterators and generators implementations eg. @rive-app/canvas
   },
 
   // Function.prototype has no 'prototype' property to enable.
@@ -6981,14 +7076,6 @@ function sampleGlobals(globalObject, newPropertyNames) {
     constructor: true,
     name: true,
     toString: true,
-  },
-
-  '%IteratorPrototype%': {
-    toString: true,
-    // https://github.com/tc39/proposal-iterator-helpers
-    constructor: true,
-    // https://github.com/tc39/proposal-iterator-helpers
-    [toStringTagSymbol]: true,
   },
 };
 
@@ -7956,7 +8043,8 @@ const sourceMetaEntriesRegExp = new FERAL_REG_EXP(
 })()
 ,
 // === 33. ses ./src/transforms.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let FERAL_REG_EXP,SyntaxError,stringReplace,stringSearch,stringSlice,stringSplit,freeze,getSourceURL;$h͏_imports([["./commons.js", [["FERAL_REG_EXP",[$h͏_a => (FERAL_REG_EXP = $h͏_a)]],["SyntaxError",[$h͏_a => (SyntaxError = $h͏_a)]],["stringReplace",[$h͏_a => (stringReplace = $h͏_a)]],["stringSearch",[$h͏_a => (stringSearch = $h͏_a)]],["stringSlice",[$h͏_a => (stringSlice = $h͏_a)]],["stringSplit",[$h͏_a => (stringSplit = $h͏_a)]],["freeze",[$h͏_a => (freeze = $h͏_a)]]]],["./get-source-url.js", [["getSourceURL",[$h͏_a => (getSourceURL = $h͏_a)]]]]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let FERAL_REG_EXP,SyntaxError,regexpReplace,sealRegexp,stringSearch,stringSlice,stringSplit,freeze,getSourceURL;$h͏_imports([["./commons.js", [["FERAL_REG_EXP",[$h͏_a => (FERAL_REG_EXP = $h͏_a)]],["SyntaxError",[$h͏_a => (SyntaxError = $h͏_a)]],["regexpReplace",[$h͏_a => (regexpReplace = $h͏_a)]],["sealRegexp",[$h͏_a => (sealRegexp = $h͏_a)]],["stringSearch",[$h͏_a => (stringSearch = $h͏_a)]],["stringSlice",[$h͏_a => (stringSlice = $h͏_a)]],["stringSplit",[$h͏_a => (stringSplit = $h͏_a)]],["freeze",[$h͏_a => (freeze = $h͏_a)]]]],["./get-source-url.js", [["getSourceURL",[$h͏_a => (getSourceURL = $h͏_a)]]]]]);
+
 
 
 
@@ -7993,7 +8081,9 @@ function getLineNumber(src, pattern) {
 
 // /////////////////////////////////////////////////////////////////////////////
 
-const htmlCommentPattern = new FERAL_REG_EXP(`(?:${'<'}!--|--${'>'})`, 'g');
+const htmlCommentPattern = sealRegexp(
+  new FERAL_REG_EXP(`(?:${'<'}!--|--${'>'})`, 'g'),
+);
 
 /**
  * Conservatively reject the source text if it may contain text that some
@@ -8058,14 +8148,13 @@ const htmlCommentPattern = new FERAL_REG_EXP(`(?:${'<'}!--|--${'>'})`, 'g');
  */$h͏_once.rejectHtmlComments(rejectHtmlComments);
        const evadeHtmlCommentTest = src => {
   const replaceFn = match => (match[0] === '<' ? '< ! --' : '-- >');
-  return stringReplace(src, htmlCommentPattern, replaceFn);
+  return regexpReplace(htmlCommentPattern, src, replaceFn);
 };
 
 // /////////////////////////////////////////////////////////////////////////////
 $h͏_once.evadeHtmlCommentTest(evadeHtmlCommentTest);
-const importPattern = new FERAL_REG_EXP(
-  '(^|[^.]|\\.\\.\\.)\\bimport(\\s*(?:\\(|/[/*]))',
-  'g',
+const importPattern = sealRegexp(
+  new FERAL_REG_EXP('(^|[^.]|\\.\\.\\.)\\bimport(\\s*(?:\\(|/[/*]))', 'g'),
 );
 
 /**
@@ -8128,7 +8217,7 @@ const importPattern = new FERAL_REG_EXP(
  */$h͏_once.rejectImportExpressions(rejectImportExpressions);
        const evadeImportExpressionTest = src => {
   const replaceFn = (_, p1, p2) => `${p1}__import__${p2}`;
-  return stringReplace(src, importPattern, replaceFn);
+  return regexpReplace(importPattern, src, replaceFn);
 };
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -8226,7 +8315,9 @@ $h͏_once.applyTransforms(applyTransforms);const transforms=freeze({
 })()
 ,
 // === 34. ses ./src/scope-constants.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let arrayFilter,arrayIncludes,getOwnPropertyDescriptor,getOwnPropertyNames,hasOwn,regexpTest;$h͏_imports([["./commons.js", [["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["arrayIncludes",[$h͏_a => (arrayIncludes = $h͏_a)]],["getOwnPropertyDescriptor",[$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]],["getOwnPropertyNames",[$h͏_a => (getOwnPropertyNames = $h͏_a)]],["hasOwn",[$h͏_a => (hasOwn = $h͏_a)]],["regexpTest",[$h͏_a => (regexpTest = $h͏_a)]]]]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let arrayFilter,arrayIncludes,getOwnPropertyDescriptor,getOwnPropertyNames,hasOwn,regexpExec,Set,setHas;$h͏_imports([["./commons.js", [["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["arrayIncludes",[$h͏_a => (arrayIncludes = $h͏_a)]],["getOwnPropertyDescriptor",[$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]],["getOwnPropertyNames",[$h͏_a => (getOwnPropertyNames = $h͏_a)]],["hasOwn",[$h͏_a => (hasOwn = $h͏_a)]],["regexpExec",[$h͏_a => (regexpExec = $h͏_a)]],["Set",[$h͏_a => (Set = $h͏_a)]],["setHas",[$h͏_a => (setHas = $h͏_a)]]]]]);
+
+
 
 
 
@@ -8236,11 +8327,12 @@ $h͏_once.applyTransforms(applyTransforms);const transforms=freeze({
 
 
 /**
- * keywords
- * In JavaScript you cannot use these reserved words as variables.
- * See 11.6.1 Identifier Names
+ * reservedNames
+ * In JavaScript you cannot use reserved words as variable names (except for
+ * "eval", which is specially reserved to prevent shadowing).
+ * https://tc39.es/ecma262/multipage/ecmascript-language-lexical-grammar.html#sec-identifier-names
  */
-const keywords = [
+const reservedNames = new Set([
   // 11.6.2.1 Keywords
   'await',
   'break',
@@ -8301,7 +8393,10 @@ const keywords = [
 
   'this',
   'arguments',
-];
+
+  // Reserved by us
+  'eval',
+]);
 
 /**
  * identifierPattern
@@ -8317,24 +8412,12 @@ const identifierPattern = /^[a-zA-Z_$][\w$]*$/;
 
 /**
  * isValidIdentifierName()
- * What variable names might it bring into scope? These include all
- * property names which can be variable names, including the names
- * of inherited properties. It excludes symbols and names which are
- * keywords. We drop symbols safely. Currently, this shim refuses
- * service if any of the names are keywords or keyword-like. This is
- * safe and only prevent performance optimization.
+ * Is a value allowed as an arbitrary identifier name?
  *
  * @param {string} name
  */
-       const isValidIdentifierName = name => {
-  // Ensure we have a valid identifier. We use regexpTest rather than
-  // /../.test() to guard against the case where RegExp has been poisoned.
-  return (
-    name !== 'eval' &&
-    !arrayIncludes(keywords, name) &&
-    regexpTest(identifierPattern, name)
-  );
-};
+       const isValidIdentifierName = name =>
+  !setHas(reservedNames, name) && !!regexpExec(identifierPattern, name);
 
 /*
  * isImmutableDataProperty
@@ -8365,12 +8448,12 @@ function isImmutableDataProperty(obj, name) {
 
 /**
  * getScopeConstants()
- * What variable names might it bring into scope? These include all
+ * What variable names might be brought into scope? These include all
  * property names which can be variable names, including the names
  * of inherited properties. It excludes symbols and names which are
  * keywords. We drop symbols safely. Currently, this shim refuses
  * service if any of the names are keywords or keyword-like. This is
- * safe and only prevent performance optimization.
+ * safe and only affects performance optimization.
  *
  * @param {object} globalObject
  * @param {object} moduleLexicals
@@ -9657,8 +9740,7 @@ const wrapLogger = (logger, thisArg) =>
 })()
 ,
 // === 43. ses ./src/error/tame-v8-error-constructor.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let WeakMap,WeakSet,apply,arrayFilter,arrayJoin,arrayMap,arraySlice,create,defineProperties,fromEntries,reflectSet,regexpExec,regexpTest,weakmapGet,weakmapSet,weaksetAdd,weaksetHas,TypeError;$h͏_imports([["../commons.js", [["WeakMap",[$h͏_a => (WeakMap = $h͏_a)]],["WeakSet",[$h͏_a => (WeakSet = $h͏_a)]],["apply",[$h͏_a => (apply = $h͏_a)]],["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["arrayJoin",[$h͏_a => (arrayJoin = $h͏_a)]],["arrayMap",[$h͏_a => (arrayMap = $h͏_a)]],["arraySlice",[$h͏_a => (arraySlice = $h͏_a)]],["create",[$h͏_a => (create = $h͏_a)]],["defineProperties",[$h͏_a => (defineProperties = $h͏_a)]],["fromEntries",[$h͏_a => (fromEntries = $h͏_a)]],["reflectSet",[$h͏_a => (reflectSet = $h͏_a)]],["regexpExec",[$h͏_a => (regexpExec = $h͏_a)]],["regexpTest",[$h͏_a => (regexpTest = $h͏_a)]],["weakmapGet",[$h͏_a => (weakmapGet = $h͏_a)]],["weakmapSet",[$h͏_a => (weakmapSet = $h͏_a)]],["weaksetAdd",[$h͏_a => (weaksetAdd = $h͏_a)]],["weaksetHas",[$h͏_a => (weaksetHas = $h͏_a)]],["TypeError",[$h͏_a => (TypeError = $h͏_a)]]]]]);
-
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let WeakMap,WeakSet,apply,arrayFilter,arrayJoin,arrayMap,arraySlice,create,defineProperties,fromEntries,reflectSet,regexpExec,weakmapGet,weakmapSet,weaksetAdd,weaksetHas,TypeError;$h͏_imports([["../commons.js", [["WeakMap",[$h͏_a => (WeakMap = $h͏_a)]],["WeakSet",[$h͏_a => (WeakSet = $h͏_a)]],["apply",[$h͏_a => (apply = $h͏_a)]],["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["arrayJoin",[$h͏_a => (arrayJoin = $h͏_a)]],["arrayMap",[$h͏_a => (arrayMap = $h͏_a)]],["arraySlice",[$h͏_a => (arraySlice = $h͏_a)]],["create",[$h͏_a => (create = $h͏_a)]],["defineProperties",[$h͏_a => (defineProperties = $h͏_a)]],["fromEntries",[$h͏_a => (fromEntries = $h͏_a)]],["reflectSet",[$h͏_a => (reflectSet = $h͏_a)]],["regexpExec",[$h͏_a => (regexpExec = $h͏_a)]],["weakmapGet",[$h͏_a => (weakmapGet = $h͏_a)]],["weakmapSet",[$h͏_a => (weakmapSet = $h͏_a)]],["weaksetAdd",[$h͏_a => (weaksetAdd = $h͏_a)]],["weaksetHas",[$h͏_a => (weaksetHas = $h͏_a)]],["TypeError",[$h͏_a => (TypeError = $h͏_a)]]]]]);
 
 
 
@@ -9761,12 +9843,12 @@ const FILENAME_CENSORS = [
 // Exported only so it can be unit tested.
 // TODO Move so that it applies not just to v8.
        const filterFileName = fileName => {
-  if (!fileName) {
-    // Stack frames with no fileName should appear in concise stack traces.
-    return true;
+  if (fileName === null) {
+    // Seems to suppress builtins like `Array.every (<anonymous>)`
+    return false;
   }
   for (const filter of FILENAME_CENSORS) {
-    if (regexpTest(filter, fileName)) {
+    if (regexpExec(filter, fileName)) {
       return false;
     }
   }
@@ -9777,9 +9859,9 @@ const FILENAME_CENSORS = [
 // likely url-path prefix, ending in a `/.../` should get dropped.
 // Anything to the left of the likely path text is kept.
 // Everything to the right of `/.../` is kept. Thus
-// `'Object.bar (/vat-v1/.../eventual-send/test/deep-send.test.js:13:21)'`
+// `'Object.bar (/vat-v1/.../errors/test/deep-send.test.js:13:21)'`
 // simplifies to
-// `'Object.bar (eventual-send/test/deep-send.test.js:13:21)'`.
+// `'Object.bar (errors/test/deep-send.test.js:13:21)'`.
 //
 // See thread starting at
 // https://github.com/Agoric/agoric-sdk/issues/2326#issuecomment-773020389
@@ -9789,9 +9871,9 @@ $h͏_once.filterFileName(filterFileName);const CALLSITE_ELLIPSIS_PATTERN1=/^((?:
 // likely url-path prefix consisting of `.../` should get dropped.
 // Anything to the left of the likely path text is kept.
 // Everything to the right of `.../` is kept. Thus
-// `'Object.bar (.../eventual-send/test/deep-send.test.js:13:21)'`
+// `'Object.bar (.../errors/test/deep-send.test.js:13:21)'`
 // simplifies to
-// `'Object.bar (eventual-send/test/deep-send.test.js:13:21)'`.
+// `'Object.bar (errors/test/deep-send.test.js:13:21)'`.
 //
 // See thread starting at
 // https://github.com/Agoric/agoric-sdk/issues/2326#issuecomment-773020389
@@ -9802,9 +9884,9 @@ const CALLSITE_ELLIPSIS_PATTERN2 = /^((?:.*[( ])?)\.\.\.\/(.+)$/;
 // dropped.
 // Anything to the left of the likely path prefix text is kept. `package/` and
 // everything to its right is kept. Thus
-// `'Object.bar (/Users/markmiller/src/ongithub/agoric/agoric-sdk/packages/eventual-send/test/deep-send.test.js:13:21)'`
+// `'Object.bar (/Users/markmiller/src/ongithub/agoric/agoric-sdk/packages/errors/test/deep-send.test.js:13:21)'`
 // simplifies to
-// `'Object.bar (packages/eventual-send/test/deep-send.test.js:13:21)'`.
+// `'Object.bar (packages/errors/test/deep-send.test.js:13:21)'`.
 // Note that `/packages/` is a convention for monorepos encouraged by
 // lerna.
 const CALLSITE_PACKAGES_PATTERN = /^((?:.*[( ])?)[:/\w_-]*\/(packages\/.+)$/;
@@ -9814,7 +9896,7 @@ const CALLSITE_PACKAGES_PATTERN = /^((?:.*[( ])?)[:/\w_-]*\/(packages\/.+)$/;
 // dropped.
 // Anything to the left of the likely path prefix text is kept. Everything to
 // the right of `file://` is kept. Thus
-// `'Object.bar (file:///Users/markmiller/src/ongithub/endojs/endo/packages/eventual-send/test/deep-send.test.js:13:21)'` is unchanged but
+// `'Object.bar (file:///Users/markmiller/src/ongithub/endojs/endo/packages/errors/test/deep-send.test.js:13:21)'` is unchanged but
 // `'Object.bar (file://test/deep-send.test.js:13:21)'`
 
 // simplifies to
@@ -9880,6 +9962,10 @@ const CALLSITE_PATTERNS = [
   // const callSiteFilter = _callSite => true;
   const callSiteFilter = callSite => {
     if (omitFrames) {
+      // eslint-disable-next-line @endo/no-polymorphic-call
+      if (callSite.getFunctionName()?.startsWith('__HIDE_')) {
+        return false;
+      }
       // eslint-disable-next-line @endo/no-polymorphic-call
       return filterFileName(callSite.getFileName());
     }
@@ -11710,6 +11796,25 @@ $h͏_once.makeVirtualModuleInstance(makeVirtualModuleInstance);const makeModuleI
   };
   notifiers['*'] = notifyStar;
 
+  const wireUpExportNotifier = (exportName, notify) => {
+    if (!notifiers[exportName] && notify !== false) {
+      notifiers[exportName] = notify;
+
+      // exported live binding state
+      let value;
+      const update = newValue => (value = newValue);
+      notify(update);
+      exportsProps[exportName] = {
+        get() {
+          return value;
+        },
+        set: undefined,
+        enumerable: true,
+        configurable: false,
+      };
+    }
+  };
+
   // Per the calling convention for the moduleFunctor generated from
   // an ESM, the `imports` function gets called once up front
   // to populate or arrange the population of imports and reexports.
@@ -11763,30 +11868,15 @@ $h͏_once.makeVirtualModuleInstance(makeVirtualModuleInstance);const makeModuleI
         }
       }
       if (reexportMap[specifier]) {
-        // Make named reexports candidates too.
+        // Set up reexport notifiers instantly so they are available in cycles.
         for (const [localName, exportedName] of reexportMap[specifier]) {
-          candidateAll[exportedName] = importNotifiers[localName];
+          wireUpExportNotifier(exportedName, importNotifiers[localName]);
         }
       }
     }
 
     for (const [exportName, notify] of entries(candidateAll)) {
-      if (!notifiers[exportName] && notify !== false) {
-        notifiers[exportName] = notify;
-
-        // exported live binding state
-        let value;
-        const update = newValue => (value = newValue);
-        notify(update);
-        exportsProps[exportName] = {
-          get() {
-            return value;
-          },
-          set: undefined,
-          enumerable: true,
-          configurable: false,
-        };
-      }
+      wireUpExportNotifier(exportName, notify);
     }
 
     // Sort the module exports namespace as per spec.
@@ -12666,7 +12756,6 @@ function makeArguments() {
   }
 
   const ab = new ArrayBuffer(0);
-  // @ts-expect-error TODO How do I add sliceToImmutable to ArrayBuffer type?
   // eslint-disable-next-line @endo/no-polymorphic-call
   const iab = ab.sliceToImmutable();
   const iabProto = getPrototypeOf(iab);
@@ -13112,16 +13201,48 @@ const throws = thunk => {
 })()
 ,
 // === 57. ses ./src/reporting.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let functionBind,globalThis,assert;$h͏_imports([["./commons.js", [["functionBind",[$h͏_a => (functionBind = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]]]],["./error/assert.js", [["assert",[$h͏_a => (assert = $h͏_a)]]]]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let globalThis,assert;$h͏_imports([["./commons.js", [["globalThis",[$h͏_a => (globalThis = $h͏_a)]]]],["./error/assert.js", [["assert",[$h͏_a => (assert = $h͏_a)]]]]]);
 
 
 /**
  * @import {Reporter, GroupReporter} from './reporting-types.js'
  */
 
+/* eslint-disable @endo/no-polymorphic-call */
+/**
+ * To address https://github.com/endojs/endo/issues/2908,
+ * the `consoleReporter` uses the current `console` rather
+ * than the original one.
+ *
+ * @type {GroupReporter}
+ */
+const consoleReporter = {
+  warn(...args) {
+    globalThis.console.warn(...args);
+  },
+  error(...args) {
+    globalThis.console.error(...args);
+  },
+  ...(globalThis.console?.groupCollapsed
+    ? {
+        groupCollapsed(...args) {
+          globalThis.console.groupCollapsed(...args);
+        },
+      }
+    : undefined),
+  ...(globalThis.console?.groupEnd
+    ? {
+        groupEnd() {
+          globalThis.console.groupEnd();
+        },
+      }
+    : undefined),
+};
+/* eslint-enable @endo/no-polymorphic-call */
+
 /**
  * Creates a suitable reporter for internal errors and warnings out of the
- * Node.js console.error to ensure all messages to go stderr, including the
+ * Node.js console.error to ensure all messages go to stderr, including the
  * group label.
  * Accounts for the extra space introduced by console.error as a delimiter
  * between the indent and subsequent arguments.
@@ -13165,18 +13286,22 @@ const mute = () => {};
   if (reporting === 'none') {
     return makeReportPrinter(mute);
   }
-  if (
-    reporting === 'console' ||
-    globalThis.window === globalThis ||
-    globalThis.importScripts !== undefined
-  ) {
-    return console;
-  }
   if (globalThis.console !== undefined) {
+    if (
+      reporting === 'console' || // asks for console explicitly
+      globalThis.window === globalThis || // likely on browser
+      globalThis.importScripts !== undefined // likely on worker
+    ) {
+      // reporter just delegates directly to the current console
+      return consoleReporter;
+    }
+    assert(reporting === 'platform');
     // On Node.js, we send all feedback to stderr, regardless of purported level.
-    const console = globalThis.console;
-    const error = functionBind(console.error, console);
-    return makeReportPrinter(error);
+    // This uses `consoleReporter.error` instead of `console.error` because we
+    // want the constructed reporter to use the `console.error` of the current
+    // `console`, not the `console` that was installed when the reporter
+    // was created.
+    return makeReportPrinter(consoleReporter.error);
   }
   if (globalThis.print !== undefined) {
     return makeReportPrinter(globalThis.print);
@@ -13220,7 +13345,8 @@ const mute = () => {};
 })()
 ,
 // === 58. ses ./src/lockdown.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let getenv,FERAL_FUNCTION,FERAL_EVAL,TypeError,arrayFilter,globalThis,is,ownKeys,stringSplit,noEvalEvaluate,getOwnPropertyNames,getPrototypeOf,makeHardener,makeIntrinsicsCollector,removeUnpermittedIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,makeSafeEvaluator,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameModuleSource,tameConsole,tameErrorConstructor,assert,makeAssert,getAnonymousIntrinsics,makeCompartmentConstructor,tameHarden,tameSymbolConstructor,tameFauxDataProperties,tameRegeneratorRuntime,shimArrayBufferTransfer,reportInGroup,chooseReporter;$h͏_imports([["@endo/env-options", [["getEnvironmentOption",[$h͏_a => (getenv = $h͏_a)]]]],["@endo/immutable-arraybuffer/shim.js", []],["./commons.js", [["FERAL_FUNCTION",[$h͏_a => (FERAL_FUNCTION = $h͏_a)]],["FERAL_EVAL",[$h͏_a => (FERAL_EVAL = $h͏_a)]],["TypeError",[$h͏_a => (TypeError = $h͏_a)]],["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]],["is",[$h͏_a => (is = $h͏_a)]],["ownKeys",[$h͏_a => (ownKeys = $h͏_a)]],["stringSplit",[$h͏_a => (stringSplit = $h͏_a)]],["noEvalEvaluate",[$h͏_a => (noEvalEvaluate = $h͏_a)]],["getOwnPropertyNames",[$h͏_a => (getOwnPropertyNames = $h͏_a)]],["getPrototypeOf",[$h͏_a => (getPrototypeOf = $h͏_a)]]]],["./make-hardener.js", [["makeHardener",[$h͏_a => (makeHardener = $h͏_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector",[$h͏_a => (makeIntrinsicsCollector = $h͏_a)]]]],["./permits-intrinsics.js", [["default",[$h͏_a => (removeUnpermittedIntrinsics = $h͏_a)]]]],["./tame-function-constructors.js", [["default",[$h͏_a => (tameFunctionConstructors = $h͏_a)]]]],["./tame-date-constructor.js", [["default",[$h͏_a => (tameDateConstructor = $h͏_a)]]]],["./tame-math-object.js", [["default",[$h͏_a => (tameMathObject = $h͏_a)]]]],["./tame-regexp-constructor.js", [["default",[$h͏_a => (tameRegExpConstructor = $h͏_a)]]]],["./enable-property-overrides.js", [["default",[$h͏_a => (enablePropertyOverrides = $h͏_a)]]]],["./tame-locale-methods.js", [["default",[$h͏_a => (tameLocaleMethods = $h͏_a)]]]],["./global-object.js", [["setGlobalObjectConstantProperties",[$h͏_a => (setGlobalObjectConstantProperties = $h͏_a)]],["setGlobalObjectMutableProperties",[$h͏_a => (setGlobalObjectMutableProperties = $h͏_a)]],["setGlobalObjectEvaluators",[$h͏_a => (setGlobalObjectEvaluators = $h͏_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator",[$h͏_a => (makeSafeEvaluator = $h͏_a)]]]],["./permits.js", [["initialGlobalPropertyNames",[$h͏_a => (initialGlobalPropertyNames = $h͏_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString",[$h͏_a => (tameFunctionToString = $h͏_a)]]]],["./tame-domains.js", [["tameDomains",[$h͏_a => (tameDomains = $h͏_a)]]]],["./tame-module-source.js", [["tameModuleSource",[$h͏_a => (tameModuleSource = $h͏_a)]]]],["./error/tame-console.js", [["tameConsole",[$h͏_a => (tameConsole = $h͏_a)]]]],["./error/tame-error-constructor.js", [["default",[$h͏_a => (tameErrorConstructor = $h͏_a)]]]],["./error/assert.js", [["assert",[$h͏_a => (assert = $h͏_a)]],["makeAssert",[$h͏_a => (makeAssert = $h͏_a)]]]],["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics",[$h͏_a => (getAnonymousIntrinsics = $h͏_a)]]]],["./compartment.js", [["makeCompartmentConstructor",[$h͏_a => (makeCompartmentConstructor = $h͏_a)]]]],["./tame-harden.js", [["tameHarden",[$h͏_a => (tameHarden = $h͏_a)]]]],["./tame-symbol-constructor.js", [["tameSymbolConstructor",[$h͏_a => (tameSymbolConstructor = $h͏_a)]]]],["./tame-faux-data-properties.js", [["tameFauxDataProperties",[$h͏_a => (tameFauxDataProperties = $h͏_a)]]]],["./tame-regenerator-runtime.js", [["tameRegeneratorRuntime",[$h͏_a => (tameRegeneratorRuntime = $h͏_a)]]]],["./shim-arraybuffer-transfer.js", [["shimArrayBufferTransfer",[$h͏_a => (shimArrayBufferTransfer = $h͏_a)]]]],["./reporting.js", [["reportInGroup",[$h͏_a => (reportInGroup = $h͏_a)]],["chooseReporter",[$h͏_a => (chooseReporter = $h͏_a)]]]]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let getenv,FERAL_FUNCTION,FERAL_EVAL,TypeError,arrayFilter,globalThis,is,ownKeys,stringSplit,symbolFor,noEvalEvaluate,getOwnPropertyNames,getPrototypeOf,makeHardener,makeIntrinsicsCollector,removeUnpermittedIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,makeSafeEvaluator,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameModuleSource,tameConsole,tameErrorConstructor,assert,makeAssert,getAnonymousIntrinsics,makeCompartmentConstructor,tameHarden,tameSymbolConstructor,tameFauxDataProperties,tameRegeneratorRuntime,shimArrayBufferTransfer,reportInGroup,chooseReporter;$h͏_imports([["@endo/env-options", [["getEnvironmentOption",[$h͏_a => (getenv = $h͏_a)]]]],["@endo/immutable-arraybuffer/shim.js", []],["./commons.js", [["FERAL_FUNCTION",[$h͏_a => (FERAL_FUNCTION = $h͏_a)]],["FERAL_EVAL",[$h͏_a => (FERAL_EVAL = $h͏_a)]],["TypeError",[$h͏_a => (TypeError = $h͏_a)]],["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]],["is",[$h͏_a => (is = $h͏_a)]],["ownKeys",[$h͏_a => (ownKeys = $h͏_a)]],["stringSplit",[$h͏_a => (stringSplit = $h͏_a)]],["symbolFor",[$h͏_a => (symbolFor = $h͏_a)]],["noEvalEvaluate",[$h͏_a => (noEvalEvaluate = $h͏_a)]],["getOwnPropertyNames",[$h͏_a => (getOwnPropertyNames = $h͏_a)]],["getPrototypeOf",[$h͏_a => (getPrototypeOf = $h͏_a)]]]],["./make-hardener.js", [["makeHardener",[$h͏_a => (makeHardener = $h͏_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector",[$h͏_a => (makeIntrinsicsCollector = $h͏_a)]]]],["./permits-intrinsics.js", [["default",[$h͏_a => (removeUnpermittedIntrinsics = $h͏_a)]]]],["./tame-function-constructors.js", [["default",[$h͏_a => (tameFunctionConstructors = $h͏_a)]]]],["./tame-date-constructor.js", [["default",[$h͏_a => (tameDateConstructor = $h͏_a)]]]],["./tame-math-object.js", [["default",[$h͏_a => (tameMathObject = $h͏_a)]]]],["./tame-regexp-constructor.js", [["default",[$h͏_a => (tameRegExpConstructor = $h͏_a)]]]],["./enable-property-overrides.js", [["default",[$h͏_a => (enablePropertyOverrides = $h͏_a)]]]],["./tame-locale-methods.js", [["default",[$h͏_a => (tameLocaleMethods = $h͏_a)]]]],["./global-object.js", [["setGlobalObjectConstantProperties",[$h͏_a => (setGlobalObjectConstantProperties = $h͏_a)]],["setGlobalObjectMutableProperties",[$h͏_a => (setGlobalObjectMutableProperties = $h͏_a)]],["setGlobalObjectEvaluators",[$h͏_a => (setGlobalObjectEvaluators = $h͏_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator",[$h͏_a => (makeSafeEvaluator = $h͏_a)]]]],["./permits.js", [["initialGlobalPropertyNames",[$h͏_a => (initialGlobalPropertyNames = $h͏_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString",[$h͏_a => (tameFunctionToString = $h͏_a)]]]],["./tame-domains.js", [["tameDomains",[$h͏_a => (tameDomains = $h͏_a)]]]],["./tame-module-source.js", [["tameModuleSource",[$h͏_a => (tameModuleSource = $h͏_a)]]]],["./error/tame-console.js", [["tameConsole",[$h͏_a => (tameConsole = $h͏_a)]]]],["./error/tame-error-constructor.js", [["default",[$h͏_a => (tameErrorConstructor = $h͏_a)]]]],["./error/assert.js", [["assert",[$h͏_a => (assert = $h͏_a)]],["makeAssert",[$h͏_a => (makeAssert = $h͏_a)]]]],["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics",[$h͏_a => (getAnonymousIntrinsics = $h͏_a)]]]],["./compartment.js", [["makeCompartmentConstructor",[$h͏_a => (makeCompartmentConstructor = $h͏_a)]]]],["./tame-harden.js", [["tameHarden",[$h͏_a => (tameHarden = $h͏_a)]]]],["./tame-symbol-constructor.js", [["tameSymbolConstructor",[$h͏_a => (tameSymbolConstructor = $h͏_a)]]]],["./tame-faux-data-properties.js", [["tameFauxDataProperties",[$h͏_a => (tameFauxDataProperties = $h͏_a)]]]],["./tame-regenerator-runtime.js", [["tameRegeneratorRuntime",[$h͏_a => (tameRegeneratorRuntime = $h͏_a)]]]],["./shim-arraybuffer-transfer.js", [["shimArrayBufferTransfer",[$h͏_a => (shimArrayBufferTransfer = $h͏_a)]]]],["./reporting.js", [["reportInGroup",[$h͏_a => (reportInGroup = $h͏_a)]],["chooseReporter",[$h͏_a => (chooseReporter = $h͏_a)]]]]]);
+
 
 
 
@@ -13585,6 +13711,30 @@ const probeHostEvaluators = () => {
 
   const intrinsics = finalIntrinsics();
 
+  // Install Object[@harden] or abort.
+  const symbolForHarden = symbolFor('harden');
+  const priorHarden = intrinsics.Object[symbolForHarden];
+  if (priorHarden) {
+    // By convention, if a module like @endo/harden gets used before lockdown,
+    // it will install itself as a non-configurable, non-writable property over
+    // Object[@harden] so that versions of SES predating the introduction of
+    // Object[@harden] will fail to lockdown because they cannot remove an
+    // unknown intrinsic.
+    // All newer versions explicitly check for Object[@harden] (here).
+    // The @endo/harden implementation additionally captures a stack trace
+    // where harden was first used to assist developers in tracking down the
+    // hardened module that was initialized before lockdown.
+    if (priorHarden.lockdownError) {
+      throw priorHarden.lockdownError;
+    }
+    // And in the event a library installs Object[@harden] without leaving a
+    // hint, we fall back to a generic lockdown error.
+    throw new TypeError(
+      'Cannot lockdown (repairIntrinsics) if a prior harden implementation has been used and installed. Check for libraries using @endo/harden before lockdown.',
+    );
+  }
+  intrinsics.Object[symbolForHarden] = tamedHarden;
+
   const hostIntrinsics = { __proto__: null };
 
   // The Node.js Buffer is a derived class of Uint8Array, and as such is often
@@ -13626,19 +13776,16 @@ const probeHostEvaluators = () => {
     );
   }
 
+  // The default `assert` installed by `assert-shim.js` does not redact errors,
+  // leaving `lockdown` or `repairIntrinsics` with the obligation to replace it
+  // with a redacting version, unless the caller opts-out with errorTaming set
+  // to `unsafe` or `unsafe-debug`.
+  // The inverse was true through version 1.13.0, except the configuration
+  // was disregarded and the redacting `assert` left in place if lexical
+  // `assert` differed from `globalThis.assert`.
   // @ts-ignore assert is absent on globalThis type def.
-  if (
-    (errorTaming === 'unsafe' || errorTaming === 'unsafe-debug') &&
-    globalThis.assert === assert
-  ) {
-    // If errorTaming is 'unsafe' or 'unsafe-debug' we replace the
-    // global assert with
-    // one whose `details` template literal tag does not redact
-    // unmarked substitution values. IOW, it blabs information that
-    // was supposed to be secret from callers, as an aid to debugging
-    // at a further cost in safety.
-    // @ts-ignore assert is absent on globalThis type def.
-    globalThis.assert = makeAssert(undefined, true);
+  if (errorTaming !== 'unsafe' && errorTaming !== 'unsafe-debug') {
+    globalThis.assert = makeAssert();
   }
 
   // Replace *Locale* methods with their non-locale equivalents
@@ -13846,10 +13993,10 @@ globalThis.Compartment = makeCompartmentConstructor(
 })()
 ,
 // === 61. ses ./src/assert-shim.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let globalThis,assert;$h͏_imports([["./commons.js", [["globalThis",[$h͏_a => (globalThis = $h͏_a)]]]],["./error/assert.js", [["assert",[$h͏_a => (assert = $h͏_a)]]]]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let globalThis,makeAssert;$h͏_imports([["./commons.js", [["globalThis",[$h͏_a => (globalThis = $h͏_a)]]]],["./error/assert.js", [["makeAssert",[$h͏_a => (makeAssert = $h͏_a)]]]]]);
 
 
-globalThis.assert = assert;
+globalThis.assert = makeAssert(undefined, true);
 })()
 ,
 // === 62. ses ./src/console-shim.js ===
