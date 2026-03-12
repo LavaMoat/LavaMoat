@@ -732,19 +732,19 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
  */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
-   * @param {...any[]} args
    * @returns {any}
    * @this {object}
    */
-  const newValue = function (...args) {
+  const newValue = function () {
+    'use strict'
     if (new.target) {
       // handle constructor calls
-      return Reflect.construct(sourceValue, args, new.target)
+      return Reflect.construct(sourceValue, arguments, new.target)
     } else {
       // handle function calls
       // unwrap to target value if this value is the source package compartment's globalThis
       const thisRef = unwrapTest(this) ? unwrapTo : this
-      return Reflect.apply(sourceValue, thisRef, args)
+      return Reflect.apply(sourceValue, thisRef, arguments)
     }
   }
   Object.defineProperties(
