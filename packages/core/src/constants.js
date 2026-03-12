@@ -23,18 +23,35 @@ const GLOBAL_THIS_REFS = Object.freeze(
 
 /**
  * Default global properties that reference `globalThis`
+ *
+ * @type {readonly [
+ *   'window',
+ *   'self',
+ *   'global',
+ *   'globalThis',
+ *   'top',
+ *   'frames',
+ *   'parent',
+ * ]}
  */
 const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(Object.values(GLOBAL_THIS_REFS))
-
-/**
- * A global property that is known to reference `globalThis`
- *
- * @typedef {(typeof DEFAULT_GLOBAL_THIS_REFS)[number]} GlobalThisRef
- */
 
 /**
  * Same as `GlobalPolicyWrite` (see schema)
  */
 const POLICY_WRITE = 'write'
 
-module.exports = { GLOBAL_THIS_REFS, DEFAULT_GLOBAL_THIS_REFS, POLICY_WRITE }
+/**
+ * Symbols that look like globals but aren't; indexed by source type.
+ */
+const MODULE_REFS = /** @type {const} */ ({
+  module: ['arguments', 'import', 'export'],
+  script: ['arguments', 'require', 'module', 'exports'],
+})
+
+module.exports = {
+  MODULE_REFS,
+  GLOBAL_THIS_REFS,
+  DEFAULT_GLOBAL_THIS_REFS,
+  POLICY_WRITE,
+}

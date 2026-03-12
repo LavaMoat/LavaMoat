@@ -22,7 +22,7 @@
  */
 
 module.exports = endowmentsToolkit
-
+module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
@@ -46,6 +46,7 @@ function endowmentsToolkit({
     copyWrappedGlobals,
     getBuiltinForConfig,
     createFunctionWrapper,
+    attenuateBuiltin,
     // internals exposed for core
     // TODO: hide eventually?
     makeMinimalViewOfRef,
@@ -188,6 +189,27 @@ function endowmentsToolkit({
    *
    * @template {object} T
    * @param {T} moduleNamespace
+   * @param {string[]} paths
+   * @param {string[]} [explicitlyBanned]
+   * @returns {Partial<T>}
+   */
+  function attenuateBuiltin(moduleNamespace, paths, explicitlyBanned = []) {
+    const moduleNamespaceView = makeMinimalViewOfRef(
+      moduleNamespace,
+      paths.sort(),
+      undefined,
+      undefined,
+      explicitlyBanned
+    )
+    return moduleNamespaceView
+  }
+
+  /**
+   * Creates an object populated with only the deep properties specified in the
+   * packagePolicy for builtins.
+   *
+   * @template {object} T
+   * @param {T} moduleNamespace
    * @param {string} moduleId
    * @param {LMPolicy.BuiltinPolicy} policyBuiltin
    * @returns {Partial<T>}
@@ -212,14 +234,8 @@ function endowmentsToolkit({
         }
       }
     })
-    const moduleNamespaceView = makeMinimalViewOfRef(
-      moduleNamespace,
-      builtinPaths.sort(),
-      undefined,
-      undefined,
-      explicitlyBanned
-    )
-    return moduleNamespaceView
+
+    return attenuateBuiltin(moduleNamespace, builtinPaths, explicitlyBanned)
   }
 
   /**
@@ -728,23 +744,47 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
 }
 
 /**
- * @type {DefaultWrapperFn}
+ * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
+ */
+
+/**
+ * The default implementation of the utility for wrapping endowed function to
+ * set `this` to a correct reference.
+ *
+ * Wraps a function so that it has a proper context object.
+ *
+ * The motivation is that some functions in `globalThis` must be called with the
+ * `globalThis` object as context. This detects such functions and wraps them
+ * such that they are called with the correct context.
+ *
+ * Supports constructors (e.g., {@link FunctionConstructor}).
+ *
+ * @template {SomeFunction} [T=SomeFunction] Function to wrap. Can be a
+ *   constructor. Default is `SomeFunction`
+ * @template {object} [U=object] Context to use, if necessary. Default is
+ *   `object`
+ * @param {T} sourceValue Function to wrap
+ * @param {ContextTestFn} unwrapTest Test to determine context; if true will use
+ *   `unwrapTo` as `this`
+ * @param {U} unwrapTo Some object (usually a `globalThis`)
+ * @returns {T} Wrapped function
  */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
-   * @param {...any[]} args
-   * @returns {any}
-   * @this {object}
+   * @returns {ReturnType<T>}
+   * @this {U | Record<PropertyKey, any>}
    */
-  const newValue = function (...args) {
+  // eslint-disable-next-line func-style
+  const newValue = function () {
+    'use strict'
     if (new.target) {
       // handle constructor calls
-      return Reflect.construct(sourceValue, args, new.target)
+      return Reflect.construct(sourceValue, arguments, new.target)
     } else {
       // handle function calls
       // unwrap to target value if this value is the source package compartment's globalThis
       const thisRef = unwrapTest(this) ? unwrapTo : this
-      return Reflect.apply(sourceValue, thisRef, args)
+      return Reflect.apply(sourceValue, thisRef, arguments)
     }
   }
   Object.defineProperties(
@@ -757,7 +797,7 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   ) {
     Object.setPrototypeOf(newValue, Reflect.getPrototypeOf(sourceValue))
   }
-  return newValue
+  return /** @type {T} */ (newValue)
 }
 
 /**

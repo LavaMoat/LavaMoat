@@ -2,11 +2,21 @@ const test = require('ava')
 const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
 function prepareTest({ knownWritable } = {}) {
-  const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
+  const {
+    getEndowmentsForConfig,
+    copyWrappedGlobals,
+    getBuiltinForConfig,
+    attenuateBuiltin,
+  } = endowmentsToolkit({
     handleGlobalWrite: !!knownWritable,
     knownWritableFields: knownWritable,
   })
-  return { getEndowmentsForConfig, copyWrappedGlobals }
+  return {
+    getEndowmentsForConfig,
+    copyWrappedGlobals,
+    getBuiltinForConfig,
+    attenuateBuiltin,
+  }
 }
 
 test('getEndowmentsForConfig', (t) => {
@@ -95,7 +105,6 @@ test('getEndowmentsForConfig - siblings', (t) => {
   }
 })
 
-
 test('getEndowmentsForConfig - tightening access with false', (t) => {
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
@@ -104,7 +113,7 @@ test('getEndowmentsForConfig - tightening access with false', (t) => {
 
   const config = {
     globals: {
-      'a': false,
+      a: false,
       'a.q': true,
     },
   }
@@ -487,7 +496,10 @@ test('copyWrappedGlobals - support other realm prototype chains', (t) => {
   // Error: Lavamoat - unable to find common prototype between Compartment and globalRef
   copyWrappedGlobals(source, target, ['window'])
 
-  t.is(Object.getOwnPropertyNames(target).sort().join(), 'aNonEnumerableValue,legitimateValue,onTheObj,onTheProto,window')
+  t.is(
+    Object.getOwnPropertyNames(target).sort().join(),
+    'aNonEnumerableValue,legitimateValue,onTheObj,onTheProto,window'
+  )
 })
 
 test('copyWrappedGlobals - copy from prototype too', (t) => {
@@ -505,16 +517,82 @@ test('copyWrappedGlobals - copy from prototype too', (t) => {
   const target = Object.create(null)
   copyWrappedGlobals(source, target, ['window'])
 
-  t.is(Object.getOwnPropertyNames(target).sort().join(), 'aNonEnumerableValue,onTheObj,onTheProto,window')
+  t.is(
+    Object.getOwnPropertyNames(target).sort().join(),
+    'aNonEnumerableValue,onTheObj,onTheProto,window'
+  )
+})
+
+test('getBuiltinForConfig - nested builtin access', (t) => {
+  const { getBuiltinForConfig } = prepareTest()
+  const customSymbol = Symbol('custom')
+  const moduleNamespace = {
+    inspect: {
+      custom: customSymbol,
+      defaultOptions: { depth: 5 },
+    },
+    format: 'text',
+  }
+  const policyBuiltin = {
+    'util.inspect.custom': true,
+  }
+  const result = getBuiltinForConfig(moduleNamespace, 'util', policyBuiltin)
+
+  t.is(result.inspect.custom, customSymbol)
+  t.is(result.inspect.defaultOptions, undefined)
+  t.is(result.format, undefined)
+})
+
+test('getBuiltinForConfig - explicitlyBanned via false in policy', (t) => {
+  const { getBuiltinForConfig } = prepareTest()
+  const moduleNamespace = {
+    parse: function () {},
+    stringify: function () {},
+    extensions: {
+      safe: 'yes',
+      dangerous: 'no',
+    },
+  }
+  const policyBuiltin = {
+    'mymod.stringify': true,
+    'mymod.extensions': false,
+    'mymod.extensions.safe': true,
+  }
+  const result = getBuiltinForConfig(moduleNamespace, 'mymod', policyBuiltin)
+
+  t.is(result.parse, undefined)
+  t.is(typeof result.stringify, 'function')
+  t.is(result.extensions.safe, 'yes')
+  t.is(result.extensions.dangerous, undefined)
+})
+
+test('attenuateBuiltin - explicitlyBanned via false in policy', (t) => {
+  const { attenuateBuiltin } = prepareTest()
+  const moduleNamespace = {
+    parse: function () {},
+    stringify: function () {},
+    extensions: {
+      safe: 'yes',
+      dangerous: 'no',
+    },
+  }
+  const paths = ['extensions.safe', 'stringify']
+  // NOTE: no need to explicitly ban for this to work
+  const result = attenuateBuiltin(moduleNamespace, paths)
+
+  t.is(result.parse, undefined)
+  t.is(typeof result.stringify, 'function')
+  t.is(result.extensions.safe, 'yes')
+  t.is(result.extensions.dangerous, undefined)
 })
 
 test('copyWrappedGlobals - static methods on wrapped functions', (t) => {
   'use strict'
   const { copyWrappedGlobals } = prepareTest()
-  
+
   const source = {
     Array,
-    Uint8Array
+    Uint8Array,
   }
   const target = Object.create(null)
   copyWrappedGlobals(source, target)
