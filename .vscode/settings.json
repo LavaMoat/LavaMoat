@@ -1,10 +1,14 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit",
     "source.fixAll": "explicit",
-    "source.formatDocument": "explicit"
+    "source.formatDocument": "explicit",
+    "source.organizeImports": "explicit"
   },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.insertFinalNewline": false,
   "prettier.useEditorConfig": true,
-  "files.insertFinalNewline": false
+  "search.exclude": {
+    "**/packages/*/dist/**": true,
+    "**/packages/*/types/**": true
+  }
 }
