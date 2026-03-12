@@ -25,10 +25,9 @@ import {
   ENDO_POLICY_ITEM_WILDCARD,
   ENDO_POLICY_RESOURCES,
   LAVAMOAT_PKG_POLICY_NATIVE,
-  LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
 import { ConversionError } from './error.js'
-import { loadPolicies } from './policy-util.js'
+import { isMergedPolicy, loadPolicies } from './policy-util.js'
 import { isArray, isBoolean } from './util.js'
 
 const { create, entries, fromEntries } = Object
@@ -42,7 +41,10 @@ const { create, entries, fromEntries } = Object
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
  *   ToEndoPolicyOptions,
- * Resources} from './types.js'
+ *   Resources,
+ *   MergedLavaMoatPolicy,
+ *   ToEndoPolicyOptionsWithoutPolicyOverride,
+ *   UnmergedLavaMoatPolicy} from './types.js'
  */
 
 /**
@@ -96,29 +98,40 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
    */
   const policyItem = {}
 
+  /** @type {[string, boolean][]} */
+  const dot = []
+  /** @type {[string, boolean][]} */
+  const noDot = []
   for (const [key, value] of entries(item)) {
     if (key.includes('.')) {
-      let [builtinName, ...rest] = key.split('.')
-      let propName = rest.join('.')
-      const itemForBuiltin = policyItem[builtinName]
-      if (isBoolean(itemForBuiltin)) {
-        throw new ConversionError(
-          'Expected a FullAttenuationDefinition; got a boolean'
-        )
-      }
-      if (isArray(itemForBuiltin)) {
-        throw new ConversionError(
-          'Expected a FullAttenuationDefinition; got an array'
-        )
-      }
-      const otherParams = itemForBuiltin?.params ?? []
-      policyItem[builtinName] = {
-        attenuate: DEFAULT_ATTENUATOR,
-        params: [...otherParams, propName],
-      }
+      dot.push([key, value])
     } else {
-      policyItem[key] = value
+      noDot.push([key, value])
     }
+  }
+
+  for (const [key] of dot) {
+    let [builtinName, ...rest] = key.split('.')
+    let propName = rest.join('.')
+    const itemForBuiltin = policyItem[builtinName]
+    if (isBoolean(itemForBuiltin)) {
+      throw new ConversionError(
+        `Expected a FullAttenuationDefinition; got a boolean for ${key}`
+      )
+    }
+    if (isArray(itemForBuiltin)) {
+      throw new ConversionError(
+        'Expected a FullAttenuationDefinition; got an array'
+      )
+    }
+    const otherParams = itemForBuiltin?.params ?? []
+    policyItem[builtinName] = {
+      attenuate: DEFAULT_ATTENUATOR,
+      params: [...otherParams, propName],
+    }
+  }
+  for (const [key, value] of noDot) {
+    policyItem[key] = value
   }
   return policyItem
 }
@@ -139,13 +152,7 @@ const convertToEndoPackagePolicyPackages = (item) => {
    */
   const policyItem = {}
   for (const [key, value] of entries(item)) {
-    if (key === LAVAMOAT_PKG_POLICY_ROOT) {
-      throw new ConversionError(
-        `Unexpected root package (${LAVAMOAT_PKG_POLICY_ROOT}) referenced in package policy`
-      )
-    } else {
-      policyItem[key] = !!value
-    }
+    policyItem[key] = !!value
   }
   return policyItem
 }
@@ -159,12 +166,7 @@ const convertToEndoPackagePolicyPackages = (item) => {
  * @param {GlobalPolicy} [item] - A value in `ResourcePolicy`
  * @returns {LavaMoatEndoPackagePolicy['globals']}
  */
-const convertToEndoPackagePolicyGlobals = (item) => {
-  if (!item) {
-    return undefined
-  }
-  return [item]
-}
+const convertToEndoPackagePolicyGlobals = (item) => (!item ? undefined : [item])
 
 /**
  * Converts LavaMoat `ResourcePolicy` to Endo's `PackagePolicyOptions`
@@ -224,13 +226,14 @@ const convertToEndoPackagePolicy = (resources) => {
 /**
  * Converts a LavaMoat policy to an Endo policy.
  *
- * Takes policy overrides into account, if provided.
+ * **Will not** read policy overrides; assumes `policy` has already been merged.
  *
- * Performs validation of policy and policy overrides.
+ * Performs validation of policy.
  *
  * @overload
- * @param {LavaMoatPolicy} policy LavaMoat policy to convert
- * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @param {MergedLavaMoatPolicy} policy LavaMoat policy to convert
+ * @param {ToEndoPolicyOptionsWithoutPolicyOverride} [options] Options for
+ *   conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
@@ -243,7 +246,8 @@ const convertToEndoPackagePolicy = (resources) => {
  * Performs validation of policy and policy overrides.
  *
  * @overload
- * @param {string | URL} policyPath Path or URL to policy file)
+ * @param {string | URL | UnmergedLavaMoatPolicy} policyPath Path or URL to
+ *   policy file)
  * @param {ToEndoPolicyOptions} [options] Options for conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
@@ -252,23 +256,24 @@ const convertToEndoPackagePolicy = (resources) => {
 /**
  * Converts a LavaMoat policy to an Endo policy.
  *
- * Takes policy overrides into account, if provided.
- *
  * Performs validation of policy and policy overrides.
  *
  * @privateRemarks
  * The overloads aren't strictly necessary, but they're a little nicer to
  * understand for consumers.
- * @param {LavaMoatPolicy | string | URL} [policyOrPolicyPath] LavaMoat policy
- *   to convert (or path to policy file)
- * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @param {MergedLavaMoatPolicy | LavaMoatPolicy | string | URL} [policyOrPolicyPath]
+ *   LavaMoat policy to convert (or path to policy file)
+ * @param {ToEndoPolicyOptions | ToEndoPolicyOptionsWithoutPolicyOverride} [options]
+ *   Options for conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
 export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
   await Promise.resolve()
 
-  const policy = await loadPolicies(policyOrPolicyPath, options)
+  const policy = isMergedPolicy(policyOrPolicyPath)
+    ? policyOrPolicyPath
+    : await loadPolicies(policyOrPolicyPath, options)
 
   const lavamoatResources = /** @type {Resources} */ (
     policy.resources ?? create(null)
@@ -305,6 +310,9 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
       resources[rootPolicyRef] = {}
     }
     entry = resources[rootPolicyRef]
+    // we have to delete it from the list of resources or the "unknown canonical
+    // name" hook will fire for it
+    delete resources[rootPolicyRef]
   } else {
     entry = ENDO_POLICY_ENTRY_TRUSTED
   }

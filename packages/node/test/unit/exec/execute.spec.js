@@ -1,6 +1,8 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+import { run } from '../../../src/exec/run.js'
+import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createExecMacros } from './exec-macros.js'
 
 const { testExec, testExecForJSON } = createExecMacros(test)
@@ -27,7 +29,7 @@ test(
         },
         dummy: {
           packages: {
-            muddy: true,
+            'dummy>muddy': true,
           },
         },
       },
@@ -46,6 +48,42 @@ test(
 test('hashbang evasion', testExecForJSON, 'hashbang.json', {
   default: { hello: 'world' },
   hello: 'world',
+})
+
+test('policy enforcement - untrusted root', async (t) => {
+  const { readPowers } = await loadJSONFixture(
+    new URL('policy-enforcement.json', JSON_FIXTURE_DIR_URL)
+  )
+  await t.throwsAsync(
+    run(
+      '/node_modules/app/app.js',
+
+      {
+        policy: {
+          resources: {
+            app: {
+              packages: {
+                pid: true,
+              },
+            },
+            pid: {
+              globals: {
+                'process.pid': false,
+              },
+            },
+          },
+          root: {
+            usePolicy: 'app',
+          },
+        },
+        readPowers,
+        trustRoot: false,
+      }
+    ),
+    {
+      message: `Cannot read properties of undefined (reading 'pid')`,
+    }
+  )
 })
 
 test(
@@ -72,20 +110,23 @@ test(
   {
     policy: {
       resources: {
-        hello_world: {
+        'hello-world': {
           packages: {
-            'node-gyp-build': true,
+            'hello-world>node-gyp-build': true,
           },
           globals: {
             __dirname: true,
           },
           native: true,
         },
-        'hello_world>node-gyp-build': {
+        'hello-world>node-gyp-build': {
           globals: {
             __webpack_require__: true,
             __non_webpack_require__: true,
             process: true,
+          },
+          packages: {
+            'hello-world': true,
           },
           builtin: {
             'fs.existsSync': true,
@@ -120,4 +161,12 @@ test(
   }
 )
 
-test.todo('hashbang in module')
+test(
+  'do not fail if missing optional dependencies',
+  testExec,
+  new URL('../fixture/optional/node_modules/app/index.js', import.meta.url),
+  { value: 'hello world', default: { value: 'hello world' } },
+  {}
+)
+
+// test('"default" exported from exit modules', testExec)
