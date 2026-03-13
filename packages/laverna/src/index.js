@@ -1,12 +1,14 @@
+/**
+ * @import {LavernaOptions, LavernaCapabilities, PublishFn, Publisher, GetVersions, GlobDirent} from './types'
+ * @import {ExecFileException} from 'node:child_process'
+ * @import {PackageJson} from 'type-fest'
+ */
+
 const path = require('node:path')
 const { INFO, ERR, WARN, OK } = require('./log-symbols')
 const { yellow, bold, gray } = require('kleur')
-const {
-  DEFAULT_SPAWN_OPTS,
-  DEFAULT_GLOB_OPTS,
-  DEFAULT_CAPS,
-  DEFAULT_OPTS,
-} = require('./defaults')
+const { DEFAULT_GLOB_OPTS, DEFAULT_CAPS, DEFAULT_OPTS } = require('./defaults')
+const { createPublisher } = require('./publisher')
 
 /**
  * @param {unknown} arr
@@ -23,8 +25,8 @@ exports.Laverna = class Laverna {
   /**
    * Initializes options & capabilities
    *
-   * @param {import('./types').LavernaOptions} [opts]
-   * @param {import('./types').LavernaCapabilities} [caps]
+   * @param {LavernaOptions} [opts]
+   * @param {LavernaCapabilities} [caps]
    */
   constructor(opts = {}, caps = {}) {
     this.opts = { ...DEFAULT_OPTS, ...opts }
@@ -32,9 +34,14 @@ exports.Laverna = class Laverna {
     this.getVersions = this.caps.getVersionsFactory
       ? this.caps.getVersionsFactory(this.opts, this.caps)
       : this.defaultGetVersions
-    this.invokePublish = this.caps.invokePublishFactory
-      ? this.caps.invokePublishFactory(this.opts, this.caps)
-      : this.defaultInvokePublish
+
+    /**
+     * Cached publisher instance, created lazily by {@link getPublisher}.
+     *
+     * @private
+     * @type {Publisher | undefined}
+     */
+    this._publisher = undefined
   }
 
   /**
@@ -52,35 +59,34 @@ exports.Laverna = class Laverna {
   }
 
   /**
-   * Invoke `npm publish`
+   * Returns the {@link Publisher} for this instance, creating it lazily if
+   * needed.
    *
-   * @type {import('./types').InvokePublish}
+   * If a custom `publisherFactory` capability was provided, it is called;
+   * otherwise the default {@link createPublisher} factory detects the package
+   * manager via lockfile.
+   *
+   * @returns {Promise<Publisher>}
    */
-  async defaultInvokePublish(pkgs) {
-    const { dryRun, root: cwd } = this.opts
-    const { spawn, console } = this.caps
+  async getPublisher() {
+    if (this._publisher !== undefined) {
+      return this._publisher
+    }
 
-    await new Promise((resolve, reject) => {
-      const args = ['publish', ...pkgs.map((name) => `--workspace=${name}`)]
-      if (dryRun) {
-        args.push('--dry-run')
-      }
+    const factory = this.caps.publisherFactory ?? createPublisher
+    this._publisher = await factory(this.opts, this.caps)
+    return this._publisher
+  }
 
-      const relativeCwd = this.relPath(cwd)
-      console.error(
-        `${INFO} Running command in ${relativeCwd}:\nnpm ${args.join(' ')}`
-      )
-
-      spawn('npm', args, { ...DEFAULT_SPAWN_OPTS, cwd })
-        .once('error', reject)
-        .once('exit', (code) => {
-          if (code === 0) {
-            resolve(void 0)
-          } else {
-            reject(new Error(`npm publish exited with code ${code}`))
-          }
-        })
-    })
+  /**
+   * Publishes the given packages using the detected (or injected)
+   * {@link Publisher}.
+   *
+   * @type {PublishFn}
+   */
+  async publish(pkgs) {
+    const publisher = await this.getPublisher()
+    await publisher.publish(pkgs)
   }
 
   /**
@@ -107,7 +113,7 @@ exports.Laverna = class Laverna {
   /**
    * Default implementation of a {@link GetVersions} function.
    *
-   * @type {import('./types').GetVersions}
+   * @type {GetVersions}
    */
   async defaultGetVersions(name, cwd) {
     const { execFile, parseJson, console } = this.caps
@@ -136,7 +142,7 @@ exports.Laverna = class Laverna {
         // promisify'd `exec` is surfaced in the node typings
         // anywhere.
         const err = /**
-         * @type {import('node:child_process').ExecFileException & {
+         * @type {ExecFileException & {
          *   stdout: string
          * }}
          */ (e)
@@ -245,7 +251,7 @@ exports.Laverna = class Laverna {
     }
 
     /**
-     * @type {import('./types').GlobDirent[]}
+     * @type {GlobDirent[]}
      * @see {@link https://github.com/isaacs/node-glob/issues/551}
      */
     const dirents = await glob(workspaces, {
@@ -279,7 +285,7 @@ exports.Laverna = class Laverna {
                  * Parsed contents of `package.json` for the package in the dir
                  * represented by `dirent`
                  *
-                 * @type {import('type-fest').PackageJson}
+                 * @type {PackageJson}
                  */
                 let pkg
 
@@ -397,7 +403,16 @@ exports.Laverna = class Laverna {
     )
 
     if (this.opts.yes || (await this.confirm())) {
-      await this.invokePublish(pkgNames)
+      const publisher = await this.getPublisher()
+      if (publisher.name === 'yarn') {
+        console.error(
+          `${INFO} Detected ${bold('yarn.lock')}; using ${bold('yarn npm publish')}`
+        )
+      } else {
+        console.error(`${INFO} using ${bold('npm publish')}`)
+      }
+
+      await publisher.publish(pkgNames)
       console.error(`${OK} Done!`)
     } else {
       console.error(`${ERR} Aborted; no packages haved been published.`)

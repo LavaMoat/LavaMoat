@@ -7,6 +7,12 @@
  * @see {@link https://npm.im/memfs}
  */
 
+/**
+ * @import {SpawnFn, LavernaOptions, LavernaCapabilities} from '../src/types'
+ * @import {TestFn} from 'ava'
+ * @import {SpawnOptions} from 'node:child_process'
+ */
+
 const kleur = require('kleur')
 const crypto = require('node:crypto')
 const { glob: realGlob } = require('glob')
@@ -15,29 +21,30 @@ const { EventEmitter } = require('node:events')
 const { default: anyTest } = require('ava')
 const { memfs, fs } = require('memfs')
 const { Laverna } = require('../src')
-const { mock } = require('node:test')
+const nodeTest = require('node:test')
 
+const { mock } = nodeTest
 /**
  * Test context object for our tests
  *
  * @typedef PublishTestContext
- * @property {{ error: import('node:test').Mock<Console['error']> }} console
- * @property {import('node:test').Mock<import('../src/types').SpawnFn>} spawn
+ * @property {{ error: nodeTest.Mock<Console['error']> }} console
+ * @property {nodeTest.Mock<SpawnFn>} spawn
  * @property {(
- *   opts?: import('../src/types').LavernaOptions,
- *   caps?: import('../src/types').LavernaCapabilities
+ *   opts?: LavernaOptions,
+ *   caps?: LavernaCapabilities
  * ) => Promise<void>} runLaverna
  * @property {(
  *   pkgNames: string[],
- *   opts?: import('../src/types').LavernaOptions,
- *   caps?: import('../src/types').LavernaCapabilities
- * ) => Promise<void>} runInvokePublish
+ *   opts?: LavernaOptions,
+ *   caps?: LavernaCapabilities
+ * ) => Promise<void>} runPublish
  */
 
 /**
  * This just tells `ava` we're using {@link PublishTestContext} for the context.
  */
-const test = /** @type {import('ava').TestFn<PublishTestContext>} */ (anyTest)
+const test = /** @type {TestFn<PublishTestContext>} */ (anyTest)
 
 /**
  * A valid `package.json` for the root workspace used in many tests
@@ -61,7 +68,7 @@ function getRandomPkgName() {
  * Base options for {@link Laverna}, providing some stubs.
  */
 const BASE_OPTS = Object.freeze(
-  /** @type {import('../src/types').LavernaOptions} */ ({
+  /** @type {LavernaOptions} */ ({
     /**
      * Because the root of the phony `memfs` filesystem is `/`, we use it here.
      */
@@ -83,7 +90,7 @@ const BASE_OPTS = Object.freeze(
  * Base capabilities for {@link Laverna}, providing some stubs.
  */
 const BASE_CAPS = Object.freeze(
-  /** @type {import('../src/types').LavernaCapabilities} */ ({
+  /** @type {LavernaCapabilities} */ ({
     /**
      * The phony `fs` is given to `glob`--it supports a custom `fs` module--so
      * it can find files in there.
@@ -132,8 +139,8 @@ test.beforeEach((t) => {
     /**
      * @param {string} cmd
      * @param {string[]} args
-     * @param {import('node:child_process').SpawnOptions} opts
-     * @returns {import('node:events').EventEmitter}
+     * @param {SpawnOptions} opts
+     * @returns {EventEmitter}
      */
     // eslint-disable-next-line no-unused-vars
     (cmd, args, opts) => {
@@ -146,8 +153,7 @@ test.beforeEach((t) => {
   )
 
   /**
-   * Helps run {@link Laverna.invokePublish} with a custom set of options and
-   * caps.
+   * Helps run {@link Laverna.publish} with a custom set of options and caps.
    *
    * Provides the default {@link ConsoleSpy} and {@link SpawnSpy} implementations
    * if not overridden by the test.
@@ -155,11 +161,11 @@ test.beforeEach((t) => {
    * Does not create a child process
    *
    * @param {string[]} pkgNames
-   * @param {import('../src/types').LavernaOptions} opts
-   * @param {import('../src/types').LavernaCapabilities} caps
+   * @param {LavernaOptions} opts
+   * @param {LavernaCapabilities} caps
    * @returns {Promise<void>}
    */
-  const runInvokePublish = async (pkgNames, opts = {}, caps = {}) => {
+  const runPublish = async (pkgNames, opts = {}, caps = {}) => {
     opts = { ...BASE_OPTS, ...opts }
     t.true(opts.dryRun, 'dryRun must be true for tests')
     const laverna = new Laverna(opts, {
@@ -168,7 +174,7 @@ test.beforeEach((t) => {
       spawn: spawn,
       ...caps,
     })
-    await laverna.invokePublish(pkgNames)
+    await laverna.publish(pkgNames)
   }
 
   /**
@@ -180,8 +186,8 @@ test.beforeEach((t) => {
    *
    * Does not create a child process
    *
-   * @param {import('../src/types').LavernaOptions} opts
-   * @param {import('../src/types').LavernaCapabilities} caps
+   * @param {LavernaOptions} opts
+   * @param {LavernaCapabilities} caps
    * @returns {Promise<void>}
    */
   const runLaverna = async (opts = {}, caps = {}) => {
@@ -200,7 +206,7 @@ test.beforeEach((t) => {
     console,
     spawn,
     runLaverna,
-    runInvokePublish,
+    runPublish,
   }
 })
 
@@ -867,9 +873,9 @@ test('publishWorkspaces - known packages - duplicate package names', async (t) =
   )
 })
 
-test('invokePublish - basic usage', async (t) => {
+test('publish - basic usage', async (t) => {
   const pkgName = getRandomPkgName()
-  await t.context.runInvokePublish([pkgName])
+  await t.context.runPublish([pkgName])
 
   t.deepEqual(t.context.spawn.mock.calls[0].arguments, [
     'npm',
@@ -878,8 +884,8 @@ test('invokePublish - basic usage', async (t) => {
   ])
 })
 
-test('invokePublish - dry run', async (t) => {
-  await t.context.runInvokePublish(['foo'])
+test('publish - dry run', async (t) => {
+  await t.context.runPublish(['foo'])
 
   t.deepEqual(t.context.spawn.mock.calls[0].arguments, [
     'npm',
@@ -888,9 +894,9 @@ test('invokePublish - dry run', async (t) => {
   ])
 })
 
-test('invokePublish - nonzero exit code', async (t) => {
+test('publish - nonzero exit code', async (t) => {
   await t.throwsAsync(
-    t.context.runInvokePublish(
+    t.context.runPublish(
       ['foo'],
       {},
       {
@@ -909,10 +915,10 @@ test('invokePublish - nonzero exit code', async (t) => {
   )
 })
 
-test('invokePublish - other error', async (t) => {
+test('publish - other error', async (t) => {
   const err = new Error('help meeeee')
   await t.throwsAsync(
-    t.context.runInvokePublish(
+    t.context.runPublish(
       ['foo'],
       {},
       {
@@ -928,5 +934,115 @@ test('invokePublish - other error', async (t) => {
     {
       is: err,
     }
+  )
+})
+
+test('publish - yarn.lock present - uses yarn command', async (t) => {
+  const { fs: yarnFs } = memfs({
+    '/': {
+      'yarn.lock': '',
+    },
+  })
+
+  await t.context.runPublish(['foo'], {}, { fs: yarnFs })
+
+  const [cmd, args] = t.context.spawn.mock.calls[0].arguments
+  t.is(
+    [cmd, ...args].join(' '),
+    'yarn workspaces foreach -A --no-private --include foo npm publish --tolerate-republish --dry-run'
+  )
+})
+
+test('publish - yarn.lock present - multiple packages', async (t) => {
+  const { fs: yarnFs } = memfs({
+    '/': {
+      'yarn.lock': '',
+    },
+  })
+
+  await t.context.runPublish(['@endo/ses', '@endo/init'], {}, { fs: yarnFs })
+
+  const [cmd, args] = t.context.spawn.mock.calls[0].arguments
+  t.is(
+    [cmd, ...args].join(' '),
+    'yarn workspaces foreach -A --no-private --include @endo/ses --include @endo/init npm publish --tolerate-republish --dry-run'
+  )
+})
+
+test('publish - yarn.lock present - nonzero exit code', async (t) => {
+  const { fs: yarnFs } = memfs({
+    '/': {
+      'yarn.lock': '',
+    },
+  })
+
+  await t.throwsAsync(
+    t.context.runPublish(
+      ['foo'],
+      {},
+      {
+        fs: yarnFs,
+        spawn: mock.fn(() => {
+          const ee = new EventEmitter()
+          setImmediate(() => {
+            ee.emit('exit', 1)
+          })
+          return ee
+        }),
+      }
+    ),
+    {
+      message: /yarn workspaces foreach npm publish exited with code 1/,
+    }
+  )
+})
+
+test('publish - no yarn.lock - uses npm command', async (t) => {
+  const { fs: npmFs } = memfs({
+    '/': {
+      'package.json': JSON.stringify({ name: 'root', version: '1.0.0' }),
+    },
+  })
+
+  await t.context.runPublish(['foo'], {}, { fs: npmFs })
+
+  const [cmd] = t.context.spawn.mock.calls[0].arguments
+  t.is(cmd, 'npm')
+})
+
+test('publishWorkspaces - yarn.lock present - logs detection', async (t) => {
+  const { fs: yarnFs } = memfs({
+    '/': {
+      'yarn.lock': '',
+      'package.json': DEFAULT_ROOT_PKG_JSON,
+      packages: {
+        workspace1: {
+          'package.json': JSON.stringify({
+            name: 'workspace1',
+            version: '31337.420.69',
+          }),
+        },
+      },
+    },
+  })
+
+  await t.context.runLaverna(
+    {},
+    {
+      fs: yarnFs,
+      getVersionsFactory: () => async () => ['1.0.0'],
+    }
+  )
+
+  const logArgs = t.context.console.error.mock.calls.flatMap(
+    (call) => call.arguments
+  )
+  t.true(
+    logArgs.some((arg) => `${arg}`.includes('yarn.lock')),
+    'should log yarn.lock detection'
+  )
+  t.true(
+    logArgs.some((arg) => `${arg}`.includes('yarn npm publish')),
+    'should log yarn npm publish'
   )
 })
