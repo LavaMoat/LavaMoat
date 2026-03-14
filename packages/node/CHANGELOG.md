@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.11...node-v1.0.0) (2026-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **node:** major compatibility changes & parallel module inspection
+* Node.js v18 is no longer supported.
+
+### Features
+
+* **node:** major compatibility changes & parallel module inspection ([68e6a12](https://github.com/LavaMoat/LavaMoat/commit/68e6a128418a5c5d150983a84f6636774e0ba80c))
+
+
+### Bug Fixes
+
+* **deps:** upgrade ses, @types/node, endo ([c6eca11](https://github.com/LavaMoat/LavaMoat/commit/c6eca11b3cfc873b7f5776b0d08f6f329b48e490))
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.1.0 to ^1.0.0
+    * lavamoat-core bumped from ^17.1.3 to ^18.0.0
+    * lavamoat-tofu bumped from ^8.0.11 to ^9.0.0
+
 ## [0.4.11](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.10...node-v0.4.11) (2026-02-05)
 
 
