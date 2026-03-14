@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/types-v0.1.0...types-v1.0.0) (2026-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Features
+
+* **types:** add `include` property to LavaMoatPolicy ([3721cc7](https://github.com/LavaMoat/LavaMoat/commit/3721cc7981ec45dc0267ed348f24bc2e913d5e08))
+
+
+### Bug Fixes
+
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
 ## [0.1.0](https://github.com/LavaMoat/LavaMoat/compare/types-v0.0.1...types-v0.1.0) (2025-10-01)
 
 
