@@ -61,7 +61,10 @@ const tag2commit = async (user, project, tag) => {
       return res.json()
     })
     .then((data) => {
-      const { currentOid, refType } = data?.payload?.refInfo || {}
+      const { currentOid, refType } =
+        data?.payload?.refInfo ||
+        data?.payload?.codeViewTreeRoute?.refInfo ||
+        {}
 
       return {
         commit: currentOid,
