@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-extra-semi
 ;(function() {
   function getGlobalRef () {
     if (typeof globalThis !== 'undefined') {

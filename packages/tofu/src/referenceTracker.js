@@ -26,7 +26,6 @@ module.exports = {
  */
 
 /**
- *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').Node>} targetPath
  * @returns
  */
@@ -39,9 +38,10 @@ function getGraph(targetPath) {
     //   nodes.push()
     // },
     /**
-     *
-     * @param {import('@babel/traverse').NodePath<import('@babel/types').Node>} targetPath
-     * @param {*} refLink
+     * @param {import('@babel/traverse').NodePath<
+     *   import('@babel/types').Node
+     * >} targetPath
+     * @param {any} refLink
      */
     onLink(targetPath, refLink) {
       const originNode = targetPath.node
@@ -59,7 +59,6 @@ function getGraph(targetPath) {
 }
 
 /**
- *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').Node>} targetPath
  * @returns
  */
@@ -68,7 +67,9 @@ function expandUsage(targetPath) {
    * @type {ReferenceLinkage[]}
    */
   const nodes = []
-  /** @type {import('@babel/traverse').NodePath<import('@babel/types').Node>[]} */
+  /** @type {import('@babel/traverse').NodePath<
+  import('@babel/types').Node
+>[]} */
   const leaves = []
 
   walkUsage(targetPath, { onNode, onLeaf })
@@ -95,14 +96,20 @@ function expandUsage(targetPath) {
 /**
  * @typedef WalkUsageOptions
  * @property {(refLink: ReferenceLinkage) => void} onNode
- * @property {(path: import('@babel/traverse').NodePath<import('@babel/types').Node>) => void} onLeaf
- * @property {(originPath: import('@babel/traverse').NodePath<import('@babel/types').Node>, refLink: ReferenceLinkage) => void} onLink
+ * @property {(
+ *   path: import('@babel/traverse').NodePath<import('@babel/types').Node>
+ * ) => void} onLeaf
+ * @property {(
+ *   originPath: import('@babel/traverse').NodePath<
+ *     import('@babel/types').Node
+ *   >,
+ *   refLink: ReferenceLinkage
+ * ) => void} onLink
  */
 
 /**
- *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').Node>} targetPath
- * @param {*} param1
+ * @param {any} param1
  * @returns
  */
 function walkUsage(
@@ -129,8 +136,7 @@ function walkUsage(
 
 class ReferenceLinkage {
   /**
-   *
-   * @param {{path: import('@babel/traverse').NodePath, label: string}} param0
+   * @param {{ path: import('@babel/traverse').NodePath; label: string }} param0
    */
   constructor({ path, label }) {
     this.path = path
@@ -139,7 +145,6 @@ class ReferenceLinkage {
 }
 
 /**
- *
  * @param {import('@babel/traverse').Binding} [targetBinding]
  * @returns {ReferenceLinkage[]}
  */
@@ -175,16 +180,22 @@ class RefOutOfScopeError extends Error {
 RefOutOfScopeError.code = 'ERR_REF_OUT_OF_SCOPE'
 
 /**
- * @typedef {import('@babel/types').CallExpression|import('@babel/types').Identifier|import('@babel/types').ReturnStatement|import('@babel/types').VariableDeclarator|import('@babel/types').MemberExpression} DetectableNode
+ * @typedef {import('@babel/types').CallExpression
+ *   | import('@babel/types').Identifier
+ *   | import('@babel/types').ReturnStatement
+ *   | import('@babel/types').VariableDeclarator
+ *   | import('@babel/types').MemberExpression} DetectableNode
  */
 
 /**
  * @template {DetectableNode} T
- * @typedef {(targetPath: import('@babel/traverse').NodePath<T>) => ReferenceLinkage[]} Detector
+ * @typedef {(
+ *   targetPath: import('@babel/traverse').NodePath<T>
+ * ) => ReferenceLinkage[]} Detector
  */
 
 /**
- * @template {DetectableNode} [T=DetectableNode]
+ * @template {DetectableNode} [T=DetectableNode] Default is `DetectableNode`
  * @typedef {import('@babel/traverse').NodePath<T>} DetectableNodePath
  */
 
@@ -247,9 +258,9 @@ const usageDetectors = {
       }
       case 'ReturnStatement': {
         return usageDetectors[targetPath.parent.type](
-          /** @type {import('@babel/traverse').NodePath<import('@babel/types').ReturnStatement>} */ (
-            targetPath.parentPath
-          )
+          /** @type {import('@babel/traverse').NodePath<
+  import('@babel/types').ReturnStatement
+>} */ (targetPath.parentPath)
         )
       }
       case 'FunctionDeclaration': {
@@ -307,7 +318,7 @@ const usageDetectors = {
     if (leftSide.type === 'Identifier') {
       const binding = targetPath.scope.getBinding(leftSide.name)
       if (binding) {
-        // @ts-ignore - FIXME needs logic changes for type safety
+        // @ts-expect-error - FIXME needs logic changes for type safety
         return new ReferenceLinkage({
           path: binding.path,
           label: 'parent of member',
@@ -317,7 +328,7 @@ const usageDetectors = {
       }
     }
     const leftSidePath = pathLookup.get(leftSide)
-    // @ts-ignore - FIXME needs logic changes for type safety
+    // @ts-expect-error - FIXME needs logic changes for type safety
     return new ReferenceLinkage({
       path: leftSidePath,
       label: 'parent of member (unknown)',
@@ -356,7 +367,6 @@ function tracePathToUsages(targetPath) {
 }
 
 /**
- *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').Node>} targetPath
  * @returns {ReferenceLinkage}
  */
@@ -396,7 +406,6 @@ function makeReferenceLinkageForIdentifier(targetPath) {
 }
 
 /**
- *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').Node>} targetPath
  * @returns
  */

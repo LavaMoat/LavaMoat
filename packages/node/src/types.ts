@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Public types for `@lavamoat/node`
  *
@@ -34,7 +33,6 @@ import type {
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from './constants.js'
-
 export type { FileUrlString } from '@endo/compartment-mapper'
 
 /**
@@ -478,7 +476,6 @@ export type {
   Resources,
   RootPolicy,
 } from '@lavamoat/types'
-
 export type * from './errors.js'
 
 /**

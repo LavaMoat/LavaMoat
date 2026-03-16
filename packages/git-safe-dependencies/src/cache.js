@@ -8,7 +8,7 @@ exports.init = (name = 'cache') => {
   let data
   try {
     data = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'))
-  } catch (e) {
+  } catch {
     data = {}
   }
 

@@ -438,7 +438,7 @@ test('globals - firefox addon chrome api lazy getter works', async (t) => {
     // define lazy getter on chrome
     beforeCreateKernel: ({ globalThis }) => {
       function exportLazyGetter(object, prop, getter) {
-        let redefine = (value) => {
+        const redefine = (value) => {
           if (value === undefined) {
             delete object[prop]
           } else {

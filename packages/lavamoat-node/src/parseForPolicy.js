@@ -149,7 +149,7 @@ function makeResolveHook({ projectRoot, resolutions = {}, canonicalNameMap }) {
     }
     // utilize node's internal resolution algo
     const { resolve } = createRequire(new URL(`file://${referrer}`))
-    /* eslint-disable no-useless-catch */
+
     let resolved
     try {
       resolved = resolve(requestedName)
@@ -189,7 +189,7 @@ function makeImportHook({
     }
     try {
       var content = await fs.readFile(filename, 'utf8')
-    } catch (err) {
+    } catch {
       console.warn(
         `lavamoat-node/makeImportHook - could not read file "${filename}"`
       )
@@ -244,7 +244,7 @@ function makeImportHook({
         if (shouldResolve(requestedName, specifier)) {
           try {
             depValue = resolveHook(requestedName, specifier)
-          } catch (err) {
+          } catch {
             // graceful failure
             console.warn(
               `lavamoat-node/makeImportHandler - could not resolve "${requestedName}" from "${specifier}"`

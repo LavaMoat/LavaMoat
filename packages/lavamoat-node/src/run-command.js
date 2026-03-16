@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-eval */
 
 const path = require('node:path')
 const fs = require('node:fs')
@@ -48,7 +47,7 @@ function parseArgs() {
     console.error(`Error: '${commandName}' is not one of the locally installed commands. Missing: '${binEntry}'
     Possible reasons for this error:
     - node_modules not installed
-    - trying to run a globally installed script or command, 
+    - trying to run a globally installed script or command,
       which is not supported and not recommended`)
     process.exit(4)
   }

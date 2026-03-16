@@ -61,7 +61,7 @@ function elevateSecretPrototype(globalRef) {
           // The try-catch exists to avoid errors if a property is a getter-setter pair that we didn't know existed.
           // eslint-disable-next-line no-self-assign
           globalRef[key] = globalRef[key]
-        } catch (e) {}
+        } catch {}
       }
     }
   }

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 /* eslint-disable no-restricted-globals */
-/* eslint-disable n/shebang */
 // @ts-check
 
 const { bold, magenta, gray, italic, cyan, underline } = require('kleur')
@@ -66,7 +65,7 @@ function parseArgs(args) {
 }
 
 function main() {
-  let opts = parseArgs()
+  const opts = parseArgs()
 
   if (opts.help) {
     // this should be the only place we write to stdout unless we

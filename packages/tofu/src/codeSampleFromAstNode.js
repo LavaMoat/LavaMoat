@@ -5,12 +5,12 @@ module.exports = { codeSampleFromAstNode }
  * @import {NodeWithLocation} from './types'
  */
 
-
 // dumbed down the types to avoid circular dep on @lavamoat/types or lavamoat-core
 /**
- * @deprecated - moved to lavamoat-core - use the same function from there for better types
+ * @deprecated - Moved to lavamoat-core - use the same function from there for
+ *   better types
  * @param {NodeWithLocation} node
- * @param {{content: string|undefined}} moduleRecord
+ * @param {{ content: string | undefined }} moduleRecord
  * @returns {{ range: string; sample: string }}
  */
 function codeSampleFromAstNode(node, moduleRecord) {

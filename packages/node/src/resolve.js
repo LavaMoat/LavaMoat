@@ -35,7 +35,6 @@ export const resolveWorkspace = ({
   fs = nodeFs,
 } = {}) => {
   let current = toPath(from)
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const nicePath = hrPath(current)
     log.debug(`Searching for workspace in ${nicePath}`)
@@ -104,7 +103,7 @@ export const resolveBinScript = (
     )
   }
   let current = workspace
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const maybeBinDir = path.join(current, 'node_modules', '.bin')
     const niceBinDir = hrPath(maybeBinDir)

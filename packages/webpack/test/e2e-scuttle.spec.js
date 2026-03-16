@@ -1,4 +1,3 @@
-// eslint-disable-next-line ava/use-test
 const { default: ava } = require('ava')
 
 /**
@@ -13,7 +12,6 @@ const { default: ava } = require('ava')
 
 const test = /** @type {import('ava').TestFn<ScuttlingTestContext>} */ (ava)
 const path = require('node:path')
-// eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 
@@ -61,8 +59,7 @@ async function scuttleViaRuntimeConf(t, scuttleGlobalThis, globals) {
           scuttleGlobalThis,
         },
       }
-    }
-
+    },
   })
   const webpackConfig = {
     ...webpackConfigDefault,

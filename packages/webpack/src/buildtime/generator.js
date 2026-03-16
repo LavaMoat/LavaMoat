@@ -8,7 +8,7 @@ const {
 const { wrapper } = require('./wrapper.js')
 const diag = require('./diagnostics.js')
 
-// @ts-ignore // this one doesn't have official types
+// @ts-expect-error - no types
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
 const { RUNTIME_KEY } = require('../ENUM.json')
 

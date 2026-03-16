@@ -89,9 +89,8 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       // this test ensures class syntax works, with its required use of the "new" keyword
       module.exports.classCheck = () => {
         try {
-          // eslint-disable-next-line no-new
           new SomeClass()
-        } catch (err) {
+        } catch {
           return false
         }
         return true

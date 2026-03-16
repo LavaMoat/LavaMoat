@@ -48,12 +48,10 @@ const alwaysThrowHandler = new Proxy(
  * @type {ProxyHandler}
  */
 const scopeProxyHandlerProperties = {
-  // eslint-disable-next-line no-unused-vars
   get(_shadow, _prop) {
     return undefined
   },
 
-  // eslint-disable-next-line no-unused-vars
   set(_shadow, prop, _value) {
     // We should only hit this if the has() hook returned true matches the v8
     // ReferenceError message "Uncaught ReferenceError: xyz is not defined"
