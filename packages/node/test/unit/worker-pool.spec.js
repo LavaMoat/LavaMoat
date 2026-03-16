@@ -195,7 +195,8 @@ test.serial('WorkerPool sendTask - concurrent tasks', async (t) => {
   t.plan(6)
 
   pool = new WorkerPool(
-    /** @type {WorkerPool<TestMessage, TestResponse>} */ TEST_WORKER_PATH
+    /** @type {WorkerPool<TestMessage, TestResponse>} */ TEST_WORKER_PATH,
+    { maxWorkers: 3 }
   )
 
   // Send multiple tasks concurrently
