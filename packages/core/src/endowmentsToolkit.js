@@ -776,7 +776,6 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
    */
   // eslint-disable-next-line func-style
   const newValue = function () {
-    'use strict'
     if (new.target) {
       // handle constructor calls
       return Reflect.construct(sourceValue, arguments, new.target)
