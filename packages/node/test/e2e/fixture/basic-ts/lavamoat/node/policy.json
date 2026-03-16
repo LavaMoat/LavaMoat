@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "simple-dep": {
+      "globals": {
+        "process.argv.slice": true
+      }
+    }
+  }
+}
