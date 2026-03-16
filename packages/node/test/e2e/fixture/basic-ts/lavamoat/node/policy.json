@@ -2,7 +2,8 @@
   "resources": {
     "simple-dep": {
       "globals": {
-        "process.argv.slice": true
+        "process.argv.slice": true,
+        "process.env.SHOULD_BE_INCLUDED_IN_POLICY": true
       }
     }
   }
