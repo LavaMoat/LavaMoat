@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 // modified from https://github.com/Agoric/SES-shim/blob/aefefbfcbe53f5b4520542bfb4da14dd68f13ec6/packages/ses/src/whitelist.js

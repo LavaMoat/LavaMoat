@@ -144,7 +144,7 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
 
   /** @type {GetPolyfillsFn} */
   config.getPolyfills = (options) => {
-    let polyfills = originalGetPolyfills(options)
+    const polyfills = originalGetPolyfills(options)
     assertPolyfills(polyfills)
 
     const ses = hermesRuntime

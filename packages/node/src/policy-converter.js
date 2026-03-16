@@ -111,8 +111,8 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
   }
 
   for (const [key] of dot) {
-    let [builtinName, ...rest] = key.split('.')
-    let propName = rest.join('.')
+    const [builtinName, ...rest] = key.split('.')
+    const propName = rest.join('.')
     const itemForBuiltin = policyItem[builtinName]
     if (isBoolean(itemForBuiltin)) {
       throw new ConversionError(

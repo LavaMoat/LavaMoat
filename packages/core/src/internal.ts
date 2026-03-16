@@ -28,7 +28,7 @@ export type ContextTestFn = (context: object) => boolean
 export type SomeFunction =
   | (new (...args: any[]) => any)
   | ((...args: any[]) => any)
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   | Function
 
 /**

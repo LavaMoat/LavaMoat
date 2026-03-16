@@ -512,7 +512,6 @@ function endowmentsToolkit({
   function getPropertyDescriptorDeep(target, key) {
     /** @type {object | null} */
     let receiver = target
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       // abort if this is the end of the prototype chain.
       if (!receiver) {
@@ -529,7 +528,6 @@ function endowmentsToolkit({
         receiver = Reflect.getPrototypeOf(receiver)
       } else {
         // prototype lookup for primitives
-        // eslint-disable-next-line no-proto
         receiver = /** @type {any} */ (receiver).__proto__
       }
     }
@@ -774,16 +772,17 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
    * @returns {ReturnType<T>}
    * @this {U | Record<PropertyKey, any>}
    */
-  // eslint-disable-next-line func-style
   const newValue = function () {
     'use strict'
     if (new.target) {
       // handle constructor calls
+      // eslint-disable-next-line prefer-rest-params
       return Reflect.construct(sourceValue, arguments, new.target)
     } else {
       // handle function calls
       // unwrap to target value if this value is the source package compartment's globalThis
       const thisRef = unwrapTest(this) ? unwrapTo : this
+      // eslint-disable-next-line prefer-rest-params
       return Reflect.apply(sourceValue, thisRef, arguments)
     }
   }

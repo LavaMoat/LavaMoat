@@ -81,7 +81,10 @@ function dumpError(
  *   and get rid of this.
  */
 async function readPolicy(readPower, policyDir) {
-  let [policy, policyOverrides] = await Promise.all(
+  /** @type {LavaMoatPolicy | undefined} */
+  let policy
+
+  const results = await Promise.all(
     [DEFAULT_POLICY_FILENAME, DEFAULT_POLICY_OVERRIDE_FILENAME].map(
       (filename) =>
         readPower(path.resolve(policyDir, filename))
@@ -94,6 +97,8 @@ async function readPolicy(readPower, policyDir) {
           })
     )
   )
+  policy = results[0]
+  const policyOverrides = results[1]
   if (!policy) {
     throw new Error(`LavaMoat - policy not found in ${policyDir}`)
   }

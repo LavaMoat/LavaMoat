@@ -1,4 +1,4 @@
-import { File } from '@babel/types'
+import type { File } from '@babel/types'
 
 /**
  * Possible value of {@link LavamoatModuleRecord.type}.
@@ -13,6 +13,7 @@ export type ModuleRecordType = 'builtin' | 'native' | 'js'
  * @template InitArgs - Arguments to pass to the module initializer
  */
 export interface LavamoatModuleRecord<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   InitArgs extends readonly any[] = DefaultModuleInitArgs,
 > {
   /**
@@ -68,6 +69,7 @@ export interface LavamoatModuleRecord<
  * @template InitArgs - Arguments to pass to the module initializer
  */
 export type ModuleInitializer<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   InitArgs extends readonly any[] = DefaultModuleInitArgs,
 > = (...args: InitArgs) => void
 

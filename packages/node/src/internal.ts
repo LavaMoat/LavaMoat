@@ -75,7 +75,7 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
 export type SomeFunction =
   | (new (...args: any[]) => any)
   | ((...args: any[]) => any)
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   | Function
 
 /**
@@ -155,7 +155,7 @@ export type ResolveWorkspaceOptions = ResolveBinScriptOptions
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
   }[ReadNowPowersProp]
 >

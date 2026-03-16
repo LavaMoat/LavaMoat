@@ -12,7 +12,7 @@ test('envConfig - intrinsic prototype mutating package running in unfrozen realm
       }
     },
     defineTwo: () => {
-      /* eslint-disable-next-line */
+       
       Function.prototype.xyz = 'Hello'
       module.exports = Function.prototype.xyz
     },

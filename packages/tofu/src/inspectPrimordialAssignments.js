@@ -94,14 +94,14 @@ function memberExpressionChainToPath(node) {
   const path = []
   // walk down property chain
   while (isMemberLikeExpression(node.object)) {
-    // @ts-ignore - FIXME needs logic changes for type safety
+    // @ts-expect-error - FIXME needs logic changes for type safety
     path.push(node.property.name)
     node = node.object
   }
   // reached the end
-  // @ts-ignore - FIXME needs logic changes for type safety
+  // @ts-expect-error - FIXME needs logic changes for type safety
   path.push(node.property.name)
-  // @ts-ignore - FIXME needs logic changes for type safety
+  // @ts-expect-error - FIXME needs logic changes for type safety
   path.push(node.object.name)
   // fix order
   path.reverse()

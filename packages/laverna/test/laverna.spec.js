@@ -11,7 +11,6 @@ const kleur = require('kleur')
 const crypto = require('node:crypto')
 const { glob: realGlob } = require('glob')
 const { EventEmitter } = require('node:events')
-// eslint-disable-next-line ava/use-test
 const { default: anyTest } = require('ava')
 const { memfs, fs } = require('memfs')
 const { Laverna } = require('../src')
@@ -130,13 +129,12 @@ test.beforeEach((t) => {
    */
   const spawn = mock.fn(
     /**
-     * @param {string} cmd
-     * @param {string[]} args
-     * @param {import('node:child_process').SpawnOptions} opts
+     * @param {string} _cmd
+     * @param {string[]} _args
+     * @param {import('node:child_process').SpawnOptions} _opts
      * @returns {import('node:events').EventEmitter}
      */
-    // eslint-disable-next-line no-unused-vars
-    (cmd, args, opts) => {
+    (_cmd, _args, _opts) => {
       const ee = new EventEmitter()
       setImmediate(() => {
         ee.emit('exit', 0)

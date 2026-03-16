@@ -51,7 +51,6 @@ const log = new Loggerr({
 
 void run(entryPath, { policy, scuttleGlobalThis, readPowers, log }).catch(
   (err) => {
-    // eslint-disable-next-line no-console
     defaultLog.error(err)
     process.exitCode = 1
   }

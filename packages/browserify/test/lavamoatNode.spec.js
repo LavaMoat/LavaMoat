@@ -11,7 +11,7 @@ test('lavamoat-node compat - bundle works under lavamoat node', (t) => {
       maxBuffer: 8192 * 10000,
     })
   } catch (err) {
-    // eslint-disable-next-line ava/assertion-arguments
+     
     return t.fail(err.stderr.toString())
   }
   t.pass('bundling works under lavamoat node')

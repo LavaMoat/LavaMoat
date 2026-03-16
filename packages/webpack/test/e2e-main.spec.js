@@ -1,5 +1,4 @@
 const test = /** @type {import('ava').TestFn} */ (require('ava'))
-// eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
 
@@ -23,7 +22,10 @@ test('webpack/main - dist shape', (t) => {
 })
 
 test('webpack/main - default warning gets printed', (t) => {
-  t.regex(t.context.build.stdout, /options had to be overriden.*concatenateModules/)
+  t.regex(
+    t.context.build.stdout,
+    /options had to be overriden.*concatenateModules/
+  )
 })
 
 test('webpack/main - warns about excluded modules', (t) => {

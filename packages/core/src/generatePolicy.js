@@ -437,8 +437,6 @@ function createModuleInspector(opts) {
       let builtin
       /** @type {ResourcePolicy['packages']} */
       let packages
-      /** @type {ResourcePolicy['native']} */
-      let native
       // skip for root modules (modules not from deps)
       const isRootModule = root && packageName === root.packageName
       if (isRootModule && trustRoot) {
@@ -481,7 +479,8 @@ function createModuleInspector(opts) {
         builtin = importBuiltin
       }
       // get native modules
-      native = packageToNativeModules.has(packageName)
+      /** @type {ResourcePolicy['native']} */
+      const native = packageToNativeModules.has(packageName)
       // skip package policy if there are no settings needed
       // create empty resources object for the root module
       // to use as a proper reference (otherwise it'd be undefined)

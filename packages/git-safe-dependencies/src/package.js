@@ -38,7 +38,7 @@ const getDirectDependenciesForPath = async (rootPath) => {
           readFileSync(join(rootPath, workspacePath, 'package.json'))
         )
         return getDependencies(workspacePackageJson)
-      } catch (e) {
+      } catch {
         console.warn(
           `Warning: couldn't read package.json in workspace: ${workspacePath}`
         )

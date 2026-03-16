@@ -136,9 +136,8 @@ function inspectGlobals(
     const { memberExpressions, parentOfMembershipChain, topmostMember } =
       getMemberExpressionNesting(identifierNode, parents)
     // determine if used in an assignment expression
-    // @ts-ignore - FIXME needs logic changes for type safety
     const isAssignment = parentOfMembershipChain.type === 'AssignmentExpression'
-    // @ts-ignore - FIXME needs logic changes for type safety
+    // @ts-expect-error - FIXME needs logic changes for type safety
     const isAssignmentTarget = parentOfMembershipChain.left === topmostMember
     if (isAssignment && isAssignmentTarget) {
       // this membership chain is being assigned to
@@ -420,7 +419,7 @@ function inspectRequires(ast, packagesToInspect, deep = true) {
       initialKeyPath
     )
     declaredVars.forEach(({ node, keyPath }) => {
-      // @ts-ignore - FIXME - `name` not present on all nodes of type `Declaration`
+      // @ts-expect-error - FIXME - `name` not present on all nodes of type `Declaration`
       const varName = node.name
       const refs = path.scope.getBinding(varName)?.referencePaths
       // if the var is not used anywhere, still whitelist it so the require call doesnt fail
