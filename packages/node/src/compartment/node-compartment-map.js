@@ -117,6 +117,8 @@ export const makeNodeCompartmentMap = async (
   /** @type {CanonicalName | undefined} */
   let rootUsePolicy
 
+  const peerToAdd ={}
+
   /** @type {MapNodeModulesOptions} */
   const mapNodeModulesOptions = {
     conditions: new Set(DEFAULT_CONDITIONS),
@@ -140,6 +142,22 @@ export const makeNodeCompartmentMap = async (
         // @ts-expect-error - https://github.com/endojs/endo/pull/3111
         if (!trustRoot && canonicalName === ROOT_COMPARTMENT) {
           rootUsePolicy = name
+        }
+        if (packageDescriptor?.peerDependenciesMeta) {
+          process._rawDebug(
+            `Adding peer dependencies for ${canonicalName}: ${Object.keys(
+              packageDescriptor.peerDependenciesMeta
+            ).join(', ')}`
+          )
+          peerToAdd[canonicalName] = {}
+          packageDescriptor.dependencies ||
+            (packageDescriptor.dependencies = {})
+          Object.keys(packageDescriptor.peerDependenciesMeta).forEach(
+            (peerDep) => {
+              packageDescriptor.dependencies[peerDep] = '*'
+              peerToAdd[canonicalName][peerDep] = '*'
+            }
+          )
         }
         knownCanonicalNames.add(canonicalName)
         packageJsonsByLocation.set(
@@ -166,6 +184,7 @@ export const makeNodeCompartmentMap = async (
       canonicalName,
       dependencies,
     }) => {
+      
       if (policyOverride) {
         const { resources } = policyOverride
         if (canonicalName in resources) {

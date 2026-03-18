@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@lavamoat/node": "file:../../node",
+    "@lavamoat/webpack": "file:..",
     "@types/webpack": "^5.28.1",
     "css-loader": "^6.7.3",
     "esbuild-loader": "^3.0.1",
@@ -28,6 +29,7 @@
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.2",
     "webpack-cli": "^5.1.4",
+    "webpack":"*",
     "webpack-virtual-modules": "^0.5.0"
   }
 }

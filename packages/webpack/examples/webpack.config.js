@@ -1,5 +1,6 @@
 // @ts-check
-const LavaMoat = require('../src/plugin.js')
+const LavaMoat = require('@lavamoat/webpack')
+
 const { ProgressPlugin } = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')

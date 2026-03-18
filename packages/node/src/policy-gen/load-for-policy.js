@@ -194,6 +194,8 @@ export const loadAndGeneratePolicy = async (
   /** @type {string[]} */
   const warnings = []
   try {
+    process._rawDebug(Object.values(packageCompartmentMap.compartments).filter(c=>c.label.endsWith('webpack>terser-webpack-plugin')))
+
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
       importHook: nullImportHook,
@@ -209,6 +211,7 @@ export const loadAndGeneratePolicy = async (
         canonicalName: rawCanonicalName,
         connections,
       }) => {
+        rawCanonicalName === 'webpack>terser-webpack-plugin' && process._rawDebug('!!!',connections)
         if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
           return
         }
