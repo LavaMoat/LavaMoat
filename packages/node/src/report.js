@@ -243,10 +243,11 @@ export const reportSesViolations = (
  * If the console is not a TTY, this function will return a pair of functions
  * that do nothing.
  *
+ * @param {boolean} disabled - If true, the reporter will not report progress
  * @returns {ModuleInspectionProgressReporter}
  */
-export const createModuleInspectionProgressReporter = () => {
-  if (!process.stderr.isTTY) {
+export const createModuleInspectionProgressReporter = (disabled = false) => {
+  if (!process.stderr.isTTY || disabled) {
     return {
       reportModuleInspectionProgress: () => 0,
       reportModuleInspectionProgressEnd: () => {},

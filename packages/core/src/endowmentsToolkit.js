@@ -46,6 +46,7 @@ function endowmentsToolkit({
     copyWrappedGlobals,
     getBuiltinForConfig,
     createFunctionWrapper,
+    attenuateBuiltin,
     // internals exposed for core
     // TODO: hide eventually?
     makeMinimalViewOfRef,
@@ -188,6 +189,27 @@ function endowmentsToolkit({
    *
    * @template {object} T
    * @param {T} moduleNamespace
+   * @param {string[]} paths
+   * @param {string[]} [explicitlyBanned]
+   * @returns {Partial<T>}
+   */
+  function attenuateBuiltin(moduleNamespace, paths, explicitlyBanned = []) {
+    const moduleNamespaceView = makeMinimalViewOfRef(
+      moduleNamespace,
+      paths.sort(),
+      undefined,
+      undefined,
+      explicitlyBanned
+    )
+    return moduleNamespaceView
+  }
+
+  /**
+   * Creates an object populated with only the deep properties specified in the
+   * packagePolicy for builtins.
+   *
+   * @template {object} T
+   * @param {T} moduleNamespace
    * @param {string} moduleId
    * @param {LMPolicy.BuiltinPolicy} policyBuiltin
    * @returns {Partial<T>}
@@ -212,14 +234,8 @@ function endowmentsToolkit({
         }
       }
     })
-    const moduleNamespaceView = makeMinimalViewOfRef(
-      moduleNamespace,
-      builtinPaths.sort(),
-      undefined,
-      undefined,
-      explicitlyBanned
-    )
-    return moduleNamespaceView
+
+    return attenuateBuiltin(moduleNamespace, builtinPaths, explicitlyBanned)
   }
 
   /**
@@ -755,20 +771,20 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
  */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
-   * @param {SomeParameters<T>} args
    * @returns {ReturnType<T>}
    * @this {U | Record<PropertyKey, any>}
    */
   // eslint-disable-next-line func-style
-  const newValue = function (...args) {
+  const newValue = function () {
+    'use strict'
     if (new.target) {
       // handle constructor calls
-      return Reflect.construct(sourceValue, args, new.target)
+      return Reflect.construct(sourceValue, arguments, new.target)
     } else {
       // handle function calls
       // unwrap to target value if this value is the source package compartment's globalThis
       const thisRef = unwrapTest(this) ? unwrapTo : this
-      return Reflect.apply(sourceValue, thisRef, args)
+      return Reflect.apply(sourceValue, thisRef, arguments)
     }
   }
   Object.defineProperties(

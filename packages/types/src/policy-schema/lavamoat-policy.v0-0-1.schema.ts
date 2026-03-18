@@ -41,16 +41,17 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
   root?: RootPolicy<T>
 
   /**
-   * List of canonical names to forcefully include in the policy
+   * List of canonical names and/or entry paths to forcefully include in the
+   * policy
    *
    * If an array of strings is provided, the entry is assumed to be the
    * entrypoint of the package. Otherwise, name is the canonical name of the
    * package and entry is the relative path from the package root to the desired
    * module.
    */
-  include?:
-    | Array<Extract<keyof T, string>>
-    | Array<{ name: Extract<keyof T, string>; entry: string }>
+  include?: Array<
+    { name: Extract<keyof T, string>; entry: string } | Extract<keyof T, string>
+  >
 }
 
 /**

@@ -8,7 +8,7 @@ const __dirname = dirname(__filename)
 const TEST_WORKER_PATH = join(__dirname, 'fixture', 'test-worker.js')
 
 /**
- * @import {BaseMessage} from '../../src/internal.js'
+ * @import {Worker} from 'node:worker_threads'
  */
 
 /**
@@ -73,7 +73,7 @@ test.serial('WorkerPool constructor - uses default idle timeout', (t) => {
   )
 
   t.is(pool.workerScript, TEST_WORKER_PATH)
-  t.is(pool.idleTimeout, 5000) // DEFAULT_WORKER_IDLE_TIMEOUT
+  t.is(pool.idleTimeout, 1000) // DEFAULT_WORKER_IDLE_TIMEOUT
 })
 
 test.serial('WorkerPool constructor - accepts custom idle timeout', (t) => {
@@ -195,7 +195,8 @@ test.serial('WorkerPool sendTask - concurrent tasks', async (t) => {
   t.plan(6)
 
   pool = new WorkerPool(
-    /** @type {WorkerPool<TestMessage, TestResponse>} */ TEST_WORKER_PATH
+    /** @type {WorkerPool<TestMessage, TestResponse>} */ TEST_WORKER_PATH,
+    { maxWorkers: 3 }
   )
 
   // Send multiple tasks concurrently
@@ -263,13 +264,13 @@ test.serial('WorkerPool getWorker - reuses available worker', (t) => {
   )
 
   // Create and return a worker to the pool
-  const worker1 = pool.getWorker()
+  const worker1 = /** @type {Worker} */ (pool.getWorker())
   pool.returnWorker(worker1)
 
   t.is(pool.availableWorkerCount, 1)
 
   // Get worker again - should reuse the same one
-  const worker2 = pool.getWorker()
+  const worker2 = /** @type {Worker} */ (pool.getWorker())
 
   t.is(worker1, worker2) // Same worker instance
   t.is(pool.availableWorkerCount, 0) // Worker removed from available pool
@@ -283,7 +284,7 @@ test.serial('WorkerPool returnWorker - adds worker to available pool', (t) => {
     /** @type {WorkerPool<TestMessage, TestResponse>} */ TEST_WORKER_PATH
   )
 
-  const worker = pool.getWorker()
+  const worker = /** @type {Worker} */ (pool.getWorker())
   t.is(pool.availableWorkerCount, 0)
 
   pool.returnWorker(worker)
@@ -408,7 +409,7 @@ test.serial('WorkerPool handleWorkerMessage - ignores unknown task ID', (t) => {
   pool = new WorkerPool(
     /** @type {WorkerPool<TestMessage, TestResponse>} */ TEST_WORKER_PATH
   )
-  const worker = pool.getWorker()
+  const worker = /** @type {Worker} */ (pool.getWorker())
 
   const initialTaskCount = pool.outstandingTaskCount
 
@@ -478,7 +479,7 @@ test.serial(
     )
 
     // Manually create a worker and add multiple tasks to it
-    const worker = pool.getWorker()
+    const worker = /** @type {Worker} */ (pool.getWorker())
 
     // Simulate multiple pending tasks for the same worker
     pool.pendingTasks.set('task-1', {
@@ -520,7 +521,7 @@ test.serial(
       { idleTimeout: shortTimeout }
     )
 
-    const worker = pool.getWorker()
+    const worker = /** @type {Worker} */ (pool.getWorker())
     t.is(pool.availableWorkerCount, 0)
 
     pool.returnWorker(worker)
@@ -542,7 +543,7 @@ test.serial(
       { idleTimeout: 1000 }
     )
 
-    const worker = pool.getWorker()
+    const worker = /** @type {Worker} */ (pool.getWorker())
     pool.returnWorker(worker)
 
     t.is(pool.availableWorkerCount, 1)

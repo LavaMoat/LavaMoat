@@ -32,10 +32,12 @@ import {
   inspectGlobals,
   inspectRequires,
   inspectSesCompat,
+  utils as tofuUtils,
 } from 'lavamoat-tofu'
-import { builtinModules } from 'node:module'
 import { isMainThread, parentPort } from 'node:worker_threads'
 import {
+  ALL_BUILTIN_MODULES,
+  LAVAMOAT_POLICY_ITEM_READ,
   MessageTypes,
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
@@ -66,17 +68,13 @@ if (!isMainThread && parentPort) {
   throw new Error('This module is intended to be run as a Worker thread.')
 }
 
-const { getOwnPropertyNames } = Object
-
-/**
- * Array of all builtin modules, including both bare names (e.g., 'fs') and
- * node: protocol names (e.g., 'node:fs')
- */
-const ALL_BUILTIN_MODULES = builtinModules.flatMap((name) =>
-  name.startsWith('node:') ? [name] : [name, `node:${name}`]
-)
+const { getOwnPropertyNames, freeze, create } = Object
 
 const globalObjPrototypeRefs = getOwnPropertyNames(Object.prototype)
+
+const builtinModules = freeze([...ALL_BUILTIN_MODULES])
+
+const decoder = new TextDecoder('utf-8')
 
 /**
  * Type guard to check if a message is an {@link InspectMessage}
@@ -133,7 +131,7 @@ const globalMapToGlobalPolicy = (globalMap) => {
 
   for (const [key, value] of globalMap.entries()) {
     // Replace 'read' with true
-    if (value === 'read') {
+    if (value === LAVAMOAT_POLICY_ITEM_READ) {
       result[key] = true
     } else if (value === 'write' && key.includes('.') && !key.endsWith('.')) {
       // Handle 'write' values with dots (not at the end)
@@ -171,6 +169,9 @@ const globalMapToGlobalPolicy = (globalMap) => {
  * @returns {GlobalPolicy | null} The processed global policy
  */
 const createGlobalPolicy = (ast, sourceType) => {
+  /**
+   * These are essentially things that look like globals but aren't.
+   */
   const moduleRefs = MODULE_REFS[sourceType]
   if (!moduleRefs) {
     throw new InvalidArgumentsError(`Unknown sourceType: ${sourceType}`)
@@ -187,39 +188,39 @@ const createGlobalPolicy = (ast, sourceType) => {
 }
 
 /**
- * @param {ParseResult} ast
- * @returns {Set<string>} The set of builtin modules imported
+ * Finds all builtins in use by the AST.
+ *
+ * @param {ParseResult} ast AST of some module
+ * @returns {Set<string>} A `Set` of builtin modules imported
  */
 const inspectBuiltins = (ast) => {
-  const esmModuleBuiltins = inspectEsmImports(ast, ALL_BUILTIN_MODULES)
-  const { cjsImports: cjsModuleBuiltins } = inspectRequires(
-    ast,
-    ALL_BUILTIN_MODULES
-  )
+  const esmModuleBuiltins = inspectEsmImports(ast, builtinModules)
+  const { cjsImports: cjsModuleBuiltins } = inspectRequires(ast, builtinModules)
   if (cjsModuleBuiltins.length + esmModuleBuiltins.length === 0) {
     return new Set()
   }
 
-  return new Set([...cjsModuleBuiltins, ...esmModuleBuiltins])
-  // // add debug info
-  // if (includeDebugInfo) {
-  //   const moduleDebug = debugInfo[moduleRecord.specifier]
-  //   moduleDebug.builtin = [
-  //     ...new Set([...esmModuleBuiltins, ...cjsModuleBuiltins]),
-  //   ]
-  // }
+  const distilledImports = tofuUtils.reduceToTopmostApiCallsFromStrings([
+    ...cjsModuleBuiltins,
+    ...esmModuleBuiltins,
+  ])
+
+  return new Set(distilledImports)
 }
 
 /**
- * @param {ParseResult} ast
- * @returns {BuiltinPolicy | null}
+ * Creates a {@link BuiltinPolicy} from the AST.
+ *
+ * @param {ParseResult} ast AST of some module
+ * @returns {BuiltinPolicy | null} A {@link BuiltinPolicy} for the module, or
+ *   `null` if no builtins are in use
  */
 const createBuiltinPolicy = (ast) => {
   const builtins = inspectBuiltins(ast)
 
   if (builtins.size) {
     /** @type {BuiltinPolicy} */
-    const result = {}
+    const result = create(null)
     for (const mod of builtins) {
       result[mod] = true
     }
@@ -261,6 +262,9 @@ const inspectListener = ({ source, sourceType, id }) => {
 
   /** @type {StructuredViolationsResult | null} */
   let violations
+
+  // NOTE: these three operations needn't happen in this particular order.
+
   try {
     globalPolicy = createGlobalPolicy(ast, sourceType)
   } catch (error) {
@@ -269,6 +273,7 @@ const inspectListener = ({ source, sourceType, id }) => {
       { cause: error }
     )
   }
+
   try {
     builtinPolicy = createBuiltinPolicy(ast)
   } catch (error) {
@@ -277,6 +282,7 @@ const inspectListener = ({ source, sourceType, id }) => {
       { cause: error }
     )
   }
+
   try {
     violations = inspectViolations(ast, id)
   } catch (error) {
@@ -299,29 +305,36 @@ const inspectListener = ({ source, sourceType, id }) => {
     try {
       parentPort.postMessage(inspectionResultsMessage)
     } catch (error) {
-      error
+      throw new GenerationError(
+        `Failed to post inspection results message to parent: ${error instanceof Error ? error.message : `${error}`}`,
+        { cause: error }
+      )
     }
   } else {
-    throw new ReferenceError('parentPort is not available')
+    throw new GenerationError(
+      `Failed to post inspection results message to parent: parentPort is undefined`
+    )
   }
 }
 
 /**
- * @param {ParseResult} ast
- * @param {string} id - The file path (file:// URL)
- * @returns {StructuredViolationsResult | null}
+ * Inspects {@link ast} for SES compatibility violations.
+ *
+ * @param {ParseResult} ast AST of some module
+ * @param {string} id The file path (file:// URL)
+ * @returns {StructuredViolationsResult | null} Inspection result
  */
 const inspectViolations = (ast, id) => {
-  const compatWarnings = inspectSesCompat(/** @type {any} */ (ast))
-
   const { primordialMutations, strictModeViolations, dynamicRequires } =
-    compatWarnings
-  const hasResults =
-    primordialMutations.length > 0 ||
-    strictModeViolations.length > 0 ||
-    dynamicRequires.length > 0
+    inspectSesCompat(/** @type {any} */ (ast))
 
-  if (!hasResults) {
+  const hasViolations = !!(
+    primordialMutations.length +
+    strictModeViolations.length +
+    dynamicRequires.length
+  )
+
+  if (!hasViolations) {
     return null
   }
 
@@ -361,19 +374,18 @@ const inspectViolations = (ast, id) => {
 }
 
 /**
- * @param {Uint8Array} source
- * @param {SourceType} sourceType
- * @returns {ParseResult}
+ * Parses the source code into an AST.
+ *
+ * @param {Uint8Array} source Source code as a Uint8Array
+ * @param {SourceType} sourceType Source type (`module` or `script`)
+ * @returns {ParseResult} AST of the source code
  */
 const parseAst = (source, sourceType) => {
-  const decoder = new TextDecoder('utf-8')
   const sourceCode = decoder.decode(source)
 
-  const ast = parse(sourceCode, {
-    sourceType: 'unambiguous',
-    // someone must have been doing this
+  return parse(sourceCode, {
+    sourceType,
     allowReturnOutsideFunction: sourceType === SOURCE_TYPE_SCRIPT,
     errorRecovery: true,
   })
-  return ast
 }

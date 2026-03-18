@@ -109,7 +109,7 @@ test(
   'child-pkg got: helper from root'
 )
 
-test('--dev processes dev deps', async (t) => {
+test('dev deps are included by default', async (t) => {
   t.plan(2)
 
   const tempdir = await makeTempdir(t)
@@ -118,7 +118,6 @@ test('--dev processes dev deps', async (t) => {
       [
         'run',
         devDeptree.entrypoint,
-        '--dev',
         '--policy',
         devDeptree.policyPath,
         '--policy-override',

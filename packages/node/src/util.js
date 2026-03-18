@@ -125,16 +125,14 @@ export const hasValue = (obj, prop) => {
 }
 
 /**
- * Converts a boolean `dev` to a set of conditions (Endo option)
+ * Converts a boolean `prodOnly` to a set of conditions (Endo option)
  *
- * TODO: Evaluate if this is needed. `dev` option should be un-deprecated
- *
- * @param {boolean} [dev=false] Default is `false`
+ * @param {boolean} [prodOnly=false] Default is `false`
  * @returns {Set<string>}
  * @internal
  */
-export const devToConditions = (dev) =>
-  dev ? new Set(['development']) : new Set()
+export const prodOnlyToConditions = (prodOnly) =>
+  prodOnly ? new Set() : new Set(['development'])
 
 /**
  * Ordered array of every property in {@link ReadNowPowers} which is _required_.

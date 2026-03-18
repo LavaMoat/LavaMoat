@@ -25,17 +25,18 @@ import type {
   FileUrlString,
   MergedLavaMoatPolicy,
   SourceType,
-  WithDev,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
   WithPolicyOverrideOnly,
+  WithProdOnly,
   WithProjectRoot,
   WithReadFile,
   WithReadPowersAndTrust,
   WithReadPowersAndTrustAndEndoPolicy,
   WithScuttleGlobalThis,
+  WithTrustRoot,
 } from './types.js'
 
 /**
@@ -206,7 +207,7 @@ export type MakeNodeCompartmentMapOptions = ComposeOptions<
   [
     WithLog,
     WithReadPowersAndTrustAndEndoPolicy,
-    WithDev,
+    WithProdOnly,
     WithPolicyOverrideOnly,
   ]
 >
@@ -237,7 +238,7 @@ export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
  * @internal
  */
 export type MakeGlobalsAttenuatorOptions = ComposeOptions<
-  [WithPolicy, WithScuttleGlobalThis]
+  [WithPolicy, WithScuttleGlobalThis, WithTrustRoot]
 >
 
 /**
@@ -279,6 +280,15 @@ export interface WorkerPoolOptions<
 > {
   /** How long workers can be idle before termination (ms) */
   idleTimeout?: number
+
+  /**
+   * Maximum number of concurrent workers.
+   *
+   * Defaults to `os.availableParallelism() - 1` (minimum 1). Tasks submitted
+   * when all workers are busy will queue and dispatch as workers become
+   * available.
+   */
+  maxWorkers?: number
 }
 
 /**

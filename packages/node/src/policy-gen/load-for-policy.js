@@ -8,22 +8,26 @@
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import chalk from 'chalk'
+import { utils as tofuUtils } from 'lavamoat-tofu'
 import { fileURLToPath } from 'node:url'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
+  ALL_BUILTIN_MODULES,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
   LANGUAGE_CJS,
   LANGUAGE_MJS,
+  LAVAMOAT_POLICY_ITEM_READ,
   MessageTypes,
   ROOT_COMPARTMENT,
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { log as defaultLog } from '../log.js'
+import { hrLabel } from '../format.js'
+import { log as defaultLog, Loggerr } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
 import {
   createModuleInspectionProgressReporter,
@@ -35,22 +39,20 @@ import { WorkerPool } from '../worker-pool.js'
 
 /**
  * @import {LoadAndGeneratePolicyOptions,
- * LoadCompartmentMapResult,
- * InspectMessage,
- * InspectionResultsMessage,
- * ErrorMessage,
- * ModuleInspectionProgressReporter,
- * StructuredViolationsResult,
- * ReportModuleInspectionProgressFn} from '../internal.js'
+ *   LoadCompartmentMapResult,
+ *   InspectMessage,
+ *   InspectionResultsMessage,
+ *   ErrorMessage,
+ *   StructuredViolationsResult,
+ *   ReportModuleInspectionProgressFn} from '../internal.js'
  * @import {CanonicalName, ModuleSourceHookModuleSource} from '@endo/compartment-mapper'
- * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
+ * @import {BuiltinPolicy, GlobalPolicy, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
  * @import {MergedLavaMoatPolicy, FileUrlString, SourceType} from '../types.js'
- * @import {Loggerr} from 'loggerr'
  */
 
 const inspectorPath = fileURLToPath(new URL('./inspector.js', import.meta.url))
 
-const { entries, keys } = Object
+const { keys } = Object
 
 /**
  * The nitty-gritty of building a policy from a given entrypoint.
@@ -71,7 +73,7 @@ export const loadAndGeneratePolicy = async (
     policyOverride,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     log = defaultLog,
-    dev = true,
+    prodOnly,
     ...options
   } = {}
 ) => {
@@ -83,18 +85,11 @@ export const loadAndGeneratePolicy = async (
     rootUsePolicy,
   } = await makeNodeCompartmentMap(entrypointPath, {
     readPowers,
-    dev,
+    prodOnly,
     log,
     trustRoot,
     policyOverride,
   })
-
-  console.log(
-    'packageCompartmentMap',
-    entrypointPath,
-    dev,
-    packageCompartmentMap
-  )
 
   /* c8 ignore next */
   if (!trustRoot && !rootUsePolicy) {
@@ -174,7 +169,7 @@ export const loadAndGeneratePolicy = async (
   const violationsForPackage = new Map()
 
   const { reportModuleInspectionProgress, reportModuleInspectionProgressEnd } =
-    createModuleInspectionProgressReporter()
+    createModuleInspectionProgressReporter(log.level > Loggerr.INFO)
 
   const inspectModuleSource = createModuleSourceInspector(
     log,
@@ -196,6 +191,8 @@ export const loadAndGeneratePolicy = async (
       : { compartment: include.name, entry: include.entry }
   )
 
+  /** @type {string[]} */
+  const warnings = []
   try {
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
@@ -237,12 +234,19 @@ export const loadAndGeneratePolicy = async (
        * compatibility violations.
        */
       moduleSourceHook: ({ moduleSource, canonicalName: rawCanonicalName }) => {
-        console.log('moduleSourceHook', {
-          moduleSource,
-          rawCanonicalName,
-        })
+        if ('exit' in moduleSource && moduleSource.exit) {
+          if (
+            !ALL_BUILTIN_MODULES.has(moduleSource.exit) &&
+            // these are essentially duplicates; the same thing happens for `foo/package.json` and `foo`.
+            !moduleSource.exit.endsWith('package.json')
+          ) {
+            warnings.push(
+              `${hrLabel(moduleSource.exit)} is not a builtin module, but was loaded as a builtin from ${hrLabel(rawCanonicalName)}. This may be due to an implicit dependency; ensure ${hrLabel(moduleSource.exit)} is explicitly listed as a dependency in ${hrLabel(rawCanonicalName)}'s package.json.`
+            )
+          }
+          return
+        }
         if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
-          log.debug('Root module is trusted; skipping inspection')
           return
         }
         const canonicalName =
@@ -259,6 +263,10 @@ export const loadAndGeneratePolicy = async (
     // Clear the progress line and move to next line
     if (process.stderr.isTTY) {
       reportModuleInspectionProgressEnd(inspectedModules, modulesToInspect)
+    }
+
+    for (const warning of warnings) {
+      log.warning(warning)
     }
 
     const errors = inspectionResults
@@ -328,30 +336,39 @@ const compilePolicy = (
 ) => {
   /** @type {LavaMoatPolicy} */
   const policy = { resources: {} }
-  for (const [canonicalName, globalPolicy] of globalsForPackage) {
-    // convert from Map into plain object
-    /** @type {GlobalPolicy} */
-    const plainGlobalPolicy = {}
-    for (const [
-      key,
-      value,
-    ] of /** @type {[name: string, value: GlobalPolicyValue][]} */ (
-      entries(globalPolicy)
-    )) {
-      plainGlobalPolicy[key] = value
-    }
-    policy.resources[canonicalName] = {
-      ...policy.resources[canonicalName],
-      globals: plainGlobalPolicy,
+
+  /**
+   * Reduces per-package policy entries to topmost API calls and merges them
+   * into `policy.resources` under the given key.
+   *
+   * @param {'builtin' | 'globals'} policyKey Key on each resource (e.g.
+   *   `builtin`, `globals`).
+   * @param {Map<CanonicalName, BuiltinPolicy>
+   *   | Map<CanonicalName, GlobalPolicy>} policyForPackage
+   *   Map of per-package policy entries to reduce and merge.
+   */
+  const mergeReducedPolicyIntoResources = (policyKey, policyForPackage) => {
+    for (const [canonicalName, packagePolicy] of policyForPackage) {
+      const reducedKeys = tofuUtils.reduceToTopmostApiCallsFromStrings(
+        keys(packagePolicy)
+      )
+      /** @type {BuiltinPolicy | GlobalPolicy} */
+      const reducedPolicy = {}
+      for (const key of reducedKeys) {
+        reducedPolicy[key] =
+          packagePolicy[key] === LAVAMOAT_POLICY_ITEM_READ
+            ? true
+            : packagePolicy[key]
+      }
+      policy.resources[canonicalName] = {
+        ...policy.resources[canonicalName],
+        [policyKey]: reducedPolicy,
+      }
     }
   }
 
-  for (const [canonicalName, builtinPolicy] of builtinsForPackage) {
-    policy.resources[canonicalName] = {
-      ...policy.resources[canonicalName],
-      builtin: builtinPolicy,
-    }
-  }
+  mergeReducedPolicyIntoResources('globals', globalsForPackage)
+  mergeReducedPolicyIntoResources('builtin', builtinsForPackage)
 
   for (const [canonicalName, packagePolicy] of packagesForPackage) {
     policy.resources[canonicalName] = {
@@ -413,6 +430,24 @@ const createModuleSourceInspector = (
   reportModuleInspectionProgress
 ) => {
   /**
+   * Cache of in-flight worker tasks keyed by file URL. When the same physical
+   * file is loaded by multiple compartments, we reuse the single worker task
+   * and fan out the results to each canonical name's policy handler. This
+   * avoids duplicate work _and_ prevents a bug where overlapping `pendingTasks`
+   * Map entries (keyed by the same file URL) would overwrite each other,
+   * orphaning promises that never settle.
+   *
+   * TODO: This cache can likely be removed when Endo stops calling
+   * `moduleSourceHook` for the same module source multiple times.
+   *
+   * @type {Map<
+   *   FileUrlString,
+   *   Promise<InspectionResultsMessage | ErrorMessage>
+   * >}
+   */
+  const workerTaskCache = new Map()
+
+  /**
    * Sends task to inspect a module source to the worker pool and updates the
    * work queue ({@link pendingInspections}) and the set of modules to inspect
    * ({@link modulesToInspect}).
@@ -449,14 +484,6 @@ const createModuleSourceInspector = (
       }
     }
 
-    /** @type {InspectMessage} */
-    const message = {
-      source,
-      id,
-      sourceType,
-      type,
-    }
-
     /**
      * For progress reporting
      */
@@ -471,9 +498,21 @@ const createModuleSourceInspector = (
       rootUsePolicy
     )
 
-    // note that all rejections will be aggregated
-    const inspectionPromise = workerPool
-      .sendTask(message, MessageTypes.InspectionResults)
+    let workerTask = workerTaskCache.get(id)
+    if (!workerTask) {
+      /** @type {InspectMessage} */
+      const message = {
+        source,
+        id,
+        sourceType,
+        type,
+      }
+
+      workerTask = workerPool.sendTask(message, MessageTypes.InspectionResults)
+      workerTaskCache.set(id, workerTask)
+    }
+
+    const inspectionPromise = workerTask
       .catch((error) => {
         log.error(`Error inspecting module ${id}: ${error.message}`)
         throw error

@@ -5,6 +5,7 @@
  *
  * _Type a string more than once? Make it a constant!_
  */
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 
 const { freeze } = Object
@@ -130,21 +131,6 @@ export const ENDO_PKG_POLICY_OPTIONS = 'options'
 export const ENDO_PKG_POLICY_PACKAGES = 'packages'
 
 /**
- * `builtin` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_BUILTIN = 'builtin'
-
-/**
- * `js` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_SOURCE = 'js'
-
-/**
- * `native` module type for a `LavamoatModuleRecord`
- */
-export const LMR_TYPE_NATIVE = 'native'
-
-/**
  * Flag for root policy item in a LavaMoat policy
  */
 export const LAVAMOAT_PKG_POLICY_ROOT = '$root$'
@@ -158,6 +144,14 @@ export const LAVAMOAT_PKG_POLICY_NATIVE = 'native'
  * Policy item for a writable global
  */
 export const LAVAMOAT_POLICY_ITEM_WRITE = 'write'
+
+/**
+ * Policy item for a readable global.
+ *
+ * This value is considered deprecated and is used for backwards compatibility;
+ * use `true` instead.
+ */
+export const LAVAMOAT_POLICY_ITEM_READ = 'read'
 
 /**
  * Extension for native modules
@@ -225,7 +219,7 @@ export const LANGUAGE_CJS = 'cjs'
 /**
  * Message types for the worker `./policy-gen/inspector.js`
  */
-export const MessageTypes = Object.freeze(
+export const MessageTypes = freeze(
   /** @type {const} */ ({
     Inspect: 'inspect',
     InspectionResults: 'inspectionResults',
@@ -236,9 +230,21 @@ export const MessageTypes = Object.freeze(
 /**
  * Source types, as a const enum
  */
-export const SourceTypes = Object.freeze(
+export const SourceTypes = freeze(
   /** @type {const} */ ({
     Module: SOURCE_TYPE_MODULE,
     Script: SOURCE_TYPE_SCRIPT,
   })
+)
+
+/**
+ * Set of all builtin modules, including both bare names (e.g., 'fs') and node:
+ * protocol names (e.g., 'node:fs')
+ */
+export const ALL_BUILTIN_MODULES = freeze(
+  new Set(
+    builtinModules.flatMap((name) =>
+      name.startsWith('node:') ? [name] : [name, `node:${name}`]
+    )
+  )
 )

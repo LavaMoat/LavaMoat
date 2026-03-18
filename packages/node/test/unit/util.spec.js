@@ -1,6 +1,6 @@
 import test from 'ava'
 import {
-  devToConditions,
+  prodOnlyToConditions,
   hasValue,
   isArray,
   isBoolean,
@@ -119,12 +119,12 @@ test('hasValue - returns false if object does not have value', (t) => {
   t.false(hasValue(obj, 'nonexistent'))
 })
 
-test('devToConditions - returns development condition if dev is true', (t) => {
-  t.deepEqual(devToConditions(true), new Set(['development']))
+test('prodOnlyToConditions - returns empty set if prodOnly is true', (t) => {
+  t.deepEqual(prodOnlyToConditions(true), new Set())
 })
 
-test('devToConditions - returns empty set if dev is false', (t) => {
-  t.deepEqual(devToConditions(false), new Set())
+test('prodOnlyToConditions - returns development condition if prodOnly is false', (t) => {
+  t.deepEqual(prodOnlyToConditions(false), new Set(['development']))
 })
 
 test('isReadNowPowers - returns true for valid ReadNowPowers', (t) => {

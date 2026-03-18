@@ -86,7 +86,7 @@ export const makeNodeCompartmentMap = async (
   entrypointPath,
   {
     readPowers = defaultReadPowers,
-    dev = true,
+    prodOnly,
     log = defaultLog,
     endoPolicy,
     policyOverride,
@@ -120,7 +120,7 @@ export const makeNodeCompartmentMap = async (
   /** @type {MapNodeModulesOptions} */
   const mapNodeModulesOptions = {
     conditions: new Set(DEFAULT_CONDITIONS),
-    dev,
+    dev: !prodOnly,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
     policy: endoPolicy,
     log: log.debug.bind(log),
@@ -137,6 +137,7 @@ export const makeNodeCompartmentMap = async (
         canonicalName,
         name,
       } of packageData.values()) {
+        // @ts-expect-error - https://github.com/endojs/endo/pull/3111
         if (!trustRoot && canonicalName === ROOT_COMPARTMENT) {
           rootUsePolicy = name
         }
@@ -145,7 +146,6 @@ export const makeNodeCompartmentMap = async (
           location,
           /** @type {PackageJson} */ (packageDescriptor)
         )
-        console.log('packageDataHook', { location, canonicalName, name })
       }
     },
     /**
@@ -153,7 +153,6 @@ export const makeNodeCompartmentMap = async (
      * the compartment map
      */
     unknownCanonicalNameHook: ({ canonicalName }) => {
-      console.log('unknownCanonicalNameHook', { canonicalName })
       unknownCanonicalNames.add(canonicalName)
     },
   }

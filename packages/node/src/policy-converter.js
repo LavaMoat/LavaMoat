@@ -41,10 +41,10 @@ const { create, entries, fromEntries } = Object
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
  *   ToEndoPolicyOptions,
- * Resources,
- * MergedLavaMoatPolicy,
- * ToEndoPolicyOptionsWithoutPolicyOverride,
- * UnmergedLavaMoatPolicy} from './types.js'
+ *   Resources,
+ *   MergedLavaMoatPolicy,
+ *   ToEndoPolicyOptionsWithoutPolicyOverride,
+ *   UnmergedLavaMoatPolicy} from './types.js'
  */
 
 /**
@@ -98,29 +98,40 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
    */
   const policyItem = {}
 
+  /** @type {[string, boolean][]} */
+  const dot = []
+  /** @type {[string, boolean][]} */
+  const noDot = []
   for (const [key, value] of entries(item)) {
     if (key.includes('.')) {
-      let [builtinName, ...rest] = key.split('.')
-      let propName = rest.join('.')
-      const itemForBuiltin = policyItem[builtinName]
-      if (isBoolean(itemForBuiltin)) {
-        throw new ConversionError(
-          'Expected a FullAttenuationDefinition; got a boolean'
-        )
-      }
-      if (isArray(itemForBuiltin)) {
-        throw new ConversionError(
-          'Expected a FullAttenuationDefinition; got an array'
-        )
-      }
-      const otherParams = itemForBuiltin?.params ?? []
-      policyItem[builtinName] = {
-        attenuate: DEFAULT_ATTENUATOR,
-        params: [...otherParams, propName],
-      }
+      dot.push([key, value])
     } else {
-      policyItem[key] = value
+      noDot.push([key, value])
     }
+  }
+
+  for (const [key] of dot) {
+    let [builtinName, ...rest] = key.split('.')
+    let propName = rest.join('.')
+    const itemForBuiltin = policyItem[builtinName]
+    if (isBoolean(itemForBuiltin)) {
+      throw new ConversionError(
+        `Expected a FullAttenuationDefinition; got a boolean for ${key}`
+      )
+    }
+    if (isArray(itemForBuiltin)) {
+      throw new ConversionError(
+        'Expected a FullAttenuationDefinition; got an array'
+      )
+    }
+    const otherParams = itemForBuiltin?.params ?? []
+    policyItem[builtinName] = {
+      attenuate: DEFAULT_ATTENUATOR,
+      params: [...otherParams, propName],
+    }
+  }
+  for (const [key, value] of noDot) {
+    policyItem[key] = value
   }
   return policyItem
 }
@@ -299,6 +310,9 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
       resources[rootPolicyRef] = {}
     }
     entry = resources[rootPolicyRef]
+    // we have to delete it from the list of resources or the "unknown canonical
+    // name" hook will fire for it
+    delete resources[rootPolicyRef]
   } else {
     entry = ENDO_POLICY_ENTRY_TRUSTED
   }

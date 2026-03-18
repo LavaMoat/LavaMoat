@@ -39,7 +39,7 @@ export const load = async (
   entrypointPath,
   {
     log = defaultLog,
-    dev,
+    prodOnly,
     trustRoot,
     endoPolicy,
     readPowers = defaultReadPowers,
@@ -60,7 +60,7 @@ export const load = async (
     ;({ packageCompartmentMap, unknownCanonicalNames, knownCanonicalNames } =
       await makeNodeCompartmentMap(entrypointPath, {
         readPowers,
-        dev,
+        prodOnly,
         log,
         trustRoot,
         endoPolicy,
@@ -83,7 +83,7 @@ export const load = async (
   const loadFromMapOptions = {
     ...DEFAULT_ENDO_OPTIONS,
     ...otherOptions,
-    dev,
+    dev: !prodOnly,
     policy: endoPolicy,
     log: log.debug.bind(log),
   }

@@ -6,8 +6,6 @@
  * @internal
  */
 
-
-
 /**
  * Callback used by `wrapFunctionConstructor`.
  *
@@ -18,7 +16,6 @@
  * @internal
  */
 export type ContextTestFn = (context: object) => boolean
-
 
 /**
  * A function _or_ a constructor.

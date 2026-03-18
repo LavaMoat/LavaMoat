@@ -6,7 +6,7 @@
  */
 
 import { endowmentsToolkit } from 'lavamoat-core'
-const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper 
+const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper
 
 /**
  * @import {SomeGlobalThis, ContextTestFn} from '../internal.js'
@@ -61,8 +61,8 @@ export const makeExecutionCompartment = (originalGlobalThis) => {
         }
       )
 
-      // W're replacing the Function global, but want to prevent 
-      // identity discontinuity on functions between compartments, 
+      // W're replacing the Function global, but want to prevent
+      // identity discontinuity on functions between compartments,
       // so the prototype must match
       Object.defineProperty(NewFunctionCtor, 'prototype', {
         value: OriginalFunctionCtor.prototype,
