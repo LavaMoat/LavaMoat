@@ -461,7 +461,8 @@ const main = async (args = hideBin(process.argv)) => {
           prodOnly,
           projectRoot,
           scuttleGlobalThis,
-          ...(policy ? { policy } : { policyPath }),
+          policy,
+          policyPath,
         })
       }
     )

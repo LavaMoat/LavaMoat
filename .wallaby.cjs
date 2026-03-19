@@ -25,6 +25,7 @@ module.exports = {
     'packages/node/test/unit/**/snapshots/*.md',
     'packages/node/test/unit/json-fixture/**/*.json',
     'packages/node/test/unit/policy/**/*.json',
+    'packages/node/test/test-util.js',
     {
       pattern: 'packages/node/test/unit/fixture/**/*',
       instrument: false,

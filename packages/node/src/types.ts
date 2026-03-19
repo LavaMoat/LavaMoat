@@ -89,6 +89,14 @@ export interface WithLog {
   log?: Loggerr
 }
 
+export interface WithPolicyPath {
+  policyPath?: string | URL
+}
+
+export interface WithPolicy {
+  policy?: LavaMoatPolicy
+}
+
 export interface WithPolicyOnly {
   /**
    * A {@link LavaMoatPolicy} object.
@@ -99,19 +107,6 @@ export interface WithPolicyOnly {
    */
   policyPath?: never
 }
-
-export interface WithPolicyPathOnly {
-  /**
-   * Disallowed in lieu of {@link policy}
-   */
-  policy?: never
-  /**
-   * Path to a policy file.
-   */
-  policyPath?: string | URL
-}
-
-export type WithPolicyOrPath = WithPolicyOnly | WithPolicyPathOnly
 
 /**
  * Options having a `policyOverride` property and _not_ a `policyOverridePath`
@@ -218,11 +213,6 @@ export interface WritableFsInterface {
  * Options available when writing a policy
  */
 export interface WithWritePolicyOptions {
-  /**
-   * Path to a {@link LavaMoatPolicyDebug} file
-   */
-  policyDebugPath?: string | URL
-
   /**
    * Path to a {@link LavaMoatPolicy} file
    */
@@ -387,7 +377,8 @@ export type RunOptions = ComposeOptions<
     WithTrustRoot,
     WithScuttleGlobalThis,
     WithLog,
-    WithPolicyOrPath,
+    WithPolicy,
+    WithPolicyPath,
     LoadPoliciesOptions,
   ]
 >
@@ -452,7 +443,13 @@ export type WithReadPowersAndTrustAndEndoPolicy = ComposeOptions<
  * Options for `loadPolicies()`
  */
 export type LoadPoliciesOptions = ComposeOptions<
-  [WithProjectRoot, WithReadFile, WithPolicyOverrideOrPath]
+  [
+    WithProjectRoot,
+    WithReadFile,
+    WithPolicyOverride,
+    WithPolicyOverridePath,
+    WithPolicyPath,
+  ]
 >
 
 export type CanonicalName = LiteralUnion<
@@ -523,11 +520,25 @@ export interface WithFs {
 }
 
 /**
+ * `true` if all overlapping keys between `A` and `B` have identical types;
+ * vacuously `true` when there is no overlap.
+ */
+type OverlapCompatible<A extends object, B extends object> = [
+  keyof A & keyof B,
+] extends [never]
+  ? true
+  : {
+        [K in keyof A & keyof B]: [A[K], B[K]] extends [B[K], A[K]] ? 1 : 0
+      }[keyof A & keyof B] extends 1
+    ? true
+    : false
+
+/**
  * Safely composes properties from each object in `T` into a single, simplified
  * type.
  *
- * If `T` contains objects with non-exclusive keys, then the type will resolve
- * to `never`.
+ * Overlapping keys with identical types are permitted; overlapping keys with
+ * incompatible types cause the type to resolve to `never`.
  *
  * Drawback: this is a little slow.
  */
@@ -535,9 +546,13 @@ export type ComposeOptions<T extends object[]> = Simplify<
   T extends [infer First, ...infer Rest]
     ? First extends object
       ? Rest extends object[]
-        ? keyof First extends keyof ComposeOptions<Rest>
-          ? never
-          : First & ComposeOptions<Rest>
+        ? ComposeOptions<Rest> extends infer Composed
+          ? Composed extends object
+            ? OverlapCompatible<First, Composed> extends true
+              ? First & Composed
+              : never
+            : never
+          : never
         : never
       : never
     : object
@@ -549,9 +564,4 @@ export type MergedLavaMoatPolicy = LavaMoatPolicy & {
 
 export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
   [MERGED_POLICY_FIELD]?: never
-}
-
-export interface PolicyCanonicalNameInfo {
-  name: CanonicalName
-  source: string
 }

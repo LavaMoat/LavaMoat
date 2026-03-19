@@ -14,12 +14,9 @@ import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
 import {
-  ATTENUATORS_COMPARTMENT,
-  DEFAULT_POLICY_DEBUG_FILENAME,
   DEFAULT_POLICY_DIR,
   DEFAULT_POLICY_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
-  LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
 import { InvalidPolicyError, NoPolicyError, WritePolicyError } from './error.js'
 import { hrCode, hrPath } from './format.js'
@@ -31,20 +28,14 @@ import {
   isPathLike,
   isString,
   toAbsolutePath,
-  toKeypath,
   toPath,
 } from './util.js'
 
-const { keys, values } = Object
-
 /**
- * @import {CompartmentDescriptor} from '@endo/compartment-mapper'
  * @import {RootPolicy, LavaMoatPolicy} from '@lavamoat/types'
  * @import {MergedLavaMoatPolicy,
- *  CanonicalName,
  *  LoadPoliciesOptions,
- *  WritableFsInterface,
- *  PolicyCanonicalNameInfo} from './types.js'
+ *  WritableFsInterface} from './types.js'
  * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
  */
 
@@ -152,6 +143,10 @@ export const maybeReadPolicyOverride = async (
  * Reads a policy and policy override from object or disk and merges them into a
  * single policy.
  *
+ * If `policyOrPolicyPath` is a `LavaMoatPolicy`, providing `options.policyPath`
+ * is a hint for guessing the policy override path if neither
+ * `options.policyOverride` nor `options.policyOverridePath` are provided.
+ *
  * @privateRemarks
  * TODO: The way this fails is not user-friendly; it will just throw a
  * `InvalidPolicyError` saying that the policy is invalid. **We should use
@@ -173,7 +168,8 @@ export const loadPolicies = async (
     ...options
   } = {}
 ) => {
-  policyOrPolicyPath ??= makeDefaultPolicyPath(projectRoot)
+  policyOrPolicyPath ??=
+    options.policyPath ?? makeDefaultPolicyPath(projectRoot)
 
   /**
    * Path to policy
@@ -223,15 +219,20 @@ export const loadPolicies = async (
   }
 
   // either / or / or nothing at all
-  if (hasValue(options, 'policyOverridePath')) {
-    policyOverridePath = toPath(options.policyOverridePath)
-  } else if (hasValue(options, 'policyOverride')) {
+  if (hasValue(options, 'policyOverride')) {
     allegedPolicyOverride = options.policyOverride
+  } else if (hasValue(options, 'policyOverridePath')) {
+    policyOverridePath = toPath(options.policyOverridePath)
   } else {
+    let policyPathToUse = policyPath
+    // use the hint if it's provided
+    if (!policyPathToUse && hasValue(options, 'policyPath')) {
+      policyPathToUse = toPath(options.policyPath)
+    }
     // if the user specified a policy path, resolve as its sibling;
     // otherwise resolve from `projectRoot` since that's about all we can do.
     policyOverridePath = makeDefaultPolicyOverridePath({
-      policyPath,
+      policyPath: policyPathToUse,
       projectRoot,
     })
   }
@@ -240,11 +241,6 @@ export const loadPolicies = async (
    * An tuple of `Promise`s; each performs either a file read & a validation
    * _or_ just a validation.
    *
-   * @privateRemarks
-   * The fact that we either have a path _xor_ an alleged policy—combined with
-   * the every-so-slightly different signatures of {@link readPolicy} and
-   * {@link maybeReadPolicyOverride}—make these following conditionals painful to
-   * abstract into a type-safe function. So I didn't.
    * @type {[
    *   policy: Promise<LavaMoatPolicy> | LavaMoatPolicy,
    *   policyOverride:
@@ -395,111 +391,6 @@ export const isPolicy = (value) => {
 }
 
 /**
- * Gets an array of canonical name information including the name (`name`) and
- * its keypath (`source`) from `policy`.
- *
- * @param {LavaMoatPolicy} policy
- * @returns {PolicyCanonicalNameInfo[]}
- */
-const getPolicyCanonicalNames = (policy) => {
-  /**
-   * Canonical names from the keys of {@link LavaMoatPolicy.resources}
-   * (`ResourcePolicy`)
-   */
-  const resourceCanonicalNames = keys(policy.resources).map((name) => ({
-    name,
-    source: toKeypath(['resources', name]),
-  }))
-
-  // const untrustedRootResource = policy.root?.usePolicy
-
-  /**
-   * Canonical names from the keys of `ResourcePolicy.packages`
-   * (`PackagePolicy`)
-   */
-  const packagePolicyCanonicalNames = resourceCanonicalNames.flatMap(
-    ({ name: resourceName }) =>
-      keys(policy.resources[resourceName].packages ?? {}).map((name) => ({
-        name,
-        source: toKeypath(['resources', resourceName, 'packages', name]),
-      }))
-  )
-
-  /**
-   * Canonical names from the `LavaMoatPolicy.include` array
-   */
-  const includeCanonicalNames =
-    policy.include?.map((value) => {
-      if (isString(value)) {
-        return {
-          name: value,
-          source: toKeypath(['include', value]),
-        }
-      }
-      return {
-        name: value.name,
-        source: toKeypath(['include', value.entry]),
-      }
-    }) ?? []
-
-  /**
-   * Deduped array of all canonical names found in policy
-   */
-  const policyCanonicalNames = /** @type {PolicyCanonicalNameInfo[]} */ ([
-    ...new Set([
-      ...resourceCanonicalNames,
-      ...packagePolicyCanonicalNames,
-      ...includeCanonicalNames,
-      LAVAMOAT_PKG_POLICY_ROOT,
-      ATTENUATORS_COMPARTMENT,
-    ]),
-  ])
-  return policyCanonicalNames
-}
-
-/**
- * @template {CompartmentDescriptor} T
- * @template {string} K
- * @param {LavaMoatPolicy} policy
- * @param {Record<K, T>} compartmentDescriptors
- * @returns {{
- *   getInvalidCanonicalNames: () => PolicyCanonicalNameInfo[]
- *   policyCanonicalNameInfo: PolicyCanonicalNameInfo[]
- * }}
- */
-export const createGetInvalidCanonicalNamesFn = (
-  policy,
-  compartmentDescriptors
-) => {
-  const canonicalNames = new Set(
-    values(compartmentDescriptors).map(({ label }) => label)
-  )
-
-  /**
-   * @param {CanonicalName} name
-   * @returns {name is T[K]['label']}
-   */
-  const isCanonicalNameInCompartments = (name) => {
-    return canonicalNames.has(name)
-  }
-
-  const policyCanonicalNameInfo = getPolicyCanonicalNames(policy)
-
-  /**
-   * @returns {PolicyCanonicalNameInfo[]}
-   */
-  const getInvalidCanonicalNames = () =>
-    policyCanonicalNameInfo.filter(
-      ({ name }) => !isCanonicalNameInCompartments(name)
-    )
-
-  return {
-    getInvalidCanonicalNames,
-    policyCanonicalNameInfo,
-  }
-}
-
-/**
  * Returns `true` if there is no such
  * {@link RootPolicy.usePolicy `root.usePolicy`} field.
  *
@@ -580,7 +471,6 @@ const makeDefaultPath = (
  * @returns {string}
  * @internal
  */
-
 export const makeDefaultPolicyOverridePath = ({ policyPath, projectRoot }) => {
   const path = makeDefaultPath(
     DEFAULT_POLICY_DIR,
@@ -588,26 +478,6 @@ export const makeDefaultPolicyOverridePath = ({ policyPath, projectRoot }) => {
     { policyPath, projectRoot }
   )
   log.debug(`Guessed policy override path: ${hrPath(path)}`)
-  return path
-}
-/**
- * Given path to a policy file, returns the sibling path to the policy debug
- * file
- *
- * @param {Object} options
- * @param {string | URL} [options.policyPath] Path to the policy file
- * @param {string | URL} [options.projectRoot]
- * @returns {string}
- * @internal
- */
-
-export const makeDefaultPolicyDebugPath = ({ policyPath, projectRoot }) => {
-  const path = makeDefaultPath(
-    DEFAULT_POLICY_DIR,
-    DEFAULT_POLICY_DEBUG_FILENAME,
-    { policyPath, projectRoot }
-  )
-  log.debug(`Using debug policy path: ${hrPath(path)}`)
   return path
 }
 
