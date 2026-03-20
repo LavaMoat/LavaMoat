@@ -19,6 +19,27 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [11.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.1.1...lavamoat-v11.0.0) (2026-03-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node.js v18 is no longer supported.
+
+### Bug Fixes
+
+* **deps:** update dependency corepack to v0.34.6 ([#1808](https://github.com/LavaMoat/LavaMoat/issues/1808)) ([7b9a804](https://github.com/LavaMoat/LavaMoat/commit/7b9a8049f03dc598febcd5dc3633f6680f47e0b7))
+* drop Node.js v18 support across the board ([#1886](https://github.com/LavaMoat/LavaMoat/issues/1886)) ([1190c9b](https://github.com/LavaMoat/LavaMoat/commit/1190c9b58294abc071eadd7cd14ea11bf63d28b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.6 to ^5.0.0
+    * lavamoat-core bumped from ^17.1.3 to ^18.0.0
+    * lavamoat-tofu bumped from ^8.1.1 to ^9.0.0
+
 ## [10.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.1.0...lavamoat-v10.1.1) (2026-02-05)
 
 
