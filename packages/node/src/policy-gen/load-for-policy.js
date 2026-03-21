@@ -16,6 +16,7 @@ import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
   ALL_BUILTIN_MODULES,
+  DEFAULT_PRELOAD_ENTRY,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
   LANGUAGE_CJS,
   LANGUAGE_MJS,
@@ -25,13 +26,14 @@ import {
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
-import { GenerationError } from '../error.js'
-import { hrLabel } from '../format.js'
+import { GenerationError, TrustMismatchError } from '../error.js'
+import { hrCode, hrLabel, hrPath } from '../format.js'
 import { log as defaultLog, Loggerr } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
 import {
   createModuleInspectionProgressReporter,
   reportInvalidCanonicalNames,
+  reportRedundantPreloads,
   reportSesViolations,
 } from '../report.js'
 import { pluralize } from '../util.js'
@@ -60,6 +62,9 @@ const { keys } = Object
  * Loads the compartment map and subscribes to hooks to inspect modules for
  * globals, builtins, and SES compatibility violations, then builds a policy
  * from it. This bypasses `lavamoat-core`'s inspector entirely.
+ *
+ * The `policyPath` and `policyOverridePath` options are used only for reporting
+ * purposes.
  *
  * @param {string | URL} entrypointPath
  * @param {LoadAndGeneratePolicyOptions} options
@@ -94,8 +99,13 @@ export const loadAndGeneratePolicy = async (
   /* c8 ignore next */
   if (!trustRoot && !rootUsePolicy) {
     // should never happen
-    throw new GenerationError(
-      `Root compartment is not trusted, but no data for root.usePolicy exists`
+    const policyPathStr = options.policyOverridePath
+      ? hrPath(options.policyOverridePath)
+      : options.policyPath
+        ? hrPath(options.policyPath)
+        : 'the policy'
+    throw new TrustMismatchError(
+      `Root compartment is not trusted, but ${hrCode('root.usePolicy')} is not present in ${policyPathStr}`
     )
   }
 
@@ -169,7 +179,9 @@ export const loadAndGeneratePolicy = async (
   const violationsForPackage = new Map()
 
   const { reportModuleInspectionProgress, reportModuleInspectionProgressEnd } =
-    createModuleInspectionProgressReporter(log.level > Loggerr.INFO)
+    createModuleInspectionProgressReporter({
+      disabled: log.level > Loggerr.INFO,
+    })
 
   const inspectModuleSource = createModuleSourceInspector(
     log,
@@ -187,18 +199,26 @@ export const loadAndGeneratePolicy = async (
   // `compartment` is `name` in policy.
   const preload = policyOverride?.include?.map((include) =>
     typeof include === 'string'
-      ? { compartment: include, entry: '.' }
+      ? { compartment: include, entry: DEFAULT_PRELOAD_ENTRY }
       : { compartment: include.name, entry: include.entry }
   )
 
   /** @type {string[]} */
   const warnings = []
+  /** @type {Map<string, string[]>} */
+  const redundantPreloads = new Map()
   try {
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
       importHook: nullImportHook,
       log: log.debug.bind(log),
       _preload: preload,
+      _redundantPreloadHook: ({ canonicalName, entry }) => {
+        redundantPreloads.set(canonicalName, [
+          ...(redundantPreloads.get(canonicalName) ?? []),
+          entry,
+        ])
+      },
       /**
        * Called for each package in the compartment map with a list of
        * connections (which are also canonical names).
@@ -293,6 +313,9 @@ export const loadAndGeneratePolicy = async (
     )
     return { policy, packageJsonMap }
   } finally {
+    // Clean up the worker pool
+    workerPool.terminate()
+
     // we only check this if we have a policy override, because we're assuming
     // the policy we just generated is valid, which may be a bad idea.
     if (policyOverride) {
@@ -308,8 +331,14 @@ export const loadAndGeneratePolicy = async (
       reportSesViolations(violationsForPackage, { log })
     }
 
-    // Clean up the worker pool
-    workerPool.terminate()
+    // Report redundant preloads if any were found
+    if (redundantPreloads.size > 0) {
+      reportRedundantPreloads(redundantPreloads, {
+        log,
+        policyOverridePath: options.policyOverridePath,
+        policyPath: options.policyPath,
+      })
+    }
   }
 }
 
