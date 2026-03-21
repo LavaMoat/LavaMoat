@@ -112,6 +112,8 @@ export const generatePolicy = async (
     readPowers,
     policyOverride,
     projectRoot,
+    policyPath,
+    policyOverridePath,
   })
 
   if (shouldWrite) {
