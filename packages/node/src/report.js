@@ -9,7 +9,7 @@ import { stripVTControlCharacters } from 'node:util'
 import { InvalidArgumentsError } from './error.js'
 import { hrCode, hrLabel, hrPath } from './format.js'
 import { log as defaultLog } from './log.js'
-import { isObjectyObject, pluralize, toKeypath } from './util.js'
+import { isObjectyObject, pluralize, toKeypath, toPath } from './util.js'
 
 /**
  * @import {ReportInvalidOverridesOptions,
@@ -18,7 +18,9 @@ import { isObjectyObject, pluralize, toKeypath } from './util.js'
  * ReportModuleInspectionProgressEndFn,
  * ReportSesViolationsOptions,
  * StructuredViolation,
- * StructuredViolationsResult} from './internal.js'
+ * StructuredViolationsResult,
+ * ReportRedundantPreloadsOptions,
+ * CreateModuleInspectionProgressReporterOptions} from './internal.js'
  * @import {CanonicalName} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
@@ -243,11 +245,14 @@ export const reportSesViolations = (
  * If the console is not a TTY, this function will return a pair of functions
  * that do nothing.
  *
- * @param {boolean} disabled - If true, the reporter will not report progress
+ * @param {CreateModuleInspectionProgressReporterOptions} [options]
  * @returns {ModuleInspectionProgressReporter}
  */
-export const createModuleInspectionProgressReporter = (disabled = false) => {
-  if (!process.stderr.isTTY || disabled) {
+export const createModuleInspectionProgressReporter = ({
+  disabled = false,
+  stream = process.stderr,
+} = {}) => {
+  if (!stream.isTTY || disabled) {
     return {
       reportModuleInspectionProgress: () => 0,
       reportModuleInspectionProgressEnd: () => {},
@@ -284,7 +289,7 @@ export const createModuleInspectionProgressReporter = (disabled = false) => {
     prefix[trianglePos - 1] = styledTriangle
     const prefixStr = prefix.join('')
     const moduleStr = pluralize(modulesToInspect.size, 'module')
-    process.stderr.write(
+    stream.write(
       `\r        ${chalk.dim('›')} ${prefixStr} ${chalk.white(`Inspecting ${moduleStr}: `)}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)}`
     )
     return messageCount
@@ -301,7 +306,7 @@ export const createModuleInspectionProgressReporter = (disabled = false) => {
   ) => {
     const prefix = `        ${chalk.dim('›')} `
     const moduleStr = pluralize(modulesToInspect.size, 'module')
-    process.stderr.write(
+    stream.write(
       `\r${prefix}${chalk.dim('▶')}${chalk.white('▶')}${chalk.whiteBright('▶')} ${chalk.white(`Inspecting ${moduleStr}: `)}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)} ${chalk.greenBright('✓')}\n`
     )
   }
@@ -310,4 +315,49 @@ export const createModuleInspectionProgressReporter = (disabled = false) => {
     reportModuleInspectionProgress,
     reportModuleInspectionProgressEnd,
   }
+}
+
+/**
+ * Reports redundant preloads found in the policy.
+ *
+ * `policyOverridePath` and `policyPath` are used only for display purposes;
+ * `policyOverridePath` takes precedence over `policyPath` (since `include` is
+ * never created in policy _without_ it being present in overrides).
+ *
+ * @param {Map<string, string[]>} redundantPreloads - Map of canonical names to
+ *   entries that were designated to be preloaded but are already loaded via the
+ *   entry compartment
+ * @param {ReportRedundantPreloadsOptions} [options] - Options for reporting
+ *   redundant preloads
+ * @returns {void}
+ * @internal
+ */
+export const reportRedundantPreloads = (
+  redundantPreloads,
+  { log = defaultLog, policyOverridePath, policyPath } = {}
+) => {
+  if (redundantPreloads.size === 0) {
+    return
+  }
+  const policyPathStr = policyOverridePath
+    ? hrPath(policyOverridePath)
+    : policyPath
+      ? hrPath(policyPath)
+      : 'the policy'
+
+  const entriesStr = [...redundantPreloads]
+    .flatMap(([canonicalName, entries]) =>
+      entries.map((entry) => {
+        entry = toPath(entry)
+        return entry === '.'
+          ? `  - ${hrCode(`"${canonicalName}"`)}`
+          : `  - ${hrCode(`{"name": "${canonicalName}", "entry": "${entry}"}`)}`
+      })
+    )
+    .join('\n')
+
+  log.warning(
+    `The following entries in ${policyPathStr}'s ${hrCode('include')} are redundant and can be removed:
+${entriesStr}`
+  )
 }
