@@ -42,11 +42,9 @@
     "@lavamoat/types": "^1.0.0",
     "json-stable-stringify": "1.3.0",
     "lavamoat-tofu": "^9.0.0",
-    "merge-deep": "3.0.3",
     "ses": "1.15.0"
   },
   "devDependencies": {
-    "@types/merge-deep": "3.0.3",
     "tmp-promise": "3.0.3"
   },
   "ava": {

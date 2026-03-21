@@ -1,5 +1,10 @@
 // @ts-check
 
+const { runInContext, createContext } = require('node:vm')
+const path = require('node:path')
+
+const tmp = require('tmp-promise')
+
 const {
   parseForPolicy,
   LavamoatModuleRecord,
@@ -7,10 +12,7 @@ const {
   getDefaultPaths,
   jsonStringifySortedPolicy,
 } = require('../src')
-const mergeDeep = require('merge-deep')
-const { runInContext, createContext } = require('node:vm')
-const path = require('node:path')
-const tmp = require('tmp-promise')
+const { mergePolicy } = require('../src/mergePolicy.js')
 const { applySourceTransforms } = require('../src/sourceTransforms.js')
 
 const { hasOwn } = Object
@@ -24,7 +26,7 @@ const { hasOwn } = Object
  *   ScenarioCheckErrorFn,
  *   ScenarioCheckResultFn,
  *   ScenarioFile} from './scenario'
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  * @import {MakeDirectoryOptions} from 'node:fs'
  * @import {ExecutionContext} from 'ava'
  */
@@ -131,8 +133,8 @@ function createScenarioFromScaffold({
   builtin = {},
   context = {},
   opts = {},
-  config,
-  configOverride,
+  config = { resources: {} },
+  configOverride = { resources: {} },
   defineEntry,
   defineOne,
   defineTwo,
@@ -254,7 +256,7 @@ function createScenarioFromScaffold({
 
   let _config
   if (defaultPolicy) {
-    _config = mergeDeep(
+    _config = mergePolicy(
       {
         resources: {
           one: {
@@ -276,7 +278,7 @@ function createScenarioFromScaffold({
     _config = config
   }
 
-  const _configOverride = mergeDeep(
+  const _configOverride = mergePolicy(
     {
       resources: {
         one: {
@@ -386,7 +388,7 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
     opts = {},
     beforeCreateKernel = () => {},
   } = scenario
-  const lavamoatConfig = mergeDeep(config, configOverride)
+  const lavamoatConfig = mergePolicy(config, configOverride)
   const kernelSrc = generateKernel(opts)
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
