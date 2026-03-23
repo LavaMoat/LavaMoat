@@ -57,13 +57,9 @@ export const run = async (
   const loadPoliciesOptions = {
     readFile,
     projectRoot,
-    ...('policyOverride' in options
-      ? {
-          policyOverride: options.policyOverride,
-        }
-      : {
-          policyOverridePath: options.policyOverridePath,
-        }),
+    policyPath: options.policyPath,
+    policyOverride: options.policyOverride,
+    policyOverridePath: options.policyOverridePath,
   }
 
   const policy = await loadPolicies(

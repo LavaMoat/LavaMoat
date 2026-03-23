@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-expressions, no-extend-native */
 const test = require('ava')
 const { mergePolicy } = require('../src/mergePolicy')
 
@@ -192,7 +191,7 @@ test('merge results in invalid nesting', (t) => {
   }
   try {
     mergePolicy(configA, configB)
-  } catch(err) {
+  } catch (err) {
     t.regex(err.message, /"babel"/)
     t.regex(err.message, /"abc.z" is invalid when "abc" is also present/)
     t.regex(err.message, /"qwe.z" is invalid when "qwe" is also present/)

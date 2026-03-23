@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Class, ValueOf } from 'type-fest'
 import type { ErrorCodes } from './error-code.js'
 

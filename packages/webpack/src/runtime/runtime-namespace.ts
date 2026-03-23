@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-explicit-any */
 import type { LavaMoatPolicy } from '@lavamoat/types'
-import type { EndowmentsToolkitFactory, LavaMoatScuttleOpts } from 'lavamoat-core'
+import type {
+  EndowmentsToolkitFactory,
+  LavaMoatScuttleOpts,
+} from 'lavamoat-core'
 import type { LavaMoatPluginOptions } from '../buildtime/types'
 
 type DebugTools = {
@@ -25,6 +29,7 @@ export interface RuntimeNamespace {
   ENUM: Record<string, string>
   endowmentsToolkit: typeof EndowmentsToolkitFactory
   defaultExport: (...args: any[]) => unknown
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   repairs: Record<string, Function>
   debug: DebugTools | undefined
 }

@@ -106,7 +106,7 @@ function findGlobals(ast) {
    * @param {IdentifierOrThisExpressionNodePath} path
    * @param {string} [name]
    */
-  // @ts-ignore - FIXME needs logic changes for type safety
+  // @ts-expect-error - FIXME needs logic changes for type safety
   function saveGlobal(path, name = path.node.name) {
     // init entry if needed
     if (!globals.has(name)) {

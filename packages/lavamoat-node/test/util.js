@@ -38,6 +38,7 @@ function setOptToArgs(args, key, value) {
 
 /**
  * Converts options within a `NormalizedScenario` to CLI args.
+ *
  * @param {import('lavamoat-core/test/scenarios/scenario').NormalizedScenario} scenario
  * @returns {string[]}
  */
@@ -54,8 +55,9 @@ function convertOptsToArgs(scenario) {
 
 /**
  * Runs Lavamoat CLI
- * @param {{args?: string[], cwd?: string}} opts
- * @returns {Promise<{output: {stdout: string, stderr: string}}>}
+ *
+ * @param {{ args?: string[]; cwd?: string }} opts
+ * @returns {Promise<{ output: { stdout: string; stderr: string } }>}
  */
 async function runLavamoat({ args = [], cwd = process.cwd() } = {}) {
   const lavamoatPath = require.resolve('../src/cli')
@@ -66,10 +68,13 @@ async function runLavamoat({ args = [], cwd = process.cwd() } = {}) {
 /**
  * Run the given scenario.
  *
- * The `scenario` itself should be passed thru `createScenarioFromScaffold` to normalize it.
+ * The `scenario` itself should be passed thru `createScenarioFromScaffold` to
+ * normalize it.
  *
- * @template [T=unknown]
- * @param {{scenario: import('lavamoat-core/test/scenarios/scenario').NormalizedScenario}} opts
+ * @template [T=unknown] Default is `unknown`
+ * @param {{
+ *   scenario: import('lavamoat-core/test/scenarios/scenario').NormalizedScenario
+ * }} opts
  * @returns {Promise<T>}
  */
 async function runScenario({ scenario }) {
@@ -87,7 +92,7 @@ async function runScenario({ scenario }) {
   }
   try {
     result = JSON.parse(stdout)
-  } catch (e) {
+  } catch {
     throw new Error(`Unexpected output in standard out: \n${stdout}`)
   }
   return result

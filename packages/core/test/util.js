@@ -333,7 +333,7 @@ function createHookedConsole() {
     let result
     try {
       result = JSON.parse(message)
-    } catch (err) {
+    } catch {
       throw new Error(`LavaMoat - failed to parse test output:\n${message}`)
     }
     resolve(result)

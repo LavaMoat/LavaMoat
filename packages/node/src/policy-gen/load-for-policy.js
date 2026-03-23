@@ -293,6 +293,8 @@ export const loadAndGeneratePolicy = async (
     )
     return { policy, packageJsonMap }
   } finally {
+    // we only check this if we have a policy override, because we're assuming
+    // the policy we just generated is valid, which may be a bad idea.
     if (policyOverride) {
       reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
         policy: policyOverride,

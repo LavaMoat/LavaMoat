@@ -4,6 +4,7 @@ import {
   DEFAULT_POLICY_OVERRIDE_PATH,
   DEFAULT_POLICY_PATH,
 } from '../src/constants.js'
+import { toPath } from '../src/util.js'
 
 /**
  * @import {Fixture, FixtureOptions} from './types.js'
@@ -36,8 +37,10 @@ export const fixtureFinder = (referrer) => {
     const dir = fileURLToPath(new URL(`./fixture/${name}`, referrer))
     // do not compute entrypoint relative to dir if it already exists
     entrypoint ??= path.join(dir, entrypointFilename)
-    policyPath ??= path.join(dir, DEFAULT_POLICY_PATH)
-    policyOverridePath ??= path.join(dir, DEFAULT_POLICY_OVERRIDE_PATH)
+    policyPath = toPath(policyPath ?? path.join(dir, DEFAULT_POLICY_PATH))
+    policyOverridePath = toPath(
+      policyOverridePath ?? path.join(dir, DEFAULT_POLICY_OVERRIDE_PATH)
+    )
     return { entrypoint, dir, policyPath, policyOverridePath }
   }
   return fixture

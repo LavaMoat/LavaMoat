@@ -2,6 +2,7 @@ const { isGitUrl, gitInfo, isCommitHash } = require('./isgit')
 const cache = require('./cache')
 
 const fetchRetry5xx = (url, options = {}, retries = 1) => {
+  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   return fetch(url, options).then((res) => {
     if (res.status >= 500 && res.status < 600 && retries > 0) {
       return fetchRetry5xx(url, options, retries - 1)

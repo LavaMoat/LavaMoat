@@ -1,4 +1,4 @@
-import { LavamoatModuleRecord } from '../module-record'
+import type { LavamoatModuleRecord } from '../module-record'
 
 /**
  * Schema for LavaMoat policy override files
@@ -198,4 +198,5 @@ export interface Resolutions {
 /**
  * For use with type-narrowing
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SomeLavaMoatPolicy = LavaMoatPolicy<any>

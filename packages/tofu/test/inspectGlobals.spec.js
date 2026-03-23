@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-vars, n/no-unsupported-features/node-builtins */
 /* global xyz: true, zzz, a, b, c, z: true, abc: true, manifest */
 
 const { EOL } = require('node:os')
@@ -18,12 +18,9 @@ testInspect(
   'detects global reads',
   {},
   () => {
-    const x = xyz(
-      // eslint-disable-next-line no-unexpected-multiline
-      function (a) {
-        return a
-      }
-    )(abc)
+    const x = xyz(function (a) {
+      return a
+    })(abc)
   },
   {
     xyz: 'read',
@@ -216,7 +213,7 @@ testInspect(
   },
   () => {
     // XXX: this is probably wrong.  either use `typeof window === 'undefined'` or `window === undefined`
-    // eslint-disable-next-line valid-typeof
+    // eslint-disable-next-line no-constant-binary-expression, valid-typeof
     typeof window === undefined
   },
   {}
@@ -455,7 +452,7 @@ function testInspect(label, opts, fn, expectedResultObj) {
 
     // for debugging
     if (!deepEqual(resultSorted, expectedSorted)) {
-      label, opts
+      ;(label, opts)
       // eslint-disable-next-line no-debugger
       debugger
     }

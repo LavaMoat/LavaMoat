@@ -92,16 +92,20 @@ exports.Laverna = class Laverna {
     if (this.opts.yes) {
       throw new Error('Attempted to confirm with yes=true; this is a bug')
     }
-    const rl = require('node:readline/promises').createInterface(
-      process.stdin,
-      process.stderr
-    )
-    try {
-      const answer = await rl.question(`${yellow('Proceed?')} (y/N) `)
-      return answer?.toLowerCase() === 'y'
-    } finally {
-      rl.close()
-    }
+    return new Promise((resolve, reject) => {
+      const rl = require('node:readline').createInterface(
+        process.stdin,
+        process.stderr
+      )
+      rl.once('error', (err) => {
+        rl.close()
+        reject(err)
+      })
+      rl.question(`${yellow('Proceed?')} (y/N) `, (answer) => {
+        rl.close()
+        resolve(answer?.toLowerCase() === 'y')
+      })
+    })
   }
 
   /**

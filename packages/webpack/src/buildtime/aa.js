@@ -177,8 +177,7 @@ exports.generateIdentifierLookup = ({
    * @returns
    */
   const stripMetaFromResource = (resource) => {
-    // eslint-disable-next-line no-unused-vars
-    const { meta, ...rest } = resource
+    const { meta: _meta, ...rest } = resource
     return rest
   }
   /**

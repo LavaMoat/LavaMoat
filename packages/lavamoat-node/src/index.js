@@ -1,5 +1,3 @@
-/* eslint-disable no-eval */
-
 const path = require('node:path')
 const fs = require('node:fs')
 const {

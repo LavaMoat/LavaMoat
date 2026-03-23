@@ -117,6 +117,7 @@ export async function loadJSONFixture(
   if (randomDelay) {
     const { maybeRead } = readPowers
     readPowers.maybeRead = async (specifier) => {
+      // eslint-disable-next-line n/no-unsupported-features/node-builtins
       await scheduler.wait(
         Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1)) + MIN_DELAY
       )
