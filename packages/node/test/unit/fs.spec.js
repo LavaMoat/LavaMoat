@@ -43,8 +43,7 @@ test('isReadablePathSync() - returns true for readable paths', (t) => {
   t.true(isReadablePathSync('/test.txt', { fs }))
 })
 
-// memfs does not really implement permissions
-test.failing('isReadablePathSync returns false for non-readable paths', (t) => {
+test('isReadablePathSync returns false for non-readable paths', (t) => {
   const { vol, fs } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.chmodSync('/test.txt', 0o000)
@@ -54,52 +53,49 @@ test.failing('isReadablePathSync returns false for non-readable paths', (t) => {
 test('isExecutablePathSync() - returns true for executable paths', (t) => {
   const { vol, fs } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
-  vol.chmodSync('/test.txt', 0o755) // XXX: this does nothing; all paths are considered executable
+  vol.chmodSync('/test.txt', 0o755)
   t.true(isExecutablePathSync('/test.txt', { fs }))
 })
 
-// memfs does not really implement permissions
-test.failing(
-  'isExecutablePathSync returns false for non-executable paths',
-  (t) => {
-    const { vol, fs } = memfs()
-    vol.fromJSON({ '/test.txt': 'content' })
-    vol.chmodSync('/test.txt', 0o644) // XXX: this does nothing
-    t.false(isExecutablePathSync('/test.txt', { fs }))
-  }
-)
+test('isExecutablePathSync returns false for non-executable paths', (t) => {
+  const { vol, fs } = memfs()
+  vol.fromJSON({ '/test.txt': 'content' })
+  vol.chmodSync('/test.txt', 0o644)
+  t.false(isExecutablePathSync('/test.txt', { fs }))
+})
+
 test('isReadableFileSync() - returns true for readable files', (t) => {
   const { vol, fs } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   t.true(isReadableFileSync('/test.txt', { fs }))
 })
 
-// memfs does not really implement permissions
-test.failing('isReadableFileSync returns false for non-readable files', (t) => {
+test('isReadableFileSync returns false for non-readable files', (t) => {
   const { vol, fs } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
-  vol.chmodSync('/test.txt', 0o000) // XXX: this does nothing
+  vol.chmodSync('/test.txt', 0o000)
   t.false(isReadableFileSync('/test.txt', { fs }))
 })
 
-test('isExecutableSymlink() - returns true for executable symlinks', (t) => {
-  const { vol, fs } = memfs()
-  vol.fromJSON({ '/test.txt': 'content' })
-  vol.symlinkSync('/test.txt', '/test-link')
-  vol.chmodSync('/test-link', 0o755)
-  t.true(isExecutableSymlink('/test-link', { fs }))
-})
-// memfs does not really implement permissions
+// https://github.com/streamich/memfs/issues/1252
 test.failing(
-  'isExecutableSymlink returns false for non-executable symlinks',
+  'isExecutableSymlink() - returns true for executable symlinks',
   (t) => {
     const { vol, fs } = memfs()
     vol.fromJSON({ '/test.txt': 'content' })
     vol.symlinkSync('/test.txt', '/test-link')
-    vol.chmodSync('/test-link', 0o644) // XXX: this does nothing
-    t.false(isExecutableSymlink('/test-link', { fs }))
+    vol.chmodSync('/test-link', 0o755)
+    t.true(isExecutableSymlink('/test-link', { fs }))
   }
 )
+
+test('isExecutableSymlink returns false for non-executable symlinks', (t) => {
+  const { vol, fs } = memfs()
+  vol.fromJSON({ '/test.txt': 'content' })
+  vol.symlinkSync('/test.txt', '/test-link')
+  vol.chmodSync('/test-link', 0o644)
+  t.false(isExecutableSymlink('/test-link', { fs }))
+})
 
 test('isSymlinkSync() - returns true for symlinks', (t) => {
   const { vol, fs } = memfs()
