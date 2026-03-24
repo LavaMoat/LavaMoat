@@ -146,6 +146,7 @@ export default defineConfig(
       '**/vendor/**',
       '**/*.d.ts',
       'docs/**',
+      'packages/__sandbox__/**',
       'packages/*/examples/**',
       'packages/*/test/**/fixtures/**',
       'packages/*/test/**/fixture/**',

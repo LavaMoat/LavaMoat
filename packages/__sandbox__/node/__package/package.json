@@ -1,0 +1,8 @@
+{
+  "name": "local__package",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "a package to participate in policy generation",
+  "license": "ISC",
+  "main": "index.js"
+}

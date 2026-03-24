@@ -1,0 +1,16 @@
+{
+  "resources": {
+    "@noble/hashes": {
+      "globals": {
+        "TextEncoder": true,
+        "crypto": true
+      }
+    },
+    "local__package": {
+      "globals": {
+        "console.log": true,
+        "process.env": true
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "sandbox_node",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "preconfigured setup to try things in @lavamoat/node manually",
+  "license": "ISC",
+  "private": true,
+  "scripts": {
+    "generate": "lavamoat generate index.js",
+    "test": "lavamoat run index.js"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.0.1",
+    "local__package": "file:__package"
+  },
+  "devDependencies": {
+    "@lavamoat/node": "file:../../node"
+  }
+}
