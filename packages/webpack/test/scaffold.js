@@ -1,7 +1,7 @@
 const path = require('node:path')
 const webpack = require('webpack')
 const memfs = require('memfs')
-const { toSnapshotSync } = require('memfs/lib/snapshot')
+const { toSnapshotSync } = require('@jsonjoy.com/fs-snapshot')
 const { createContext, runInNewContext } = require('node:vm')
 const { readFileSync } = require('node:fs')
 
@@ -86,7 +86,7 @@ exports.scaffold = async function runWebpackBuild(
 /**
  * Convert a memfs snapshot to a map
  *
- * @param {import('memfs/lib/snapshot').SnapshotNode} input
+ * @param {import('@jsonjoy.com/fs-snapshot').SnapshotNode} input
  * @param {string} [path]
  * @returns {Record<string, any>}
  */
@@ -144,7 +144,7 @@ function runScript(code, globals) {
   if (typeof code !== 'string' || code === '') {
     throw new Error('runScript requires a bundle string as the first argument')
   }
-  const context = createContext({...defaultGlobals(), ...globals})
+  const context = createContext({ ...defaultGlobals(), ...globals })
   context.self = context // minimal browser emulation
   return {
     context,
