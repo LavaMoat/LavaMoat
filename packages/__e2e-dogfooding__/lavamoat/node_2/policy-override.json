@@ -1,0 +1,69 @@
+{
+  "include": [
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>is-plain-object",
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone",
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>mixin-object",
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>is-extendable",
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>kind-of",
+    "babel-loader",
+    "@babel/preset-env",
+    "@babel/preset-react"
+  ],
+  "resources": {
+    "@babel/preset-env": {
+      "packages": {
+        "@babel/core>semver": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>is-plain-object": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>kind-of": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>is-extendable": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>kind-of": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>mixin-object": true
+      }
+    },
+    "babel-loader>@babel/core": {
+      "packages": {
+        "@babel/preset-env": true,
+        "@babel/preset-react": true,
+        "@babel/preset-typescript": true
+      }
+    },
+    "html-webpack-plugin": {
+      "builtin": {
+        "url": true
+      }
+    },
+    "html-webpack-plugin>lodash": {
+      "builtin": {
+        "util": true
+      }
+    },
+    "webpack>graceful-fs": {
+      "globals": {
+        "___graceful-fs_previous": "write",
+        "___graceful-fs_queue": "write"
+      }
+    },
+    "webpack>loader-runner": {
+      "packages": {
+        "@lavamoat/webpack": true,
+        "babel-loader": true,
+        "html-webpack-plugin": true,
+        "mini-css-extract-plugin": true
+      }
+    },
+    "webpack>terser-webpack-plugin>jest-worker": {
+      "packages": {
+        "webpack>terser-webpack-plugin": true
+      }
+    }
+  }
+}
