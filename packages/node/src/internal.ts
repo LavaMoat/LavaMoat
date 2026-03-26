@@ -18,6 +18,7 @@ import type {
   LavaMoatPolicy,
   Resources,
 } from '@lavamoat/types'
+import { type WriteStream } from 'node:tty'
 import type { PackageJson, ValueOf } from 'type-fest'
 import type { MessageTypes, SES_VIOLATION_TYPES } from './constants.js'
 import type {
@@ -30,6 +31,7 @@ import type {
   WithLog,
   WithPolicyOverride,
   WithPolicyOverrideOnly,
+  WithPolicyOverridePath,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
@@ -61,6 +63,8 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
     WithReadPowersAndTrust,
     WithPolicyOverride,
     WithProjectRoot,
+    WithPolicyPath,
+    WithPolicyOverridePath,
   ]
 >
 
@@ -187,6 +191,15 @@ export type ReportInvalidOverridesOptions = ComposeOptions<
  * @internal
  */
 export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
+
+/**
+ * Options for `reportRedundantPreloads()`
+ *
+ * @internal
+ */
+export type ReportRedundantPreloadsOptions = ComposeOptions<
+  [WithLog, WithPolicyOverridePath, WithPolicyPath]
+>
 
 /**
  * Result of `loadCompartmentMap()`
@@ -378,6 +391,7 @@ export interface ErrorMessage {
  * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
  *   be inspected
  * @returns {number} The new message count
+ * @internal
  */
 export type ReportModuleInspectionProgressFn = (
   messageCount: number,
@@ -392,6 +406,7 @@ export type ReportModuleInspectionProgressFn = (
  *   inspected so far
  * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
  *   be inspected
+ * @internal
  */
 export type ReportModuleInspectionProgressEndFn = (
   inspectedModules: Set<FileUrlString>,
@@ -400,8 +415,36 @@ export type ReportModuleInspectionProgressEndFn = (
 
 /**
  * Object returned by `createModuleInspectionProgressReporter`
+ *
+ * @internal
  */
 export interface ModuleInspectionProgressReporter {
+  /**
+   * Reports progress of the module inspection process to the console.
+   */
   reportModuleInspectionProgress: ReportModuleInspectionProgressFn
+  /**
+   * Reports the end of the module inspection process to the console.
+   */
   reportModuleInspectionProgressEnd: ReportModuleInspectionProgressEndFn
+}
+
+/**
+ * Options for `createModuleInspectionProgressReporter()`
+ *
+ * @internal
+ */
+export interface CreateModuleInspectionProgressReporterOptions {
+  /**
+   * If `true`, the reporter will not report progress
+   *
+   * @defaultValue `false`
+   */
+  disabled?: boolean
+  /**
+   * The stream to write the progress to
+   *
+   * @defaultValue `process.stderr`
+   */
+  stream?: WriteStream
 }

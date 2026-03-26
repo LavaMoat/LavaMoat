@@ -234,7 +234,7 @@ export const toAbsolutePath = (pathLike, assertionMessage) => {
 const INT_STRING_REGEXP = /^(?:0|[1-9][0-9]*)$/
 
 /**
- * Anything matching this will need to be in
+ * Anything matching this will need to be in dot notation.
  */
 const DOT_NOTATION_ALLOWED = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/
 
