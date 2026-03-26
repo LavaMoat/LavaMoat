@@ -14,7 +14,6 @@ ignores:
   - 'one'
   # types
   - '@types/json-stable-stringify'
-  - '@types/merge-deep'
   - '@babel/types'
   - '@lavamoat/types'
   - 'type-fest'
