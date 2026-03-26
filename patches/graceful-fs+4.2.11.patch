@@ -1,0 +1,25 @@
+diff --git a/node_modules/graceful-fs/graceful-fs.js b/node_modules/graceful-fs/graceful-fs.js
+index 8d5b89e..0f8ebb5 100644
+--- a/node_modules/graceful-fs/graceful-fs.js
++++ b/node_modules/graceful-fs/graceful-fs.js
+@@ -6,18 +6,8 @@ var clone = require('./clone.js')
+ var util = require('util')
+ 
+ /* istanbul ignore next - node 0.x polyfill */
+-var gracefulQueue
+-var previousSymbol
+-
+-/* istanbul ignore else - node 0.x polyfill */
+-if (typeof Symbol === 'function' && typeof Symbol.for === 'function') {
+-  gracefulQueue = Symbol.for('graceful-fs.queue')
+-  // This is used in testing by future versions
+-  previousSymbol = Symbol.for('graceful-fs.previous')
+-} else {
+-  gracefulQueue = '___graceful-fs.queue'
+-  previousSymbol = '___graceful-fs.previous'
+-}
++var gracefulQueue = '___graceful-fs.queue'
++var previousSymbol = '___graceful-fs.previous'
+ 
+ function noop () {}
+ 
