@@ -1,4 +1,6 @@
 // @ts-check
+/// <reference types="ses" />
+/* global Compartment */
 
 /**
  * Utilities for generating the endowments object based on a `globalRef` and a
@@ -35,12 +37,30 @@ module.exports._test = { instrumentDynamicValueAtPath }
  * @param {boolean} [opts.handleGlobalWrite]
  * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
  *   mutated later
+ * @param {Map<string, { ambient: boolean; endow: Function }>} [opts.capabilities]
+ *   -
+ *
+ *   Registered capabilities from evaluateCapabilities
  */
 function endowmentsToolkit({
   createFunctionWrapper = defaultCreateFunctionWrapper,
   handleGlobalWrite = false,
   knownWritableFields = new Set(),
+  capabilities = new Map(),
 } = {}) {
+  // Split capabilities into ambient (auto-applied in Phase 2) and local
+  // (applied only when listed in package policy).
+  /** @type {Map<string, { ambient: boolean; endow: Function }>} */
+  const ambientCapabilities = new Map()
+  /** @type {Map<string, { ambient: boolean; endow: Function }>} */
+  const localCapabilities = new Map()
+  for (const [name, def] of capabilities) {
+    if (def.ambient) {
+      ambientCapabilities.set(name, def)
+    } else {
+      localCapabilities.set(name, def)
+    }
+  }
   return {
     // public API
     getEndowmentsForConfig,
@@ -76,66 +96,87 @@ function endowmentsToolkit({
     unwrapTo,
     unwrapFrom
   ) {
-    if (!packagePolicy.globals) {
-      return {}
-    }
-    // validate read access from packagePolicy
-    /** @type {string[]} */
-    const whitelistedReads = []
-    /** @type {Set<string>} */
-    const allowedWriteFields = new Set()
-    /** @type {string[]} */
-    const explicitlyBanned = []
+    /** @type {object} */
+    let endowments = {}
 
-    Object.entries(packagePolicy.globals).forEach(
-      ([path, packagePolicyValue]) => {
-        const pathParts = path.split('.')
-        // disallow dunder proto in path
-        const pathContainsDunderProto = pathParts.some(
-          (pathPart) => pathPart === '__proto__'
-        )
-        if (pathContainsDunderProto) {
-          throw new Error(
-            `Lavamoat - "__proto__" disallowed when creating minimal view. saw "${path}"`
+    if (packagePolicy.globals) {
+      // validate read access from packagePolicy
+      /** @type {string[]} */
+      const whitelistedReads = []
+      /** @type {Set<string>} */
+      const allowedWriteFields = new Set()
+      /** @type {string[]} */
+      const explicitlyBanned = []
+
+      Object.entries(packagePolicy.globals).forEach(
+        ([path, packagePolicyValue]) => {
+          const pathParts = path.split('.')
+          // disallow dunder proto in path
+          const pathContainsDunderProto = pathParts.some(
+            (pathPart) => pathPart === '__proto__'
           )
-        }
-        // false means no access. It's necessary so that overrides can also be used to tighten the policy
-        if (packagePolicyValue === false) {
-          explicitlyBanned.push(path)
-          return
-        }
-        // write access handled elsewhere
-        if (packagePolicyValue === 'write') {
-          if (!handleGlobalWrite) {
-            return
-          }
-          if (pathParts.length > 1) {
+          if (pathContainsDunderProto) {
             throw new Error(
-              `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+              `Lavamoat - "__proto__" disallowed when creating minimal view. saw "${path}"`
             )
           }
-          allowedWriteFields.add(path)
+          // false means no access. It's necessary so that overrides can also be used to tighten the policy
+          if (packagePolicyValue === false) {
+            explicitlyBanned.push(path)
+            return
+          }
+          // write access handled elsewhere
+          if (packagePolicyValue === 'write') {
+            if (!handleGlobalWrite) {
+              return
+            }
+            if (pathParts.length > 1) {
+              throw new Error(
+                `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+              )
+            }
+            allowedWriteFields.add(path)
+            whitelistedReads.push(path)
+            return
+          }
+          if (packagePolicyValue !== true) {
+            throw new Error(
+              `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
+            )
+          }
           whitelistedReads.push(path)
-          return
         }
-        if (packagePolicyValue !== true) {
+      )
+      // sort by length to optimize further steps
+      whitelistedReads.sort((a, b) => a.length - b.length)
+      endowments = makeMinimalViewOfRef(
+        sourceRef,
+        whitelistedReads,
+        unwrapTo,
+        unwrapFrom,
+        explicitlyBanned,
+        allowedWriteFields
+      )
+    }
+
+    if (packagePolicy.capabilities) {
+      Object.entries(packagePolicy.capabilities).forEach(([name, options]) => {
+        const cap = localCapabilities.get(name)
+        if (!cap) {
           throw new Error(
-            `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
+            `LavaMoat - unknown capability "${name}" requested in package policy`
           )
         }
-        whitelistedReads.push(path)
-      }
-    )
-    // sort by length to optimize further steps
-    whitelistedReads.sort((a, b) => a.length - b.length)
-    return makeMinimalViewOfRef(
-      sourceRef,
-      whitelistedReads,
-      unwrapTo,
-      unwrapFrom,
-      explicitlyBanned,
-      allowedWriteFields
-    )
+        cap.endow({
+          options,
+          endowments,
+          compartmentGlobalThis: unwrapFrom,
+          rootCompartmentGlobalThis: sourceRef,
+        })
+      })
+    }
+
+    return endowments
   }
 
   /**
@@ -540,7 +581,8 @@ function endowmentsToolkit({
   function copyWrappedGlobals(
     globalRef,
     target,
-    globalThisRefs = ['globalThis']
+    globalThisRefs = ['globalThis'],
+    rootCapabilities = {}
   ) {
     // find the relevant endowment sources
     const globalProtoChain = getPrototypeChain(globalRef)
@@ -620,6 +662,23 @@ function endowmentsToolkit({
       }
       target[ref] = target
     }
+
+    // Apply root-level capabilities listed in policy
+    Object.entries(rootCapabilities).forEach(([name, options]) => {
+      const cap = localCapabilities.get(name)
+      if (!cap) {
+        throw new Error(
+          `LavaMoat - unknown capability "${name}" requested for root package`
+        )
+      }
+      cap.endow({
+        options,
+        endowments: target,
+        compartmentGlobalThis: target,
+        rootCompartmentGlobalThis: target,
+      })
+    })
+
     return target
   }
 }
@@ -670,7 +729,6 @@ function evaluateCapabilities({ sources, globalRef, globals = {} }) {
       capabilities.set(name, definition)
     }
 
-    // Compartment is a global provided by SES
     const compartment = new Compartment({
       ...globals,
       repair,
@@ -889,6 +947,8 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
+ * @param {Record<string, any[]>} [rootCapabilities] - Capabilities to apply to
+ *   the root compartment, keyed by name with options arrays as values
  * @returns {Record<PropertyKey, any>}
  */
 

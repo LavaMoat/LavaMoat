@@ -27,6 +27,13 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
   resources: T
 
   /**
+   * @experimental
+   * List of Capability Module specifiers to load at startup.
+   * Resolved relative to the policy file location.
+   */
+  use?: string[]
+
+  /**
    * Module resolution mapping
    *
    * @deprecated Resolutions are better handled by package managers. A future
@@ -142,6 +149,15 @@ export interface Resources {
 
 export type ResourceMetadata = Record<string, string | string[]>
 
+/**
+ * Capabilities (custom endowment providers) applied to this resource. Keys are
+ * capability names; values are arrays of options passed to the capability's
+ * `endow` function.
+ */
+export interface CapabilitiesPolicy {
+  [name: string]: unknown[]
+}
+
 export interface ResourcePolicy {
   globals?: GlobalPolicy
   builtin?: BuiltinPolicy
@@ -155,6 +171,11 @@ export interface ResourcePolicy {
    * Metadata about the resource
    */
   meta?: ResourceMetadata
+  /**
+   * @experimental
+   * Named capabilities to apply to this resource's compartment.
+   */
+  capabilities?: CapabilitiesPolicy
 }
 
 /**
