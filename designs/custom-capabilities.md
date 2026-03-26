@@ -1,18 +1,26 @@
 # Custom capabilities
 
-## design
+## Design
 
-Custom capability is conceptually similar to an attenuator mixed with a repair where instead of an item being endowed to a compartment for a package the functionality from Custom capability implementation is invoked and can modify the compartment global disk according to needs that it defaults to or parameters provided to it.
+A custom capability is conceptually similar to an attenuator mixed with a repair. Instead of a single item being endowed to a compartment for a package, the capability implementation is invoked and can modify the compartment's globalThis according to its defaults or parameters provided to it in policy.
 
-The design consists of two parts.
+The design consists of two parts:
 
-1. how custom capabilities are defined and used in policy files.
-2. the structure of the custom capability.
+1. How custom capabilities are defined and used in policy files.
+2. The structure of the custom capability implementation.
+
+### Terminology
+
+- **Capability Module** — A JS module whose default export is an array of `{ names, file }` entries that map capability names to implementation file paths. Listed in the policy `use` field.
+- **Capability File** — The implementation file that calls `repair()` and/or `defineCapability()` to register behavior. Evaluated in an isolated Compartment at startup.
 
 ### Using capabilities in policy
 
-Capabilities are selected at the top level (precise selection is important for webpack bundle size but less important in node.js)
-Every capability listed there will have its `repair` executed.
+Capability Modules are selected at the top level with the `use` field. The `use` field is valid in both `policy.json` and `policy-override.json`. Precise selection is important for webpack bundle size but less important in Node.js.
+
+All capabilities listed in `use` are loaded and evaluated at startup. Every `repair` callback registered by any loaded capability is executed between `repairIntrinsics()` and `hardenIntrinsics()`.
+
+The `capabilities` field in a resource entry specifies which capabilities' `endow` functions should be applied to that resource's compartment. Each key is a capability name; its value is an array of options passed to the `endow` callback.
 
 ```js
 {
@@ -29,110 +37,185 @@ Every capability listed there will have its `repair` executed.
     },
     "some>package": {
       "capabilities": {
-        "define-to-set": []
-        "endow-symbol-write": ['nameofthesymbol', 'nameoftAnotherSymbol']
+        "define-to-set": [],
+        "endow-symbol-write": ["nameofthesymbol", "nameofAnotherSymbol"]
       },
-      "globals": {  }
+      "globals": {}
     },
     "other>package": {
       "globals": {
-        "process": true // still protected by the root thing
+        "process": true // still protected by the root capability
       }
     }
   }
 }
 ```
 
-The difference between using it for a package versus defining globally is that the global definitions can provide repairs while for an individual package repairs are going to be ignored because there is no way to run them anymore within the lockdown process.
-Using a capability that provides repairs inside of a resource should throw an error.
-
-the strings in the `capabilities` array are valid selectors that can be resolved from the location of the policy-override.js The design assumes listing them covers simple cases and, if needed they can be composed in a single local file by the end user.
+The strings in the `use` array are valid module specifiers resolved from the location of the policy file. This covers simple cases; for composition, a local Capability Module can re-export a selection of capabilities from multiple dependencies.
 
 ### Defining capabilities
 
-Capablity Module is a module with a default export containing available capability names as keys and file locations where the capabilities are implemented as values, like so:
+#### Capability Module
+
+A Capability Module is a JS module with a default export that is an array of entries, each mapping one or more capability names to an implementation file:
 
 ```js
-{
-    "capability-name": require.resolve('./src/capabilityname.js')
-}
+module.exports = [
+  {
+    names: ['define-to-set', 'endow-symbol-redefine'],
+    file: require.resolve('./src/define-set.js'),
+  },
+  {
+    names: ['endow-symbol-write'],
+    file: require.resolve('./src/symbol-write.js'),
+  },
+  {
+    names: ['reasonable-process'],
+    file: require.resolve('./src/reasonable-process.js'),
+  },
+]
 ```
 
-Capability names must be unique for a policy. A local CapabilityModule can be used to compose a selection of unique capabilities from multiple dependencies
+Capability names must be unique across all Capability Modules in a policy. Name collisions are detected at load time (build-time) by flattening all `names` arrays across all modules. Each unique file should only be referenced once.
 
-The capability file is taken in as text (minified in case of webpack) and evaluated in a compartment endowed with `repair` and `defineCapability`
+A local Capability Module can be used to compose a unique selection of capabilities from multiple dependencies.
 
-`repair` registers the function from argument to run in lockdown and passes real `globalThis` to it for repairs.
+#### Capability File
 
-`defineCapability` puts functions in a collection to pass them into endowmentsToolkit to be used
+The Capability File is read as text (minified in the case of webpack) and evaluated in an isolated Compartment endowed with `repair` and `defineCapability`. One Compartment is created per unique file (not per capability name).
 
-```
+**`repair(callback)`** — Registers a callback to run after `repairIntrinsics()` but before `hardenIntrinsics()`. The callback receives the real top-level `globalThis` and may modify it. It is safe to capture the reference in a higher scope for use in `endow`.
+
+**`defineCapability(name, definition)`** — Registers a named capability. The `name` must be a string matching one of the names declared in the Capability Module. A single file may call `defineCapability` multiple times with different names.
+
+```js
 repair((realGlobalThis) => {
-    // make repairs here
-    // it's ok to preserve globalThis in higher scope.
+  // Runs between repairIntrinsics() and hardenIntrinsics().
+  // Make repairs to realGlobalThis here.
+  // It's ok to capture realGlobalThis in higher scope.
 })
 
-
-defineCapability({
-  ambient: false // if true, applies the capability to every compartment.
+defineCapability('define-to-set', {
+  ambient: false, // if true, applies to every compartment automatically
   endow: ({
-      options, // aray of options from policy use
-      endowments, //
-      compartmentGlobalThis,
-      rootCompartmentGlobalThis
-    }) => {
-      // detect you're handling root compartment: rootCompartmentGlobalThis === compartmentGlobalThis
-
-    },
-
-
+    options, // array of options from the resource's capabilities entry
+    endowments, // the proposed endowments object (after getEndowmentsForConfig)
+    compartmentGlobalThis, // the compartment's globalThis
+    rootCompartmentGlobalThis, // the root compartment's globalThis
+  }) => {
+    // Mutate endowments or compartmentGlobalThis in place. No return value.
+    // Detect root compartment: rootCompartmentGlobalThis === compartmentGlobalThis
+  },
 })
 
-
-
+defineCapability('endow-symbol-redefine', {
+  ambient: false,
+  endow: ({
+    options,
+    endowments,
+    compartmentGlobalThis,
+    rootCompartmentGlobalThis,
+  }) => {
+    // This capability shares the repair above with "define-to-set"
+    // because they are in the same Capability File.
+  },
+})
 ```
 
-### Example usecases
+### Example use cases
 
-reasonable-process - an attenuator for `process` returning a safe version of `process` for Node.js that has all the basic functionality but none of the really dangerous APIs. If a specific dangerous API is meant to be available, its name needs to be listed in the options. Can be applied globally on root or per resource. Could be implemented to endow more powerful process to individual resources while the root one is more limited.
+**reasonable-process** — An attenuator for `process` returning a safe version that has all the basic functionality but none of the really dangerous APIs. If a specific dangerous API is meant to be available, its name needs to be listed in the options. Can be applied globally on root or per resource. Could be implemented to endow more powerful `process` to individual resources while the root one is more limited.
 
-define-to-set - Puts a new copy of Object and Reflect references in the compartment where it's used and inherit all the references except for the defineProperty method. The replaced implementations use the value or the return value of a getter and assign to globalThis with _set_ semantics. Works the same if first argument is not compartment globel.
+**define-to-set** — Puts a new copy of `Object` and `Reflect` references in the compartment where it's used, inheriting all references except for the `defineProperty` method. The replaced implementations use the value or the return value of a getter and assign to globalThis with _set_ semantics. Works the same if first argument is not the compartment globalThis.
 
-endow-symbol-write - creates a writable (via getter and setter) symbol key(s)
+**endow-symbol-write** — Creates writable (via getter and setter) symbol key(s).
 
-endow-symbol-redefine - a mix of the above two.
+**endow-symbol-redefine** — A mix of the above two, sharing a repair with define-to-set by co-location in the same Capability File.
 
-brand-new-name-capability - any new global can be custom-made using existing globals and the per-resource options array. In node.js we could afford synchronously loading builtins for that.
+**brand-new-name-capability** — Any new global can be custom-made using existing globals and the per-resource options array. In Node.js we could afford synchronously loading builtins for that.
 
-### bikeshedding and open questions
+### Bikeshedding and open questions
 
-naming things:
+Naming:
 
-- capability vs power vs cap vs optinions/opinionateds
-- all names in how the capability is defined
+- capability vs power vs cap vs opinions/opinionateds — still undecided. "capability" used as working name throughout.
+- All names in how the capability is defined.
 
-- is `ambient` too powerful?
-- should capabilities cover builtins for node and if so, how?
-  - the answer is probably yes, with a separate function like endow, but totally different parameters
+Ambient capabilities:
 
-- do they have to be called synchronously on module load or could `defineCapability` be called in the callback to `repair`?
+- `ambient: true` applies the capability's `endow` to ALL compartments including root. Capability authors detect root via `rootCompartmentGlobalThis === compartmentGlobalThis` and can opt out of modifying it. A future author guide should document this pattern.
+
+Timing:
+
+- Whether `defineCapability` can be called inside the `repair` callback (instead of at the top level) — depends on implementation details of running repairs in packages/node workspace. If `repair` can execute its callback immediately, this is allowed. Revisit when Phase 1.5 implementation details are clear.
+
+Builtins:
+
+- Should capabilities cover Node.js builtins (fs, net, etc.)? Probably yes, with a separate registration function and different parameters. Planned for Phase 3.
+
+Validation:
+
+- The runtime does NOT validate that `defineCapability` calls match Capability Module declarations. A DX validation tool (Phase 4) will handle checking for undeclared or missing definitions.
+- Name collision detection happens at Capability Module load time (build-time), across all modules.
 
 ## Implementation plan
 
-Defined capabilities get passed to endowmentsToolkit as input and used in copyWrappedGlobals and getEndowmentsForConfig. After the proposed endowments object is ready, at the end of these functions, we iterate capabilities listed and apply them.
-The input to endowmentsToolkit needs to be already arranged into a collection of all `endow` functions from capabilities, a separate collection of `endow` from ambient capabilities and an analogous set of local and ambient ones for builtins, if we decide to implement that too.
+Implementation is split into phases. Each phase builds on the previous.
 
-Both lavamoat/node and the Webpack plugin require these to be properly integrated. So on initial read of the policy overrides file, he detect the capabilities listed in the top level `use` field. They need to get imported. And the definitions of capabilities are read. And these pointer files.
-These files need to be loaded in both lavamoat/node and in the webpack plugin accordingly.
+### Phase 1: Core capability infrastructure (packages/webpack and packages/node only)
 
-In case of webpack, the way capabilities get inserted into the runtime would be very similar to the existing implementation of repairs. Main distinction being we need to inline all of the capabilities listed in the policy. Assuming they are only listed because they were being used without checking whether they're actually used. In the future, we could consider warning the user about unused capabilities in their policy.
+Non-ambient capabilities working in the webpack plugin. Existing repairs mechanism deprecated but left functional.
 
-For lavamoat/node, the files that need to be read as strings, and then passed around to a point where we're running lockdown. The call to lockdown needs to be split into repair and harden steps. and the following happens in between.
+**Capability registration API** — New module `packages/core/src/endowmentsToolkit.js`. Exports `evaluateCapabilities(capabilitySourcesByFile, globalRef)` which, for each unique file, creates a Compartment, evaluates the capability code, and collects repair and endow registrations. The `repair` endowment queues callbacks. The `defineCapability` endowment is a single shared function that collects `(name, { ambient, endow })` pairs into a registry. Returns `{ repairs: Function[], capabilities: Map<string, { ambient, endow }> }`.
 
-So now in both webpack and lava node, we are at a point where we need to execute the code from capabilities. What we do is create a new compartment, not associated with any of the load and import mechanisms. Now repair and define capability functions into that compartment and then proceed to evaluate every capabilities code in that compartment. The implementation of repair is simply a function that calls its callback with the current real top level global this. And defined capability is implemented as collecting the function defined under the name of the capability, which implies that defined capability needs to be different per evaluation, which implies potentially a new compartment for every custom capability.
+**Policy schema changes** — Add `use: string[]` at policy top level and `capabilities: Record<string, any[]>` per resource. Update `mergePolicy()` in `packages/core/src/mergePolicy.js` to union `use` arrays and use override-wins for per-resource `capabilities`.
 
-The collection created by defined capabilities to then be passed around to reach the call to endowments toolkit and be passed in as part of its configuration.
+**Build-time capability loading** (`packages/webpack/src/buildtime/`) — After policy is loaded, resolve `use` entries as JS Capability Modules. Each exports an array of `{ names, file }` entries. Flatten all `names` to detect collisions. Read each unique file as source text. Pass capability sources and name→file mapping to the runtime as new fragments (similar to how `repairsBuilder.js` inlines repair sources).
 
-### nice-to-haves
+**Runtime capability execution** (`packages/webpack/src/runtime/`) — New runtime fragments: `capabilitySources` (file→source map) and `capabilityNames` (name→file index). In `runtime.js`, between `repairIntrinsics()` and `hardenIntrinsics()` (the existing `LOCKDOWN_SHIMS` gap): evaluate each unique capability file in a fresh Compartment with `repair` and `defineCapability` endowments, then execute all collected repair callbacks with `theRealGlobalThis`. In `installGlobalsForPolicy()`, after `getEndowmentsForConfig()` and existing repairs: for each capability in the resource's `capabilities` field, look up the registered capability and call its `endow` function.
 
-- an input to the defineCapability callback containing the canonical name of the compartment/resource - but that's not information that is now available to endowmentsTooklit at all and threading it consistently in both lavamoat/node and webpack plugin might not be worth the mess it'd create. the benefit on the other hand would be that a debugging tool could
+**Deprecate existing repairs** — Add deprecation notices to `repairsBuilder.js` and repair files. Leave fully functional; migration to capabilities is a Phase 4 concern.
+
+**Key files:**
+
+- `packages/core/src/endowmentsToolkit.js` — integration point; `getEndowmentsForConfig` and `copyWrappedGlobals` are where capability endow hooks in after proposed endowments are built
+- `packages/core/src/mergePolicy.js` — extend merge logic for `use` and `capabilities`
+- `packages/core/src/loadPolicy.js` — may need `use` field handling
+- `packages/webpack/src/runtime/runtime.js` — lockdown gap (line ~15-23), `installGlobalsForPolicy` (line ~188)
+- `packages/webpack/src/runtime/runtimeBuilder.js` — add capability fragments alongside repairs fragment
+- `packages/webpack/src/runtime/repairsBuilder.js` — reference pattern for source inlining
+- `packages/webpack/src/runtime/assemble.js` — `assembleRuntime` handles fragment inlining
+
+### Phase 1.5: lavamoat-node support
+
+Capabilities working in lavamoat-node. Browserify gets partial support via the shared `kernelCoreTemplate` but no browserify-specific work is planned.
+
+**Split lockdown** in `packages/core/src/kernelTemplate.js` — change `lockdown()` to `repairIntrinsics()` + capability repairs + `hardenIntrinsics()`.
+
+**Thread capability data into kernel** — `generateKernel()` in `packages/core/src/generateKernel.js` accepts capability source texts and inlines them via the `templateRequire`/`stringReplace` mechanism. The `capabilityRunner` module gets inlined as a new `templateRequire` dependency.
+
+**Hook endow into compartment creation** in `packages/core/src/kernelCoreTemplate.js` — in `getCompartmentForPackage()`, after `getEndowmentsForConfig()` and property descriptor transforms, call capability endow functions for the resource's listed capabilities.
+
+**Update CLIs** — `packages/lavamoat-node/src/kernel.js` and `packages/node/src/cli.js` load Capability Modules from disk and pass sources to `generateKernel`.
+
+### Phase 2: Ambient capabilities
+
+Support `ambient: true` in `defineCapability`. Ambient capabilities have their `endow` called for every compartment (including root) automatically, with an empty options array. Non-ambient capabilities continue to require explicit listing in the resource's `capabilities` field. `endow` callbacks detect root via `rootCompartmentGlobalThis === compartmentGlobalThis`.
+
+### Phase 3: Builtins support
+
+Capabilities can attenuate Node.js builtins. New registration function (e.g. `defineBuiltinCapability`) in the capability API with different parameters than `endow` — receives module namespace, returns attenuated version. Hook into `getBuiltinForConfig` in `endowmentsToolkit.js`.
+
+### Phase 4: DX improvements
+
+- **Capability validation tool** — CLI/build-time tool that evaluates capabilities and checks `defineCapability` calls match Capability Module declarations (undeclared names, missing definitions).
+- Warning for unused capabilities (in `use` but never referenced in `capabilities`).
+- Validation: referencing a capability not in `use` → clear error.
+- Better error messages.
+- Optional `resourceName` parameter in `endow` callback (threading canonical name into endowmentsToolkit).
+- Capability author guide.
+- Migrate existing built-in repairs to capability format (completing deprecation from Phase 1).
+
+### Nice-to-haves
+
+- An input to the `endow` callback containing the canonical name of the compartment/resource. This is not information currently available to endowmentsToolkit and threading it consistently in both lavamoat-node and the webpack plugin might not be worth the complexity. The benefit would be that a debugging tool could report which capabilities are applied to which resources at runtime.
