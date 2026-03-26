@@ -1,4 +1,4 @@
-# This is a fixture for testing the prebuilt native modules
+# This is a fixture for testing statically loaded, prebuilt native modules
 
 ## Create Snapshot
 
@@ -8,6 +8,17 @@ Run the following to create/update a snapshot in `../json-fixture`:
 # you may be prompted to install `snapshot-fs`
 npm run start
 ```
+
+## Loading the Fixture
+
+Since this fixture loads a native module statically, you'll need to use the entrypoint for the specific platform/arch. Currently supported entrypoints are:
+
+- `linux-x64.js`
+- `linux-arm64.js`
+- `darwin-arm64.js`
+- `win32.js`
+
+The `index.js` entrypoint will throw an error redirecting you to the correct entrypoint.
 
 ## Update Prebuilt Native Modules
 
