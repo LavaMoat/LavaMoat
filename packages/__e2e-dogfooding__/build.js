@@ -15,6 +15,7 @@ webpack(config, (err, stats) => {
   const info = stats.toJson()
 
   if (stats.hasErrors()) {
+    console.dir(info.errors, { depth: null, colors: true })
     console.error('Webpack build errors:', info.errors[0].message)
     process.exit(1)
   }
