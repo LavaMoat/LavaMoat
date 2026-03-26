@@ -378,6 +378,9 @@ export default defineConfig(
   // --- packages/laverna ---
   {
     files: ['packages/laverna/src/**/*.js'],
+    languageOptions: {
+      sourceType: 'module',
+    },
     rules: {
       'no-restricted-globals': [
         'error',
