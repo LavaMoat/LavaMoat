@@ -187,10 +187,12 @@ export type ResourceMetadata = Record<string, string | string[]>
 /**
  * Capabilities (custom endowment providers) applied to this resource. Keys are
  * capability names; values are arrays of options passed to the capability's
- * `endow` function.
+ * `endow` function. A per-name value of `false` removes that capability when
+ * merging with policy-override. The whole field may be set to `false` in a
+ * policy-override to clear all capabilities for the resource.
  */
 export interface CapabilitiesPolicy {
-  [name: string]: unknown[]
+  [name: string]: unknown[] | false
 }
 
 export interface ResourcePolicy {
@@ -209,8 +211,9 @@ export interface ResourcePolicy {
   /**
    * @experimental
    * Named capabilities to apply to this resource's compartment.
+   * In a policy-override, set to `false` to remove all capabilities.
    */
-  capabilities?: CapabilitiesPolicy
+  capabilities?: CapabilitiesPolicy | false
 }
 
 /**
