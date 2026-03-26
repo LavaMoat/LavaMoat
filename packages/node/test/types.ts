@@ -10,12 +10,70 @@ import type {
   WithPolicyPath,
 } from '../src/types.js'
 
-export interface RunnerWorkerData {
+export interface ScenarioRunnerWorkerData {
   entryPath: string
   policy: LavaMoatPolicy
   vol: NestedDirectoryJSON
   scuttleGlobalThis: LavaMoatScuttleOpts
 }
+
+/**
+ * Common fields for worker data sent to the exec runner
+ */
+export interface ExecRunnerWorkerDataBase {
+  policy: LavaMoatPolicy
+}
+
+/**
+ * Worker data for exec runner when running a JSON fixture
+ */
+export interface ExecRunnerWorkerDataJson extends ExecRunnerWorkerDataBase {
+  isJsonFixture: true
+  fixtureFilename: string
+  jsonEntrypoint?: string
+}
+
+/**
+ * Worker data for exec runner when running a real filesystem entrypoint
+ */
+export interface ExecRunnerWorkerDataDirect extends ExecRunnerWorkerDataBase {
+  isJsonFixture: false
+  entryPath: string
+}
+
+/**
+ * Discriminated union of worker data sent to the exec runner.
+ *
+ * When `isJsonFixture` is `true`, the runner loads a JSON fixture from disk
+ * (via `loadJSONFixture`) and uses the resulting `readPowers`. Otherwise, it
+ * runs against the real filesystem.
+ */
+export type ExecRunnerWorkerData =
+  | ExecRunnerWorkerDataJson
+  | ExecRunnerWorkerDataDirect
+
+/**
+ * Message posted by the exec runner on successful execution
+ */
+export interface ExecRunnerSuccessMessage {
+  type: 'success'
+  result: unknown
+}
+
+/**
+ * Message posted by the exec runner when execution fails
+ */
+export interface ExecRunnerErrorMessage {
+  type: 'error'
+  error: Error
+}
+
+/**
+ * Discriminated union of messages the exec runner can post to the parent thread
+ */
+export type ExecRunnerMessage =
+  | ExecRunnerSuccessMessage
+  | ExecRunnerErrorMessage
 
 export type TestCLIExpectationFn<Ctx = unknown> = (
   t: ExecutionContext<Ctx>,
