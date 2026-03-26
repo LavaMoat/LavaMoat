@@ -143,18 +143,60 @@ test(
   }
 )
 ;(process.platform === 'linux' && process.arch === 'x64' ? test : test.skip)(
-  'native module loaded statically (linux-x64 only)',
+  'native module loaded statically (linux-x64)',
   testExec,
-  new URL('../fixture/static-native/index.js', import.meta.url),
+  new URL('../fixture/static-native/linux-x64.js', import.meta.url),
   { hello: 'world' },
   {
     policy: {
       resources: {
         hello_world: {
           native: true,
-          packages: {
-            node_gyp_build: true,
-          },
+        },
+      },
+    },
+  }
+)
+;(process.platform === 'linux' && process.arch === 'arm64' ? test : test.skip)(
+  'native module loaded statically (linux-arm64)',
+  testExec,
+  new URL('../fixture/static-native/linux-arm64.js', import.meta.url),
+  { hello: 'world' },
+  {
+    policy: {
+      resources: {
+        hello_world: {
+          native: true,
+        },
+      },
+    },
+  }
+)
+;(process.platform === 'darwin' && process.arch === 'arm64' ? test : test.skip)(
+  'native module loaded statically (darwin-arm64)',
+  testExec,
+  new URL('../fixture/static-native/darwin-arm64.js', import.meta.url),
+  { hello: 'world' },
+  {
+    policy: {
+      resources: {
+        hello_world: {
+          native: true,
+        },
+      },
+    },
+  }
+)
+;(process.platform === 'win32' ? test : test.skip)(
+  'native module loaded statically (win32)',
+  testExec,
+  new URL('../fixture/static-native/win32.js', import.meta.url),
+  { hello: 'world' },
+  {
+    policy: {
+      resources: {
+        hello_world: {
+          native: true,
         },
       },
     },
