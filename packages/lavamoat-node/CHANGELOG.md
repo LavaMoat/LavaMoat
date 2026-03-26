@@ -19,6 +19,15 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [11.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.0.0...lavamoat-v11.0.1) (2026-03-26)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.0 to ^18.0.1
+
 ## [11.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.1.1...lavamoat-v11.0.0) (2026-03-20)
 
 
