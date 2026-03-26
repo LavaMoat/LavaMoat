@@ -140,11 +140,28 @@ const mergeResourcePolicy = (policyResources, policyOverrideResources) => {
     result.env = policyResources.env
   }
 
-  // capabilities: override wins entirely for this resource
+  // capabilities: merge per name.
+  // `capabilities: false` in override clears all base capabilities.
+  // Otherwise: base entries not mentioned in override are kept; override entries
+  // with value `false` remove the matching base entry; any other override value
+  // replaces or adds the entry.
   if ('capabilities' in policyOverrideResources) {
-    result.capabilities = policyOverrideResources.capabilities
+    const overrideCaps = policyOverrideResources.capabilities
+    if (overrideCaps === false) {
+      // explicitly cleared
+    } else {
+      const merged = { ...(policyResources.capabilities ?? {}) }
+      for (const [name, value] of Object.entries(overrideCaps ?? {})) {
+        if (value === false) {
+          delete merged[name]
+        } else {
+          merged[name] = value
+        }
+      }
+      result.capabilities = merged
+    }
   } else if ('capabilities' in policyResources) {
-    result.capabilities = policyResources.capabilities
+    result.capabilities = { ...policyResources.capabilities }
   }
 
   return result

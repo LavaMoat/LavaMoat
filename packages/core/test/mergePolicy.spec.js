@@ -666,19 +666,31 @@ test(
 )
 
 test(
-  'capabilities - override with empty object clears capabilities',
+  'capabilities - override with false clears capabilities',
   testMergePolicy,
   { resources: { pkg: { capabilities: { cap: ['optA'] } } } },
-  { resources: { pkg: { capabilities: {} } } },
-  { resources: { pkg: { capabilities: {} } } }
+  { resources: { pkg: { capabilities: false } } },
+  { resources: { pkg: {} } }
 )
 
 test(
-  'capabilities - override wins entirely when names overlap with different options',
+  'capabilities - override with overlapping and non-overlapping capabilities',
   testMergePolicy,
-  { resources: { pkg: { capabilities: { capA: ['opt1'], capB: ['opt2'] } } } },
-  { resources: { pkg: { capabilities: { capA: ['opt3'], capC: ['opt4'] } } } },
-  { resources: { pkg: { capabilities: { capA: ['opt3'], capC: ['opt4'] } } } }
+  {
+    resources: {
+      pkg: { capabilities: { capA: ['opt1'], capB: ['opt2'], capX: ['opt5'] } },
+    },
+  },
+  {
+    resources: {
+      pkg: { capabilities: { capA: ['opt3'], capC: ['opt4'], capX: false } },
+    },
+  },
+  {
+    resources: {
+      pkg: { capabilities: { capA: ['opt3'], capB: ['opt2'], capC: ['opt4'] } },
+    },
+  }
 )
 // #endregion
 

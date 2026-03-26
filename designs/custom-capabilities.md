@@ -53,6 +53,10 @@ The `capabilities` field in a resource entry specifies which capabilities' `endo
 
 The strings in the `use` array are valid module specifiers resolved from the location of the policy file. This covers simple cases; for composition, a local Capability Module can re-export a selection of capabilities from multiple dependencies.
 
+#### Policy and override
+
+Capabilities could be automatically added to generated policy by tools in the future, so we want the policy merging logic to apply the overrides and allow overriding individual capabilities or removing individual or all capabilities from a resource.
+
 ### Defining capabilities
 
 #### Capability Module
@@ -176,7 +180,7 @@ Inside `getEndowmentsForConfig(sourceRef, packagePolicy, unwrapTo, unwrapFrom)`,
 
 **Encapsulation principle** — `endowmentsToolkit.js` is the only module that understands the internal structure of the definition object passed to `defineCapability` (i.e. `{ ambient, endow }`). All other layers — policy converter, attenuator, runtime, kernel — treat registered capabilities as opaque values. They pass them through but never inspect or call `endow` or read `ambient` themselves. This keeps the capability definition contract in a single place and allows its shape to evolve without cascading changes across runtimes.
 
-**Policy schema changes** — Add `use: string[]` at policy top level and `capabilities: Record<string, any[]>` per resource. Update `mergePolicy()` in `packages/core/src/mergePolicy.js` to union `use` arrays and use override-wins for per-resource `capabilities`.
+**Policy schema changes** — Add `use: string[]` at policy top level and `capabilities: Record<string, any[]>` per resource. Update `mergePolicy()` in `packages/core/src/mergePolicy.js` to union `use` arrays and merge per-resource `capabilities` by name: base entries not mentioned in the override are kept; an override entry with value `false` removes that capability; any other override value replaces or adds the entry; setting `capabilities: false` on a resource in the override removes all capabilities for that resource.
 
 Key files:
 
