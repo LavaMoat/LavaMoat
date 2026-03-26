@@ -11,6 +11,7 @@ import { readFileSync } from 'node:fs'
 import eslintJs from '@eslint/js'
 import prettierConfig from 'eslint-config-prettier/flat'
 import avaPlugin from 'eslint-plugin-ava'
+import jsonSchemaValidatorPlugin from 'eslint-plugin-json-schema-validator'
 import jsoncPlugin from 'eslint-plugin-jsonc'
 import nodePlugin from 'eslint-plugin-n'
 import nodeImportPlugin from 'eslint-plugin-node-import'
@@ -485,6 +486,11 @@ export default defineConfig(
   jsoncPlugin.configs['flat/prettier'].map((config) => ({
     ...config,
     files: ['**/tsconfig*.json', '**/*.json5', '**/*.jsonc'],
+  })),
+
+  ...jsonSchemaValidatorPlugin.configs.recommended.map((config) => ({
+    ...config,
+    files: ['*.json', '*.json5', '*.jsonc', '*.yaml', '*.yml'],
   })),
 
   // ---------------------------------------------------------------------------
