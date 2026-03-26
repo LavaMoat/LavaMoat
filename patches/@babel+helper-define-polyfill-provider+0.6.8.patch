@@ -1,0 +1,13 @@
+diff --git a/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs b/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs
+index 82fa0a0..9f52864 100644
+--- a/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs
++++ b/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs
+@@ -718,7 +718,7 @@ var entry = callProvider => ({
+ });
+ 
+ const nativeRequireResolve = parseFloat(process.versions.node) >= 8.9;
+-const require = createRequire(import /*::(_)*/.meta.url); // eslint-disable-line
++const require = createRequire(import.meta.url); // eslint-disable-line
+ 
+ function myResolve(name, basedir) {
+   if (nativeRequireResolve) {
