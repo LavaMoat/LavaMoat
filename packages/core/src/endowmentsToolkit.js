@@ -23,6 +23,7 @@
 
 module.exports = endowmentsToolkit
 module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
+module.exports.evaluateCapabilities = evaluateCapabilities
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
@@ -622,6 +623,74 @@ function endowmentsToolkit({
     return target
   }
 }
+/**
+ * Evaluates capability sources in isolated Compartments and collects registered
+ * repairs and capability definitions.
+ *
+ * Each source is evaluated in a fresh Compartment endowed with `repair`,
+ * `defineCapability`, and any additional `globals`. Repair callbacks are
+ * wrapped to pass `globalRef` when executed. Duplicate capability names across
+ * sources result in an error.
+ *
+ * NOTE: This function relies on `Compartment` being available as a global,
+ * which is provided by SES at runtime.
+ *
+ * @param {object} opts
+ * @param {string[]} opts.sources - Array of capability source texts to evaluate
+ * @param {object} opts.globalRef - The real globalThis reference passed to
+ *   repair callbacks when executed
+ * @param {object} [opts.globals] - Additional globals to expose in each
+ *   Compartment alongside `repair` and `defineCapability`
+ * @returns {{ repairs: Function[]; capabilities: Map<string, object> }}
+ */
+function evaluateCapabilities({ sources, globalRef, globals = {} }) {
+  /** @type {Function[]} */
+  const repairs = []
+  /** @type {Map<string, object>} */
+  const capabilities = new Map()
+
+  sources.forEach((source, index) => {
+    /**
+     * @param {Function} callback
+     */
+    const repair = (callback) => {
+      repairs.push(() => callback(globalRef))
+    }
+
+    /**
+     * @param {string} name
+     * @param {any} definition
+     */
+    const defineCapability = (name, definition) => {
+      if (capabilities.has(name)) {
+        throw new Error(
+          `LavaMoat - duplicate capability name "${name}" across capability sources`
+        )
+      }
+      capabilities.set(name, definition)
+    }
+
+    // Compartment is a global provided by SES
+    const compartment = new Compartment({
+      ...globals,
+      repair,
+      defineCapability,
+    })
+
+    try {
+      compartment.evaluate(source)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      throw new Error(
+        `LavaMoat - error evaluating capability source at index ${index}: ${message}`,
+        { cause: err }
+      )
+    }
+  })
+
+  return { repairs, capabilities }
+}
+
 /**
  * Util for getting the prototype chain as an array includes the provided value
  * in the result

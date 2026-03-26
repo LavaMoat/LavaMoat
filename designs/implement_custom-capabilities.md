@@ -33,6 +33,14 @@ Test cases:
 
 Files: `packages/core/src/endowmentsToolkit.js`, `packages/core/test/endowmentsToolkit.spec.js` (or colocated test file).
 
+### Review comments
+
+endowmentsToolkit.js
+
+- there's no point in evaluateCapabilities knowing the file paths, accept an array of sources.
+- evaluateCapabilities should use an option bag of named arguments
+- add an argument called `globals` and pass that as additional globals to Compartment
+
 ## Task 1.2: `endowmentsToolkit` factory accepts `capabilities` option
 
 Write tests, then extend the `endowmentsToolkit()` factory to accept a `capabilities` option (the map from Task 1.1). At factory init time, split into ambient and local collections. Extend `getEndowmentsForConfig` to call `endow` for each capability listed in `packagePolicy.capabilities`, after building the endowments object. Extend `copyWrappedGlobals` to apply capabilities listed for `$root$`.
