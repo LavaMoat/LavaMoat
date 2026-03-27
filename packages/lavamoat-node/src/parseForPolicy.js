@@ -1,7 +1,6 @@
 const path = require('node:path')
 const { promises: fs } = require('node:fs')
-const { builtinModules } = require('node:module')
-const resolve = require('resolve')
+const { isBuiltin } = require('node:module')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
 const { codeFrameColumns } = require('@babel/code-frame')
@@ -18,53 +17,14 @@ const {
 } = require('lavamoat-core')
 const { parse, inspectImports } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
+const { makeResolver } = require('./resolve')
 
-// file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
 const commonjsExtensions = ['', '.js', '.cjs']
-// extensions we want the resolver to look for when given just the file name (it defaults to .js only)
-const resolutionOmittedExtensions = ['.js', '.cjs', '.json']
-
-/**
- * Allow use of `node:` prefixed builtins.
- */
-const builtinPackages = [
-  ...builtinModules,
-  ...builtinModules.map((id) => `node:${id}`),
-]
-
-// approximate polyfill for node builtin
-const createRequire = (url) => {
-  return {
-    resolve: (requestedName) => {
-      const basedir = path.dirname(url.pathname)
-      const result = resolve.sync(requestedName, {
-        basedir,
-        extensions: resolutionOmittedExtensions,
-      })
-      // check for missing builtin modules (e.g. 'worker_threads' in node v10)
-      // the "resolve" package resolves as "worker_threads" even if missing
-      const resultMatchesRequest = requestedName === result
-      if (resultMatchesRequest) {
-        const isBuiltinModule = builtinPackages.includes(result)
-        const looksLikeAPath = requestedName.includes('/')
-        if (!looksLikeAPath && !isBuiltinModule) {
-          const errMsg = `Cannot find module '${requestedName}' from '${basedir}'`
-          const err = new Error(errMsg)
-          err.code = 'MODULE_NOT_FOUND'
-          throw err
-        }
-      }
-      // return resolved path
-      return result
-    },
-  }
-}
 
 module.exports = {
   parseForPolicy,
   makeResolveHook,
   makeImportHook,
-  resolutionOmittedExtensions,
 }
 
 /**
@@ -90,7 +50,6 @@ async function parseForPolicy({
   includeDebugInfo,
   ...args
 }) {
-  const isBuiltin = (id) => builtinPackages.includes(id)
   const { resolutions } = policyOverride
   const canonicalNameMap = await loadCanonicalNameMap({
     rootDir: projectRoot,
@@ -128,6 +87,7 @@ async function parseForPolicy({
 }
 
 function makeResolveHook({ projectRoot, resolutions = {}, canonicalNameMap }) {
+  const resolver = makeResolver({ projectRoot })
   return (requestedName, referrer) => {
     const parentPackageName = getPackageNameForModulePath(
       canonicalNameMap,
@@ -147,12 +107,10 @@ function makeResolveHook({ projectRoot, resolutions = {}, canonicalNameMap }) {
         requestedName = path.resolve(projectRoot, result)
       }
     }
-    // utilize node's internal resolution algo
-    const { resolve } = createRequire(new URL(`file://${referrer}`))
 
     let resolved
     try {
-      resolved = resolve(requestedName)
+      resolved = resolver(requestedName, referrer)
     } catch (err) {
       if (err.code === 'MODULE_NOT_FOUND') {
         console.warn(
