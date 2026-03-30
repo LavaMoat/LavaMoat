@@ -50,7 +50,7 @@ if (process.env.LAVAMOAT_DEBUG_RESOLVE) {
   trace = (report) => {
     traces.push(report)
     require('node:fs').writeFileSync(
-      `./trace-${num}.json`,
+      `trace-${num}.json`,
       JSON.stringify(traces, null, 2)
     )
   }

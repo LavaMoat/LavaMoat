@@ -19,6 +19,7 @@ const { parse, inspectImports } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 const { makeResolver } = require('./resolve')
 
+// file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
 const commonjsExtensions = ['', '.js', '.cjs']
 
 module.exports = {
