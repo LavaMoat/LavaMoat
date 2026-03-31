@@ -2,13 +2,9 @@ import type { JsonObject, PackageJson } from 'type-fest'
 
 declare global {
   export interface PkgLavamoatConfig {
-    allowBins?: JsonObject
-    allowConfig?: JsonObject
-    allowScripts?: JsonObject
-    allowedPatterns?: JsonObject
-    disallowedPatterns?: JsonObject
-    excessPolicies?: JsonObject
-    missingPolicies?: JsonObject
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    allowBins?: Record<string, any>
+    allowScripts?: Record<string, boolean>
   }
 
   export type LavamoatPackageJson = PackageJson & {
@@ -16,7 +12,7 @@ declare global {
   }
 
   export interface PkgInfo {
-    canonicalName: string
+    pattern: string
     path: string
     scripts: JsonObject
   }
@@ -25,7 +21,7 @@ declare global {
    * Configuration for a type of scripts policies
    */
   export interface ScriptsConfig {
-    allowConfig: JsonObject
+    allowConfig: Record<string, boolean>
     packagesWithScripts: Map<string, [PkgInfo]>
     allowedPatterns: string[]
     disallowedPatterns: string[]
@@ -64,6 +60,7 @@ declare global {
   export interface SetDefaultConfigurationParams {
     rootDir: string
     lifecycleEvents?: string[]
+    skipVersions?: boolean
   }
 
   export interface SavePackageConfigurationsParams {
