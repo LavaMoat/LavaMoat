@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs'
 import eslintJs from '@eslint/js'
 import prettierConfig from 'eslint-config-prettier/flat'
 import avaPlugin from 'eslint-plugin-ava'
-import * as jsoncPlugin from 'eslint-plugin-jsonc'
+import jsoncPlugin from 'eslint-plugin-jsonc'
 import nodePlugin from 'eslint-plugin-n'
 import nodeImportPlugin from 'eslint-plugin-node-import'
 import { defineConfig } from 'eslint/config'
@@ -482,12 +482,10 @@ export default defineConfig(
   //    The jsonc flat/prettier config is an array; we spread it and scope each
   //    entry to only the files we care about.
   // ---------------------------------------------------------------------------
-  .../** @type {any} */ (jsoncPlugin).configs['flat/prettier'].map(
-    (/** @type {any} */ config) => ({
-      ...config,
-      files: ['**/tsconfig*.json', '**/*.json5', '**/*.jsonc'],
-    })
-  ),
+  jsoncPlugin.configs['flat/prettier'].map((config) => ({
+    ...config,
+    files: ['**/tsconfig*.json', '**/*.json5', '**/*.jsonc'],
+  })),
 
   // ---------------------------------------------------------------------------
   // 8. Prettier (must be last to override conflicting rules)
