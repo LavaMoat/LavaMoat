@@ -103,7 +103,7 @@ test('cli - auto command', (t) => {
   // assert its contents
   t.deepEqual(packageJsonContents.lavamoat, {
     allowScripts: {
-      'bbb>evil_dep': false,
+      'bbb>evil_dep#1.0.0': false,
     },
   })
 })
@@ -137,7 +137,7 @@ skipOnWindows('cli - auto command with experimental bins', (t) => {
       karramba: 'node_modules/bbb/index.js',
     },
     allowScripts: {
-      'bbb>evil_dep': false,
+      'bbb>evil_dep#1.0.0': false,
     },
   })
 })
@@ -159,7 +159,7 @@ test('cli - run command - good dep at the root', (t) => {
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
     'running lifecycle scripts for event "preinstall"',
-    '- good_dep',
+    '- good_dep#1.0.0',
     'running lifecycle scripts for event "install"',
     'running lifecycle scripts for event "postinstall"',
     'running lifecycle scripts for top level package',
@@ -193,7 +193,7 @@ skipOnWindows(
       'installing bin scripts',
       '- good - from package: good_dep',
       'running lifecycle scripts for event "preinstall"',
-      '- good_dep',
+      '- good_dep#1.0.0',
       'running lifecycle scripts for event "install"',
       'running lifecycle scripts for event "postinstall"',
       'running lifecycle scripts for top level package',
@@ -263,10 +263,10 @@ test('cli - run command - good dep as a sub dep', (t) => {
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
     'running lifecycle scripts for event "preinstall"',
-    '- bbb>good_dep',
+    '- bbb>good_dep#1.0.0',
     'running lifecycle scripts for event "install"',
     'running lifecycle scripts for event "postinstall"',
-    '- bbb',
+    '- bbb#1.0.0',
     'running lifecycle scripts for top level package',
     '',
   ])
@@ -316,7 +316,7 @@ skipOnWindows(
       `\
 running lifecycle scripts for event "preinstall"
 running lifecycle scripts for event "install"
-- native_dep
+- native_dep#1.0.0
 running lifecycle scripts for event "postinstall"
 running lifecycle scripts for top level package
 `,
@@ -387,14 +387,40 @@ skipOnWindows(
       'installing bin scripts',
       '- good - from package: aaa',
       'running lifecycle scripts for event "preinstall"',
-      '- bbb>good_dep',
+      '- bbb>good_dep#1.0.0',
       'running lifecycle scripts for event "install"',
       'running lifecycle scripts for event "postinstall"',
-      '- bbb',
+      '- bbb#1.0.0',
       '',
     ])
   }
 )
+
+test('cli - run command - version mismatch', (t) => {
+  // set up the directories
+  const projectRoot = path.join(__dirname, 'projects', '5')
+
+  // clean up from a previous run
+  // the force option is only here to stop rm complaining if target is missing
+  fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
+    recursive: true,
+    force: true,
+  })
+
+  // run the "run" command
+  const result = run(t, ['run'], projectRoot)
+
+  // assert the output
+  t.deepEqual(result.stdout.toString().split('\n'), [
+    '',
+    '@lavamoat/allow-scripts has detected dependencies without configuration. explicit configuration required.',
+    'run "allow-scripts auto" to automatically populate the configuration.',
+    '',
+    'packages missing configuration:',
+    '- aaaa#1.0.99 [1 location(s)]',
+    '',
+  ])
+})
 
 /**
  * @param {string} projectRoot

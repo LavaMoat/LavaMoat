@@ -16,7 +16,7 @@ declare global {
   }
 
   export interface PkgInfo {
-    canonicalName: string
+    pattern: string
     path: string
     scripts: JsonObject
   }
@@ -64,6 +64,7 @@ declare global {
   export interface SetDefaultConfigurationParams {
     rootDir: string
     lifecycleEvents?: string[]
+    skipVersions?: boolean
   }
 
   export interface SavePackageConfigurationsParams {
