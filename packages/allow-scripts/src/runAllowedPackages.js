@@ -38,7 +38,7 @@ async function runAllowedPackages({ rootDir }) {
   }
 
   const { allowedWithVersionAndBelow } = versionAwareMatcher(
-    lifecycle.allowedPatterns
+    lifecycle.allowConfig
   )
 
   if (FEATURE.bins && bin.allowConfig) {

@@ -42,22 +42,47 @@ const versionBelowOrEqual = (versionToCheck, versionAllowed) => {
   return false
 }
 
-const ANY_VERSION = '9999'
 /**
- * @param {string[]} allowedPatterns
+ * @param {Record<string, boolean>} allowConfig
  */
-const versionAwareMatcher = (allowedPatterns) => {
-  const indexedPatterns = allowedPatterns.reduce((acc, pattern) => {
+const versionAwareMatcher = (allowConfig) => {
+  const indexedPatterns = /** @type {Record<string, string>} */ ({})
+  const blanketDisallowed = new Set()
+  const explicitlyDisallowed = new Set()
+
+  for (const [pattern, value] of Object.entries(allowConfig)) {
     const [name, version] = pattern.split('#')
-    if (!version) {
-      acc[name] = ANY_VERSION
-    } else if (!acc[name] || versionBelowOrEqual(version, acc[name])) {
-      acc[name] = version
+
+    if (value === true) {
+      if (
+        !indexedPatterns[name] ||
+        versionBelowOrEqual(version, indexedPatterns[name])
+      ) {
+        indexedPatterns[name] = version
+      }
+    } else {
+      if (!version) {
+        blanketDisallowed.add(name)
+      } else {
+        explicitlyDisallowed.add(pattern)
+      }
     }
-    return acc
-  }, /** @type {Record<string, string>} */ ({}))
+  }
 
   return {
+    /**
+     * Checks if the pattern is blanketDisallowed regardless of version
+     *
+     * @param {string} patternToCheck
+     * @returns {boolean}
+     */
+    disallowedExplicitlyOrAll: (patternToCheck) => {
+      const [nameToCheck] = patternToCheck.split('#')
+      return (
+        blanketDisallowed.has(nameToCheck) ||
+        explicitlyDisallowed.has(patternToCheck)
+      )
+    },
     /**
      * Compares two allowlist patterns by version, returns true if the
      * patternToCheck is the same version or lower than the patternAllowed
@@ -267,24 +292,56 @@ async function setDefaultConfiguration({
   } = conf
 
   console.log('\n@lavamoat/allow-scripts automatically updating configuration')
+  let changed = false
 
-  if (!somePoliciesAreMissing) {
-    console.log('\nconfiguration looks good as is, no changes necessary')
-    return
+  if (somePoliciesAreMissing) {
+    lifecycle.missingPolicies.forEach((pattern) => {
+      console.log(`Adding lifecycle ${pattern}`)
+      if (skipVersions) {
+        pattern = pattern.split('#')[0]
+      }
+      lifecycle.allowConfig[pattern] = false
+      changed = true
+    })
   }
 
-  console.log('\nadding configuration:')
-
-  lifecycle.missingPolicies.forEach((pattern) => {
-    console.log(`- lifecycle ${pattern}`)
-    lifecycle.allowConfig[pattern] = false
-  })
+  if (!skipVersions) {
+    // one-time migration to add versions to previously allowed entries
+    lifecycle.excessPolicies.forEach((pattern) => {
+      if (!pattern.includes('#')) {
+        const matchingKey = Object.keys(lifecycle.allowConfig).find((key) =>
+          key.startsWith(`${pattern}#`)
+        )
+        if (matchingKey && lifecycle.allowConfig[pattern] === true) {
+          console.log(
+            `Updating allowlist entry "${pattern}" to include version: "${matchingKey}"`
+          )
+          lifecycle.allowConfig[matchingKey] = true
+          delete lifecycle.allowConfig[pattern]
+          changed = true
+        }
+      } else if (lifecycle.allowConfig[pattern] === false) {
+        // if a pattern with version number is in excess policies, it means the version is absent, so it can be removed
+        console.log(
+          `Removing allowlist entry "${pattern}" since it no longer matches dependencies`
+        )
+        delete lifecycle.allowConfig[pattern]
+        changed = true
+      }
+    })
+  }
 
   if (FEATURE.bins && bin.somePoliciesAreMissing) {
     bin.allowConfig = prepareBinScriptsPolicy(bin.binCandidates)
     console.log(
-      `- bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`
+      `Adding bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`
     )
+    changed = true
+  }
+
+  if (!changed) {
+    console.log('\nconfiguration looks good as is, no changes necessary')
+    return
   }
 
   // update package json
@@ -350,7 +407,8 @@ function indexLifecycleConfiguration(config) {
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
 
-  const { allowedWithVersionAndBelow } = versionAwareMatcher(configuredPatterns)
+  const { allowedWithVersionAndBelow, disallowedExplicitlyOrAll } =
+    versionAwareMatcher(config.allowConfig)
   // select allowed + disallowed
   config.allowedPatterns = Object.entries(config.allowConfig)
     .filter(([, packageData]) => !!packageData)
@@ -362,7 +420,13 @@ function indexLifecycleConfiguration(config) {
 
   config.missingPolicies = Array.from(
     config.packagesWithScripts.keys() ?? []
-  ).filter((pattern) => !allowedWithVersionAndBelow(pattern))
+  ).filter(
+    (pattern) =>
+      !(
+        allowedWithVersionAndBelow(pattern) ||
+        disallowedExplicitlyOrAll(pattern)
+      )
+  )
 
   config.excessPolicies = configuredPatterns.filter(
     (pattern) => !config.packagesWithScripts.has(pattern)

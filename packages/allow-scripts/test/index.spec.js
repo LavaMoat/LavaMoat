@@ -57,6 +57,16 @@ const run = (t, args, cwd) => {
   }
 }
 
+const getPkgJsonFromRoot = (projectRoot) =>
+  JSON.parse(
+    fs.readFileSync(
+      pathToFileURL(
+        path.join(projectRoot.replace(path.sep, '/'), PACKAGE_JSON),
+        'utf8'
+      )
+    )
+  )
+
 test('cli - auto command', (t) => {
   // set up the directories
   const projectRoot = path.join(__dirname, 'projects', '1')
@@ -90,20 +100,22 @@ test('cli - auto command', (t) => {
   // run the auto command
   run(t, ['auto'], projectRoot)
 
-  // get the package.json
-  const packageJsonContents = JSON.parse(
-    fs.readFileSync(
-      pathToFileURL(
-        path.join(projectRoot.replace(path.sep, '/'), PACKAGE_JSON),
-        'utf8'
-      )
-    )
-  )
-
   // assert its contents
-  t.deepEqual(packageJsonContents.lavamoat, {
+  t.deepEqual(getPkgJsonFromRoot(projectRoot).lavamoat, {
     allowScripts: {
       'bbb>evil_dep#1.0.0': false,
+    },
+  })
+
+  // run the auto command with skipping versions
+  run(t, ['auto', '--skip-versions'], projectRoot)
+
+  // assert its contents
+  t.deepEqual(getPkgJsonFromRoot(projectRoot).lavamoat, {
+    allowScripts: {
+      // legacy behavior was to keep existing entries, we don't want to automate "migrating back", so the versioned entry is retained
+      'bbb>evil_dep#1.0.0': false,
+      'bbb>evil_dep': false,
     },
   })
 })
@@ -157,14 +169,16 @@ test('cli - run command - good dep at the root', (t) => {
   const result = run(t, ['run'], projectRoot)
 
   // assert the output
-  t.deepEqual(result.stdout.toString().split('\n'), [
-    'running lifecycle scripts for event "preinstall"',
-    '- good_dep#1.0.0',
-    'running lifecycle scripts for event "install"',
-    'running lifecycle scripts for event "postinstall"',
-    'running lifecycle scripts for top level package',
-    '',
-  ])
+  t.is(
+    multilineTrim(result.stdout.toString()),
+    multilineTrim(`
+      running lifecycle scripts for event "preinstall"
+      - good_dep#1.0.0
+      running lifecycle scripts for event "install"
+      running lifecycle scripts for event "postinstall"
+      running lifecycle scripts for top level package
+    `)
+  )
 
   // note
   // we could also test whether the preinstall script is
@@ -189,16 +203,18 @@ skipOnWindows(
     const result = run(t, ['run', '--experimental-bins'], projectRoot)
 
     // assert the output
-    t.deepEqual(result.stdout.toString().split('\n'), [
-      'installing bin scripts',
-      '- good - from package: good_dep',
-      'running lifecycle scripts for event "preinstall"',
-      '- good_dep#1.0.0',
-      'running lifecycle scripts for event "install"',
-      'running lifecycle scripts for event "postinstall"',
-      'running lifecycle scripts for top level package',
-      '',
-    ])
+    t.is(
+      multilineTrim(result.stdout.toString()),
+      multilineTrim(`
+        installing bin scripts
+        - good - from package: good_dep
+        running lifecycle scripts for event "preinstall"
+        - good_dep#1.0.0
+        running lifecycle scripts for event "install"
+        running lifecycle scripts for event "postinstall"
+        running lifecycle scripts for top level package
+      `)
+    )
 
     t.assert(
       fs.existsSync(path.join(projectRoot, 'node_modules', '.bin', 'good')),
@@ -261,15 +277,17 @@ test('cli - run command - good dep as a sub dep', (t) => {
   const result = run(t, ['run'], projectRoot)
 
   // assert the output
-  t.deepEqual(result.stdout.toString().split('\n'), [
-    'running lifecycle scripts for event "preinstall"',
-    '- bbb>good_dep#1.0.0',
-    'running lifecycle scripts for event "install"',
-    'running lifecycle scripts for event "postinstall"',
-    '- bbb#1.0.0',
-    'running lifecycle scripts for top level package',
-    '',
-  ])
+  t.is(
+    multilineTrim(result.stdout.toString()),
+    multilineTrim(`
+      running lifecycle scripts for event "preinstall"
+      - bbb>good_dep#1.0.0
+      running lifecycle scripts for event "install"
+      running lifecycle scripts for event "postinstall"
+      - bbb#1.0.0
+      running lifecycle scripts for top level package
+    `)
+  )
   const stderr = result.stderr.toString()
   if (stderr.length > 0) {
     t.log(`stderr\n---\n${stderr}\n---`)
@@ -312,14 +330,14 @@ skipOnWindows(
 
     // assert the output
     t.is(
-      result.stdout,
-      `\
-running lifecycle scripts for event "preinstall"
-running lifecycle scripts for event "install"
-- native_dep#1.0.0
-running lifecycle scripts for event "postinstall"
-running lifecycle scripts for top level package
-`,
+      multilineTrim(result.stdout.toString()),
+      multilineTrim(`
+        running lifecycle scripts for event "preinstall"
+        running lifecycle scripts for event "install"
+        - native_dep#1.0.0
+        running lifecycle scripts for event "postinstall"
+        running lifecycle scripts for top level package
+      `),
       'Expected output matches actual output'
     )
     t.true(
@@ -383,43 +401,62 @@ skipOnWindows(
       'Expected to see instructions on how to enable a bin script3'
     )
     // assert the output
-    t.deepEqual(result.stdout.toString().split('\n'), [
-      'installing bin scripts',
-      '- good - from package: aaa',
-      'running lifecycle scripts for event "preinstall"',
-      '- bbb>good_dep#1.0.0',
-      'running lifecycle scripts for event "install"',
-      'running lifecycle scripts for event "postinstall"',
-      '- bbb#1.0.0',
-      '',
-    ])
+    t.is(
+      multilineTrim(result.stdout.toString()),
+      multilineTrim(`
+        installing bin scripts
+        - good - from package: aaa
+        running lifecycle scripts for event "preinstall"
+        - bbb>good_dep#1.0.0
+        running lifecycle scripts for event "install"
+        running lifecycle scripts for event "postinstall"
+        - bbb#1.0.0
+      `)
+    )
   }
 )
 
 test('cli - run command - version mismatch', (t) => {
-  // set up the directories
   const projectRoot = path.join(__dirname, 'projects', '5')
 
-  // clean up from a previous run
-  // the force option is only here to stop rm complaining if target is missing
-  fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
-    recursive: true,
-    force: true,
-  })
+  // Note that both
+  // "aaaa#1.0.99": false,
+  // "aaaa": false
+  // are stable in the configuration and can co-exist - so `false` can be set generally and on a specific version
 
   // run the "run" command
   const result = run(t, ['run'], projectRoot)
 
   // assert the output
-  t.deepEqual(result.stdout.toString().split('\n'), [
-    '',
-    '@lavamoat/allow-scripts has detected dependencies without configuration. explicit configuration required.',
-    'run "allow-scripts auto" to automatically populate the configuration.',
-    '',
-    'packages missing configuration:',
-    '- aaaa#1.0.99 [1 location(s)]',
-    '',
-  ])
+  t.is(
+    multilineTrim(result.stdout.toString()),
+    multilineTrim(`
+      running lifecycle scripts for event "preinstall"
+      - bbbb#1.0.99
+      running lifecycle scripts for event "install"
+      running lifecycle scripts for event "postinstall"
+      running lifecycle scripts for top level package
+    `)
+  )
+})
+
+test('cli - run command - versions skipped', (t) => {
+  const projectRoot = path.join(__dirname, 'projects', '5')
+
+  // run the "run" command
+  const result = run(t, ['run', '--skip-versions'], projectRoot)
+
+  // assert the output
+  t.is(
+    multilineTrim(result.stdout.toString()),
+    multilineTrim(`
+      running lifecycle scripts for event "preinstall"
+      - bbbb#1.0.99
+      running lifecycle scripts for event "install"
+      running lifecycle scripts for event "postinstall"
+      running lifecycle scripts for top level package
+    `)
+  )
 })
 
 /**
@@ -433,4 +470,12 @@ function realisticEnvOptions(projectRoot) {
     encoding: 'utf-8',
     shell: true, // required for running .cmd on Windows https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2  https://github.com/nodejs/node/issues/52554
   }
+}
+
+function multilineTrim(str) {
+  return str
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line !== '')
+    .join('\n')
 }

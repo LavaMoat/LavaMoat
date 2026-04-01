@@ -13,8 +13,9 @@
   "license": "ISC",
   "lavamoat": {
     "allowScripts": {
+      "bbbb#2.0.0": true,
       "aaaa#1.0.0": true,
-      "bbbb#2.0.0": true
+      "aaaa#1.0.99": false
     }
   }
 }
