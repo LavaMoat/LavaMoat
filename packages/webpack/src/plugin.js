@@ -564,7 +564,7 @@ class LavaMoatPlugin {
           compilation.hooks.processAssets.tap(
             {
               name: PLUGIN_NAME,
-              stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+              stage: Compilation.PROCESS_ASSETS_STAGE_DEV_TOOLING - 1,
             },
             sesPrefixFiles({
               compilation,
