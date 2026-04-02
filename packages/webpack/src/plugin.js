@@ -184,8 +184,8 @@ class LavaMoatPlugin {
       FORCED_CONFIG.push(
         'devtool="eval*"->false (use any non-eval devtool instead)'
       )
+      compiler.options.devtool = false
     }
-    compiler.options.devtool = false
 
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually by adding a closure that returns the module namespace. I just don't want to get into the compatibility of it all yet.
     // TODO: explore how these settings affect the Compartment wrapping etc.
