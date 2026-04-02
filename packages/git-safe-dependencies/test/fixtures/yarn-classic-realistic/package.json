@@ -9,6 +9,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "react-native-tcp": "aprock/react-native-tcp#11/head"
+    "react-native-tcp": "PeelTechnologies/react-native-tcp#41/head"
   }
 }
