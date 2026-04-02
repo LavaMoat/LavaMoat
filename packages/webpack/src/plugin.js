@@ -180,6 +180,13 @@ class LavaMoatPlugin {
     // This setting creates a bit of confusion when it removes a reexport between packages and collapses the dependency tree, but it's got a potential to optimize some bundles a lot. We can support it by making sure we use the optimized connections when generating policy.
     // compiler.options.optimization.sideEffects;
 
+    if (compiler.options.devtool?.toString().includes('eval')) {
+      FORCED_CONFIG.push(
+        'devtool="eval*"->false (use any non-eval devtool instead)'
+      )
+    }
+    compiler.options.devtool = false
+
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually by adding a closure that returns the module namespace. I just don't want to get into the compatibility of it all yet.
     // TODO: explore how these settings affect the Compartment wrapping etc.
     // compiler.options.optimization.mangleExports = false;
@@ -564,6 +571,7 @@ class LavaMoatPlugin {
           compilation.hooks.processAssets.tap(
             {
               name: PLUGIN_NAME,
+              // Happens exactly before the stage in which webpack handles sourcemaps. That way we can be sure our prefixing doesn't interfere with them and that they end up being correct for the final output.
               stage: Compilation.PROCESS_ASSETS_STAGE_DEV_TOOLING - 1,
             },
             sesPrefixFiles({

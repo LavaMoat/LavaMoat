@@ -49,6 +49,7 @@ module.exports = {
 ```
 
 One important thing to note when using the LavaMoat plugin is that it disables the `concatenateModules` optimization in webpack. This is because concatenation won't work with wrapped modules.
+Use of `eval` based tools in the `devtool` option is also forcibly turned off to avoid it undermining the integrity of SES and compartments.
 
 ### Using static shims
 
