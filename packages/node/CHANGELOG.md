@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.1](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.0...node-v1.0.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/node to v20.19.37 ([#1919](https://github.com/LavaMoat/LavaMoat/issues/1919)) ([641ab36](https://github.com/LavaMoat/LavaMoat/commit/641ab3627a3064fbf4fdd1c1b446c7fca6ee9ff7))
+* **node:** fix SES policy violation summary formatting ([6b5b371](https://github.com/LavaMoat/LavaMoat/commit/6b5b3711ba48ec0710e00b122d70682ffe4e30f3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.0 to ^18.0.1
+
 ## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.11...node-v1.0.0) (2026-03-20)
 
 
