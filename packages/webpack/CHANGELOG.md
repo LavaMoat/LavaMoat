@@ -18,6 +18,25 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [2.1.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.0.0...webpack-v2.1.0) (2026-04-02)
+
+
+### Features
+
+* **webpack:** override the devtool setting that is likely to break lavamoat ([#1933](https://github.com/LavaMoat/LavaMoat/issues/1933)) ([7a724de](https://github.com/LavaMoat/LavaMoat/commit/7a724de81570f1e44ec366b14d87b5c3011386a9))
+
+
+### Bug Fixes
+
+* **webpack:** preserve source maps correctnes when SES is inlined ([#1932](https://github.com/LavaMoat/LavaMoat/issues/1932)) ([23bcc79](https://github.com/LavaMoat/LavaMoat/commit/23bcc79e9dc8190fbaaee4107b0a7af90417faf6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.0 to ^18.0.1
+
 ## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.8...webpack-v2.0.0) (2026-03-20)
 
 
