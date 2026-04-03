@@ -81,7 +81,7 @@ function endowmentsToolkit({
     // validate read access from packagePolicy
     /** @type {string[]} */
     const whitelistedReads = []
-    /** @type {Set<string>} */
+    /** @type {Set<string | symbol>} */
     const allowedWriteFields = new Set()
     /** @type {string[]} */
     const explicitlyBanned = []
@@ -117,6 +117,11 @@ function endowmentsToolkit({
           whitelistedReads.push(path)
           return
         }
+        if (packagePolicyValue === 'write-symbol') {
+          const symbolKey = Symbol.for(path)
+          allowedWriteFields.add(symbolKey)
+          return
+        }
         if (packagePolicyValue !== true) {
           throw new Error(
             `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
@@ -147,7 +152,7 @@ function endowmentsToolkit({
    * @param {object} [unwrapTo]
    * @param {object} [unwrapFrom]
    * @param {string[]} [explicitlyBanned]
-   * @param {Set<string>} [allowedWriteFields]
+   * @param {Set<string | symbol>} [allowedWriteFields]
    * @returns {Partial<T>}
    */
   function makeMinimalViewOfRef(
@@ -160,6 +165,11 @@ function endowmentsToolkit({
   ) {
     /** @type {object} */
     const targetRef = {}
+    allowedWriteFields.forEach((field) => {
+      if (typeof field === 'symbol') {
+        return makeWritableValueAtPath(field, sourceRef, targetRef)
+      }
+    })
     paths.forEach((path) => {
       const pathParts = path.split('.')
       if (knownWritableFields.has(pathParts[0])) {
@@ -665,11 +675,12 @@ function isEmpty(value) {
 /**
  * Sets up the getter and setter pair so that the specific targetRef field is
  * effectively writeable and the value propagates to sourceRef. This implements
- * the `'write'` permission for a global in a specific resource.
+ * the `'write'` and `'write-symbol'` permission for a global in a specific
+ * resource.
  *
- * @param {string} key
- * @param {Record<string, any>} sourceRef
- * @param {Record<string, any>} targetRef
+ * @param {string | symbol} key
+ * @param {Record<string | symbol, any>} sourceRef
+ * @param {Record<string | symbol, any>} targetRef
  */
 function makeWritableValueAtPath(key, sourceRef, targetRef) {
   const enumerable = Reflect.getOwnPropertyDescriptor(
