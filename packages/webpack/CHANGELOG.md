@@ -18,6 +18,13 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [2.1.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.1.0...webpack-v2.1.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* **webpack:** do not completely disable sourcemaps ([#1935](https://github.com/LavaMoat/LavaMoat/issues/1935)) ([5bbb0d7](https://github.com/LavaMoat/LavaMoat/commit/5bbb0d7c28925c419b7d9d0667ecb5f26ceaa182))
+
 ## [2.1.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.0.0...webpack-v2.1.0) (2026-04-02)
 
 
