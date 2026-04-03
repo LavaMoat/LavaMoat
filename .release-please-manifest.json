@@ -11,6 +11,6 @@
   "packages/preinstall-always-fail": "3.0.0",
   "packages/react-native-lockdown": "1.0.0",
   "packages/tofu": "9.0.0",
-  "packages/webpack": "2.1.0",
+  "packages/webpack": "2.1.1",
   "packages/types": "1.0.0"
 }
