@@ -105,6 +105,19 @@ To pass arguments to the script without revealing lavamoat-specific arguments, u
  lavamoat index.js --override './policies/policy-override.json' -- --arg-for-index=1
 ```
 
+#### Experimental node resolve
+
+By default, the `resolve` package is used to resolve packages from node_modules. One unfortunate fact about it is it doesn't support the `"exports"` field in package.json.
+
+In modern versions of Node.js you can switch to the built-in `createRequire().resolve` implementation, but its default to resolve symlinks to target paths is incompatible with enforcing lavamoat policy.
+To opt-in to use native resolve, set `LAVAMOAT_RESOLVE_NATIVE=1` and it will fall back to `resolve` package when the result is not compatible.
+You can also opt-in by telling Node.js to preserve symplinks: `NODE_PRESERVE_SYMLINKS=1` - which automatically switches lavamoat to the native resolver as well and doesn't hit the fallback for symlinked packages.
+If you're using pnpm, you'll probably get the best results from this option.
+
+To get a trace of which resolution was used in the CWD of your app, also set `LAVAMOAT_DEBUG_RESOLVE=1`
+
+This resolution switching opt-in is experimental and its behavior might change across versions. It'll become a CLI option or the default behavior once deemed stable.
+
 ## More Examples
 
 ### Run with Policy in default location
