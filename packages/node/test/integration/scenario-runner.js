@@ -14,7 +14,7 @@ import { log as defaultLog } from '../../src/log.js'
 
 /**
  * @import {FsInterface} from '@endo/compartment-mapper';
- * @import {RunnerWorkerData} from '../types.js';
+ * @import {ScenarioRunnerWorkerData} from '../types.js';
  */
 
 if (isMainThread) {
@@ -28,7 +28,7 @@ if (isMainThread) {
 globalThis.getTrueGlobalThisForTestsOnly = () => globalThis
 
 const { entryPath, policy, vol, scuttleGlobalThis } =
-  /** @type {RunnerWorkerData} */ (workerData)
+  /** @type {ScenarioRunnerWorkerData} */ (workerData)
 
 const { fs } = memfs(vol)
 
