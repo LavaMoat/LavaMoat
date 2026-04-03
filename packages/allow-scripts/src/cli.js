@@ -19,6 +19,7 @@ async function start() {
   const parsedArgs = parseArgs()
   const command = String(parsedArgs.command || 'run')
   FEATURE.bins = parsedArgs.experimentalBins
+  const skipVersions = parsedArgs.skipVersions
 
   switch (command) {
     // (default) run scripts
@@ -28,7 +29,7 @@ async function start() {
     }
     // automatically set configuration
     case 'auto': {
-      await setDefaultConfiguration({ rootDir })
+      await setDefaultConfiguration({ rootDir, skipVersions })
       return
     }
     // list packages
@@ -55,6 +56,12 @@ function parseArgs() {
     .command('run', 'run the allowed scripts')
     .command('auto', 'generate scripts policy in package.json')
     .command('setup', 'configure local repository to use allow-scripts')
+    .option('skip-versions', {
+      alias: 'sv',
+      describe: 'skip versions in allowlist entries',
+      type: 'boolean',
+      default: false,
+    })
     .option('experimental-bins', {
       alias: 'bin',
       describe:

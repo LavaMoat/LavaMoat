@@ -10,6 +10,106 @@ const normalizeBin = require('npm-normalize-package-bin')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 const bannedBins = new Set(['corepack', 'node', 'npm', 'pnpm', 'yarn'])
+
+/**
+ * Checks if versionToCheck is lower than or equal to versionAllowed
+ *
+ * @param {string} versionToCheck
+ * @param {string} versionAllowed
+ * @returns {boolean}
+ */
+const versionBelowOrEqual = (versionToCheck, versionAllowed) => {
+  // if versionToCheck is strictly lower than versionAllowed, then it's allowed
+  const [majorAllowed, minorAllowed, patchAllowed] = versionAllowed
+    .split('.')
+    .map(Number)
+  const [majorToCheck, minorToCheck, patchToCheck] = versionToCheck
+    .split('.')
+    .map(Number)
+
+  if (majorToCheck < majorAllowed) {
+    return true
+  } else if (majorToCheck === majorAllowed) {
+    if (minorToCheck < minorAllowed) {
+      return true
+    } else if (minorToCheck === minorAllowed) {
+      if (patchToCheck < patchAllowed) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+/**
+ * @param {Record<string, boolean>} allowConfig
+ */
+const versionAwareMatcher = (allowConfig) => {
+  const indexedPatterns = /** @type {Record<string, string>} */ ({})
+  const blanketDisallowed = new Set()
+  const explicitlyDisallowed = new Set()
+
+  for (const [pattern, value] of Object.entries(allowConfig)) {
+    const [name, version] = pattern.split('#')
+
+    if (value === true) {
+      if (
+        !indexedPatterns[name] ||
+        versionBelowOrEqual(version, indexedPatterns[name])
+      ) {
+        indexedPatterns[name] = version
+      }
+    } else {
+      if (!version) {
+        blanketDisallowed.add(name)
+      } else {
+        explicitlyDisallowed.add(pattern)
+      }
+    }
+  }
+
+  return {
+    /**
+     * Checks if the pattern is blanketDisallowed regardless of version
+     *
+     * @param {string} patternToCheck
+     * @returns {boolean}
+     */
+    disallowedExplicitlyOrAll: (patternToCheck) => {
+      const [nameToCheck] = patternToCheck.split('#')
+      return (
+        blanketDisallowed.has(nameToCheck) ||
+        explicitlyDisallowed.has(patternToCheck)
+      )
+    },
+    /**
+     * Compares two allowlist patterns by version, returns true if the
+     * patternToCheck is the same version or lower than the patternAllowed
+     *
+     * @param {string} patternToCheck
+     * @returns {boolean}
+     */
+    allowedWithVersionAndBelow: (patternToCheck) => {
+      if (!patternToCheck.includes('#')) {
+        return false
+      }
+      const [nameToCheck, versionToCheck] = patternToCheck.split('#')
+      const versionAllowed = indexedPatterns[nameToCheck]
+
+      if (versionAllowed === undefined) {
+        return false
+      }
+
+      if (versionAllowed === versionToCheck) {
+        return true
+      }
+
+      return versionBelowOrEqual(versionToCheck, versionAllowed)
+    },
+  }
+}
+
 /**
  * Scripts with names other than these are ignored and unenforced by default.
  */
@@ -18,10 +118,15 @@ const DEFAULT_LIFECYCLE_EVENTS = ['preinstall', 'install', 'postinstall']
 /**
  * @param {Object} args
  * @param {string} args.rootDir
- * @param {string[]=} args.lifecycleEvents - which script names to consider
+ * @param {string[]} [args.lifecycleEvents] - Which script names to consider
+ * @param {boolean} [args.skipVersions] - Whether to skip versioning in patterns
  * @returns {Promise<PkgConfs>}
  */
-async function loadAllPackageConfigurations({ rootDir, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
+async function loadAllPackageConfigurations({
+  rootDir,
+  lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS,
+  skipVersions = false,
+}) {
   const packagesWithScriptsLifecycle = new Map()
   /** @type {BinCandidates} */
   const binCandidates = new Map()
@@ -59,9 +164,18 @@ async function loadAllPackageConfigurations({ rootDir, lifecycleEvents = DEFAULT
       throw err
     }
     const depScripts = depPackageJson.scripts || {}
-    const lifecycleScripts = lifecycleEvents.filter(
-      (name) => Object.prototype.hasOwnProperty.call(depScripts, name)
+    const version = depPackageJson.version || 'unknown'
+    const lifecycleScripts = lifecycleEvents.filter((name) =>
+      Object.prototype.hasOwnProperty.call(depScripts, name)
     )
+
+    /** @type {string} */
+    let pattern
+    if (skipVersions) {
+      pattern = canonicalName
+    } else {
+      pattern = `${canonicalName}#${version}`
+    }
 
     if (
       !lifecycleScripts.includes('preinstall') &&
@@ -75,18 +189,20 @@ async function loadAllPackageConfigurations({ rootDir, lifecycleEvents = DEFAULT
     if (lifecycleScripts.length) {
       /**
        * @type {{
-       *   canonicalName: string
+       *   pattern: string
        *   path: string
        *   scripts: LavamoatPackageJson['scripts']
+       *   version: string
        * }[]}
        */
-      const collection = packagesWithScriptsLifecycle.get(canonicalName) || []
+      const collection = packagesWithScriptsLifecycle.get(pattern) || []
       collection.push({
-        canonicalName,
+        pattern,
         path: filePath,
         scripts: depScripts,
+        version,
       })
-      packagesWithScriptsLifecycle.set(canonicalName, collection)
+      packagesWithScriptsLifecycle.set(pattern, collection)
     }
 
     if (FEATURE.bins && depPackageJson.bin) {
@@ -143,7 +259,11 @@ async function loadAllPackageConfigurations({ rootDir, lifecycleEvents = DEFAULT
  * @param {GetOptionsForBinParams} params
  * @returns {Promise<BinInfo[] | undefined>}
  */
-async function getOptionsForBin({ rootDir, name, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
+async function getOptionsForBin({
+  rootDir,
+  name,
+  lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS,
+}) {
   const {
     configs: {
       bin: { binCandidates },
@@ -156,32 +276,72 @@ async function getOptionsForBin({ rootDir, name, lifecycleEvents = DEFAULT_LIFEC
 /**
  * @param {SetDefaultConfigurationParams} params
  */
-async function setDefaultConfiguration({ rootDir, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
-  const conf = await loadAllPackageConfigurations({ rootDir, lifecycleEvents })
+async function setDefaultConfiguration({
+  rootDir,
+  lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS,
+  skipVersions = false,
+}) {
+  const conf = await loadAllPackageConfigurations({
+    rootDir,
+    lifecycleEvents,
+    skipVersions,
+  })
   const {
     configs: { lifecycle, bin },
     somePoliciesAreMissing,
   } = conf
 
   console.log('\n@lavamoat/allow-scripts automatically updating configuration')
+  let changed = false
 
-  if (!somePoliciesAreMissing) {
-    console.log('\nconfiguration looks good as is, no changes necessary')
-    return
+  if (somePoliciesAreMissing) {
+    lifecycle.missingPolicies.forEach((pattern) => {
+      console.log(`Adding lifecycle ${pattern}`)
+      if (skipVersions) {
+        pattern = pattern.split('#')[0]
+      }
+      lifecycle.allowConfig[pattern] = false
+      changed = true
+    })
   }
 
-  console.log('\nadding configuration:')
-
-  lifecycle.missingPolicies.forEach((pattern) => {
-    console.log(`- lifecycle ${pattern}`)
-    lifecycle.allowConfig[pattern] = false
-  })
+  if (!skipVersions) {
+    // one-time migration to add versions to previously allowed entries
+    lifecycle.excessPolicies.forEach((pattern) => {
+      if (!pattern.includes('#')) {
+        const matchingKey = Object.keys(lifecycle.allowConfig).find((key) =>
+          key.startsWith(`${pattern}#`)
+        )
+        if (matchingKey && lifecycle.allowConfig[pattern] === true) {
+          console.log(
+            `Updating allowlist entry "${pattern}" to include version: "${matchingKey}"`
+          )
+          lifecycle.allowConfig[matchingKey] = true
+          delete lifecycle.allowConfig[pattern]
+          changed = true
+        }
+      } else if (lifecycle.allowConfig[pattern] === false) {
+        // if a pattern with version number is in excess policies, it means the version is absent, so it can be removed
+        console.log(
+          `Removing allowlist entry "${pattern}" since it no longer matches dependencies`
+        )
+        delete lifecycle.allowConfig[pattern]
+        changed = true
+      }
+    })
+  }
 
   if (FEATURE.bins && bin.somePoliciesAreMissing) {
     bin.allowConfig = prepareBinScriptsPolicy(bin.binCandidates)
     console.log(
-      `- bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`
+      `Adding bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`
     )
+    changed = true
+  }
+
+  if (!changed) {
+    console.log('\nconfiguration looks good as is, no changes necessary')
+    return
   }
 
   // update package json
@@ -246,6 +406,9 @@ function indexLifecycleConfiguration(config) {
   config.allowConfig = config.allowConfig || {}
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
+
+  const { allowedWithVersionAndBelow, disallowedExplicitlyOrAll } =
+    versionAwareMatcher(config.allowConfig)
   // select allowed + disallowed
   config.allowedPatterns = Object.entries(config.allowConfig)
     .filter(([, packageData]) => !!packageData)
@@ -257,7 +420,13 @@ function indexLifecycleConfiguration(config) {
 
   config.missingPolicies = Array.from(
     config.packagesWithScripts.keys() ?? []
-  ).filter((pattern) => !configuredPatterns.includes(pattern))
+  ).filter(
+    (pattern) =>
+      !(
+        allowedWithVersionAndBelow(pattern) ||
+        disallowedExplicitlyOrAll(pattern)
+      )
+  )
 
   config.excessPolicies = configuredPatterns.filter(
     (pattern) => !config.packagesWithScripts.has(pattern)
@@ -326,4 +495,5 @@ module.exports = {
   getOptionsForBin,
   loadAllPackageConfigurations,
   setDefaultConfiguration,
+  versionAwareMatcher,
 }
