@@ -9,11 +9,13 @@
 import { readFileSync } from 'node:fs'
 
 import eslintJs from '@eslint/js'
+import stylisticPlugin from '@stylistic/eslint-plugin'
 import prettierConfig from 'eslint-config-prettier/flat'
 import avaPlugin from 'eslint-plugin-ava'
 import jsoncPlugin from 'eslint-plugin-jsonc'
 import nodePlugin from 'eslint-plugin-n'
 import nodeImportPlugin from 'eslint-plugin-node-import'
+import perfectionistPlugin from 'eslint-plugin-perfectionist'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 import semver from 'semver'
@@ -401,6 +403,13 @@ export default defineConfig(
   { ignores: ['packages/node/src/types.js'] },
   {
     files: ['packages/node/{src,test}/**/*.{js,ts}'],
+    ...perfectionistPlugin.configs['recommended-natural'],
+  },
+  {
+    plugins: {
+      '@stylistic': stylisticPlugin,
+    },
+    files: ['packages/node/{src,test}/**/*.{js,ts}'],
     languageOptions: {
       sourceType: 'module',
     },
@@ -420,6 +429,34 @@ export default defineConfig(
           ignoreRestSiblings: true,
         },
       ],
+
+      '@stylistic/lines-around-comment': [
+        'warn',
+        {
+          allowArrayStart: true,
+          allowBlockStart: true,
+          allowClassStart: true,
+          allowInterfaceStart: true,
+          // these conflict with prettier, so we must allow them
+          allowObjectStart: true,
+          allowTypeStart: true,
+          beforeBlockComment: true,
+        },
+      ],
+
+      '@stylistic/lines-between-class-members': 'error',
+
+      '@stylistic/padding-line-between-statements': [
+        'error',
+        { blankLine: 'always', next: 'export', prev: '*' },
+      ],
+
+      '@stylistic/quotes': [
+        'error',
+        'single',
+        { allowTemplateLiterals: 'avoidEscape', avoidEscape: true },
+      ],
+      '@stylistic/semi': ['error', 'never'],
     },
   },
   {
