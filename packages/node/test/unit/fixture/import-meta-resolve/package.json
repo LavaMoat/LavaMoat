@@ -1,0 +1,10 @@
+{
+  "name": "import-meta-resolve",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "app.js",
+  "dependencies": {
+    "helper": "1.0.0"
+  }
+}
