@@ -18,6 +18,8 @@ const {
   getParents,
 } = require('./util')
 
+const avoidEndingPathsIn = ['bind', 'call', 'apply']
+
 module.exports = {
   inspectGlobals,
   inspectRequires,
@@ -111,6 +113,11 @@ function inspectGlobals(
         // skip if global and only used for detecting presence
         if (path.length === 0) {
           return
+        }
+        // Sometimes nesting further doesn't make sense, like in case of Function methods
+        // Eliminating cases of nesting unwanted path endings like func.bind.call was considered not worth the complexity
+        if (avoidEndingPathsIn.includes(path[path.length - 1])) {
+          path.pop()
         }
         // submit as a global usage
         const pathString = path.join('.')
