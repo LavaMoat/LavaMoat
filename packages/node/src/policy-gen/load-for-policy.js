@@ -9,7 +9,6 @@
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import chalk from 'chalk'
 import { utils as tofuUtils } from 'lavamoat-tofu'
-import { fileURLToPath } from 'node:url'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
@@ -19,47 +18,37 @@ import {
   DEFAULT_TRUST_ROOT_COMPARTMENT,
   LANGUAGE_CJS,
   LANGUAGE_MJS,
-  LAVAMOAT_POLICY_ITEM_READ,
-  MessageTypes,
   ROOT_COMPARTMENT,
-  SOURCE_TYPE_MODULE,
-  SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
 import { hrLabel } from '../format.js'
-import { log as defaultLog, Loggerr } from '../log.js'
+import { log as defaultLog } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
-import {
-  createModuleInspectionProgressReporter,
-  reportInvalidCanonicalNames,
-  reportSesViolations,
-} from '../report.js'
+import { reportInvalidCanonicalNames, reportSesViolations } from '../report.js'
 import { pluralize } from '../util.js'
-import { WorkerPool } from '../worker-pool.js'
+import { createPolicyGenWorkerParser } from './worker-parser.js'
 
 /**
  * @import {LoadAndGeneratePolicyOptions,
  *   LoadCompartmentMapResult,
- *   InspectMessage,
- *   InspectionResultsMessage,
- *   ErrorMessage,
  *   StructuredViolationsResult,
- *   ReportModuleInspectionProgressFn} from '../internal.js'
- * @import {CanonicalName, ModuleSourceHookModuleSource} from '@endo/compartment-mapper'
+ *   ModuleInspectionResult} from '../internal.js'
+ * @import {CanonicalName} from '@endo/compartment-mapper'
  * @import {BuiltinPolicy, GlobalPolicy, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
- * @import {MergedLavaMoatPolicy, FileUrlString, SourceType} from '../types.js'
+ * @import {MergedLavaMoatPolicy, FileUrlString} from '../types.js'
  */
-
-const inspectorPath = fileURLToPath(new URL('./inspector.js', import.meta.url))
 
 const { keys } = Object
 
 /**
- * The nitty-gritty of building a policy from a given entrypoint.
+ * Loads the compartment map for a given entrypoint, inspects all modules for
+ * globals, builtins, and SES compatibility violations, and compiles a policy.
  *
- * Loads the compartment map and subscribes to hooks to inspect modules for
- * globals, builtins, and SES compatibility violations, then builds a policy
- * from it. This bypasses `lavamoat-core`'s inspector entirely.
+ * All module parsing and analysis is parallelized across worker threads via
+ * the async worker parser. Both ESM and CJS modules go through the worker
+ * pool, which runs the full composed pipeline (parse + tofu analysis +
+ * evasive transforms + module-source analysis + generate + record building)
+ * per module.
  *
  * @param {string | URL} entrypointPath
  * @param {LoadAndGeneratePolicyOptions} options
@@ -93,98 +82,36 @@ export const loadAndGeneratePolicy = async (
 
   /* c8 ignore next */
   if (!trustRoot && !rootUsePolicy) {
-    // should never happen
     throw new GenerationError(
       `Root compartment is not trusted, but no data for root.usePolicy exists`
     )
   }
 
-  /**
-   * In-flight requests to inspect modules
-   *
-   * @type {Set<Promise<FileUrlString>>}
-   */
-  const pendingInspections = new Set()
-
-  /**
-   * All modules to inspect. This will grow as our `moduleSource` hooks are
-   * called.
-   *
-   * @type {Set<FileUrlString>}
-   */
-  const modulesToInspect = new Set()
-
-  /**
-   * List of modules that have been inspected. This will grow as our worker pool
-   * messages are processed.
-   *
-   * @type {Set<FileUrlString>}
-   */
-  const inspectedModules = new Set()
-
-  /**
-   * A worker pool for inspecting modules.
-   *
-   * @type {WorkerPool<
-   *   InspectMessage,
-   *   InspectionResultsMessage | ErrorMessage
-   * >}
-   */
-  const workerPool = new WorkerPool(inspectorPath)
-
-  /**
-   * Stores global policies for each package.
-   *
-   * Updated as we receive messages from the worker pool.
-   *
-   * @type {Map<CanonicalName, GlobalPolicy>}
-   */
+  /** @type {Map<CanonicalName, GlobalPolicy>} */
   const globalsForPackage = new Map()
 
-  /**
-   * Stores builtin policies for each package.
-   *
-   * Updated as we receive messages from the worker pool.
-   *
-   * @type {Map<CanonicalName, BuiltinPolicy>}
-   */
+  /** @type {Map<CanonicalName, BuiltinPolicy>} */
   const builtinsForPackage = new Map()
 
-  /**
-   * Stores package policies for each package.
-   *
-   * Updated as we receive messages from the worker pool.
-   *
-   * @type {Map<CanonicalName, PackagePolicy>}
-   */
+  /** @type {Map<CanonicalName, PackagePolicy>} */
   const packagePoliciesMap = new Map()
 
-  /**
-   * Stores SES compatibility violations for each package.
-   *
-   * Updated as we receive messages from the worker pool.
-   *
-   * @type {Map<CanonicalName, StructuredViolationsResult>}
-   */
+  /** @type {Map<CanonicalName, StructuredViolationsResult>} */
   const violationsForPackage = new Map()
 
-  const { reportModuleInspectionProgress, reportModuleInspectionProgressEnd } =
-    createModuleInspectionProgressReporter(log.level > Loggerr.INFO)
+  /**
+   * Per-module inspection results populated by the worker parser's
+   * `onModuleComplete` callback. Keyed by module file URL; consumed by
+   * `moduleSourceHook` to map locations to canonical package names.
+   *
+   * @type {Map<FileUrlString, ModuleInspectionResult>}
+   */
+  const inspectionResults = new Map()
 
-  const inspectModuleSource = createModuleSourceInspector(
-    log,
-    workerPool,
-    inspectedModules,
-    modulesToInspect,
-    globalsForPackage,
-    builtinsForPackage,
-    violationsForPackage,
-    pendingInspections,
-    reportModuleInspectionProgress
-  )
+  const workerParser = createPolicyGenWorkerParser(inspectionResults)
 
-  // preprocess include array to match Endo's _preload format;
-  // `compartment` is `name` in policy.
+  let totalModuleCount = 0
+
   const preload = policyOverride?.include?.map((include) =>
     typeof include === 'string'
       ? { compartment: include, entry: '.' }
@@ -193,18 +120,22 @@ export const loadAndGeneratePolicy = async (
 
   /** @type {string[]} */
   const warnings = []
+
   try {
+    log.info('Inspecting modules; please wait…')
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
+      parserForLanguage: {
+        ...DEFAULT_ENDO_OPTIONS.parserForLanguage,
+        mjs: workerParser,
+        cjs: workerParser,
+      },
+      // All transforms are now handled inside the worker parser pipeline.
+      // No syncModuleTransforms needed for policy gen.
+      syncModuleTransforms: {},
       importHook: nullImportHook,
       log: log.debug.bind(log),
       _preload: preload,
-      /**
-       * Called for each package in the compartment map with a list of
-       * connections (which are also canonical names).
-       *
-       * We use this to build the package policies.
-       */
       packageConnectionsHook: ({
         canonicalName: rawCanonicalName,
         connections,
@@ -222,22 +153,14 @@ export const loadAndGeneratePolicy = async (
             packagePolicy[connection] = true
           }
         }
-        // avoid empty package policies
         if (keys(packagePolicy).length > 0) {
           packagePoliciesMap.set(canonicalName, packagePolicy)
         }
       },
-      /**
-       * Called for each module source that Endo finds.
-       *
-       * We use this to inspect each module for globals, builtins, and SES
-       * compatibility violations.
-       */
       moduleSourceHook: ({ moduleSource, canonicalName: rawCanonicalName }) => {
-        if ('exit' in moduleSource && moduleSource.exit) {
+        if ('exit' in moduleSource) {
           if (
             !ALL_BUILTIN_MODULES.has(moduleSource.exit) &&
-            // these are essentially duplicates; the same thing happens for `foo/package.json` and `foo`.
             !moduleSource.exit.endsWith('package.json')
           ) {
             warnings.push(
@@ -249,39 +172,43 @@ export const loadAndGeneratePolicy = async (
         if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
           return
         }
+
         const canonicalName =
           rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
             ? rootUsePolicy
             : rawCanonicalName
-        return inspectModuleSource(moduleSource, canonicalName)
+
+        const { language, location: id } = moduleSource
+
+        if (language !== LANGUAGE_MJS && language !== LANGUAGE_CJS) {
+          log.debug(
+            `Unsupported language "${language}" for module ${id}; skipping`
+          )
+          return
+        }
+
+        totalModuleCount += 1
+
+        const result = inspectionResults.get(/** @type {FileUrlString} */ (id))
+        if (result) {
+          applyInspectionResults(
+            canonicalName,
+            result,
+            globalsForPackage,
+            builtinsForPackage,
+            violationsForPackage
+          )
+        }
       },
       ...options,
     })
-
-    const inspectionResults = await Promise.allSettled([...pendingInspections])
-
-    // Clear the progress line and move to next line
-    if (process.stderr.isTTY) {
-      reportModuleInspectionProgressEnd(inspectedModules, modulesToInspect)
-    }
 
     for (const warning of warnings) {
       log.warning(warning)
     }
 
-    const errors = inspectionResults
-      .filter((result) => result.status !== 'fulfilled')
-      .map((result) => result.reason)
-
-    if (errors.length > 0) {
-      throw new AggregateError(
-        errors,
-        `Failed to inspect ${errors.length}/${modulesToInspect.size} module(s): \n${errors.map((error) => `  ${error.message}`).join('\n')}`
-      )
-    }
-
     log.info(
-      `${chalk.greenBright('✓')} ${chalk.bold('Completed inspection')} ${chalk.white('for')} ${chalk.whiteBright(modulesToInspect.size)} ${pluralize(modulesToInspect.size, 'module')}`
+      `${chalk.greenBright('✓')} ${chalk.bold('Completed inspection')} ${chalk.white('for')} ${chalk.whiteBright(totalModuleCount)} ${pluralize(totalModuleCount, 'module')}`
     )
 
     const policy = compilePolicy(
@@ -293,8 +220,8 @@ export const loadAndGeneratePolicy = async (
     )
     return { policy, packageJsonMap }
   } finally {
-    // we only check this if we have a policy override, because we're assuming
-    // the policy we just generated is valid, which may be a bad idea.
+    await workerParser.terminate()
+
     if (policyOverride) {
       reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
         policy: policyOverride,
@@ -303,31 +230,66 @@ export const loadAndGeneratePolicy = async (
       })
     }
 
-    // Report SES violations if any were found
     if (violationsForPackage.size > 0) {
       reportSesViolations(violationsForPackage, { log })
     }
-
-    // Clean up the worker pool
-    workerPool.terminate()
   }
 }
 
 /**
- * Compiles the per-package policies and violations into a
- * {@link MergedLavaMoatPolicy}.
- *
- * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage Map of global
- *   policies for each package.
- * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage Map of builtin
- *   policies for each package.
- * @param {Map<CanonicalName, PackagePolicy>} packagesForPackage Map of package
- *   policies for each package.
- * @param {LavaMoatPolicy} [policyOverride] Policy override to merge with the
- *   compiled policy.
- * @param {CanonicalName | undefined} [rootUsePolicy] Canonical name of the
- *   untrusted entry package
- * @returns {MergedLavaMoatPolicy} Merged policy.
+ * @param {CanonicalName} canonicalName
+ * @param {ModuleInspectionResult} result
+ * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
+ * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
+ * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
+ */
+const applyInspectionResults = (
+  canonicalName,
+  { globalPolicy, builtinPolicy, violations },
+  globalsForPackage,
+  builtinsForPackage,
+  violationsForPackage
+) => {
+  if (globalPolicy) {
+    const current = globalsForPackage.get(canonicalName)
+    globalsForPackage.set(canonicalName, { ...current, ...globalPolicy })
+  }
+
+  if (builtinPolicy) {
+    const current = builtinsForPackage.get(canonicalName)
+    builtinsForPackage.set(canonicalName, { ...current, ...builtinPolicy })
+  }
+
+  if (violations) {
+    const current = violationsForPackage.get(canonicalName)
+    if (current) {
+      violationsForPackage.set(canonicalName, {
+        primordialMutations: [
+          ...current.primordialMutations,
+          ...violations.primordialMutations,
+        ],
+        strictModeViolations: [
+          ...current.strictModeViolations,
+          ...violations.strictModeViolations,
+        ],
+        dynamicRequires: [
+          ...current.dynamicRequires,
+          ...violations.dynamicRequires,
+        ],
+      })
+    } else {
+      violationsForPackage.set(canonicalName, violations)
+    }
+  }
+}
+
+/**
+ * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
+ * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
+ * @param {Map<CanonicalName, PackagePolicy>} packagesForPackage
+ * @param {LavaMoatPolicy} [policyOverride]
+ * @param {CanonicalName | undefined} [rootUsePolicy]
+ * @returns {MergedLavaMoatPolicy}
  */
 const compilePolicy = (
   globalsForPackage,
@@ -340,14 +302,9 @@ const compilePolicy = (
   const policy = { resources: {} }
 
   /**
-   * Reduces per-package policy entries to topmost API calls and merges them
-   * into `policy.resources` under the given key.
-   *
-   * @param {'builtin' | 'globals'} policyKey Key on each resource (e.g.
-   *   `builtin`, `globals`).
+   * @param {'builtin' | 'globals'} policyKey
    * @param {Map<CanonicalName, BuiltinPolicy>
    *   | Map<CanonicalName, GlobalPolicy>} policyForPackage
-   *   Map of per-package policy entries to reduce and merge.
    */
   const mergeReducedPolicyIntoResources = (policyKey, policyForPackage) => {
     for (const [canonicalName, packagePolicy] of policyForPackage) {
@@ -358,9 +315,7 @@ const compilePolicy = (
       const reducedPolicy = {}
       for (const key of reducedKeys) {
         reducedPolicy[key] =
-          packagePolicy[key] === LAVAMOAT_POLICY_ITEM_READ
-            ? true
-            : packagePolicy[key]
+          packagePolicy[key] === 'read' ? true : packagePolicy[key]
       }
       policy.resources[canonicalName] = {
         ...policy.resources[canonicalName],
@@ -385,251 +340,5 @@ const compilePolicy = (
     }
   }
 
-  const mergedPolicy = mergePolicies(policy, policyOverride)
-
-  return mergedPolicy
-}
-
-/**
- * Creates a module source inspector function with the provided dependencies.
- *
- * @param {Loggerr} log Logger instance.
- * @param {WorkerPool<
- *   InspectMessage,
- *   InspectionResultsMessage | ErrorMessage
- * >} workerPool
- *   Worker pool instance which expects to send only {@link InspectMessage}s and
- *   receive {@link InspectionResultsMessage}s or {@link ErrorMessage}s.
- * @param {Set<FileUrlString>} inspectedModules Set of modules that have been
- *   inspected already.
- * @param {Set<FileUrlString>} modulesToInspect For progress reporting
- * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage Map of global
- *   policies for each package.
- * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage Map of builtin
- *   policies for each package.
- * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
- *   Map of SES compatibility violations for each package.
- * @param {Set<Promise<FileUrlString>>} pendingInspections Work queue of
- *   promises to inspect modules.
- * @param {ReportModuleInspectionProgressFn} reportModuleInspectionProgress
- *   Function to report module inspection progress.
- * @returns {(
- *   moduleSource: ModuleSourceHookModuleSource,
- *   canonicalName: CanonicalName,
- *   rootUsePolicy?: string
- * ) => void}
- *   Inspection function
- */
-const createModuleSourceInspector = (
-  log,
-  workerPool,
-  inspectedModules,
-  modulesToInspect,
-  globalsForPackage,
-  builtinsForPackage,
-  violationsForPackage,
-  pendingInspections,
-  reportModuleInspectionProgress
-) => {
-  /**
-   * Cache of in-flight worker tasks keyed by file URL. When the same physical
-   * file is loaded by multiple compartments, we reuse the single worker task
-   * and fan out the results to each canonical name's policy handler. This
-   * avoids duplicate work _and_ prevents a bug where overlapping `pendingTasks`
-   * Map entries (keyed by the same file URL) would overwrite each other,
-   * orphaning promises that never settle.
-   *
-   * TODO: This cache can likely be removed when Endo stops calling
-   * `moduleSourceHook` for the same module source multiple times.
-   *
-   * @type {Map<
-   *   FileUrlString,
-   *   Promise<InspectionResultsMessage | ErrorMessage>
-   * >}
-   */
-  const workerTaskCache = new Map()
-
-  /**
-   * Sends task to inspect a module source to the worker pool and updates the
-   * work queue ({@link pendingInspections}) and the set of modules to inspect
-   * ({@link modulesToInspect}).
-   *
-   * Only supports JS sources.
-   *
-   * @param {ModuleSourceHookModuleSource} moduleSource Module source to
-   *   inspect.
-   * @param {CanonicalName} canonicalName Canonical name of the module.
-   * @param {string | undefined} rootUsePolicy Canonical name of the policy to
-   *   use for the root compartment.
-   * @returns {void}
-   */
-  const inspectModuleSource = (moduleSource, canonicalName, rootUsePolicy) => {
-    if ('error' in moduleSource || 'exit' in moduleSource) {
-      return
-    }
-    const { bytes: source, location: id, language } = moduleSource
-    const type = MessageTypes.Inspect
-    /** @type {SourceType | undefined} */
-    let sourceType
-    switch (language) {
-      case LANGUAGE_MJS:
-        sourceType = SOURCE_TYPE_MODULE
-        break
-      case LANGUAGE_CJS:
-        sourceType = SOURCE_TYPE_SCRIPT
-        break
-      default: {
-        log.debug(
-          `Unsupported language "${language}" for module ${id}; skipping`
-        )
-        return
-      }
-    }
-
-    /**
-     * For progress reporting
-     */
-    let messageCount = 0
-
-    log.debug(`Inspecting module: ${id}…`)
-    const handleInspectionResults = createInspectionResultsHandler(
-      canonicalName,
-      globalsForPackage,
-      builtinsForPackage,
-      violationsForPackage,
-      rootUsePolicy
-    )
-
-    let workerTask = workerTaskCache.get(id)
-    if (!workerTask) {
-      /** @type {InspectMessage} */
-      const message = {
-        source,
-        id,
-        sourceType,
-        type,
-      }
-
-      workerTask = workerPool.sendTask(message, MessageTypes.InspectionResults)
-      workerTaskCache.set(id, workerTask)
-    }
-
-    const inspectionPromise = workerTask
-      .catch((error) => {
-        log.error(`Error inspecting module ${id}: ${error.message}`)
-        throw error
-      })
-      .then((message) => {
-        switch (message.type) {
-          case MessageTypes.InspectionResults: {
-            inspectedModules.add(id)
-
-            if (process.stderr.isTTY) {
-              messageCount = reportModuleInspectionProgress(
-                messageCount,
-                inspectedModules,
-                modulesToInspect
-              )
-            }
-
-            handleInspectionResults(message)
-
-            return id
-          }
-
-          // if an error is successfully trapped in the worker, we'll hit this.
-          case MessageTypes.Error: {
-            const { error } = message
-            throw new GenerationError(
-              `Error inspecting module ${id}: ${error}`,
-              { cause: error }
-            )
-          }
-        }
-      })
-
-    pendingInspections.add(inspectionPromise)
-    modulesToInspect.add(id)
-  }
-  return inspectModuleSource
-}
-
-/**
- * Creates a function which handles a {@link InspectionResultsMessage} by
- * updating the appropriate maps.
- *
- * @param {CanonicalName} rawCanonicalName Canonical name of package per
- *   inspection
- * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage Map of global
- *   policies for each package.
- * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage Map of builtin
- *   policies for each package.
- * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
- *   Map of SES compatibility violations for each package.
- * @param {CanonicalName | undefined} rootUsePolicy Canonical name of the policy
- *   to use for the root compartment.
- * @returns {(message: InspectionResultsMessage) => void} Function to handle
- *   inspection results.
- */
-const createInspectionResultsHandler = (
-  rawCanonicalName,
-  globalsForPackage,
-  builtinsForPackage,
-  violationsForPackage,
-  rootUsePolicy
-) => {
-  /**
-   * If `rootUsePolicy` is provided, we're not trusting the entry package, so
-   * we're going to generate a policy with `root.usePolicy` and create a
-   * `ResourcePolicy` for the entry package by its name.
-   */
-  const canonicalName =
-    rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
-      ? rootUsePolicy
-      : rawCanonicalName
-
-  /**
-   * Builds data structures of per-package policies and violations.
-   *
-   * @param {InspectionResultsMessage} message
-   */
-  return ({ globalPolicy, builtinPolicy, violations }) => {
-    if (globalPolicy) {
-      const currentGlobalPolicy = globalsForPackage.get(canonicalName)
-      globalsForPackage.set(canonicalName, {
-        ...currentGlobalPolicy,
-        ...globalPolicy,
-      })
-    }
-
-    if (builtinPolicy) {
-      const currentBuiltinPolicy = builtinsForPackage.get(canonicalName)
-      builtinsForPackage.set(canonicalName, {
-        ...currentBuiltinPolicy,
-        ...builtinPolicy,
-      })
-    }
-
-    if (violations) {
-      const currentViolations = violationsForPackage.get(canonicalName)
-      if (currentViolations) {
-        violationsForPackage.set(canonicalName, {
-          primordialMutations: [
-            ...currentViolations.primordialMutations,
-            ...violations.primordialMutations,
-          ],
-          strictModeViolations: [
-            ...currentViolations.strictModeViolations,
-            ...violations.strictModeViolations,
-          ],
-          dynamicRequires: [
-            ...currentViolations.dynamicRequires,
-            ...violations.dynamicRequires,
-          ],
-        })
-      } else {
-        violationsForPackage.set(canonicalName, violations)
-      }
-    }
-  }
+  return mergePolicies(policy, policyOverride)
 }

@@ -79,11 +79,13 @@ const createModuleTransform = (parser) => {
 }
 
 /**
- * Standard set of module transforms for our purposes
+ * Standard set of synchronous module transforms.
+ *
+ * ESM (`mjs`) is handled by the composed parser pipeline instead
+ * ({@link createExecParser} for execution, worker parser for policy gen).
  *
  * @internal
  */
 export const syncModuleTransforms = /** @type {const} */ ({
   cjs: createModuleTransform('cjs'),
-  mjs: createModuleTransform('mjs'),
 })

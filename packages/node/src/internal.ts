@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Internal types used by `@lavamoat/node`.
  *
@@ -19,12 +18,11 @@ import type {
   Resources,
 } from '@lavamoat/types'
 import type { PackageJson, ValueOf } from 'type-fest'
-import type { MessageTypes, SES_VIOLATION_TYPES } from './constants.js'
+import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
   FileUrlString,
   MergedLavaMoatPolicy,
-  SourceType,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
@@ -65,20 +63,6 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
 >
 
 /**
- * A function _or_ a constructor.
- *
- * @privateRemarks
- * I'm not entirely sure why `Function` does not satify one of the first two
- * union members, but it has to be here.
- * @internal
- */
-export type SomeFunction =
-  | (new (...args: any[]) => any)
-  | ((...args: any[]) => any)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  | Function
-
-/**
  * A `globalThis` object with unknown properties.
  *
  * This is basically just an object with anything in it, since we cannot be sure
@@ -88,20 +72,6 @@ export type SomeFunction =
  * @internal
  */
 export type SomeGlobalThis = Record<PropertyKey, unknown>
-
-/**
- * The parameters of a {@link SomeFunction}
- *
- * @template T Function or constructor
- * @internal
- */
-export type SomeParameters<T extends SomeFunction> = T extends new (
-  ...args: any[]
-) => any
-  ? ConstructorParameters<T>
-  : T extends (...args: any[]) => any
-    ? Parameters<T>
-    : never
 
 /**
  * Options for `readPolicy()`
@@ -256,58 +226,6 @@ export interface WithPolicyPath {
 }
 
 /**
- * Base message type with required type property and id
- *
- * @internal
- */
-export interface BaseMessage {
-  /** Message type discriminant */
-  type: string
-  /** Task identifier */
-  id: string
-}
-
-/**
- * Options for {@link WorkerPool} constructor
- *
- * @template _TMessage Message type that extends BaseMessage
- * @template _TResponse Response type that extends BaseMessage
- * @internal
- */
-export interface WorkerPoolOptions<
-  _TMessage extends BaseMessage = BaseMessage,
-  _TResponse extends BaseMessage = BaseMessage,
-> {
-  /** How long workers can be idle before termination (ms) */
-  idleTimeout?: number
-
-  /**
-   * Maximum number of concurrent workers.
-   *
-   * Defaults to `os.availableParallelism() - 1` (minimum 1). Tasks submitted
-   * when all workers are busy will queue and dispatch as workers become
-   * available.
-   */
-  maxWorkers?: number
-}
-
-/**
- * Message type for requesting inspection
- *
- * @internal
- */
-export interface InspectMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['Inspect']
-  /** Source bytes */
-  source: Uint8Array
-  /** Type of source */
-  sourceType: SourceType
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
-}
-
-/**
  * A single structured violation with location information
  *
  * @internal
@@ -338,35 +256,14 @@ export interface StructuredViolationsResult {
 }
 
 /**
- * Message type for responding with global policy
+ * Per-module inspection results collected during the composed parse pipeline.
  *
  * @internal
  */
-export interface InspectionResultsMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['InspectionResults']
-  /** The resulting global policy */
+export interface ModuleInspectionResult {
   globalPolicy: GlobalPolicy | null
-  /** The resulting builtin policy */
   builtinPolicy: BuiltinPolicy | null
-  /** The resulting SES compatibility violations */
-  violations?: StructuredViolationsResult | null
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
-}
-
-/**
- * Message type for responding with an error
- *
- * @internal
- */
-export interface ErrorMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['Error']
-  /** Error message */
-  error: string
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
+  violations: StructuredViolationsResult | null
 }
 
 /**

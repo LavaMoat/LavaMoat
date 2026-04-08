@@ -1,22 +1,41 @@
 {
-  "extends": "../../../.config/tsconfig.src.json",
   "compilerOptions": {
-    "outDir": "../types",
-    "rootDir": "..",
-    "paths": {
-      "lavamoat-core": ["../../core/types/src/types.d.ts"],
-      "@lavamoat/types": ["../../types"]
-    },
-    "target": "esnext",
     "module": "NodeNext",
-    "types": ["node", "ses"],
+    "outDir": "../types",
+    "paths": {
+      "@lavamoat/types": [
+        "../../types"
+      ],
+      "lavamoat-core": [
+        "../../core/types/src/types.d.ts"
+      ],
+      "lavamoat-tofu": [
+        "../../tofu"
+      ]
+    },
+    "preserveSymlinks": true,
+    "rootDir": "..",
     "strict": true,
     "stripInternal": true,
-    "preserveSymlinks": true
+    "target": "esnext",
+    "types": [
+      "node",
+      "ses"
+    ]
   },
-  "include": ["."],
+  "extends": "../../../.config/tsconfig.src.json",
+  "include": [
+    "."
+  ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../types/tsconfig.json" }
+    {
+      "path": "../../core/tsconfig.json"
+    },
+    {
+      "path": "../../types/tsconfig.json"
+    },
+    {
+      "path": "../../tofu/tsconfig.json"
+    }
   ]
 }

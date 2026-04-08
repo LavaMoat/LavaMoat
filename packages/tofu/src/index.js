@@ -12,6 +12,11 @@ const {
 } = require('./inspectPrimordialAssignments')
 const { inspectSesCompat } = require('./inspectSesCompat.js')
 const utils = require('./util')
+const {
+  createGlobalsAnalyzerPass,
+  createBuiltinsAnalyzerPass,
+  createViolationsAnalyzerPass,
+} = require('./analyzer-passes')
 
 module.exports = {
   inspectGlobals,
@@ -26,4 +31,7 @@ module.exports = {
   inspectPrimordialAssignments,
   inspectSesCompat,
   codeSampleFromAstNode,
+  createGlobalsAnalyzerPass,
+  createBuiltinsAnalyzerPass,
+  createViolationsAnalyzerPass,
 }

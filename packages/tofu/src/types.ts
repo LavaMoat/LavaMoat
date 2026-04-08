@@ -1,17 +1,22 @@
 export {
+  createBuiltinsAnalyzerPass,
+  createGlobalsAnalyzerPass,
+  createViolationsAnalyzerPass,
+} from './analyzer-passes.js'
+export {
   inspectDynamicRequires,
   inspectEsmImports,
-  inspectRequires,
   inspectGlobals,
-  inspectPrimordialAssignments,
-  inspectSesCompat,
   inspectImports,
+  inspectPrimordialAssignments,
+  inspectRequires,
+  inspectSesCompat,
   parse,
-  utils,
   traverse,
+  utils,
 } from './index.js'
 export type {
-  PrimordialAssignment,
   NodeWithLocation,
+  PrimordialAssignment,
 } from './inspectPrimordialAssignments.js'
 export type * from './inspectSesCompat.js'

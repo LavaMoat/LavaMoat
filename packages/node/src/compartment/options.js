@@ -7,6 +7,7 @@
 
 import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
 import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
+import { createExecParser } from '../exec/exec-parser.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
@@ -17,6 +18,8 @@ import parseNative from './parse-native.js'
  */
 
 const { freeze } = Object
+
+const execParser = createExecParser()
 
 /**
  * Common options for `@endo/compartment-mapper` functions
@@ -29,16 +32,12 @@ export const DEFAULT_ENDO_OPTIONS = freeze(
     globals: globalThis,
     importHook,
     importNowHook,
-    syncModuleTransforms,
+    syncModuleTransforms: {
+      cjs: syncModuleTransforms.cjs,
+    },
     parserForLanguage: {
-      /**
-       * @remarks
-       * The parsers from `@endo/compartment-mapper/import-parsers.js` do not
-       * precompile JS. This is intentional; if `@endo/compartment-mapper`
-       * compiles the sources, we will fail to generate a LavaMoat policy
-       * correctly. We must use the original sources (or distfiles).
-       */
       ...defaultParserForLanguage,
+      mjs: execParser,
       [NATIVE_PARSER_NAME]: parseNative,
     },
     languageForExtension: {
