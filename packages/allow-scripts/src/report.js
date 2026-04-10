@@ -69,42 +69,45 @@ function printPackagesByScriptConfiguration({
   missingPolicies,
   excessPolicies,
 }) {
-  console.log('\n# allowed packages with lifecycle scripts')
+  console.log('\n# allowed packages')
   if (allowedPatterns.length) {
-    allowedPatterns.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+    console.log('- ' + allowedPatterns.join('\n- '), '\n')
   } else {
     console.log('  (none)')
   }
 
-  console.log('\n# disallowed packages with lifecycle scripts')
+  console.log('\n# disallowed packages')
   if (disallowedPatterns.length) {
-    disallowedPatterns.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+    console.log('- ' + disallowedPatterns.join('\n- '), '\n')
   } else {
     console.log('  (none)')
   }
 
+  console.log('\n# unconfigured packages')
   if (missingPolicies.length) {
-    console.log('\n# unconfigured packages with lifecycle scripts')
-    missingPolicies.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+    console.log('- ' + missingPolicies.join('\n- '), '\n')
+  } else {
+    console.log('  (none)')
   }
 
+  console.log(
+    `\n# packages on the allowlist that don't match any installed packages with lifecycle scripts`
+  )
   if (excessPolicies.length) {
-    console.log(
-      '\n# packages with lifecycle scripts that no longer need configuration due to package or scripts removal'
-    )
-    excessPolicies.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
+    console.log('- ' + excessPolicies.join('\n- '), '\n')
+  } else {
+    console.log('  (none)')
+  }
+
+  console.log(
+    '\n# all packages with lifecycle scripts found in dependencies (configured and unconfigured)'
+  )
+  if (packagesWithScripts.size) {
+    Array.from(packagesWithScripts.entries()).forEach(([pattern, pkgs]) => {
+      console.log(`- ${pattern} ${pkgs.map(({ path }) => path).join(' ')}`)
     })
+  } else {
+    console.log('  (none)')
   }
 }
 

@@ -33,7 +33,8 @@ async function start() {
       return
     }
     // list packages
-    case 'list': {
+    case 'list':
+    case 'debug': {
       await printPackagesList({ rootDir })
       return
     }

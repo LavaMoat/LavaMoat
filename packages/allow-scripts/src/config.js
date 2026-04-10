@@ -428,9 +428,16 @@ function indexLifecycleConfiguration(config) {
       )
   )
 
-  config.excessPolicies = configuredPatterns.filter(
-    (pattern) => !config.packagesWithScripts.has(pattern)
-  )
+  const packagesWithScriptsNoVersion = Array.from(
+    config.packagesWithScripts.keys()
+  ).map((pattern) => pattern.replace(/#.*$/, ''))
+  config.excessPolicies = configuredPatterns.filter((pattern) => {
+    if (!pattern.includes('#')) {
+      return !packagesWithScriptsNoVersion.includes(pattern)
+    } else {
+      return !config.packagesWithScripts.has(pattern)
+    }
+  })
 
   return /** @type {ScriptsConfig} */ (config)
 }
