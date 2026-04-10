@@ -11,6 +11,8 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 const bannedBins = new Set(['corepack', 'node', 'npm', 'pnpm', 'yarn'])
 
+const ROOT_CANONICAL_NAME = '$root$'
+
 /**
  * @param {Record<string, boolean>} allowConfig
  */
@@ -55,7 +57,10 @@ const versionAwareMatcher = (allowConfig) => {
      * @returns {boolean}
      */
     allowedWithVersion: (patternToCheck) => {
-      if (!patternToCheck.includes('#')) {
+      if (
+        patternToCheck !== ROOT_CANONICAL_NAME &&
+        !patternToCheck.includes('#')
+      ) {
         return false
       }
       return allowed.has(patternToCheck)
@@ -124,7 +129,7 @@ async function loadAllPackageConfigurations({
 
     /** @type {string} */
     let pattern
-    if (skipVersions) {
+    if (skipVersions || canonicalName === ROOT_CANONICAL_NAME) {
       pattern = canonicalName
     } else {
       pattern = `${canonicalName}#${version}`
