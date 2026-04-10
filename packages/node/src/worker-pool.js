@@ -29,6 +29,42 @@ const DEFAULT_MAX_WORKERS = Math.max(1, availableParallelism() - 1)
  */
 export class WorkerPool {
   /**
+   * Get count of available workers
+   *
+   * @returns {number}
+   */
+  get availableWorkerCount() {
+    return this.availableWorkers.length
+  }
+
+  /**
+   * Get count of outstanding tasks
+   *
+   * @returns {number}
+   */
+  get outstandingTaskCount() {
+    return this.pendingTasks.size
+  }
+
+  /**
+   * Get count of tasks waiting for a worker
+   *
+   * @returns {number}
+   */
+  get queuedTaskCount() {
+    return this.taskQueue.length
+  }
+
+  /**
+   * Get total count of workers (available + busy)
+   *
+   * @returns {number}
+   */
+  get totalWorkerCount() {
+    return this.allWorkers.size
+  }
+
+  /**
    * @param {string | URL} workerScript - Path to the worker script
    * @param {WorkerPoolOptions<TMessage, TResponse>} [options] - Configuration
    *   options
@@ -113,33 +149,6 @@ export class WorkerPool {
   }
 
   /**
-   * Handle message from worker
-   *
-   * @param {Worker} worker
-   * @param {TResponse} message
-   */
-  handleWorkerMessage(worker, message) {
-    const taskId = message.id
-    const task = this.pendingTasks.get(taskId)
-
-    if (task) {
-      // Check if this message type matches the expected completion type
-      if (message.type === task.completionType) {
-        this.pendingTasks.delete(taskId)
-        task.resolve(message)
-        this.returnWorker(worker)
-      } else if (message.type === 'error') {
-        this.pendingTasks.delete(taskId)
-        task.reject(
-          new Error(/** @type {any} */ (message).error || 'Worker error')
-        )
-        this.returnWorker(worker)
-      }
-      // For other message types, we just ignore them and keep the task pending
-    }
-  }
-
-  /**
    * Handle worker error
    *
    * @param {Worker} worker
@@ -171,6 +180,33 @@ export class WorkerPool {
   }
 
   /**
+   * Handle message from worker
+   *
+   * @param {Worker} worker
+   * @param {TResponse} message
+   */
+  handleWorkerMessage(worker, message) {
+    const taskId = message.id
+    const task = this.pendingTasks.get(taskId)
+
+    if (task) {
+      // Check if this message type matches the expected completion type
+      if (message.type === task.completionType) {
+        this.pendingTasks.delete(taskId)
+        task.resolve(message)
+        this.returnWorker(worker)
+      } else if (message.type === 'error') {
+        this.pendingTasks.delete(taskId)
+        task.reject(
+          new Error(/** @type {any} */ (message).error || 'Worker error')
+        )
+        this.returnWorker(worker)
+      }
+      // For other message types, we just ignore them and keep the task pending
+    }
+  }
+
+  /**
    * Return worker to pool, dispatching a queued task if one is waiting, or
    * scheduling the worker for idle termination otherwise.
    *
@@ -181,10 +217,10 @@ export class WorkerPool {
     if (queued) {
       const taskId = queued.message.id
       this.pendingTasks.set(taskId, {
-        worker,
-        resolve: queued.resolve,
-        reject: queued.reject,
         completionType: queued.completionType,
+        reject: queued.reject,
+        resolve: queued.resolve,
+        worker,
       })
       worker.postMessage(queued.message)
       return
@@ -222,57 +258,21 @@ export class WorkerPool {
       const worker = this.getWorker()
 
       if (!worker) {
-        this.taskQueue.push({ message, completionType, resolve, reject })
+        this.taskQueue.push({ completionType, message, reject, resolve })
         return
       }
 
       const taskId = message.id
 
       this.pendingTasks.set(taskId, {
-        worker,
-        resolve,
-        reject,
         completionType,
+        reject,
+        resolve,
+        worker,
       })
 
       worker.postMessage(message)
     })
-  }
-
-  /**
-   * Get count of outstanding tasks
-   *
-   * @returns {number}
-   */
-  get outstandingTaskCount() {
-    return this.pendingTasks.size
-  }
-
-  /**
-   * Get count of available workers
-   *
-   * @returns {number}
-   */
-  get availableWorkerCount() {
-    return this.availableWorkers.length
-  }
-
-  /**
-   * Get total count of workers (available + busy)
-   *
-   * @returns {number}
-   */
-  get totalWorkerCount() {
-    return this.allWorkers.size
-  }
-
-  /**
-   * Get count of tasks waiting for a worker
-   *
-   * @returns {number}
-   */
-  get queuedTaskCount() {
-    return this.taskQueue.length
   }
 
   /**

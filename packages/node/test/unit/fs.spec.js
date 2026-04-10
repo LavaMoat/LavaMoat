@@ -2,6 +2,7 @@ import '../../src/preamble.js'
 
 import test from 'ava'
 import { memfs } from 'memfs'
+
 import {
   assertAbsolutePath,
   isAbsolutePath,
@@ -16,7 +17,7 @@ import {
 } from '../../src/fs.js'
 
 test('readJsonFile() - reads and parses JSON file', async (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.json': '{"key": "value"}' })
   const data = await readJsonFile('/test.json', {
     readFile: /** @type {any} */ (fs.promises.readFile),
@@ -25,53 +26,53 @@ test('readJsonFile() - reads and parses JSON file', async (t) => {
 })
 
 test('isFileSync() - returns true for real files', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   t.true(isFileSync('/test.txt', { fs }))
 })
 
 test('isFileSync() - returns false for non-files', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.unlinkSync('/test.txt')
   t.false(isFileSync('/test.txt', { fs }))
 })
 
 test('isReadablePathSync() - returns true for readable paths', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   t.true(isReadablePathSync('/test.txt', { fs }))
 })
 
 test('isReadablePathSync returns false for non-readable paths', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.chmodSync('/test.txt', 0o000)
   t.false(isReadablePathSync('/test.txt', { fs }))
 })
 
 test('isExecutablePathSync() - returns true for executable paths', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.chmodSync('/test.txt', 0o755)
   t.true(isExecutablePathSync('/test.txt', { fs }))
 })
 
 test('isExecutablePathSync returns false for non-executable paths', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.chmodSync('/test.txt', 0o644)
   t.false(isExecutablePathSync('/test.txt', { fs }))
 })
 
 test('isReadableFileSync() - returns true for readable files', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   t.true(isReadableFileSync('/test.txt', { fs }))
 })
 
 test('isReadableFileSync returns false for non-readable files', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.chmodSync('/test.txt', 0o000)
   t.false(isReadableFileSync('/test.txt', { fs }))
@@ -81,7 +82,7 @@ test('isReadableFileSync returns false for non-readable files', (t) => {
 test.failing(
   'isExecutableSymlink() - returns true for executable symlinks',
   (t) => {
-    const { vol, fs } = memfs()
+    const { fs, vol } = memfs()
     vol.fromJSON({ '/test.txt': 'content' })
     vol.symlinkSync('/test.txt', '/test-link')
     vol.chmodSync('/test-link', 0o755)
@@ -90,7 +91,7 @@ test.failing(
 )
 
 test('isExecutableSymlink returns false for non-executable symlinks', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.symlinkSync('/test.txt', '/test-link')
   vol.chmodSync('/test-link', 0o644)
@@ -98,14 +99,14 @@ test('isExecutableSymlink returns false for non-executable symlinks', (t) => {
 })
 
 test('isSymlinkSync() - returns true for symlinks', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.symlinkSync('/test.txt', '/test-link')
   t.true(isSymlinkSync('/test-link', { fs }))
 })
 
 test('isSymlinkSync() - returns false for non-symlinks', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   t.false(isSymlinkSync('/test.txt', { fs }))
 })
@@ -127,7 +128,7 @@ test('isAbsolutePath() - returns false for non-absolute paths', (t) => {
 })
 
 test('realpathSync() - resolves symlinks', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({ '/test.txt': 'content' })
   vol.symlinkSync('/test.txt', '/test-link')
   t.is(realpathSync('/test-link', { fs }), '/test.txt')

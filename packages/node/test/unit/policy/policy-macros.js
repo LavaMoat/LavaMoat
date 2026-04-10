@@ -2,6 +2,7 @@ import '../../../src/preamble.js'
 
 import { Loggerr } from 'loggerr'
 import { fileURLToPath } from 'node:url'
+
 import { defaultReadPowers } from '../../../src/compartment/power.js'
 import { MERGED_POLICY_FIELD, SourceTypes } from '../../../src/constants.js'
 import { log as defaultLog } from '../../../src/log.js'
@@ -76,11 +77,11 @@ export function createGeneratePolicyMacros(test) {
         '/entry.js',
         {
           log,
-          readPowers,
           policyOverride:
             'policyOverride' in expectedPolicy
               ? expectedPolicy.policyOverride
               : undefined,
+          readPowers,
         }
       )
 
@@ -270,7 +271,7 @@ export function createGeneratePolicyMacros(test) {
           options = /** @type {TestPolicyForJSONOptions} */ (
             expectedPolicyOrOptions ?? {}
           )
-          ;({ expected, ...options } = options)
+          ;({ expected } = options)
         }
 
         if (isPolicy(expected)) {
@@ -328,7 +329,7 @@ export function createGeneratePolicyMacros(test) {
           log.setLevel(Loggerr.EMERGENCY)
         }
 
-        const { entrypoint: entrypointPath, dir: projectRoot } = fixture(name, {
+        const { dir: projectRoot, entrypoint: entrypointPath } = fixture(name, {
           entrypoint,
           entrypointFilename,
         })
@@ -336,9 +337,9 @@ export function createGeneratePolicyMacros(test) {
           entrypointPath,
           {
             ...otherOptions,
+            log,
             projectRoot,
             readPowers,
-            log,
           }
         )
 
@@ -384,7 +385,7 @@ export function createGeneratePolicyMacros(test) {
           options = /** @type {TestPolicyForFixtureOptions} */ (
             expectedPolicyOrOptions ?? {}
           )
-          ;({ expected, ...options } = options)
+          ;({ expected } = options)
         }
 
         if (isPolicy(expected)) {
@@ -450,7 +451,7 @@ const SCAFFOLD_SCRIPT_FIXTURE = fileURLToPath(
 async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
   const fixturePath =
     sourceType === 'module' ? SCAFFOLD_MODULE_FIXTURE : SCAFFOLD_SCRIPT_FIXTURE
-  const { vol, readPowers } = await loadJSONFixture(
+  const { readPowers, vol } = await loadJSONFixture(
     new URL(fixturePath, import.meta.url)
   )
 
@@ -458,5 +459,5 @@ async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
     encoding: 'utf8',
   })
 
-  return { vol, readPowers }
+  return { readPowers, vol }
 }

@@ -15,10 +15,10 @@ import nodeUrl from 'node:url'
  * @type {ReadNowPowers}
  */
 export const defaultReadPowers = makeReadNowPowers({
-  fs: nodeFs,
-  url: nodeUrl,
   crypto: nodeCrypto,
+  fs: nodeFs,
   path: nodePath,
+  url: nodeUrl,
 })
 
 /**
@@ -31,15 +31,15 @@ export const defaultReadPowers = makeReadNowPowers({
  */
 export const makeReadPowers = (options) => {
   const { readPowers } = options
-  const { fs, url = nodeUrl, path = nodePath, crypto = nodeCrypto } = options
+  const { crypto = nodeCrypto, fs, path = nodePath, url = nodeUrl } = options
   // FIXME: it might be possible that the way endo uses node:url won't work consistently
   // with non-default fs passed in. Some assumptions about path resolution are used in url
   if (fs) {
     return makeReadNowPowers({
-      fs,
-      url,
       crypto,
+      fs,
       path,
+      url,
     })
   }
   if (readPowers) {

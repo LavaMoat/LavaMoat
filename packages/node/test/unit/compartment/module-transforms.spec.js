@@ -1,11 +1,11 @@
-import test from 'ava'
 import 'ses'
+import { importLocation } from '@endo/compartment-mapper'
+import test from 'ava'
+
 import {
   syncModuleTransforms,
   useLocalTransforms,
 } from '../../../src/compartment/module-transforms.js'
-
-import { importLocation } from '@endo/compartment-mapper'
 
 // --- Tests for useLocalTransforms (hashbang and direct eval only) ---
 
@@ -161,8 +161,8 @@ test('syncModuleTransforms.mjs - evadeImportString - handles multiple occurrence
 const makeFakeReadFor = (transformed) => async (location) => {
   /** @type {Record<string, string>} */
   const fs = {
-    'file://location/index.mjs': transformed,
     'file://location/dynamic.mjs': `dynamicCallback();`,
+    'file://location/index.mjs': transformed,
     'file://location/package.json':
       '{"name":"location", "main":"index.mjs", "type":"module"}',
   }

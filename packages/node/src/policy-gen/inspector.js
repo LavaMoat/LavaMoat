@@ -35,6 +35,7 @@ import {
   utils as tofuUtils,
 } from 'lavamoat-tofu'
 import { isMainThread, parentPort } from 'node:worker_threads'
+
 import {
   ALL_BUILTIN_MODULES,
   LAVAMOAT_POLICY_ITEM_READ,
@@ -54,9 +55,9 @@ if (!isMainThread && parentPort) {
       } catch (error) {
         if (parentPort) {
           parentPort.postMessage({
-            type: MessageTypes.Error,
             error: error instanceof Error ? error.message : `${error}`,
             id: message.id,
+            type: MessageTypes.Error,
           })
         } else {
           throw error
@@ -68,7 +69,7 @@ if (!isMainThread && parentPort) {
   throw new Error('This module is intended to be run as a Worker thread.')
 }
 
-const { getOwnPropertyNames, freeze, create } = Object
+const { create, freeze, getOwnPropertyNames } = Object
 
 const globalObjPrototypeRefs = getOwnPropertyNames(Object.prototype)
 
@@ -179,8 +180,8 @@ const createGlobalPolicy = (ast, sourceType) => {
   const ignoredRefs = [...moduleRefs, ...globalObjPrototypeRefs]
 
   const globalMap = inspectGlobals(ast, {
-    ignoredRefs,
     globalRefs: DEFAULT_GLOBAL_THIS_REFS,
+    ignoredRefs,
   })
 
   // Step 5: Post-process the map
@@ -243,7 +244,7 @@ const createBuiltinPolicy = (ast) => {
  * @param {InspectMessage} message Message to handle
  * @returns {void}
  */
-const inspectListener = ({ source, sourceType, id }) => {
+const inspectListener = ({ id, source, sourceType }) => {
   /** @type {ParseResult} */
   let ast
   try {
@@ -296,11 +297,11 @@ const inspectListener = ({ source, sourceType, id }) => {
   if (parentPort) {
     /** @type {InspectionResultsMessage} */
     const inspectionResultsMessage = {
-      type: MessageTypes.InspectionResults,
-      globalPolicy,
       builtinPolicy,
-      violations,
+      globalPolicy,
       id,
+      type: MessageTypes.InspectionResults,
+      violations,
     }
     try {
       parentPort.postMessage(inspectionResultsMessage)
@@ -325,7 +326,7 @@ const inspectListener = ({ source, sourceType, id }) => {
  * @returns {StructuredViolationsResult | null} Inspection result
  */
 const inspectViolations = (ast, id) => {
-  const { primordialMutations, strictModeViolations, dynamicRequires } =
+  const { dynamicRequires, primordialMutations, strictModeViolations } =
     inspectSesCompat(/** @type {any} */ (ast))
 
   const hasViolations = !!(
@@ -341,9 +342,9 @@ const inspectViolations = (ast, id) => {
   // Transform primordialMutations: extract from node.loc.start
   const transformedPrimordialMutations = primordialMutations.map(
     (violation) => ({
-      path: id,
-      line: violation.node.loc?.start.line ?? 0,
       column: violation.node.loc?.start.column ?? 0,
+      line: violation.node.loc?.start.line ?? 0,
+      path: id,
       type: 'primordial mutation',
     })
   )
@@ -351,25 +352,25 @@ const inspectViolations = (ast, id) => {
   // Transform strictModeViolations: extract from loc directly
   const transformedStrictModeViolations = strictModeViolations.map(
     (violation) => ({
-      path: id,
-      line: violation.loc.line,
       column: violation.loc.column,
+      line: violation.loc.line,
+      path: id,
       type: 'strict-mode violation',
     })
   )
 
   // Transform dynamicRequires: extract from node.loc.start
   const transformedDynamicRequires = dynamicRequires.map((violation) => ({
-    path: id,
-    line: violation.node.loc?.start.line ?? 0,
     column: violation.node.loc?.start.column ?? 0,
+    line: violation.node.loc?.start.line ?? 0,
+    path: id,
     type: 'dynamic requires',
   }))
 
   return {
+    dynamicRequires: transformedDynamicRequires,
     primordialMutations: transformedPrimordialMutations,
     strictModeViolations: transformedStrictModeViolations,
-    dynamicRequires: transformedDynamicRequires,
   }
 }
 
@@ -384,8 +385,8 @@ const parseAst = (source, sourceType) => {
   const sourceCode = decoder.decode(source)
 
   return parse(sourceCode, {
-    sourceType,
     allowReturnOutsideFunction: sourceType === SOURCE_TYPE_SCRIPT,
     errorRecovery: true,
+    sourceType,
   })
 }
