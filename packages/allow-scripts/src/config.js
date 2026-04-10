@@ -22,10 +22,15 @@ const versionAwareMatcher = (allowConfig) => {
   )
 
   const knownNames = new Set()
+  const knownPatternsWithVersion = new Set()
 
   for (const [pattern] of Object.entries(allowConfig)) {
-    const [name] = pattern.split('#')
-    knownNames.add(name)
+    const [name, version] = pattern.split('#')
+    if (version) {
+      knownPatternsWithVersion.add(pattern)
+    } else {
+      knownNames.add(name)
+    }
   }
 
   return {
@@ -37,7 +42,10 @@ const versionAwareMatcher = (allowConfig) => {
      */
     known: (patternToCheck) => {
       const [nameToCheck] = patternToCheck.split('#')
-      return knownNames.has(nameToCheck)
+      return (
+        knownNames.has(nameToCheck) ||
+        knownPatternsWithVersion.has(patternToCheck)
+      )
     },
     /**
      * Compares two allowlist patterns by version, returns true if the

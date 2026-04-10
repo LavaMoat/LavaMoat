@@ -40,13 +40,11 @@ function printMissingPoliciesIfAny({
  * @param {BinsConfig} param0
  */
 function printPackagesByBins({ allowedBins, excessPolicies }) {
-  console.log('\n# allowed packages with bin scripts')
   if (allowedBins.length) {
+    console.log('\n# allowed packages with bin scripts')
     allowedBins.forEach(({ canonicalName, bin }) => {
       console.log(`- ${canonicalName} [${bin}]`)
     })
-  } else {
-    console.log('  (none)')
   }
 
   if (excessPolicies.length) {
@@ -69,16 +67,25 @@ function printPackagesByScriptConfiguration({
   missingPolicies,
   excessPolicies,
 }) {
+  /**
+   * @param {string} pattern
+   */
+  const markUnused = (pattern) => {
+    if (excessPolicies.includes(pattern)) {
+      return `${pattern} \t (!) no matching package with lifecycle scripts installed`
+    }
+    return pattern
+  }
   console.log('\n# allowed packages')
   if (allowedPatterns.length) {
-    console.log('- ' + allowedPatterns.join('\n- '), '\n')
+    console.log('- ' + allowedPatterns.map(markUnused).join('\n- '), '\n')
   } else {
     console.log('  (none)')
   }
 
   console.log('\n# disallowed packages')
   if (disallowedPatterns.length) {
-    console.log('- ' + disallowedPatterns.join('\n- '), '\n')
+    console.log('- ' + disallowedPatterns.map(markUnused).join('\n- '), '\n')
   } else {
     console.log('  (none)')
   }
@@ -104,7 +111,9 @@ function printPackagesByScriptConfiguration({
   )
   if (packagesWithScripts.size) {
     Array.from(packagesWithScripts.entries()).forEach(([pattern, pkgs]) => {
-      console.log(`- ${pattern} ${pkgs.map(({ path }) => path).join(' ')}`)
+      console.log(
+        `- ${pattern} \n\t${pkgs.map(({ path }) => path).join('\n\t')}`
+      )
     })
   } else {
     console.log('  (none)')
