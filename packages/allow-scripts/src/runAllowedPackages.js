@@ -37,9 +37,7 @@ async function runAllowedPackages({ rootDir }) {
     process.exit(1)
   }
 
-  const { allowedWithVersionAndBelow } = versionAwareMatcher(
-    lifecycle.allowConfig
-  )
+  const { allowedWithVersion } = versionAwareMatcher(lifecycle.allowConfig)
 
   if (FEATURE.bins && bin.allowConfig) {
     // Consider: Might as well delete entire .bin and recreate in case it was left there
@@ -61,7 +59,7 @@ async function runAllowedPackages({ rootDir }) {
     const allowedPackagesWithScriptsLifecycleScripts = Array.from(
       lifecycle.packagesWithScripts.entries()
     )
-      .filter(([pattern]) => allowedWithVersionAndBelow(pattern))
+      .filter(([pattern]) => allowedWithVersion(pattern))
       .flatMap(([, packages]) => packages)
 
     console.log('running lifecycle scripts for event "preinstall"')

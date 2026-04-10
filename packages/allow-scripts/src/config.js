@@ -12,76 +12,32 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const bannedBins = new Set(['corepack', 'node', 'npm', 'pnpm', 'yarn'])
 
 /**
- * Checks if versionToCheck is lower than or equal to versionAllowed
- *
- * @param {string} versionToCheck
- * @param {string} versionAllowed
- * @returns {boolean}
- */
-const versionBelowOrEqual = (versionToCheck, versionAllowed) => {
-  // if versionToCheck is strictly lower than versionAllowed, then it's allowed
-  const [majorAllowed, minorAllowed, patchAllowed] = versionAllowed
-    .split('.')
-    .map(Number)
-  const [majorToCheck, minorToCheck, patchToCheck] = versionToCheck
-    .split('.')
-    .map(Number)
-
-  if (majorToCheck < majorAllowed) {
-    return true
-  } else if (majorToCheck === majorAllowed) {
-    if (minorToCheck < minorAllowed) {
-      return true
-    } else if (minorToCheck === minorAllowed) {
-      if (patchToCheck < patchAllowed) {
-        return true
-      }
-    }
-  }
-
-  return false
-}
-
-/**
  * @param {Record<string, boolean>} allowConfig
  */
 const versionAwareMatcher = (allowConfig) => {
-  const indexedPatterns = /** @type {Record<string, string>} */ ({})
-  const blanketDisallowed = new Set()
-  const explicitlyDisallowed = new Set()
+  const allowed = new Set(
+    Object.entries(allowConfig)
+      .filter(([, value]) => !!value)
+      .map(([pattern]) => pattern)
+  )
 
-  for (const [pattern, value] of Object.entries(allowConfig)) {
-    const [name, version] = pattern.split('#')
+  const knownNames = new Set()
 
-    if (value === true) {
-      if (
-        !indexedPatterns[name] ||
-        versionBelowOrEqual(version, indexedPatterns[name])
-      ) {
-        indexedPatterns[name] = version
-      }
-    } else {
-      if (!version) {
-        blanketDisallowed.add(name)
-      } else {
-        explicitlyDisallowed.add(pattern)
-      }
-    }
+  for (const [pattern] of Object.entries(allowConfig)) {
+    const [name] = pattern.split('#')
+    knownNames.add(name)
   }
 
   return {
     /**
-     * Checks if the pattern is blanketDisallowed regardless of version
+     * Checks if the pattern is known regardless of version
      *
      * @param {string} patternToCheck
      * @returns {boolean}
      */
-    disallowedExplicitlyOrAll: (patternToCheck) => {
+    known: (patternToCheck) => {
       const [nameToCheck] = patternToCheck.split('#')
-      return (
-        blanketDisallowed.has(nameToCheck) ||
-        explicitlyDisallowed.has(patternToCheck)
-      )
+      return knownNames.has(nameToCheck)
     },
     /**
      * Compares two allowlist patterns by version, returns true if the
@@ -90,22 +46,11 @@ const versionAwareMatcher = (allowConfig) => {
      * @param {string} patternToCheck
      * @returns {boolean}
      */
-    allowedWithVersionAndBelow: (patternToCheck) => {
+    allowedWithVersion: (patternToCheck) => {
       if (!patternToCheck.includes('#')) {
         return false
       }
-      const [nameToCheck, versionToCheck] = patternToCheck.split('#')
-      const versionAllowed = indexedPatterns[nameToCheck]
-
-      if (versionAllowed === undefined) {
-        return false
-      }
-
-      if (versionAllowed === versionToCheck) {
-        return true
-      }
-
-      return versionBelowOrEqual(versionToCheck, versionAllowed)
+      return allowed.has(patternToCheck)
     },
   }
 }
@@ -407,8 +352,7 @@ function indexLifecycleConfiguration(config) {
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
 
-  const { allowedWithVersionAndBelow, disallowedExplicitlyOrAll } =
-    versionAwareMatcher(config.allowConfig)
+  const { known } = versionAwareMatcher(config.allowConfig)
   // select allowed + disallowed
   config.allowedPatterns = Object.entries(config.allowConfig)
     .filter(([, packageData]) => !!packageData)
@@ -420,13 +364,7 @@ function indexLifecycleConfiguration(config) {
 
   config.missingPolicies = Array.from(
     config.packagesWithScripts.keys() ?? []
-  ).filter(
-    (pattern) =>
-      !(
-        allowedWithVersionAndBelow(pattern) ||
-        disallowedExplicitlyOrAll(pattern)
-      )
-  )
+  ).filter((pattern) => !known(pattern))
 
   const packagesWithScriptsNoVersion = Array.from(
     config.packagesWithScripts.keys()
