@@ -58,7 +58,7 @@
     "@babel/preset-typescript": "7.28.5",
     "@jsonjoy.com/fs-snapshot": "4.57.1",
     "@types/browser-resolve": "2.0.5",
-    "babel-loader": "10.0.0",
+    "babel-loader": "10.1.1",
     "css-loader": "7.1.4",
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.6.6",
