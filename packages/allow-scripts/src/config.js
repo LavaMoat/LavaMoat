@@ -42,7 +42,7 @@ const versionAwareMatcher = (allowConfig) => {
      * @param {string} patternToCheck
      * @returns {boolean}
      */
-    known: (patternToCheck) => {
+    isKnown: (patternToCheck) => {
       const [nameToCheck] = patternToCheck.split('#')
       return (
         knownNames.has(nameToCheck) ||
@@ -365,7 +365,7 @@ function indexLifecycleConfiguration(config) {
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
 
-  const { known } = versionAwareMatcher(config.allowConfig)
+  const { isKnown } = versionAwareMatcher(config.allowConfig)
   // select allowed + disallowed
   config.allowedPatterns = Object.entries(config.allowConfig)
     .filter(([, packageData]) => !!packageData)
@@ -377,7 +377,7 @@ function indexLifecycleConfiguration(config) {
 
   config.missingPolicies = Array.from(
     config.packagesWithScripts.keys() ?? []
-  ).filter((pattern) => !known(pattern))
+  ).filter((pattern) => !isKnown(pattern))
 
   const packagesWithScriptsNoVersion = Array.from(
     config.packagesWithScripts.keys()

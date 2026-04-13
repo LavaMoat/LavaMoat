@@ -70,7 +70,7 @@ Configuration goes in `package.json`
 {
   "lavamoat": {
     "allowScripts": {
-      "keccak#3.0.4": true,
+      "keccak#3.0.4": false,
       "rezeplayer>core-js#3.49.0": false
     }
   }
@@ -81,10 +81,11 @@ If `allowScripts` has an item set to true, the lifecycle scripts of that package
 
 > [!NOTE]
 >
-> - `allow-scripts` is pinning versions of the dependencies with lifecycle since v5. 
-> - Items set to `false` will be updated via `allow-scripts auto` to the current  detected version.
-> - To avoid churn in the list, you can remove the `#version` suffix from a disallowed item and it will be denied regardless of version. 
-> - Versions are mandatory for allowed packages in case of maintainer compromise. > - You can opt out of this behavior with the `--skip-versions` flag.
+> - `allow-scripts` is pinning versions of the dependencies with lifecycle since v5.
+> - Items set to `false` will be updated via `allow-scripts auto` to the current detected version.
+> - To avoid churn in the list, you can remove the `#version` suffix from a disallowed item and it will be denied regardless of version.
+> - Versions are mandatory for allowed packages in case of maintainer compromise.
+> - You can opt out of this behavior with the `--skip-versions` flag.
 
 > [!NOTE]
 >

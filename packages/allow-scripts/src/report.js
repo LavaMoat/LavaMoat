@@ -78,21 +78,21 @@ function printPackagesByScriptConfiguration({
   }
   console.log('\n# allowed packages')
   if (allowedPatterns.length) {
-    console.log('- ' + allowedPatterns.map(markUnused).join('\n- '), '\n')
+    console.log(`- ${allowedPatterns.map(markUnused).join('\n- ')}\n`)
   } else {
     console.log('  (none)')
   }
 
   console.log('\n# disallowed packages')
   if (disallowedPatterns.length) {
-    console.log('- ' + disallowedPatterns.map(markUnused).join('\n- '), '\n')
+    console.log(`- ${disallowedPatterns.map(markUnused).join('\n- ')}\n`)
   } else {
     console.log('  (none)')
   }
 
   console.log('\n# unconfigured packages')
   if (missingPolicies.length) {
-    console.log('- ' + missingPolicies.join('\n- '), '\n')
+    console.log(`- ${missingPolicies.join('\n- ')}\n`)
   } else {
     console.log('  (none)')
   }
@@ -101,7 +101,7 @@ function printPackagesByScriptConfiguration({
     `\n# packages on the allowlist that don't match any installed packages with lifecycle scripts`
   )
   if (excessPolicies.length) {
-    console.log('- ' + excessPolicies.join('\n- '), '\n')
+    console.log(`- ${excessPolicies.join('\n- ')}\n`)
   } else {
     console.log('  (none)')
   }
