@@ -10,9 +10,15 @@ import path from 'node:path'
 import { PACKAGE_JSON } from './constants.js'
 import { NoBinScriptError, NoWorkspaceError } from './error.js'
 import { hrLabel, hrPath } from './format.js'
-import { isExecutableSymlink, isReadableFileSync, realpathSync } from './fs.js'
+import {
+  isExecutablePathSync,
+  isExecutableSymlink,
+  isReadableFileSync,
+  realpathSync,
+} from './fs.js'
 import { log } from './log.js'
 import { toPath } from './util.js'
+import readCmdShim from 'read-cmd-shim'
 
 /**
  * @import {ResolveBinScriptOptions, ResolveEntrypointOptions, ResolveWorkspaceOptions} from './internal.js'
@@ -103,7 +109,7 @@ export const resolveBinScript = (
     )
   }
   let current = workspace
-   
+
   while (true) {
     const maybeBinDir = path.join(current, 'node_modules', '.bin')
     const niceBinDir = hrPath(maybeBinDir)
@@ -116,6 +122,19 @@ export const resolveBinScript = (
         `Found executable ${niceBin} in ${niceBinDir} linked from ${niceRealBinPath}`
       )
       return realBinPath
+    } else if (isExecutablePathSync(maybeBinPath, { fs })) {
+      try {
+        const binPath = readCmdShim.sync(maybeBinPath)
+        const realBinPath = realpathSync(path.join(maybeBinDir, binPath), {
+          fs,
+        })
+        log.debug(
+          `Found executable ${hrPath(realBinPath)} linked from ${hrPath(maybeBinPath)}`
+        )
+        return realBinPath
+      } catch {
+        // readCmdShim throws ENOTASHIM if a file exists but is not a recognizable shim
+      }
     }
 
     /** @type {string} */
