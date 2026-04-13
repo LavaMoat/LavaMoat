@@ -10,8 +10,9 @@ const {
 } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { checkForResolutionOverride } = require('./resolutions')
-const { resolutionOmittedExtensions } = require('./parseForPolicy')
 const { createFreshRealmCompartment } = require('./freshRealmCompartment')
+const { makeResolver } = require('./resolve')
+
 const noop = () => {}
 
 const nativeRequire = require
@@ -88,9 +89,10 @@ function prepareModuleInitializerArgs(
 }
 
 function createModuleResolver({ projectRoot, resolutions, canonicalNameMap }) {
+  const resolver = makeResolver({ projectRoot })
   return function getRelativeModuleId(parentAbsolutePath, requestedName) {
     // handle resolution overrides
-    let parentDir = path.dirname(parentAbsolutePath)
+    const parentDir = path.dirname(parentAbsolutePath)
     const parentPackageName = getPackageNameForModulePath(
       canonicalNameMap,
       parentDir
@@ -104,22 +106,18 @@ function createModuleResolver({ projectRoot, resolutions, canonicalNameMap }) {
       requestedName = result
       // if path is a relative path, it should be relative to the projectRoot
       if (!path.isAbsolute(result)) {
-        parentDir = projectRoot
+        const parentFileName = path.basename(parentAbsolutePath)
+        parentAbsolutePath = path.join(projectRoot, parentFileName)
       }
     }
-    // resolve normally
-    const resolved = resolve.sync(requestedName, {
-      basedir: parentDir,
-      extensions: resolutionOmittedExtensions,
-    })
-    return resolved
+    return resolver(requestedName, parentAbsolutePath)
   }
 }
 
 function createModuleLoader({ canonicalNameMap }) {
   const memo = new Map()
   return function loadModuleData(absolutePath) {
-    if( memo.has(absolutePath)) {
+    if (memo.has(absolutePath)) {
       return memo.get(absolutePath)
     }
     // load builtin modules (eg "fs")
@@ -205,7 +203,6 @@ function createModuleLoader({ canonicalNameMap }) {
         absolutePath
       )
       const moduleData = {
-
         type: 'js',
         file: absolutePath,
         package: packageName,
