@@ -196,3 +196,26 @@ test('policy - package with falsy main field', async (t) => {
     },
   })
 })
+
+const testOptInOnly = process.env.LAVAMOAT_RESOLVE_NATIVE ? test : test.failing
+
+testOptInOnly(
+  'execute - choosing the right resolve implementation',
+  async (t) => {
+    // resolve-compat is equivalent of project 3 but with a mix of different resolution difficulties
+    const projectRoot = path.join(__dirname, 'projects', 'resolve-compat')
+    const entryId = path.join(projectRoot, 'index.js')
+    const { output } = await runLavamoat({
+      cwd: projectRoot,
+      args: [entryId],
+    })
+    t.deepEqual(
+      output.stdout.split('\n'),
+      [
+        'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
+        '',
+      ],
+      'should not have any standard output'
+    )
+  }
+)

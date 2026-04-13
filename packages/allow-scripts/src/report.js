@@ -40,13 +40,11 @@ function printMissingPoliciesIfAny({
  * @param {BinsConfig} param0
  */
 function printPackagesByBins({ allowedBins, excessPolicies }) {
-  console.log('\n# allowed packages with bin scripts')
   if (allowedBins.length) {
+    console.log('\n# allowed packages with bin scripts')
     allowedBins.forEach(({ canonicalName, bin }) => {
       console.log(`- ${canonicalName} [${bin}]`)
     })
-  } else {
-    console.log('  (none)')
   }
 
   if (excessPolicies.length) {
@@ -69,42 +67,56 @@ function printPackagesByScriptConfiguration({
   missingPolicies,
   excessPolicies,
 }) {
-  console.log('\n# allowed packages with lifecycle scripts')
+  /**
+   * @param {string} pattern
+   */
+  const markUnused = (pattern) => {
+    if (excessPolicies.includes(pattern)) {
+      return `${pattern} \t (!) no matching package with lifecycle scripts installed`
+    }
+    return pattern
+  }
+  console.log('\n# allowed packages')
   if (allowedPatterns.length) {
-    allowedPatterns.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+    console.log(`- ${allowedPatterns.map(markUnused).join('\n- ')}\n`)
   } else {
     console.log('  (none)')
   }
 
-  console.log('\n# disallowed packages with lifecycle scripts')
+  console.log('\n# disallowed packages')
   if (disallowedPatterns.length) {
-    disallowedPatterns.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+    console.log(`- ${disallowedPatterns.map(markUnused).join('\n- ')}\n`)
   } else {
     console.log('  (none)')
   }
 
+  console.log('\n# unconfigured packages')
   if (missingPolicies.length) {
-    console.log('\n# unconfigured packages with lifecycle scripts')
-    missingPolicies.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+    console.log(`- ${missingPolicies.join('\n- ')}\n`)
+  } else {
+    console.log('  (none)')
   }
 
+  console.log(
+    `\n# packages on the allowlist that don't match any installed packages with lifecycle scripts`
+  )
   if (excessPolicies.length) {
-    console.log(
-      '\n# packages with lifecycle scripts that no longer need configuration due to package or scripts removal'
-    )
-    excessPolicies.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
+    console.log(`- ${excessPolicies.join('\n- ')}\n`)
+  } else {
+    console.log('  (none)')
+  }
+
+  console.log(
+    '\n# all packages with lifecycle scripts found in dependencies (configured and unconfigured)'
+  )
+  if (packagesWithScripts.size) {
+    Array.from(packagesWithScripts.entries()).forEach(([pattern, pkgs]) => {
+      console.log(
+        `- ${pattern} \n\t${pkgs.map(({ path }) => path).join('\n\t')}`
+      )
     })
+  } else {
+    console.log('  (none)')
   }
 }
 

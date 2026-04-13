@@ -1,0 +1,11 @@
+{
+  "name": "test-resolve-compat",
+  "scripts": {
+    "setup": "exit 0"
+  },
+  "dependencies": {
+    "a": "file:./node-modules/a/a-1.0.0.tgz",
+    "b": "file:../3/node-modules/b"
+  },
+  "packageManager": "yarn@1.22.22"
+}

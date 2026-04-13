@@ -45,7 +45,7 @@
     "webpack": "^5.80.2"
   },
   "dependencies": {
-    "@babel/parser": "7.28.3",
+    "@babel/parser": "7.29.2",
     "@lavamoat/aa": "^5.0.0",
     "@lavamoat/types": "^1.0.0",
     "browser-resolve": "2.0.0",
@@ -54,11 +54,11 @@
     "ses": "1.15.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "7.27.2",
-    "@babel/preset-typescript": "7.27.1",
+    "@babel/preset-env": "7.29.2",
+    "@babel/preset-typescript": "7.28.5",
     "@jsonjoy.com/fs-snapshot": "4.57.1",
     "@types/browser-resolve": "2.0.5",
-    "babel-loader": "10.0.0",
+    "babel-loader": "10.1.1",
     "css-loader": "7.1.4",
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.6.6",

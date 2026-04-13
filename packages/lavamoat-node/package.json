@@ -32,13 +32,14 @@
   ],
   "scripts": {
     "lint:deps": "depcheck",
-    "test": "npm run test:npm && npm run test:yarn1",
+    "test": "npm run test:npm; npm run test:yarn1; npm run test:resolve",
     "test:npm": "npm run test:prepare && ava",
+    "test:resolve": "cross-env LAVAMOAT_RESOLVE_NATIVE=1 npm run test:npm",
     "test:prepare": "node ./test/prepare.js",
     "test:yarn1": "cross-env COREPACK_ENABLE_PROJECT_SPEC=0 LAVAMOAT_PM=yarn@1 npm run test:prepare && cross-env COREPACK_ENABLE_PROJECT_SPEC=0 ava"
   },
   "dependencies": {
-    "@babel/code-frame": "7.27.1",
+    "@babel/code-frame": "7.29.0",
     "@babel/highlight": "7.25.9",
     "@lavamoat/aa": "^5.0.0",
     "bindings": "1.5.0",
