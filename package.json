@@ -60,7 +60,7 @@
     "eslint-plugin-node-import": "1.2.0",
     "expect-type": "1.2.2",
     "glob": "11.1.0",
-    "globals": "17.3.0",
+    "globals": "17.5.0",
     "husky": "9.1.7",
     "lint-staged": "16.1.6",
     "memfs": "4.57.1",
