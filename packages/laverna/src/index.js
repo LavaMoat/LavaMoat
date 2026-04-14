@@ -1,12 +1,13 @@
-const path = require('node:path')
-const { INFO, ERR, WARN, OK } = require('./log-symbols')
-const { yellow, bold, gray } = require('kleur')
-const {
-  DEFAULT_SPAWN_OPTS,
-  DEFAULT_GLOB_OPTS,
+import { colors } from '@lavamoat/vog'
+import path from 'node:path'
+import {
   DEFAULT_CAPS,
+  DEFAULT_GLOB_OPTS,
   DEFAULT_OPTS,
-} = require('./defaults')
+  DEFAULT_SPAWN_OPTS,
+} from './defaults.js'
+import { ERR, INFO, OK, WARN } from './log-symbols.js'
+const { yellow, bold, gray } = colors
 
 /**
  * @param {unknown} arr
@@ -19,12 +20,12 @@ function isStringArray(arr) {
 /**
  * Main class
  */
-exports.Laverna = class Laverna {
+export class Laverna {
   /**
    * Initializes options & capabilities
    *
-   * @param {import('./types').LavernaOptions} [opts]
-   * @param {import('./types').LavernaCapabilities} [caps]
+   * @param {import('./types.js').LavernaOptions} [opts]
+   * @param {import('./types.js').LavernaCapabilities} [caps]
    */
   constructor(opts = {}, caps = {}) {
     this.opts = { ...DEFAULT_OPTS, ...opts }
@@ -54,7 +55,7 @@ exports.Laverna = class Laverna {
   /**
    * Invoke `npm publish`
    *
-   * @type {import('./types').InvokePublish}
+   * @type {import('./types.js').InvokePublish}
    */
   async defaultInvokePublish(pkgs) {
     const { dryRun, root: cwd } = this.opts
@@ -111,7 +112,7 @@ exports.Laverna = class Laverna {
   /**
    * Default implementation of a {@link GetVersions} function.
    *
-   * @type {import('./types').GetVersions}
+   * @type {import('./types.js').GetVersions}
    */
   async defaultGetVersions(name, cwd) {
     const { execFile, parseJson, console } = this.caps
@@ -129,7 +130,7 @@ exports.Laverna = class Laverna {
       ).then(({ stdout }) => stdout.trim())
     } catch (e) {
       if (/** @type {NodeJS.ErrnoException} */ (e).code === 'ENOENT') {
-        throw new Error(`Could not find npm: ${e}`)
+        throw new Error(`Could not find npm: ${e}`, { cause: e })
       }
       if (newPkg.includes(name)) {
         console.error(
@@ -163,7 +164,8 @@ exports.Laverna = class Laverna {
           throw new Error(
             `Querying for package ${Laverna.pkgToString(
               name
-            )} failed (${errJson.error.summary.trim()}). Missing --newPkg=${name}?`
+            )} failed (${errJson.error.summary.trim()}). Missing --newPkg=${name}?`,
+            { cause: e }
           )
         }
         throw err
@@ -222,7 +224,8 @@ exports.Laverna = class Laverna {
       rootPkgJsonContents = await fs.readFile(rootPkgJsonPath)
     } catch (err) {
       throw new Error(
-        `Could not read package.json in workspace root ${cwd}: ${err}`
+        `Could not read package.json in workspace root ${cwd}: ${err}`,
+        { cause: err }
       )
     }
     const relativePkgJsonPath = this.relPath(rootPkgJsonPath)
@@ -249,7 +252,7 @@ exports.Laverna = class Laverna {
     }
 
     /**
-     * @type {import('./types').GlobDirent[]}
+     * @type {import('./types.js').GlobDirent[]}
      * @see {@link https://github.com/isaacs/node-glob/issues/551}
      */
     const dirents = await glob(workspaces, {
@@ -397,7 +400,7 @@ exports.Laverna = class Laverna {
     console.error(
       `${INFO} ${yellow(
         `These package(s) will be published:`
-      )}\n${nameVersionPairs.join('\n')}`
+      )}\n${nameVersionPairs.sort().join('\n')}`
     )
 
     if (this.opts.yes || (await this.confirm())) {
