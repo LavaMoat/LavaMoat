@@ -26,11 +26,11 @@ const versionAwareMatcher = (allowConfig) => {
   const knownNames = new Set()
   const knownPatternsWithVersion = new Set()
 
-  for (const [pattern] of Object.entries(allowConfig)) {
+  for (const [pattern, value] of Object.entries(allowConfig)) {
     const [name, version] = pattern.split('#')
     if (version) {
       knownPatternsWithVersion.add(pattern)
-    } else {
+    } else if (!value) {
       knownNames.add(name)
     }
   }
@@ -42,7 +42,10 @@ const versionAwareMatcher = (allowConfig) => {
      * @param {string} patternToCheck
      * @returns {boolean}
      */
-    isKnown: (patternToCheck) => {
+    isCorrectlyConfigured: (patternToCheck) => {
+      if (patternToCheck === ROOT_CANONICAL_NAME) {
+        return true
+      }
       const [nameToCheck] = patternToCheck.split('#')
       return (
         knownNames.has(nameToCheck) ||
@@ -232,6 +235,80 @@ async function getOptionsForBin({
 }
 
 /**
+ * @param {object} params
+ * @param {ScriptsConfig} params.lifecycle
+ * @param {boolean} params.skipVersions
+ * @returns {{ changed: boolean; logs: string[] }} Whether any changes were made
+ *   and the logs describing the changes
+ */
+function applyMigrations({ lifecycle, skipVersions }) {
+  let changed = false
+  /** @type {string[]} */
+  const logs = []
+  /**
+   * Updates the allowConfig entry for the old pattern to the new pattern,
+   * keeping the same value. Marks config as changed if an update was made.
+   *
+   * @param {string} oldPattern
+   * @param {string} newPattern
+   */
+  function updateAllowConfigVersion(oldPattern, newPattern) {
+    logs.push(`Updating allowlist entry "${oldPattern}" to "${newPattern}"`)
+    lifecycle.allowConfig[newPattern] = lifecycle.allowConfig[oldPattern]
+    delete lifecycle.allowConfig[oldPattern]
+    changed = true
+  }
+
+  if (!skipVersions) {
+    // one-time migration to add versions to previously allowed entries
+    lifecycle.allowedPatterns
+      .filter((pattern) => !pattern.includes('#'))
+      .forEach((pattern) => {
+        const matchingKey = lifecycle.missingPolicies.find((key) =>
+          key.startsWith(`${pattern}#`)
+        )
+        if (matchingKey) {
+          updateAllowConfigVersion(pattern, matchingKey)
+        }
+      })
+    lifecycle.excessPolicies.forEach((pattern) => {
+      if (lifecycle.allowConfig[pattern] === false) {
+        // if a pattern with version number is in excess policies, it means the version is absent, so it can be removed
+        logs.push(
+          `Removing allowlist entry "${pattern}" since it no longer matches dependencies`
+        )
+        delete lifecycle.allowConfig[pattern]
+        changed = true
+      } else if (pattern.includes('#')) {
+        // allowed package is in excessPolicies, which means it needs a version update.
+        const [name] = pattern.split('#')
+        const matchingKey = Array.from(
+          lifecycle.packagesWithScripts.keys()
+        ).find((key) => key.startsWith(`${name}#`))
+        if (matchingKey && lifecycle.missingPolicies.includes(matchingKey)) {
+          updateAllowConfigVersion(pattern, matchingKey)
+        }
+      }
+    })
+  }
+
+  lifecycle.missingPolicies.forEach((pattern) => {
+    if (skipVersions) {
+      pattern = pattern.split('#')[0]
+    }
+    // avoid overriding what has been migrated
+    if (lifecycle.allowConfig[pattern] === true) {
+      return
+    }
+    logs.push(`Adding lifecycle ${pattern}`)
+    lifecycle.allowConfig[pattern] = false
+    changed = true
+  })
+
+  return { changed, logs }
+}
+
+/**
  * @param {SetDefaultConfigurationParams} params
  */
 async function setDefaultConfiguration({
@@ -252,41 +329,18 @@ async function setDefaultConfiguration({
   console.log('\n@lavamoat/allow-scripts automatically updating configuration')
   let changed = false
 
-  if (somePoliciesAreMissing) {
-    lifecycle.missingPolicies.forEach((pattern) => {
-      console.log(`Adding lifecycle ${pattern}`)
-      if (skipVersions) {
-        pattern = pattern.split('#')[0]
-      }
-      lifecycle.allowConfig[pattern] = false
-      changed = true
-    })
-  }
+  const { changed: migrationsChanged, logs } = applyMigrations({
+    lifecycle,
+    skipVersions,
+  })
+  changed = migrationsChanged || changed
+  logs.forEach((log) => console.log(log))
 
-  if (!skipVersions) {
-    // one-time migration to add versions to previously allowed entries
-    lifecycle.excessPolicies.forEach((pattern) => {
-      if (!pattern.includes('#')) {
-        const matchingKey = Object.keys(lifecycle.allowConfig).find((key) =>
-          key.startsWith(`${pattern}#`)
-        )
-        if (matchingKey && lifecycle.allowConfig[pattern] === true) {
-          console.log(
-            `Updating allowlist entry "${pattern}" to include version: "${matchingKey}"`
-          )
-          lifecycle.allowConfig[matchingKey] = true
-          delete lifecycle.allowConfig[pattern]
-          changed = true
-        }
-      } else if (lifecycle.allowConfig[pattern] === false) {
-        // if a pattern with version number is in excess policies, it means the version is absent, so it can be removed
-        console.log(
-          `Removing allowlist entry "${pattern}" since it no longer matches dependencies`
-        )
-        delete lifecycle.allowConfig[pattern]
-        changed = true
-      }
-    })
+  if (somePoliciesAreMissing && !changed) {
+    // should not be possible
+    console.log(
+      '\nSome packages with scripts are missing from the configuration, but no automatic migrations were applicable. You can run "allow-scripts auto" again to apply migrations after manually adding missing packages to the configuration.'
+    )
   }
 
   if (FEATURE.bins && bin.somePoliciesAreMissing) {
@@ -365,7 +419,7 @@ function indexLifecycleConfiguration(config) {
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
 
-  const { isKnown } = versionAwareMatcher(config.allowConfig)
+  const { isCorrectlyConfigured } = versionAwareMatcher(config.allowConfig)
   // select allowed + disallowed
   config.allowedPatterns = Object.entries(config.allowConfig)
     .filter(([, packageData]) => !!packageData)
@@ -377,7 +431,7 @@ function indexLifecycleConfiguration(config) {
 
   config.missingPolicies = Array.from(
     config.packagesWithScripts.keys() ?? []
-  ).filter((pattern) => !isKnown(pattern))
+  ).filter((pattern) => !isCorrectlyConfigured(pattern))
 
   const packagesWithScriptsNoVersion = Array.from(
     config.packagesWithScripts.keys()
@@ -454,4 +508,5 @@ module.exports = {
   loadAllPackageConfigurations,
   setDefaultConfiguration,
   versionAwareMatcher,
+  applyMigrations,
 }

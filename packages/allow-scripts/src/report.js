@@ -3,7 +3,7 @@
  *
  * @module
  */
-const { loadAllPackageConfigurations } = require('./config.js')
+const { loadAllPackageConfigurations, applyMigrations } = require('./config.js')
 
 /**
  * @param {PrintPackagesListParams} params
@@ -66,6 +66,7 @@ function printPackagesByScriptConfiguration({
   disallowedPatterns,
   missingPolicies,
   excessPolicies,
+  allowConfig,
 }) {
   /**
    * @param {string} pattern
@@ -117,6 +118,26 @@ function printPackagesByScriptConfiguration({
     })
   } else {
     console.log('  (none)')
+  }
+
+  const lifecycleDeepCopy = {
+    packagesWithScripts: new Map(packagesWithScripts),
+    allowedPatterns: [...allowedPatterns],
+    disallowedPatterns: [...disallowedPatterns],
+    missingPolicies: [...missingPolicies],
+    excessPolicies: [...excessPolicies],
+    allowConfig: JSON.parse(JSON.stringify(allowConfig)),
+  }
+
+  const { changed, logs } = applyMigrations({
+    lifecycle: lifecycleDeepCopy,
+    skipVersions: false,
+  })
+  if (changed || logs.length > 0) {
+    console.log(
+      '\n# in the current state, allow-scripts auto would apply the following migrations:',
+      logs
+    )
   }
 }
 
