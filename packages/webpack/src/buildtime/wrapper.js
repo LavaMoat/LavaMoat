@@ -55,7 +55,7 @@ function applySesTransforms(originalSource) {
   // ReplaceSource from webpack's generator) have internal positions that don't
   // correspond to their flattened string output.
   const { source, map } = originalSource.sourceAndMap()
-  const sourceStr = typeof source === 'string' ? source : source.toString()
+  const sourceStr = source.toString()
   const flatSource = map
     ? new SourceMapSource(sourceStr, 'lavamoat-ses-transforms', map)
     : new RawSource(sourceStr)
