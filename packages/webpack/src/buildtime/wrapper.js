@@ -2,7 +2,7 @@ const diag = require('./diagnostics')
 const fs = require('node:fs')
 const q = JSON.stringify
 const {
-  sources: { ReplaceSource },
+  sources: { ReplaceSource, SourceMapSource, RawSource },
 } = require('webpack')
 
 /**
@@ -47,14 +47,21 @@ const evalPattern = /\beval(\s*\()/g
  *
  * @param {Source} originalSource - The original webpack source object with
  *   sourcemap
- * @returns {{ source: Source; sourceStr: string; sourceChanged: boolean }}
+ * @returns {{ source: Source; sourceStr: string }}
  */
 function applySesTransforms(originalSource) {
-  const sourceStr = originalSource.source().toString()
-  let sourceChanged = false
+  // Flatten the source so that character positions from .source() output match
+  // what ReplaceSource expects. Without this, compound sources (e.g. a
+  // ReplaceSource from webpack's generator) have internal positions that don't
+  // correspond to their flattened string output.
+  const { source, map } = originalSource.sourceAndMap()
+  const sourceStr = typeof source === 'string' ? source : source.toString()
+  const flatSource = map
+    ? new SourceMapSource(sourceStr, 'lavamoat-ses-transforms', map)
+    : new RawSource(sourceStr)
   let match
 
-  const replaceSource = new ReplaceSource(originalSource)
+  const replaceSource = new ReplaceSource(flatSource)
 
   // evadeHtmlCommentTest: <!-- → < ! -- and --> → -- >
   htmlCommentPattern.lastIndex = 0
@@ -65,7 +72,6 @@ function applySesTransforms(originalSource) {
       match.index + match[0].length - 1,
       replacement
     )
-    sourceChanged = true
   }
 
   // evadeImportExpressionTest: import → __import__ (preserve trailing whitespace/paren)
@@ -73,7 +79,6 @@ function applySesTransforms(originalSource) {
   while ((match = importPattern.exec(sourceStr)) !== null) {
     // Only replace the 'import' keyword (6 chars), keep the capture group
     replaceSource.replace(match.index, match.index + 5, '__import__')
-    sourceChanged = true
   }
 
   // evadeDirectEvalExpressions: eval → (0,eval) (preserve trailing whitespace/paren)
@@ -81,13 +86,11 @@ function applySesTransforms(originalSource) {
   while ((match = evalPattern.exec(sourceStr)) !== null) {
     // Only replace the 'eval' keyword (4 chars), keep the capture group
     replaceSource.replace(match.index, match.index + 3, '(0,eval)')
-    sourceChanged = true
   }
 
   return {
-    source: sourceChanged ? replaceSource : originalSource,
-    sourceStr: sourceChanged ? replaceSource.source().toString() : sourceStr,
-    sourceChanged,
+    source: replaceSource,
+    sourceStr: replaceSource.source().toString(),
   }
 }
 
@@ -97,7 +100,6 @@ function applySesTransforms(originalSource) {
  *   before: string
  *   after: string
  *   source: Source
- *   sourceChanged: boolean
  * }}
  */
 exports.wrapper = function wrapper({
@@ -110,11 +112,8 @@ exports.wrapper = function wrapper({
 }) {
   const runtimeKitArray = Array.from(runtimeKit)
 
-  const {
-    source: transformedSource,
-    sourceStr,
-    sourceChanged,
-  } = applySesTransforms(source)
+  const { source: transformedSource, sourceStr: sesCompatibleStr } =
+    applySesTransforms(source)
 
   // This adds support for mapping `this` to `exports` or `module.exports` if webpack detected it's necessary
   let optionalBinding = ''
@@ -151,13 +150,12 @@ exports.wrapper = function wrapper({
     ','
   )}}))${optionalBinding}()`
   if (runChecks) {
-    validateSource(sourceStr)
+    validateSource(sesCompatibleStr)
   }
   return {
     before,
     after,
     source: transformedSource,
-    sourceChanged,
   }
 }
 
