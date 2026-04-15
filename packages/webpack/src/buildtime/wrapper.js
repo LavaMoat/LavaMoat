@@ -43,6 +43,7 @@ const evalPattern = /\beval(\s*\()/g
  * This re-implements the same replacements as lavamoat-core's
  * applySourceTransforms and evadeDirectEvalExpressions, but operates on
  * positional replacements so that webpack's sourcemap pipeline can track the
+ * exact character offsets.
  *
  * @param {Source} originalSource - The original webpack source object with
  *   sourcemap
