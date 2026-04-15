@@ -1,7 +1,9 @@
-const { applySourceTransforms } = require('lavamoat-core')
 const diag = require('./diagnostics')
 const fs = require('node:fs')
 const q = JSON.stringify
+const {
+  sources: { ReplaceSource },
+} = require('webpack')
 
 /**
  * Flags enabling runtime features based on webpack's runtime requirements.
@@ -11,8 +13,11 @@ const q = JSON.stringify
  * @property {boolean} [thisAsExports]
  */
 /**
+ * @typedef {import('webpack').sources.Source} Source
+ */
+/**
  * @typedef {object} WrappingInput
- * @property {string} source
+ * @property {Source} source
  * @property {string} id
  * @property {string[] | Set<string>} runtimeKit
  * @property {string} evalKitFunctionName
@@ -26,12 +31,71 @@ const {
   NAME_runtimeHandler,
 } = require('../ENUM.json')
 
+// Regex patterns matching those used by lavamoat-core's applySourceTransforms
+// and evadeDirectEvalExpressions. These must be kept in sync.
+// Ideally we should import these from lavamoat-core.
+const htmlCommentPattern = /(?:<!--|-->)/g
+const importPattern = /\bimport(\s*(?:\(|\/[/*]))/g
+const evalPattern = /\beval(\s*\()/g
+
+/**
+ * Applies SES source transforms using ReplaceSource to preserve sourcemap data.
+ * This re-implements the same replacements as lavamoat-core's
+ * applySourceTransforms and evadeDirectEvalExpressions, but operates on
+ * positional replacements so that webpack's sourcemap pipeline can track the
+ *
+ * @param {Source} originalSource - The original webpack source object with
+ *   sourcemap
+ * @returns {{ source: Source; sourceStr: string; sourceChanged: boolean }}
+ */
+function applySesTransforms(originalSource) {
+  const sourceStr = originalSource.source().toString()
+  let sourceChanged = false
+  let match
+
+  const replaceSource = new ReplaceSource(originalSource)
+
+  // evadeHtmlCommentTest: <!-- → < ! -- and --> → -- >
+  htmlCommentPattern.lastIndex = 0
+  while ((match = htmlCommentPattern.exec(sourceStr)) !== null) {
+    const replacement = match[0][0] === '<' ? '< ! --' : '-- >'
+    replaceSource.replace(
+      match.index,
+      match.index + match[0].length - 1,
+      replacement
+    )
+    sourceChanged = true
+  }
+
+  // evadeImportExpressionTest: import → __import__ (preserve trailing whitespace/paren)
+  importPattern.lastIndex = 0
+  while ((match = importPattern.exec(sourceStr)) !== null) {
+    // Only replace the 'import' keyword (6 chars), keep the capture group
+    replaceSource.replace(match.index, match.index + 5, '__import__')
+    sourceChanged = true
+  }
+
+  // evadeDirectEvalExpressions: eval → (0,eval) (preserve trailing whitespace/paren)
+  evalPattern.lastIndex = 0
+  while ((match = evalPattern.exec(sourceStr)) !== null) {
+    // Only replace the 'eval' keyword (4 chars), keep the capture group
+    replaceSource.replace(match.index, match.index + 3, '(0,eval)')
+    sourceChanged = true
+  }
+
+  return {
+    source: sourceChanged ? replaceSource : originalSource,
+    sourceStr: sourceChanged ? replaceSource.source().toString() : sourceStr,
+    sourceChanged,
+  }
+}
+
 /**
  * @param {WrappingInput} params
  * @returns {{
  *   before: string
  *   after: string
- *   source: string
+ *   source: Source
  *   sourceChanged: boolean
  * }}
  */
@@ -44,11 +108,12 @@ exports.wrapper = function wrapper({
   runtimeFlags = {},
 }) {
   const runtimeKitArray = Array.from(runtimeKit)
-  // validateSource(source);
 
-  // No AST used in these transforms, so string comparison should indicate if anything was changed.
-  const sesCompatibleSource = applySourceTransforms(source)
-  const sourceChanged = source !== sesCompatibleSource
+  const {
+    source: transformedSource,
+    sourceStr,
+    sourceChanged,
+  } = applySesTransforms(source)
 
   // This adds support for mapping `this` to `exports` or `module.exports` if webpack detected it's necessary
   let optionalBinding = ''
@@ -85,12 +150,12 @@ exports.wrapper = function wrapper({
     ','
   )}}))${optionalBinding}()`
   if (runChecks) {
-    validateSource(sesCompatibleSource)
+    validateSource(sourceStr)
   }
   return {
     before,
     after,
-    source: sesCompatibleSource,
+    source: transformedSource,
     sourceChanged,
   }
 }

@@ -3,7 +3,7 @@
 /** @typedef {import('webpack').sources.Source} Source */
 
 const {
-  sources: { ConcatSource, SourceMapSource },
+  sources: { ConcatSource },
 } = require('webpack')
 const { wrapper } = require('./wrapper.js')
 const diag = require('./diagnostics.js')
@@ -173,12 +173,8 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           module
         )
 
-        const { before, after, source, sourceChanged } = wrapper({
-          // There's probably a good reason why webpack stores source in those objects instead
-          // of strings. Turning it into a string here might mean we're loosing some caching.
-          // Wrapper checks if transforms changed the source and indicates it, so that we can
-          // decide if we want to keep the original object representing it.
-          source: originalGeneratedSource.source().toString(),
+        const { before, after, source } = wrapper({
+          source: originalGeneratedSource,
           id: packageId,
           runtimeKit,
           runChecks,
@@ -189,31 +185,11 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
         diag.rawDebug(4, {
           packageId,
           requirements: options.runtimeRequirements,
-          sourceChanged,
         })
 
         PROGRESS.report('generatorCalled')
 
-        // using this in webpack.config.ts complained about made up issues
-        if (sourceChanged) {
-          // Preserve the original sourcemap even when SES source transforms
-          // modify the code. Without this, chunks containing only transformed
-          // modules lose all sourcemap data, causing webpack to skip .map file
-          // generation entirely for those chunks.
-          const originalMap =
-            originalGeneratedSource.map && originalGeneratedSource.map()
-          if (originalMap) {
-            const sourceWithMap = new SourceMapSource(
-              source,
-              originalMap.file || 'lavamoat-transformed',
-              originalMap
-            )
-            return new ConcatSource(before, sourceWithMap, after)
-          }
-          return new ConcatSource(before, source, after)
-        } else {
-          return new ConcatSource(before, originalGeneratedSource, after)
-        }
+        return new ConcatSource(before, source, after)
       }
       wrappedGeneratorInstances.add(generator)
       return generator
