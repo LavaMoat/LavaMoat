@@ -154,8 +154,8 @@ exports.wrapper = function wrapper({
   }
   return {
     before,
-    after,
     source: transformedSource,
+    after,
   }
 }
 

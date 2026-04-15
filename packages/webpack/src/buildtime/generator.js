@@ -173,7 +173,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           module
         )
 
-        const { before, after, source } = wrapper({
+        const { before, source, after } = wrapper({
           source: originalGeneratedSource,
           id: packageId,
           runtimeKit,
