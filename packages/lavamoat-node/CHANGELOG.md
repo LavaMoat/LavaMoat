@@ -19,6 +19,26 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [11.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.0.1...lavamoat-v11.1.0) (2026-04-15)
+
+
+### Features
+
+* **lavamoat-node:** modernize resolve in lavamoat classic, opt-in only ([#1928](https://github.com/LavaMoat/LavaMoat/issues/1928)) ([21f8d97](https://github.com/LavaMoat/LavaMoat/commit/21f8d97ad73a314f9034c7ec303067924ea0b91f))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([#1680](https://github.com/LavaMoat/LavaMoat/issues/1680)) ([9739051](https://github.com/LavaMoat/LavaMoat/commit/973905160650c659b567088aeef9c44ec814fd7c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.1 to ^18.0.2
+    * lavamoat-tofu bumped from ^9.0.0 to ^9.0.1
+
 ## [11.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.0.0...lavamoat-v11.0.1) (2026-04-02)
 
 
