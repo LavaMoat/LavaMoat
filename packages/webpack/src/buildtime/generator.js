@@ -3,7 +3,7 @@
 /** @typedef {import('webpack').sources.Source} Source */
 
 const {
-  sources: { ConcatSource },
+  sources: { ConcatSource, SourceMapSource },
 } = require('webpack')
 const { wrapper } = require('./wrapper.js')
 const diag = require('./diagnostics.js')
@@ -196,6 +196,20 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
 
         // using this in webpack.config.ts complained about made up issues
         if (sourceChanged) {
+          // Preserve the original sourcemap even when SES source transforms
+          // modify the code. Without this, chunks containing only transformed
+          // modules lose all sourcemap data, causing webpack to skip .map file
+          // generation entirely for those chunks.
+          const originalMap =
+            originalGeneratedSource.map && originalGeneratedSource.map()
+          if (originalMap) {
+            const sourceWithMap = new SourceMapSource(
+              source,
+              originalMap.file || 'lavamoat-transformed',
+              originalMap
+            )
+            return new ConcatSource(before, sourceWithMap, after)
+          }
           return new ConcatSource(before, source, after)
         } else {
           return new ConcatSource(before, originalGeneratedSource, after)
