@@ -11,6 +11,7 @@ import { readFileSync } from 'node:fs'
 import eslintJs from '@eslint/js'
 import prettierConfig from 'eslint-config-prettier/flat'
 import avaPlugin from 'eslint-plugin-ava'
+import jsonSchemaValidatorPlugin from 'eslint-plugin-json-schema-validator'
 import jsoncPlugin from 'eslint-plugin-jsonc'
 import nodePlugin from 'eslint-plugin-n'
 import nodeImportPlugin from 'eslint-plugin-node-import'
@@ -486,6 +487,9 @@ export default defineConfig(
     ...config,
     files: ['**/tsconfig*.json', '**/*.json5', '**/*.jsonc'],
   })),
+
+  // Schema validation across YAML, TOML, JSON, JSONC, JSON5
+  ...jsonSchemaValidatorPlugin.configs.recommended,
 
   // ---------------------------------------------------------------------------
   // 8. Prettier (must be last to override conflicting rules)
