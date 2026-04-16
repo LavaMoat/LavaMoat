@@ -6,6 +6,20 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [5.0.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.0...allow-scripts-v5.0.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **allow-scripts:** fix migration logic for v5 ([62f17b4](https://github.com/LavaMoat/LavaMoat/commit/62f17b4e7c2a363cc11410b69c30708f97d320c1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.0 to ^5.0.1
+
 ## [5.0.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v4.0.0...allow-scripts-v5.0.0) (2026-04-15)
 
 

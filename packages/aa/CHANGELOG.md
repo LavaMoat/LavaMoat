@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/LavaMoat/LavaMoat/compare/aa-v5.0.0...aa-v5.0.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency resolve to v1.22.12 ([#1951](https://github.com/LavaMoat/LavaMoat/issues/1951)) ([4a06108](https://github.com/LavaMoat/LavaMoat/commit/4a06108834c81c3526385fc4578a44e19caab1cd))
+
 ## [5.0.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.6...aa-v5.0.0) (2026-03-20)
 
 
