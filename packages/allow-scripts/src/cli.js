@@ -3,7 +3,7 @@
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const runAllowedPackages = require('./runAllowedPackages.js')
-const { printPackagesList } = require('./report.js')
+const { printPackagesList, checkPackagesList } = require('./report.js')
 const { setDefaultConfiguration } = require('./config.js')
 const { editPackageJson, writeRcFile } = require('./setup.js')
 const { FEATURE } = require('./toggles.js')
@@ -36,6 +36,11 @@ async function start() {
     case 'list':
     case 'debug': {
       await printPackagesList({ rootDir })
+      return
+    }
+    // list packages
+    case 'check': {
+      await checkPackagesList({ rootDir, skipVersions })
       return
     }
     case 'setup': {
