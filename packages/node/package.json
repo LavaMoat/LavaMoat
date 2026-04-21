@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@babel/parser": "7.29.2",
-    "@endo/compartment-mapper": "2.0.0",
+    "@endo/compartment-mapper": "2.1.0",
     "@endo/evasive-transform": "2.1.0",
     "@lavamoat/types": "^1.0.1",
     "@types/node": "20.19.39",
