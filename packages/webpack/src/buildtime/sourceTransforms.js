@@ -1,7 +1,7 @@
 /** @typedef {import('webpack').sources.Source} Source */
 
 const {
-  sources: { ReplaceSource },
+  sources: { ReplaceSource, SourceMapSource },
 } = require('webpack')
 
 /**
@@ -83,9 +83,41 @@ function applyReplaceTransforms(webpackSource, sourceString, transforms) {
   return replaceSource
 }
 
+/**
+ * Uses @endo/evasive-transform to apply transforms and takes care of preserving
+ * the sourcemaps correctness. This is more expensive than the simple string
+ * replacement approach, so the implementation is provided solely for the
+ * purpose of comparative performance testing for now.
+ *
+ * @param {Source} webpackSource - The original webpack Source object
+ * @param {string} sourceString - The already-extracted source string
+ * @param {TransformEntry[]} _transforms - Unused, evadeCensorSync applies its
+ *   own transforms
+ * @returns {Source}
+ */
+function applyReplaceTransformsBabel(webpackSource, sourceString, _transforms) {
+  // Lazy require to avoid loading Babel when this path isn't used
+  const { evadeCensorSync } = require('@endo/evasive-transform')
+
+  const inputMap = webpackSource.map()
+
+  const { code, map } = evadeCensorSync(sourceString, {
+    sourceUrl: 'module.js',
+    sourceType: 'module',
+    sourceMap: inputMap ? JSON.stringify(inputMap) : undefined,
+  })
+
+  if (map) {
+    return new SourceMapSource(code, 'module.js', map, sourceString, inputMap)
+  }
+
+  // Fallback: no map produced, return unchanged
+  return webpackSource
+}
+
 module.exports = {
   NEEDS_TRANSFORM,
   SES_TRANSFORMS,
   needsTransform,
-  applyReplaceTransforms,
+  applyReplaceTransforms: applyReplaceTransformsBabel,
 }

@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@babel/parser": "7.29.2",
+    "@endo/evasive-transform": "2.1.0",
     "@lavamoat/aa": "^5.0.1",
     "@lavamoat/types": "^1.0.1",
     "browser-resolve": "2.0.0",

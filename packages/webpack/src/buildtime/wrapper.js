@@ -35,6 +35,15 @@ const {
   NAME_runtimeHandler,
 } = require('../ENUM.json')
 
+let transformCount = 0
+
+setInterval(() => {
+  fs.writeFileSync(
+    '/tmp/transformCount.log',
+    `transformCount: ${transformCount}\n`
+  )
+}, 1000).unref()
+
 /**
  * @param {WrappingInput} params
  * @returns {{
@@ -57,6 +66,7 @@ exports.wrapper = function wrapper({
   let transformedSource = source
   let sourceChanged = false
   if (needsTransform(sourceString)) {
+    transformCount++
     transformedSource = applyReplaceTransforms(
       source,
       sourceString,
