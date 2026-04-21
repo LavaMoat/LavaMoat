@@ -8,6 +8,7 @@ import '../../src/preamble.js'
 import { Loggerr } from 'loggerr'
 import { memfs } from 'memfs'
 import { isMainThread, workerData } from 'node:worker_threads'
+
 import { makeReadPowers } from '../../src/compartment/power.js'
 import { run } from '../../src/exec/run.js'
 import { log as defaultLog } from '../../src/log.js'
@@ -27,7 +28,7 @@ if (isMainThread) {
 // have to (for the scuttling tests) - we intentionally export this util func to solve this:
 globalThis.getTrueGlobalThisForTestsOnly = () => globalThis
 
-const { entryPath, policy, vol, scuttleGlobalThis } =
+const { entryPath, policy, scuttleGlobalThis, vol } =
   /** @type {RunnerWorkerData} */ (workerData)
 
 const { fs } = memfs(vol)
@@ -36,6 +37,7 @@ const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (fs) })
 
 const log = new Loggerr({
   formatter: 'cli',
+  level: Loggerr.EMERGENCY,
   streams: [
     process.stderr,
     process.stderr,
@@ -46,10 +48,9 @@ const log = new Loggerr({
     process.stderr,
     process.stderr,
   ],
-  level: Loggerr.EMERGENCY,
 })
 
-void run(entryPath, { policy, scuttleGlobalThis, readPowers, log }).catch(
+void run(entryPath, { log, policy, readPowers, scuttleGlobalThis }).catch(
   (err) => {
     defaultLog.error(err)
     process.exitCode = 1

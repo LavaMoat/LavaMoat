@@ -1,4 +1,5 @@
 import type { Class, ValueOf } from 'type-fest'
+
 import type { ErrorCodes } from './error-code.js'
 
 export type ErrorCode = ValueOf<typeof ErrorCodes>
@@ -25,22 +26,6 @@ export interface LavaMoatError<Code extends ErrorCode, Cause = unknown>
 }
 
 /**
- * Constructor parameters for a class implementing {@link LavaMoatErrorClass}
- * (which instantiates a {@link LavaMoatError}).
- *
- * @template Cause Reason for the error; usually another error. Specify if known
- * @template Options Additional options for the error; if this object has any
- *   required fields, the second parameter will be required.
- */
-export type LavaMoatErrorClassParams<
-  Options extends ErrorOptions = ErrorOptions,
-> =
-  // tuples seem to struggle with conditional types, so it doesn't look like I can embed it in the tuple
-  Partial<Options> extends Options
-    ? [message: string, errOptions?: Options]
-    : [message: string, errOptions: Options]
-
-/**
  * The _class_ of a {@link LavaMoatError}.
  */
 export type LavaMoatErrorClass<
@@ -55,5 +40,21 @@ export type LavaMoatErrorClass<
    */
   readonly code: Code
 }
+
+/**
+ * Constructor parameters for a class implementing {@link LavaMoatErrorClass}
+ * (which instantiates a {@link LavaMoatError}).
+ *
+ * @template Cause Reason for the error; usually another error. Specify if known
+ * @template Options Additional options for the error; if this object has any
+ *   required fields, the second parameter will be required.
+ */
+export type LavaMoatErrorClassParams<
+  Options extends ErrorOptions = ErrorOptions,
+> =
+  // tuples seem to struggle with conditional types, so it doesn't look like I can embed it in the tuple
+  Partial<Options> extends Options
+    ? [message: string, errOptions?: Options]
+    : [message: string, errOptions: Options]
 
 export type LavaMoatErrorOptions<T> = ErrorOptions & T

@@ -7,6 +7,7 @@
  */
 import chalk from 'chalk'
 import nodeFs from 'node:fs'
+
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { InvalidArgumentsError } from '../error.js'
@@ -37,16 +38,16 @@ import { loadAndGeneratePolicy } from './load-for-policy.js'
 export const generatePolicy = async (
   entrypoint,
   {
-    policyPath: rawPolicyPath,
-    policyOverridePath: rawPolicyOverridePath,
-    policyOverride,
-    writableFs = nodeFs,
-    readPowers = defaultReadPowers,
-    write: shouldWrite = false,
-    readFile = nodeFs.promises.readFile,
     log = defaultLog,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    policyOverride,
+    policyOverridePath: rawPolicyOverridePath,
+    policyPath: rawPolicyPath,
     projectRoot: rawProjectRootPath = process.cwd(),
+    readFile = nodeFs.promises.readFile,
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    writableFs = nodeFs,
+    write: shouldWrite = false,
     ...generateOpts
   } = {}
 ) => {
@@ -108,10 +109,10 @@ export const generatePolicy = async (
   )
   const { policy } = await loadAndGeneratePolicy(entrypointPath, {
     ...generateOpts,
-    trustRoot,
-    readPowers,
     policyOverride,
     projectRoot,
+    readPowers,
+    trustRoot,
   })
 
   if (shouldWrite) {

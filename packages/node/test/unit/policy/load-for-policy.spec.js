@@ -1,6 +1,7 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../../../src/constants.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import {

@@ -7,6 +7,7 @@
  */
 
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+
 import { ATTENUATORS_COMPARTMENT, ROOT_COMPARTMENT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { toFileURLString } from '../util.js'
@@ -85,11 +86,11 @@ const createPackageJsonMap = (
 export const makeNodeCompartmentMap = async (
   entrypointPath,
   {
-    readPowers = defaultReadPowers,
-    prodOnly,
-    log = defaultLog,
     endoPolicy,
+    log = defaultLog,
     policyOverride,
+    prodOnly,
+    readPowers = defaultReadPowers,
     trustRoot,
   } = {}
 ) => {
@@ -122,7 +123,6 @@ export const makeNodeCompartmentMap = async (
     conditions: new Set(DEFAULT_CONDITIONS),
     dev: !prodOnly,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
-    policy: endoPolicy,
     log: log.debug.bind(log),
     /**
      * Stores the `package.json` for each compartment as it is created.
@@ -132,10 +132,10 @@ export const makeNodeCompartmentMap = async (
      */
     packageDataHook: ({ packageData }) => {
       for (const {
-        packageDescriptor,
-        location,
         canonicalName,
+        location,
         name,
+        packageDescriptor,
       } of packageData.values()) {
         // @ts-expect-error - https://github.com/endojs/endo/pull/3111
         if (!trustRoot && canonicalName === ROOT_COMPARTMENT) {
@@ -148,6 +148,7 @@ export const makeNodeCompartmentMap = async (
         )
       }
     },
+    policy: endoPolicy,
     /**
      * Collects unknown canonical names referenced in policy but not found in
      * the compartment map
@@ -196,10 +197,10 @@ export const makeNodeCompartmentMap = async (
   )
 
   return {
+    knownCanonicalNames,
     packageCompartmentMap,
     packageJsonMap,
-    unknownCanonicalNames,
-    knownCanonicalNames,
     rootUsePolicy,
+    unknownCanonicalNames,
   }
 }
