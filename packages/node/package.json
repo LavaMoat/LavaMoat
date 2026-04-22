@@ -67,7 +67,7 @@
     "ses": "1.15.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.41.0",
-    "yargs": "17.7.2"
+    "yargs": "18.0.0"
   },
   "devDependencies": {
     "@jsonjoy.com/fs-snapshot": "4.57.1",
