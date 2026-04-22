@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.2...node-v1.0.3) (2026-04-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @endo/compartment-mapper to v2.1.0 ([#1962](https://github.com/LavaMoat/LavaMoat/issues/1962)) ([6bbdddd](https://github.com/LavaMoat/LavaMoat/commit/6bbdddd2ad8791184df2db030d6cdc5ec92bbaed))
+
 ## [1.0.2](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.1...node-v1.0.2) (2026-04-15)
 
 
