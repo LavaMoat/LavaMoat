@@ -18,6 +18,13 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [2.2.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.1.3...webpack-v2.2.0) (2026-04-22)
+
+
+### Features
+
+* **webpack:** sourcemap-preserving evasive transforms ([#1965](https://github.com/LavaMoat/LavaMoat/issues/1965)) ([334e2f4](https://github.com/LavaMoat/LavaMoat/commit/334e2f4fcef1d5d0c5372888fa87e9bb77471461))
+
 ## [2.1.3](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.1.2...webpack-v2.1.3) (2026-04-16)
 
 
