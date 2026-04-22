@@ -6,7 +6,8 @@
 const { loadAllPackageConfigurations, applyMigrations } = require('./config.js')
 
 /**
- * @param {PrintPackagesListParams} params
+ * @param {object} params
+ * @param {string} params.rootDir
  * @returns {Promise<void>}
  */
 async function printPackagesList({ rootDir }) {
@@ -16,6 +17,27 @@ async function printPackagesList({ rootDir }) {
 
   printPackagesByBins(bin)
   printPackagesByScriptConfiguration(lifecycle)
+}
+
+/**
+ * @param {object} params
+ * @param {string} params.rootDir
+ * @param {boolean} [params.skipVersions]
+ * @returns {Promise<void>}
+ */
+async function checkPackagesList({ rootDir, skipVersions }) {
+  const {
+    configs: { lifecycle },
+  } = await loadAllPackageConfigurations({ rootDir, skipVersions })
+
+  if (isScriptConfigurationClean(lifecycle, skipVersions)) {
+    console.log('allow-scripts - allowlist OK')
+  } else {
+    console.log(
+      'allow-scripts - allowlist needs update. Run "allow-scripts auto" to automatically update the allowlist configuration or "allow-scripts list" for details.'
+    )
+    process.exitCode = 1
+  }
 }
 
 /**
@@ -141,7 +163,46 @@ function printPackagesByScriptConfiguration({
   }
 }
 
+/**
+ * @param {ScriptsConfig} param0
+ */
+function isScriptConfigurationClean(
+  {
+    packagesWithScripts,
+    allowedPatterns,
+    disallowedPatterns,
+    missingPolicies,
+    excessPolicies,
+    allowConfig,
+  },
+  skipVersions = false
+) {
+  if (missingPolicies.length || excessPolicies.length) {
+    return false
+  }
+
+  const lifecycleDeepCopy = {
+    packagesWithScripts: new Map(packagesWithScripts),
+    allowedPatterns: [...allowedPatterns],
+    disallowedPatterns: [...disallowedPatterns],
+    missingPolicies: [...missingPolicies],
+    excessPolicies: [...excessPolicies],
+    allowConfig: JSON.parse(JSON.stringify(allowConfig)),
+  }
+
+  const { changed, logs } = applyMigrations({
+    lifecycle: lifecycleDeepCopy,
+    skipVersions,
+  })
+  if (changed || logs.length > 0) {
+    return false
+  }
+
+  return true
+}
+
 module.exports = {
   printPackagesList,
   printMissingPoliciesIfAny,
+  checkPackagesList,
 }

@@ -6,13 +6,14 @@ A tool for running only the dependency lifecycle hooks specified in an _allowlis
 
 ## Usage
 
-`@lavamoat/allow-scripts` increases your project's security posture by first _denying_ all lifecycle scripts from running, then _allowing_ the ones you actually need.  The workflow looks like this:
+`@lavamoat/allow-scripts` increases your project's security posture by first _denying_ all lifecycle scripts from running, then _allowing_ the ones you actually need. The workflow looks like this:
 
 1. Run `allow-scripts setup` **once** per project to opt-out of running scripts
 2. Run `allow-scripts auto` to populate or update the allowlist (configured in `package.json`)
 3. Run `allow-scripts run` after every install to run the lifecycle scripts
 
 We recommend using the globally installed `@lavamoat/allow-scripts` for initial the initial `setup`. Thereafter, install it as a project-local development dependency to enable contributors to execute allowed scripts.
+
 ### Install globally
 
 ```sh
@@ -68,7 +69,7 @@ Immediately after creating the configuration file, allow-scripts setup adds the 
 
 ### Populate the allowlist
 
-`allow-scripts auto` generates and writes a configuration into your `package.json`, setting new policies to `false` (deny) by default. 
+`allow-scripts auto` generates and writes a configuration into your `package.json`, setting new policies to `false` (deny) by default.
 
 After execution, you may enable packages' lifecycle scripts by setting the associated policies to `true` (allow).
 
@@ -121,6 +122,14 @@ Prints all information `allow-scripts` uses to populate and run the allowed scri
 
 ```sh
 allow-scripts list
+```
+
+### Check
+
+Exits 1 if the allowlist needs maintenance. Useful for CI to avoid running all tests on an installation that's missing results of lifecycle scripts.
+
+```sh
+allow-scripts check
 ```
 
 ### Improving your Workflow

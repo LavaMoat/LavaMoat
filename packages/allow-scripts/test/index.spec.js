@@ -459,6 +459,29 @@ test('cli - run command - versions skipped', (t) => {
   )
 })
 
+test('cli - check command - allowlist is clean', (t) => {
+  // project 2 has a fully configured allowlist matching installed packages
+  const projectRoot = path.join(__dirname, 'projects', '2')
+
+  const result = run(t, ['check'], projectRoot)
+
+  t.is(result.status, 0)
+  t.is(result.stdout.toString().trim(), 'allow-scripts - allowlist OK')
+})
+
+test('cli - check command - allowlist needs update', (t) => {
+  // project 5 has version mismatches (aaaa installed as 1.0.99, config has 1.0.0)
+  const projectRoot = path.join(__dirname, 'projects', '5')
+
+  const result = run(t, ['check'], projectRoot)
+
+  t.is(result.status, 1)
+  t.true(
+    result.stdout.toString().includes('allowlist needs update'),
+    'Expected output to mention allowlist needs update'
+  )
+})
+
 /**
  * @param {string} projectRoot
  * @returns {import('node:child_process').SpawnSyncOptions}
