@@ -34,6 +34,6 @@ function writeFromSnapshot(snapshot) {
 scaffold(webpackConfig).then(({ stdout, snapshot }) => {
   console.log(stdout)
   writeFromSnapshot(snapshot)
-  console.log('\nBuild written to:', path.resolve('.', 'tmp', now))
+  console.log('\nBuild written to:', path.resolve('tmp', now))
   runScriptWithSES(snapshot['/dist/app.js'])
 })
