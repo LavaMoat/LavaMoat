@@ -2,12 +2,15 @@
 const fs = require('node:fs')
 const path = require('node:path')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
-const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
-const webpackConfig = {
-  ...webpackConfigDefault,
-  // mode: 'development',
-  // devtool: false,
-}
+
+const { makeConfig } = require('./fixtures/main/webpack.config.js')
+
+const webpackConfig = makeConfig({
+  generatePolicy: false,
+})
+// webpackConfig.entry = { app: './sourcemap.js' }
+// webpackConfig.devtool = 'source-map'
+// webpackConfig.mode = 'production'
 
 const now = new Date().toISOString()
 
@@ -31,5 +34,6 @@ function writeFromSnapshot(snapshot) {
 scaffold(webpackConfig).then(({ stdout, snapshot }) => {
   console.log(stdout)
   writeFromSnapshot(snapshot)
+  console.log('\nBuild written to:', path.resolve('tmp', now))
   runScriptWithSES(snapshot['/dist/app.js'])
 })
