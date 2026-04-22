@@ -63,7 +63,7 @@
     "globals": "17.5.0",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
-    "memfs": "4.57.1",
+    "memfs": "4.57.2",
     "prettier": "3.8.3",
     "prettier-plugin-jsdoc": "1.8.0",
     "prettier-plugin-pkg": "0.22.1",
