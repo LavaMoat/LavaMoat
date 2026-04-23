@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "globals-package": {
+      "globals": {
+        "console": true,
+        "self": true
+      }
+    }
+  }
+}

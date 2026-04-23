@@ -179,6 +179,12 @@ const LOCKDOWN_SHIMS = [];`
         )
       }
 
+      const { capabilitySources, capabilityNames } =
+        require('./capabilitiesBuilder.js').buildCapabilities(
+          policyData,
+          options.policyLocation
+        )
+
       /** @satisfies {readonly RuntimeFragment[]} */
       const runtimeFragments = /** @type {const} */ ([
         // the string used to indicate root resource id
@@ -246,6 +252,10 @@ const LOCKDOWN_SHIMS = [];`
           name: 'repairs',
           rawSource: repairs,
         },
+        // capability implementation sources (one entry per unique file)
+        { name: 'capabilitySources', data: capabilitySources, json: true },
+        // maps each capability name to its index in capabilitySources
+        { name: 'capabilityNames', data: capabilityNames, json: true },
         // main lavamoat runtime
         {
           name: 'runtime',
