@@ -598,6 +598,102 @@ test(
   { resources: {}, debugInfo: { pkg: { globals: { x: true } } } }
 )
 
+// #region use
+test(
+  'use - disjoint arrays are unioned',
+  testMergePolicy,
+  { resources: {}, use: ['a', 'b'] },
+  { resources: {}, use: ['c', 'd'] },
+  { resources: {}, use: ['a', 'b', 'c', 'd'] }
+)
+
+test(
+  'use - overlapping entries are deduplicated',
+  testMergePolicy,
+  { resources: {}, use: ['a', 'b'] },
+  { resources: {}, use: ['b', 'c'] },
+  { resources: {}, use: ['a', 'b', 'c'] }
+)
+
+test(
+  'use - only policy has use',
+  testMergePolicy,
+  { resources: {}, use: ['a'] },
+  { resources: {} },
+  { resources: {}, use: ['a'] }
+)
+
+test(
+  'use - only override has use',
+  testMergePolicy,
+  { resources: {} },
+  { resources: {}, use: ['a'] },
+  { resources: {}, use: ['a'] }
+)
+
+test(
+  'use - neither has use, field is absent',
+  testMergePolicy,
+  { resources: {} },
+  { resources: {} },
+  { resources: {} }
+)
+// #endregion
+
+// #region capabilities
+test(
+  'capabilities - override capabilities replace base',
+  testMergePolicy,
+  { resources: { pkg: { capabilities: { cap: ['optA'] } } } },
+  { resources: { pkg: { capabilities: { cap: ['optB'] } } } },
+  { resources: { pkg: { capabilities: { cap: ['optB'] } } } }
+)
+
+test(
+  'capabilities - override adds capabilities to resource without them',
+  testMergePolicy,
+  { resources: { pkg: {} } },
+  { resources: { pkg: { capabilities: { cap: [] } } } },
+  { resources: { pkg: { capabilities: { cap: [] } } } }
+)
+
+test(
+  'capabilities - resource without override keeps its capabilities',
+  testMergePolicy,
+  { resources: { pkg: { capabilities: { cap: ['optA'] } } } },
+  { resources: {} },
+  { resources: { pkg: { capabilities: { cap: ['optA'] } } } }
+)
+
+test(
+  'capabilities - override with false clears capabilities',
+  testMergePolicy,
+  { resources: { pkg: { capabilities: { cap: ['optA'] } } } },
+  { resources: { pkg: { capabilities: false } } },
+  { resources: { pkg: {} } }
+)
+
+test(
+  'capabilities - override with overlapping and non-overlapping capabilities',
+  testMergePolicy,
+  {
+    resources: {
+      pkg: { capabilities: { capA: ['opt1'], capB: ['opt2'], capX: ['opt5'] } },
+    },
+  },
+  {
+    resources: {
+      pkg: { capabilities: { capA: ['opt3'], capC: ['opt4'], capX: false } },
+    },
+  },
+  {
+    resources: {
+      pkg: { capabilities: { capA: ['opt3'], capB: ['opt2'], capC: ['opt4'] } },
+    },
+  }
+)
+// #endregion
+
 // #endregion
 
 // #region env

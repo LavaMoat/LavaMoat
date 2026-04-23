@@ -140,6 +140,30 @@ const mergeResourcePolicy = (policyResources, policyOverrideResources) => {
     result.env = policyResources.env
   }
 
+  // capabilities: merge per name.
+  // `capabilities: false` in override clears all base capabilities.
+  // Otherwise: base entries not mentioned in override are kept; override entries
+  // with value `false` remove the matching base entry; any other override value
+  // replaces or adds the entry.
+  if ('capabilities' in policyOverrideResources) {
+    const overrideCaps = policyOverrideResources.capabilities
+    if (overrideCaps === false) {
+      // explicitly cleared
+    } else {
+      const merged = { ...(policyResources.capabilities ?? {}) }
+      for (const [name, value] of Object.entries(overrideCaps ?? {})) {
+        if (value === false) {
+          delete merged[name]
+        } else {
+          merged[name] = value
+        }
+      }
+      result.capabilities = merged
+    }
+  } else if ('capabilities' in policyResources) {
+    result.capabilities = { ...policyResources.capabilities }
+  }
+
   return result
 }
 
@@ -277,6 +301,26 @@ const mergeResolutions = (policy, policyOverride, mergedPolicy) => {
 }
 
 /**
+ * Merges the {@link LavaMoatPolicy.use} fields of two policies.
+ *
+ * Produces a deduplicated union of both arrays.
+ *
+ * Mutates {@link mergedPolicy} in place.
+ *
+ * @param {LavaMoatPolicy} policy Policy
+ * @param {LavaMoatPolicy} policyOverride Policy overrides
+ * @param {LavaMoatPolicy} mergedPolicy Merged policy
+ * @returns {void}
+ */
+const mergeUse = (policy, policyOverride, mergedPolicy) => {
+  if (policy.use || policyOverride.use) {
+    mergedPolicy.use = [
+      ...new Set([...(policy.use ?? []), ...(policyOverride.use ?? [])]),
+    ]
+  }
+}
+
+/**
  * Copies the `debugInfo` field, if present, from {@link policy} to
  * {@link mergedPolicy}.
  *
@@ -322,6 +366,7 @@ const mergePolicy = (policy, policyOverrides) => {
   mergeResolutions(policy, policyOverrides, mergedPolicy)
   mergeRoot(policy, policyOverrides, mergedPolicy)
   mergeInclude(policy, policyOverrides, mergedPolicy)
+  mergeUse(policy, policyOverrides, mergedPolicy)
   retainDebugInfo(policy, mergedPolicy)
 
   return mergedPolicy
