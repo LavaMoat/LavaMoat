@@ -64,6 +64,7 @@
     "lavamoat-core": "^18.0.2",
     "lavamoat-tofu": "^9.0.1",
     "loggerr": "4.2.0",
+    "read-cmd-shim": "4.0.0",
     "ses": "1.15.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.41.0",
