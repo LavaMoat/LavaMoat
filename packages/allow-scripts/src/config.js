@@ -15,8 +15,9 @@ const ROOT_CANONICAL_NAME = '$root$'
 
 /**
  * @param {Record<string, boolean>} allowConfig
+ * @param {boolean} [skipVersions] - Whether to skip versioning in patterns
  */
-const versionAwareMatcher = (allowConfig) => {
+const versionAwareMatcher = (allowConfig, skipVersions = false) => {
   const allowed = new Set(
     Object.entries(allowConfig)
       .filter(([, value]) => !!value)
@@ -30,7 +31,7 @@ const versionAwareMatcher = (allowConfig) => {
     const [name, version] = pattern.split('#')
     if (version) {
       knownPatternsWithVersion.add(pattern)
-    } else if (!value) {
+    } else if (!value || skipVersions) {
       knownNames.add(name)
     }
   }
@@ -53,14 +54,15 @@ const versionAwareMatcher = (allowConfig) => {
       )
     },
     /**
-     * Compares two allowlist patterns by version, returns true if the
-     * patternToCheck is the same version or lower than the patternAllowed
+     * Checks if a pattern is allowed. Takes versions into account unless
+     * specifically turned off.
      *
      * @param {string} patternToCheck
      * @returns {boolean}
      */
-    allowedWithVersion: (patternToCheck) => {
+    isAllowed: (patternToCheck) => {
       if (
+        !skipVersions &&
         patternToCheck !== ROOT_CANONICAL_NAME &&
         !patternToCheck.includes('#')
       ) {
@@ -193,10 +195,13 @@ async function loadAllPackageConfigurations({
   const lavamoatConfig = packageJson.lavamoat || {}
 
   const configs = {
-    lifecycle: indexLifecycleConfiguration({
-      packagesWithScripts: packagesWithScriptsLifecycle,
-      allowConfig: lavamoatConfig.allowScripts,
-    }),
+    lifecycle: indexLifecycleConfiguration(
+      {
+        packagesWithScripts: packagesWithScriptsLifecycle,
+        allowConfig: lavamoatConfig.allowScripts,
+      },
+      skipVersions
+    ),
     bin: indexBinsConfiguration({
       binCandidates,
       allowConfig: lavamoatConfig.allowBins,
@@ -339,7 +344,9 @@ async function setDefaultConfiguration({
   if (somePoliciesAreMissing && !changed) {
     // should not be possible
     console.log(
-      '\nSome packages with scripts are missing from the configuration, but no automatic migrations were applicable. You can run "allow-scripts auto" again to apply migrations after manually adding missing packages to the configuration.'
+      '\nSome packages with scripts are missing from the configuration, but no automatic migrations were applicable. You can run "allow-scripts auto" again to apply migrations after manually adding missing packages to the configuration.',
+      lifecycle.missingPolicies,
+      skipVersions
     )
   }
 
@@ -412,14 +419,18 @@ async function savePackageConfigurations({
  *   Partial<ScriptsConfig>,
  *   'packagesWithScripts'
  * >} config
+ * @param {boolean} [skipVersions] - Whether to skip versioning in patterns
  * @returns {ScriptsConfig}
  */
-function indexLifecycleConfiguration(config) {
+function indexLifecycleConfiguration(config, skipVersions = false) {
   config.allowConfig = config.allowConfig || {}
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
 
-  const { isCorrectlyConfigured } = versionAwareMatcher(config.allowConfig)
+  const { isCorrectlyConfigured } = versionAwareMatcher(
+    config.allowConfig,
+    skipVersions
+  )
   // select allowed + disallowed
   config.allowedPatterns = Object.entries(config.allowConfig)
     .filter(([, packageData]) => !!packageData)
