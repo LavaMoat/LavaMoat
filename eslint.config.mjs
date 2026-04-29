@@ -477,6 +477,14 @@ export default defineConfig(
     },
   },
 
+  // --- packages/policy ---
+  {
+    files: ['packages/policy/**/*.js'],
+    languageOptions: {
+      sourceType: 'module',
+    },
+  },
+
   // ---------------------------------------------------------------------------
   // 7. JSON/JSONC files
   //    The jsonc flat/prettier config is an array; we spread it and scope each
