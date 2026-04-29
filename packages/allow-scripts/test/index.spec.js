@@ -441,7 +441,7 @@ test('cli - run command - version mismatch', (t) => {
 })
 
 test('cli - run command - versions skipped', (t) => {
-  const projectRoot = path.join(__dirname, 'projects', '5')
+  const projectRoot = path.join(__dirname, 'projects', 'skip_versions')
 
   // run the "run" command
   const result = run(t, ['run', '--skip-versions'], projectRoot)
@@ -451,7 +451,8 @@ test('cli - run command - versions skipped', (t) => {
     multilineTrim(result.stdout.toString()),
     multilineTrim(`
       running lifecycle scripts for event "preinstall"
-      - bbbb#1.0.99
+      - aaaa
+      - bbbb
       running lifecycle scripts for event "install"
       running lifecycle scripts for event "postinstall"
       running lifecycle scripts for top level package

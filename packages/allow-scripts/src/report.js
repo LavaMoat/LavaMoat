@@ -9,10 +9,10 @@ const { loadAllPackageConfigurations, applyMigrations } = require('./config.js')
  * @param {PrintPackagesListParams} params
  * @returns {Promise<void>}
  */
-async function printPackagesList({ rootDir }) {
+async function printPackagesList({ rootDir, skipVersions = false }) {
   const {
     configs: { bin, lifecycle },
-  } = await loadAllPackageConfigurations({ rootDir })
+  } = await loadAllPackageConfigurations({ rootDir, skipVersions })
 
   printPackagesByBins(bin)
   printPackagesByScriptConfiguration(lifecycle)
