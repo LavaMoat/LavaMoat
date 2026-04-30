@@ -12,6 +12,7 @@
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
+
 import * as constants from './constants.js'
 import {
   DEFAULT_POLICY_DIR,
@@ -163,8 +164,8 @@ export const maybeReadPolicyOverride = async (
 export const loadPolicies = async (
   policyOrPolicyPath,
   {
-    readFile = nodeFs.promises.readFile,
     projectRoot = process.cwd(),
+    readFile = nodeFs.promises.readFile,
     ...options
   } = {}
 ) => {

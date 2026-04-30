@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import nodeFs from 'node:fs'
+
 import { makeReadPowers } from '../compartment/power.js'
 import {
   DEFAULT_ATTENUATOR,
@@ -38,12 +39,12 @@ import { execute } from './execute.js'
 export const run = async (
   entrypoint,
   {
+    log = defaultLog,
     prodOnly = false,
-    trustRoot,
     projectRoot,
     readFile = nodeFs.promises.readFile,
-    log = defaultLog,
     scuttleGlobalThis,
+    trustRoot,
     ...options
   } = {}
 ) => {
@@ -55,11 +56,11 @@ export const run = async (
    * @type {LoadPoliciesOptions}
    */
   const loadPoliciesOptions = {
-    readFile,
-    projectRoot,
-    policyPath: options.policyPath,
     policyOverride: options.policyOverride,
     policyOverridePath: options.policyOverridePath,
+    policyPath: options.policyPath,
+    projectRoot,
+    readFile,
   }
 
   const policy = await loadPolicies(
@@ -81,6 +82,8 @@ export const run = async (
   /** @type {ExecuteOptions} */
   const executeOptions = {
     Compartment: makeExecutionCompartment(globalThis),
+    endoPolicy,
+    log,
     modules: {
       // We are passing the default attenuator in as an exit module. It's not required
       // for it to be a package then, but if we have a prototype pollution or RCE
@@ -92,12 +95,10 @@ export const run = async (
         attenuateModule,
       },
     },
-    endoPolicy,
+    policy,
     prodOnly,
-    log,
     readPowers: makeReadPowers(options),
     trustRoot,
-    policy,
   }
 
   return execute(entrypoint, executeOptions)

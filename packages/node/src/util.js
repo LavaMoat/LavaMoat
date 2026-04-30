@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 import nodeUrl from 'node:url'
+
 import { assertAbsolutePath } from './fs.js'
 
 /**

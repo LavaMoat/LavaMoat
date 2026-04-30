@@ -7,6 +7,7 @@
 
 import { endowmentsToolkit } from 'lavamoat-core'
 import { scuttle } from 'lavamoat-core/src/scuttle.js'
+
 import {
   DEFAULT_TRUST_ROOT_COMPARTMENT,
   ENDO_POLICY_ITEM_ROOT,
@@ -23,11 +24,11 @@ import { isObjectyObject } from '../util.js'
  */
 
 const {
-  values,
+  defineProperties,
   entries,
   fromEntries,
-  defineProperties,
   getOwnPropertyDescriptors,
+  values,
 } = Object
 
 /**
@@ -67,7 +68,7 @@ export const makeAttenuators = ({
     }
   }
 
-  const { getEndowmentsForConfig, copyWrappedGlobals, attenuateBuiltin } =
+  const { attenuateBuiltin, copyWrappedGlobals, getEndowmentsForConfig } =
     endowmentsToolkit({
       handleGlobalWrite: knownWritableFields.size > 0,
       knownWritableFields,

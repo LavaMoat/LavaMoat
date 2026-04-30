@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
 import {
   DEFAULT_POLICY_OVERRIDE_PATH,
   DEFAULT_POLICY_PATH,
@@ -30,8 +31,8 @@ export const fixtureFinder = (referrer) => {
     {
       entrypoint,
       entrypointFilename = DEFAULT_ENTRYPOINT_FILENAME,
-      policyPath,
       policyOverridePath,
+      policyPath,
     } = {}
   ) => {
     const dir = fileURLToPath(new URL(`./fixture/${name}`, referrer))
@@ -41,7 +42,7 @@ export const fixtureFinder = (referrer) => {
     policyOverridePath = toPath(
       policyOverridePath ?? path.join(dir, DEFAULT_POLICY_OVERRIDE_PATH)
     )
-    return { entrypoint, dir, policyPath, policyOverridePath }
+    return { dir, entrypoint, policyOverridePath, policyPath }
   }
   return fixture
 }

@@ -7,6 +7,7 @@
 import nodeFs from 'node:fs'
 import Module from 'node:module'
 import path from 'node:path'
+
 import { PACKAGE_JSON } from './constants.js'
 import { NoBinScriptError, NoWorkspaceError } from './error.js'
 import { hrLabel, hrPath } from './format.js'
@@ -103,7 +104,7 @@ export const resolveBinScript = (
     )
   }
   let current = workspace
-   
+
   while (true) {
     const maybeBinDir = path.join(current, 'node_modules', '.bin')
     const niceBinDir = hrPath(maybeBinDir)

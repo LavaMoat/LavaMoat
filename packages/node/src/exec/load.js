@@ -8,6 +8,7 @@
  */
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -38,12 +39,12 @@ import { reportInvalidCanonicalNames } from '../report.js'
 export const load = async (
   entrypointPath,
   {
-    log = defaultLog,
-    prodOnly,
-    trustRoot,
     endoPolicy,
-    readPowers = defaultReadPowers,
+    log = defaultLog,
     policy,
+    prodOnly,
+    readPowers = defaultReadPowers,
+    trustRoot,
     ...otherOptions
   } = {}
 ) => {
@@ -57,18 +58,18 @@ export const load = async (
 
   await Promise.resolve()
   try {
-    ;({ packageCompartmentMap, unknownCanonicalNames, knownCanonicalNames } =
+    ;({ knownCanonicalNames, packageCompartmentMap, unknownCanonicalNames } =
       await makeNodeCompartmentMap(entrypointPath, {
-        readPowers,
-        prodOnly,
-        log,
-        trustRoot,
         endoPolicy,
+        log,
+        prodOnly,
+        readPowers,
+        trustRoot,
       }))
     if (policy) {
       reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
-        policy,
         log,
+        policy,
         what: 'policy',
       })
     }
@@ -84,8 +85,8 @@ export const load = async (
     ...DEFAULT_ENDO_OPTIONS,
     ...otherOptions,
     dev: !prodOnly,
-    policy: endoPolicy,
     log: log.debug.bind(log),
+    policy: endoPolicy,
   }
 
   const { import: importApp, sha512 } = await loadFromMap(

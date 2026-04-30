@@ -2,9 +2,10 @@ import '../../src/preamble.js'
 
 import test from 'ava'
 import { fs, vol } from 'memfs'
+import nodePath from 'node:path'
+
 import * as constants from '../../src/constants.js'
 import { ErrorCodes } from '../../src/error-code.js'
-import nodePath from 'node:path'
 import {
   assertPolicy,
   isPolicy,
@@ -69,14 +70,14 @@ test('readPolicyOverride - reads and validates policy override from disk (defaul
 
 test('loadPolicies - loads and merges policies from disk', async (t) => {
   vol.fromJSON({
-    '/policy.json': JSON.stringify({ resources: {} }),
     '/policy-override.json': JSON.stringify({ resources: {} }),
+    '/policy.json': JSON.stringify({ resources: {} }),
   })
   const policy = await loadPolicies('/policy.json', {
     policyOverridePath: '/policy-override.json',
     readFile: /** @type {any} */ (fs.promises.readFile),
   })
-  t.deepEqual(policy, { resources: {}, [constants.MERGED_POLICY_FIELD]: true })
+  t.deepEqual(policy, { [constants.MERGED_POLICY_FIELD]: true, resources: {} })
 })
 
 test('isPolicy - returns true for valid policy', (t) => {
@@ -110,11 +111,11 @@ test('isTrusted - returns true for implicitly trusted policy', (t) => {
 })
 
 test('isTrusted - returns true for empty root policy', (t) => {
-  t.true(isTrusted({ root: {}, resources: {} }))
+  t.true(isTrusted({ resources: {}, root: {} }))
 })
 
 test('isTrusted - returns false for root policy w/ usePolicy', (t) => {
-  t.false(isTrusted({ root: { usePolicy: 'foo' }, resources: {} }))
+  t.false(isTrusted({ resources: {}, root: { usePolicy: 'foo' } }))
 })
 
 test('loadPolicies - uses policyPath option as hint for override path when given a policy object', async (t) => {
@@ -132,8 +133,8 @@ test('loadPolicies - uses policyPath option as hint for override path when given
     }
   )
   t.deepEqual(policy, {
-    resources: overrideResources,
     [constants.MERGED_POLICY_FIELD]: true,
+    resources: overrideResources,
   })
 })
 
@@ -167,8 +168,8 @@ test('writePolicy - throws WritePolicyError when directory creation fails', asyn
       mkdir: async () => {
         throw cause
       },
-      writeFile: async () => {},
       rm: async () => {},
+      writeFile: async () => {},
     },
   })
   const err = await t.throwsAsync(
@@ -186,11 +187,11 @@ test('writePolicy - removes created directory when file write fails', async (t) 
   const mockFs = /** @type {any} */ ({
     promises: {
       mkdir: async () => '/nope',
+      rm: async (/** @type {string} */ path, /** @type {any} */ opts) => {
+        rmCall = { opts, path }
+      },
       writeFile: async () => {
         throw cause
-      },
-      rm: async (/** @type {string} */ path, /** @type {any} */ opts) => {
-        rmCall = { path, opts }
       },
     },
   })
@@ -199,5 +200,5 @@ test('writePolicy - removes created directory when file write fails', async (t) 
     { code: ErrorCodes.WritePolicyFailure }
   )
   t.is(/** @type {Error} */ (err).cause, cause)
-  t.deepEqual(rmCall, { path: '/nope', opts: { recursive: true } })
+  t.deepEqual(rmCall, { opts: { recursive: true }, path: '/nope' })
 })
