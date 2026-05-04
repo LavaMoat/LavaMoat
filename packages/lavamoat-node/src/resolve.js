@@ -2,6 +2,7 @@
 const path = require('node:path')
 const { isBuiltin, createRequire } = require('node:module')
 const resolve = require('resolve') // file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
+const { pathToFileURL } = require('node:url')
 // extensions we want the resolver to look for when given just the file name (it defaults to .js only)
 const resolutionOmittedExtensions = ['.js', '.cjs', '.json']
 
@@ -55,8 +56,8 @@ const pathIsWithin = (rootPath, targetPath) => {
   )
 }
 
-const NATIVE_IGNORES_SYMLINKS = !!process.env.NODE_PRESERVE_SYMLINKS
-const NATIVE_WITH_FALLBACK_ENABLED = !!process.env.LAVAMOAT_RESOLVE_NATIVE
+const nativeIgnoresSymlinks = () => !!process.env.NODE_PRESERVE_SYMLINKS
+const nativeWithFallbackEnabled = () => !!process.env.LAVAMOAT_RESOLVE_NATIVE
 
 /**
  * @typedef {object} ResolutionReport
@@ -142,8 +143,8 @@ exports.makeResolver = ({ projectRoot }) => {
       referrer,
     }
 
-    if (NATIVE_IGNORES_SYMLINKS || NATIVE_WITH_FALLBACK_ENABLED) {
-      const refUrl = new URL(`file://${referrer}`)
+    if (nativeIgnoresSymlinks() || nativeWithFallbackEnabled()) {
+      const refUrl = pathToFileURL(referrer) // historically was: new URL(`file://${referrer}`) - which is wrong
       resolved = createRequire(refUrl).resolve(requestedName)
       report.via = 'native'
       if (
