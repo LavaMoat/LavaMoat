@@ -9,9 +9,15 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
- * @import {TestExecForJSONMacroOptions, TestExecMacroOptions} from '../../types.js'
+ * @import {
+ *   MacroDeclarationOptions,
+ *   TestFn
+ * } from 'ava'
+ * @import {
+ *   TestExecForJSONMacroOptions,
+ *   TestExecMacroOptions
+ * } from '../../types.js'
  */
 
 /**

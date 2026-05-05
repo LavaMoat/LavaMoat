@@ -14,8 +14,11 @@ import { mergePolicies, readPolicy } from '../../../src/policy-util.js'
 
 /**
  * @import {Policy} from '@endo/compartment-mapper'
- * @import {LavaMoatEndoPackagePolicyItem, MergedLavaMoatPolicy} from '../../../src/types.js'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {
+ *   LavaMoatEndoPackagePolicyItem,
+ *   MergedLavaMoatPolicy
+ * } from '../../../src/types.js'
  */
 
 const KS_POLICY_URL = new URL(

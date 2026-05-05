@@ -69,7 +69,7 @@
     "prettier-plugin-jsdoc": "1.8.1",
     "prettier-plugin-pkg": "0.22.1",
     "semver": "7.8.5",
-    "ses": "1.15.0",
+    "ses": "2.0.0",
     "type-fest": "4.41.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.61.1"

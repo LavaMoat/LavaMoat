@@ -32,11 +32,19 @@ import {
 } from './util.js'
 
 /**
- * @import {RootPolicy, LavaMoatPolicy} from '@lavamoat/types'
- * @import {MergedLavaMoatPolicy,
- *  LoadPoliciesOptions,
- *  WritableFsInterface} from './types.js'
- * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
+ * @import {
+ *   LavaMoatPolicy,
+ *   RootPolicy
+ * } from '@lavamoat/types'
+ * @import {
+ *   ReadPolicyOptions,
+ *   ReadPolicyOverrideOptions
+ * } from './internal.js'
+ * @import {
+ *   LoadPoliciesOptions,
+ *   MergedLavaMoatPolicy,
+ *   WritableFsInterface
+ * } from './types.js'
  */
 
 /**

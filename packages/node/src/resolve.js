@@ -15,7 +15,11 @@ import { log } from './log.js'
 import { toPath } from './util.js'
 
 /**
- * @import {ResolveBinScriptOptions, ResolveEntrypointOptions, ResolveWorkspaceOptions} from './internal.js'
+ * @import {
+ *   ResolveBinScriptOptions,
+ *   ResolveEntrypointOptions,
+ *   ResolveWorkspaceOptions
+ * } from './internal.js'
  */
 
 /**
@@ -103,7 +107,7 @@ export const resolveBinScript = (
     )
   }
   let current = workspace
-   
+
   while (true) {
     const maybeBinDir = path.join(current, 'node_modules', '.bin')
     const niceBinDir = hrPath(maybeBinDir)

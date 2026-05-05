@@ -1,5 +1,8 @@
 /**
- * @import {MacroDeclarationOptions, TestFn} from 'ava'
+ * @import {
+ *   MacroDeclarationOptions,
+ *   TestFn
+ * } from 'ava'
  * @import {TestCLIExpectation as TestCLIExpectation} from '../types.js'
  */
 

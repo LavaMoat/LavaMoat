@@ -9,8 +9,11 @@ import { endowmentsToolkit } from 'lavamoat-core'
 const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper
 
 /**
- * @import {SomeGlobalThis, ContextTestFn} from '../internal.js'
  * @import {CompartmentOptions} from 'ses'
+ * @import {
+ *   ContextTestFn,
+ *   SomeGlobalThis
+ * } from '../internal.js'
  */
 
 /**
