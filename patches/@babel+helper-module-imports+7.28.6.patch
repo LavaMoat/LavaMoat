@@ -1,0 +1,13 @@
+diff --git a/node_modules/@babel/helper-module-imports/lib/import-builder.js b/node_modules/@babel/helper-module-imports/lib/import-builder.js
+index b01187f..9554d38 100644
+--- a/node_modules/@babel/helper-module-imports/lib/import-builder.js
++++ b/node_modules/@babel/helper-module-imports/lib/import-builder.js
+@@ -35,7 +35,7 @@ class ImportBuilder {
+       resultName: this._resultName
+     };
+   }
+-  import() {
++  ['im' + 'port']() {
+     this._statements.push(importDeclaration([], stringLiteral(this._importedSource)));
+     return this;
+   }
