@@ -14,9 +14,16 @@ import { assertAbsolutePath } from './fs.js'
  *   FileURLToPathFn,
  *   ReadNowPowers
  * } from '@endo/compartment-mapper'
- * @import {SetNonNullable} from 'type-fest'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {
+ *   PackageJson,
+ *   SetNonNullable
+ * } from 'type-fest'
  * @import {RequiredReadNowPowers} from './internal.js'
- * @import {FileUrlString} from './types.js'
+ * @import {
+ *   CanonicalName,
+ *   FileUrlString
+ * } from './types.js'
  */
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
@@ -283,3 +290,59 @@ export const toKeypath = (path) => {
  */
 export const pluralize = (count, singular, plural = `${singular}s`) =>
   count === 1 ? singular : plural
+
+/**
+ * Returns `true` if `dependency` is an optional dependency within `packageJson`
+ *
+ * @param {PackageJson} packageJson Package JSON object
+ * @param {string} dependency Dependency name
+ * @returns {boolean} `true` if `dependency` is an optional dependency within
+ *   `packageJson`
+ * @internal
+ */
+export const isOptionalDependency = (packageJson, dependency) =>
+  !!packageJson.optionalDependencies?.[dependency] === true ||
+  !!packageJson.peerDependenciesMeta?.[dependency]?.optional === true
+
+/**
+ * A no-op function
+ *
+ * @returns {void}
+ */
+export const noop = () => {}
+
+/**
+ * Gets the keypath for a canonical name within a LavaMoat policy object
+ *
+ * @param {LavaMoatPolicy} policy
+ * @param {CanonicalName} canonicalName
+ * @returns {string | undefined} The keypath as a string, or undefined if not
+ *   found
+ */
+export const findCanonicalNameKeypath = (policy, canonicalName) => {
+  const { resources } = policy
+
+  // Check if it's a direct resource
+  if (canonicalName in resources) {
+    return toKeypath(['resources', canonicalName])
+  }
+
+  // Check nested packages
+  for (const [resourceName, resourcePolicy] of Object.entries(resources)) {
+    if (resourcePolicy.packages && canonicalName in resourcePolicy.packages) {
+      return toKeypath(['resources', resourceName, 'packages', canonicalName])
+    }
+  }
+
+  // Check include array
+  for (const include of policy.include ?? []) {
+    if (isObjectyObject(include) && include.name === canonicalName) {
+      return toKeypath(['include', include.name])
+    }
+    if (canonicalName === include) {
+      return toKeypath(['include', canonicalName])
+    }
+  }
+
+  return undefined
+}

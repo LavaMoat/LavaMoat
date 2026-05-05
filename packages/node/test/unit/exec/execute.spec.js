@@ -169,4 +169,4 @@ test(
   {}
 )
 
-// test('"default" exported from exit modules', testExec)
+test.todo('"default" exported from exit modules')

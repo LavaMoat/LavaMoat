@@ -43,7 +43,7 @@
     "@react-native/js-polyfills": "*"
   },
   "dependencies": {
-    "ses": "1.15.0"
+    "ses": "2.0.0"
   },
   "devDependencies": {
     "@react-native/js-polyfills": "0.86.0"

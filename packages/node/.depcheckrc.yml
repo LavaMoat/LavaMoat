@@ -2,8 +2,10 @@ ignores:
   # monorepo deps
   - 'ava'
 
-
   # types
   - '@types/capture-console'
   - 'type-fest'
   - '@types/json-stable-stringify'
+  - '@types/babel__generator'
+  - '@types/babel__parser'
+  - '@types/babel__traverse'
