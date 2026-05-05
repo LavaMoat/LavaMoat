@@ -298,11 +298,18 @@ export type GeneratePolicyOptions = ComposeOptions<
     WithReadPowersAndTrust,
     WithIsBuiltin,
     WithLoadForMapOptions,
-    WithWritePolicyOptions,
     WithScuttleGlobalThis,
     LoadPoliciesOptions,
   ]
 >
+
+/**
+ * Result of `generatePolicy()`
+ */
+export type GeneratePolicyResult = {
+  policy: MergedLavaMoatPolicy
+  hasWarnings: boolean
+}
 
 /**
  * Params to LavaMoat's global attenuator

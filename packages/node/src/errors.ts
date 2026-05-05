@@ -6,8 +6,10 @@ export type ErrorCode = ValueOf<typeof ErrorCodes>
 /**
  * A LavaMoat-specific error instance.
  */
-export interface LavaMoatError<Code extends ErrorCode, Cause = unknown>
-  extends Error {
+export interface LavaMoatError<
+  Code extends ErrorCode,
+  Cause = unknown,
+> extends Error {
   /**
    * Underlying cause/error, if any
    */
