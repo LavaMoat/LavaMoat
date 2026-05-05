@@ -9,9 +9,14 @@
  */
 
 import { load } from './load.js'
+import { log as defaultLog } from '../log.js'
+import { hrCode } from '../format.js'
 
 /**
- * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
+ * @import {
+ *   ApplicationLoader,
+ *   ExecuteOptions
+ * } from '../types.js'
  */
 
 /**
@@ -32,9 +37,13 @@ import { load } from './load.js'
  */
 
 export const execute = async (entrypointPath, options = {}) => {
+  const { log = defaultLog } = options
+  const startTime = Date.now()
   const application = /** @type {ApplicationLoader<T>} */ (
     await load(entrypointPath, options)
   )
+  const duration = Date.now() - startTime
+  log.debug(`Loaded application in ${hrCode(duration)}ms`)
   const { namespace } = await application.import()
   return namespace
 }

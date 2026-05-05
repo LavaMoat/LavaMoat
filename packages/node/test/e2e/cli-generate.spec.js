@@ -37,7 +37,16 @@ test.afterEach('cleanup tempdir', async (t) => {
   await t.context.tempdir[Symbol.asyncDispose]()
 })
 
-test('"generate --help" prints help', testCLI, ['generate', '--help'])
+test(
+  '"generate --help" prints help',
+  testCLI,
+  ['generate', '--help'],
+  async (t, { code, stdout }) => {
+    t.plan(2)
+    t.is(code, undefined)
+    t.true(stdout.length > 0)
+  }
+)
 
 test('basic policy generation', async (t) => {
   t.plan(2)

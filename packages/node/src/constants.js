@@ -8,6 +8,11 @@
 import { builtinModules } from 'node:module'
 import path from 'node:path'
 
+/**
+ * @import {Language} from '@endo/compartment-mapper'
+ * @import {LiteralUnion} from 'type-fest'
+ */
+
 const { freeze } = Object
 
 /**
@@ -217,17 +222,6 @@ export const LANGUAGE_MJS = 'mjs'
 export const LANGUAGE_CJS = 'cjs'
 
 /**
- * Message types for the worker `./policy-gen/inspector.js`
- */
-export const MessageTypes = freeze(
-  /** @type {const} */ ({
-    Inspect: 'inspect',
-    InspectionResults: 'inspectionResults',
-    Error: 'error',
-  })
-)
-
-/**
  * Source types, as a const enum
  */
 export const SourceTypes = freeze(
@@ -247,4 +241,13 @@ export const ALL_BUILTIN_MODULES = freeze(
       name.startsWith('node:') ? [name] : [name, `node:${name}`]
     )
   )
+)
+
+/**
+ * Languages that can be inspected.
+ *
+ * @type {Set<LiteralUnion<Language, string>>}
+ */
+export const INSPECTABLE_LANGUAGES = freeze(
+  new Set([LANGUAGE_MJS, LANGUAGE_CJS])
 )
