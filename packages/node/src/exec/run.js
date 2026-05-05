@@ -20,7 +20,12 @@ import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
 
 /**
- * @import {ExecuteOptions, LoadPoliciesOptions, MergedLavaMoatPolicy, RunOptions} from '../types.js';
+ * @import {
+ *   ExecuteOptions,
+ *   LoadPoliciesOptions,
+ *   MergedLavaMoatPolicy,
+ *   RunOptions
+ * } from '../types.js'
  */
 
 /**

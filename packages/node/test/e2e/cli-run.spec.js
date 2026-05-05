@@ -23,7 +23,16 @@ const circularRootDep = fixture('circular-root-dep')
 
 const { testCLI } = createCLIMacros(test)
 
-test('"run --help" prints help', testCLI, ['run', '--help'])
+test(
+  '"run --help" prints help',
+  testCLI,
+  ['run', '--help'],
+  async (t, { code, stdout }) => {
+    t.plan(2)
+    t.is(code, undefined)
+    t.true(stdout.length > 0)
+  }
+)
 
 test(
   'missing entrypoint',

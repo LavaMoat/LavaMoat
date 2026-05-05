@@ -10,7 +10,16 @@ import { createCLIMacros } from './cli-macros.js'
 
 const { testCLI } = createCLIMacros(test)
 
-test('"--help" prints help', testCLI, ['--help'])
+test(
+  '"--help" prints help',
+  testCLI,
+  ['--help'],
+  async (t, { code, stdout }) => {
+    t.plan(2)
+    t.is(code, undefined)
+    t.true(stdout.length > 0)
+  }
+)
 
 test(
   '"--version" matches package descriptor',

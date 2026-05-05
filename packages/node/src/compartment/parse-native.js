@@ -17,6 +17,8 @@ const { freeze, keys } = Object
 
 /**
  * @import {
+ *   CompartmentDescriptor,
+ *   ModuleConfiguration,
  *   ParseFn,
  *   ParserImplementation
  * } from '@endo/compartment-mapper'
@@ -27,7 +29,13 @@ const { freeze, keys } = Object
 /**
  * A "parser" for a native Node.js module (a.k.a. "Node.js addon")
  *
- * @type {ParseFn}
+ * @type {ParseFn<
+ *   CompartmentDescriptor<
+ *     ModuleConfiguration,
+ *     string,
+ *     LavaMoatEndoPackagePolicy
+ *   >
+ * >}
  */
 const parseNative = (
   bytes,
@@ -51,10 +59,7 @@ const parseNative = (
    * @type {ThirdPartyStaticModuleInterface['execute']}
    */
   const execute = (moduleEnvironmentRecord, compartment) => {
-    if (
-      /** @type {LavaMoatEndoPackagePolicy} */ (compartmentDescriptor?.policy)
-        ?.options?.native !== true
-    ) {
+    if (compartmentDescriptor?.policy?.options?.native !== true) {
       // TODO: we may be guaranteed a compartmentDescriptor. find out!
       throw new PermissionDeniedError(
         `Native modules are disallowed in package ${hrLabel(compartmentDescriptor?.label ?? compartment.name)}`
@@ -71,6 +76,8 @@ const parseNative = (
       }
     }
   }
+
+  parseNative.isSyncParser = true
 
   return {
     parser: NATIVE_PARSER_NAME,
