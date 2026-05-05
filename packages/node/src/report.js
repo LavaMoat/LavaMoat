@@ -1,70 +1,57 @@
 /**
  * Provides functions which report various types of _warnings_ to the user.
  *
+ * - {@link createModuleInspectionProgressReporter}: Creates a pair of functions
+ *   for reporting module inspection progress.
+ * - {@link reportInvalidCanonicalNames}: Reports resources from policy which
+ *   weren't found on disk and are thus not in the compartment map descriptor.
+ * - {@link reportSesViolations}: Logs SES violation warnings and suggested action
+ *   items
+ *
  * @packageDocumentation
  */
 
-import chalk from 'chalk'
-import { stripVTControlCharacters } from 'node:util'
 import { InvalidArgumentsError } from './error.js'
-import { hrCode, hrLabel, hrPath } from './format.js'
+import {
+  action,
+  chevron,
+  clearLine,
+  colorSplit,
+  deemphasis,
+  emphasis,
+  hazard,
+  hrCode,
+  hrLabel,
+  hrPath,
+  seconds,
+  spinner,
+  spinnerChars,
+  success,
+} from './format.js'
 import { log as defaultLog } from './log.js'
-import { isObjectyObject, pluralize, toKeypath } from './util.js'
+import { findCanonicalNameKeypath, noop, pluralize } from './util.js'
+import { fileURLToPath } from 'node:url'
 
 /**
- * @import {ReportInvalidOverridesOptions,
- * ReportModuleInspectionProgressFn,
- * ModuleInspectionProgressReporter,
- * ReportModuleInspectionProgressEndFn,
- * ReportSesViolationsOptions,
- * StructuredViolation,
- * StructuredViolationsResult} from './internal.js'
  * @import {CanonicalName} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {WriteStream} from 'node:tty'
+ * @import {
+ *   ModuleInspectionProgressReporter,
+ *   ReportInvalidCanonicalNames,
+ *   ReportModuleInspectionProgressEndFn,
+ *   ReportModuleInspectionProgressFn,
+ *   ReportSesViolationsOptions,
+ *   StructuredViolation,
+ *   StructuredViolationsResult
+ * } from './internal.js'
+ * @import {Loggerr} from './log.js'
  */
 
 /**
  * Default number of suggestions to make when reporting invalid canonical names
  * in policy
  */
-
 const DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS = 3
-
-/**
- * Gets the keypath for a canonical name within a LavaMoat policy object
- *
- * @param {LavaMoatPolicy} policy
- * @param {CanonicalName} canonicalName
- * @returns {string | undefined} The keypath as a string, or undefined if not
- *   found
- */
-const findCanonicalNameKeypath = (policy, canonicalName) => {
-  const { resources } = policy
-
-  // Check if it's a direct resource
-  if (canonicalName in resources) {
-    return toKeypath(['resources', canonicalName])
-  }
-
-  // Check nested packages
-  for (const [resourceName, resourcePolicy] of Object.entries(resources)) {
-    if (resourcePolicy.packages && canonicalName in resourcePolicy.packages) {
-      return toKeypath(['resources', resourceName, 'packages', canonicalName])
-    }
-  }
-
-  // Check include array
-  for (const include of policy.include ?? []) {
-    if (isObjectyObject(include) && include.name === canonicalName) {
-      return toKeypath(['include', include.name])
-    }
-    if (canonicalName === include) {
-      return toKeypath(['include', canonicalName])
-    }
-  }
-
-  return undefined
-}
 
 /**
  * Reports resources from policy which weren't found on disk and are thus not in
@@ -76,7 +63,7 @@ const findCanonicalNameKeypath = (policy, canonicalName) => {
  *   that were referenced in policy but not found
  * @param {Set<CanonicalName>} knownCanonicalNames - Set of all canonical names
  *   found in the compartment map
- * @param {ReportInvalidOverridesOptions} options
+ * @param {ReportInvalidCanonicalNames} options
  * @returns {void}
  * @internal
  */
@@ -148,6 +135,7 @@ export const reportInvalidCanonicalNames = (
       })
       .join('\n')
     log.warning(msg)
+    return
   }
 }
 
@@ -173,9 +161,26 @@ export const reportSesViolations = (
    */
   const formatViolation = (violation) => {
     const { path, line, column, type } = violation
-    const nicePath = hrPath(path)
-    const plainPath = stripVTControlCharacters(nicePath)
-    return `- ${chalk.yellowBright([plainPath, line, column].join(chalk.yellow(':')))} ${chalk.cyan(`(${type})`)}`
+    const plainPath = fileURLToPath(path)
+    const colRefPath = hrPath([plainPath, line, column].join(':'), true)
+    return `  ${deemphasis('▶')} ${colRefPath} ${deemphasis('—')} ${emphasis(type)}`
+  }
+
+  /**
+   * Prints warnings.
+   *
+   * @param {CanonicalName} canonicalName
+   * @param {string[]} warnings
+   * @returns {void}
+   */
+  const printWarnings = (canonicalName, warnings) => {
+    log.warning(
+      `Package ${hrLabel(canonicalName)} contains potential SES violations at the following ${pluralize(warnings.length, 'location')}:`
+    )
+
+    for (const warning of warnings) {
+      log.warning(warning)
+    }
   }
 
   let hasDynamicRequireViolations = false
@@ -189,54 +194,42 @@ export const reportSesViolations = (
     // Process primordial mutations
     if (primordialMutations.length > 0) {
       hasPrimordialMutationViolations = true
-      const warnings = primordialMutations.map(formatViolation)
-      log.warning(
-        `Package ${hrLabel(canonicalName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
-      )
+      printWarnings(canonicalName, primordialMutations.map(formatViolation))
     }
 
     // Process strict mode violations
     if (strictModeViolations.length > 0) {
       hasStrictModeViolations = true
-      const warnings = strictModeViolations.map(formatViolation)
-      log.warning(
-        `Package ${hrLabel(canonicalName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
-      )
+      printWarnings(canonicalName, strictModeViolations.map(formatViolation))
     }
 
     // Process dynamic requires
     if (dynamicRequires.length > 0) {
       hasDynamicRequireViolations = true
-      const warnings = dynamicRequires.map(formatViolation)
-      log.warning(
-        `Package ${hrLabel(canonicalName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
-      )
+      printWarnings(canonicalName, dynamicRequires.map(formatViolation))
     }
   }
 
-  const { bold } = chalk.yellowBright
-  // we only want to display these next two "summary" messages if we found
+  // we only want to display these "summary" messages if we found
   // violations of these specific type, and only once
+  let summaryMsg = `${hazard} `
   if (hasDynamicRequireViolations) {
-    log.warning(
-      `${bold('Dynamic requires')} inhibit policy generation; determine any required packages, edit policy overrides, then re-run policy generation.`
-    )
+    summaryMsg += `${emphasis('Dynamic requires')} ${action('inhibit policy generation')}; if package boundaries are crossed, execution will ${action('fail')}. To mitigate, determine dynamically-required modules/packages, and edit policy overrides (if necessary), then re-run policy generation. `
   }
   // these two can be combined since remediation is the same
   if (hasStrictModeViolations || hasPrimordialMutationViolations) {
-    let typeMsg = ''
     if (hasStrictModeViolations) {
-      typeMsg = bold('Strict-mode violations')
+      summaryMsg += emphasis('Strict-mode violations')
       if (hasPrimordialMutationViolations) {
-        typeMsg += ` and ${bold('primordial mutations')}`
+        summaryMsg += ` and ${emphasis('primordial mutations')}`
       }
     } else if (hasPrimordialMutationViolations) {
-      typeMsg = bold('Primordial mutations')
+      summaryMsg += emphasis('Primordial mutations')
     }
 
-    log.warning(
-      `${typeMsg} will likely fail at runtime under LavaMoat; patching is advised.`
-    )
+    summaryMsg += ` will likely ${action('fail')} at runtime if attempted; patching is advised.`
+
+    log.warning(summaryMsg)
   }
 }
 
@@ -246,16 +239,36 @@ export const reportSesViolations = (
  * If the console is not a TTY, this function will return a pair of functions
  * that do nothing.
  *
- * @param {boolean} disabled - If true, the reporter will not report progress
+ * @param {Object} options
+ * @param {Loggerr} [options.log] - Logger to use for reporting
+ * @param {WriteStream} [options.writeStream] - Stream to write progress to
+ * @param {boolean} [options.disabled] - If true, the reporter will not report
+ *   progress
  * @returns {ModuleInspectionProgressReporter}
  */
-export const createModuleInspectionProgressReporter = (disabled = false) => {
-  if (!process.stderr.isTTY || disabled) {
+export const createModuleInspectionProgressReporter = ({
+  log = defaultLog,
+  writeStream = process.stderr,
+  disabled = false,
+} = {}) => {
+  if (!writeStream.isTTY || disabled) {
     return {
-      reportModuleInspectionProgress: () => 0,
-      reportModuleInspectionProgressEnd: () => {},
+      reportModuleInspectionProgress: noop,
+      reportModuleInspectionProgressEnd: noop,
     }
   }
+
+  /**
+   * Counter for the spinner item
+   */
+  let spinnerCounter = 0
+
+  /**
+   * Start timestamp of the module inspection process
+   *
+   * @type {number}
+   */
+  let startTime
 
   /**
    * Reports progress of the module inspection process to the console.
@@ -266,31 +279,24 @@ export const createModuleInspectionProgressReporter = (disabled = false) => {
    * @type {ReportModuleInspectionProgressFn}
    */
   const reportModuleInspectionProgress = (
-    messageCount,
     inspectedModules,
     modulesToInspect
   ) => {
-    messageCount++
-    const trianglePos = ((messageCount - 1) % 3) + 1
-    const prefix = '   '.split('')
-
-    // Style the triangle based on position
-    let styledTriangle
-    if (trianglePos === 1) {
-      styledTriangle = chalk.dim('▶')
-    } else if (trianglePos === 2) {
-      styledTriangle = chalk.white('▶')
-    } else {
-      styledTriangle = chalk.whiteBright('▶')
-    }
-
-    prefix[trianglePos - 1] = styledTriangle
-    const prefixStr = prefix.join('')
-    const moduleStr = pluralize(modulesToInspect.size, 'module')
-    process.stderr.write(
-      `\r        ${chalk.dim('›')} ${prefixStr} ${chalk.white(`Inspecting ${moduleStr}: `)}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)}`
+    startTime ??= Date.now()
+    spinnerCounter++
+    const prefixStr = spinner(
+      spinnerChars[spinnerCounter % spinnerChars.length]
     )
-    return messageCount
+    const duration = Date.now() - startTime
+    const modulesPerSecond = inspectedModules.size / (duration / 1000)
+
+    const inspectedRatioStr = colorSplit(
+      `${inspectedModules.size}/${modulesToInspect.size}`,
+      { delimiter: '/', color: hrCode, delimiterColor: hrCode.dim }
+    )
+    writeStream.write(
+      `\r        ${chevron} ${prefixStr} ${action('Inspecting')} module ${inspectedRatioStr} (${seconds(modulesPerSecond)} modules/s)`
+    )
   }
 
   /**
@@ -302,10 +308,11 @@ export const createModuleInspectionProgressReporter = (disabled = false) => {
     inspectedModules,
     modulesToInspect
   ) => {
-    const prefix = `        ${chalk.dim('›')} `
-    const moduleStr = pluralize(modulesToInspect.size, 'module')
-    process.stderr.write(
-      `\r${prefix}${chalk.dim('▶')}${chalk.white('▶')}${chalk.whiteBright('▶')} ${chalk.white(`Inspecting ${moduleStr}: `)}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)} ${chalk.greenBright('✓')}\n`
+    const duration = Date.now() - startTime
+    const modulesPerSecond = inspectedModules.size / (duration / 1000)
+    clearLine()
+    log.info(
+      `${success} ${action('Inspected')} ${hrCode(modulesToInspect.size)} (${seconds(modulesPerSecond)} modules/s)`
     )
   }
 

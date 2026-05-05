@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Internal types used by `@lavamoat/node`.
  *
@@ -15,16 +14,15 @@ import type { CanonicalName } from '@endo/compartment-mapper/import.js'
 import type {
   BuiltinPolicy,
   GlobalPolicy,
+  GlobalPolicyValue,
   LavaMoatPolicy,
   Resources,
 } from '@lavamoat/types'
 import type { PackageJson, ValueOf } from 'type-fest'
-import type { MessageTypes, SES_VIOLATION_TYPES } from './constants.js'
+import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
-  FileUrlString,
   MergedLavaMoatPolicy,
-  SourceType,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
@@ -65,20 +63,6 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
 >
 
 /**
- * A function _or_ a constructor.
- *
- * @privateRemarks
- * I'm not entirely sure why `Function` does not satify one of the first two
- * union members, but it has to be here.
- * @internal
- */
-export type SomeFunction =
-  | (new (...args: any[]) => any)
-  | ((...args: any[]) => any)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  | Function
-
-/**
  * A `globalThis` object with unknown properties.
  *
  * This is basically just an object with anything in it, since we cannot be sure
@@ -88,20 +72,6 @@ export type SomeFunction =
  * @internal
  */
 export type SomeGlobalThis = Record<PropertyKey, unknown>
-
-/**
- * The parameters of a {@link SomeFunction}
- *
- * @template T Function or constructor
- * @internal
- */
-export type SomeParameters<T extends SomeFunction> = T extends new (
-  ...args: any[]
-) => any
-  ? ConstructorParameters<T>
-  : T extends (...args: any[]) => any
-    ? Parameters<T>
-    : never
 
 /**
  * Options for `readPolicy()`
@@ -161,11 +131,11 @@ export type RequiredReadNowPowers = ReadonlyArray<
 >
 
 /**
- * Options for `reportInvalidOverrides()`
+ * Options for {@link reportInvalidCanonicalNames}
  *
  * @internal
  */
-export type ReportInvalidOverridesOptions = ComposeOptions<
+export type ReportInvalidCanonicalNames = ComposeOptions<
   [
     WithPolicy,
     /**
@@ -175,7 +145,18 @@ export type ReportInvalidOverridesOptions = ComposeOptions<
     WithPolicyPath,
     WithLog,
     {
+      /**
+       * Maximum number of suggestions to make when reporting invalid canonical
+       * names
+       *
+       * @defaultValue 3
+       */
       maxSuggestions?: number
+      /**
+       * Description of the policy type being reported
+       *
+       * @defaultValue 'policy'
+       */
       what?: 'policy' | 'policy overrides'
     },
   ]
@@ -196,6 +177,7 @@ export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
 export interface LoadCompartmentMapResult {
   policy: MergedLavaMoatPolicy
   packageJsonMap: Map<string, PackageJson>
+  hasWarnings: boolean
 }
 
 /**
@@ -256,58 +238,6 @@ export interface WithPolicyPath {
 }
 
 /**
- * Base message type with required type property and id
- *
- * @internal
- */
-export interface BaseMessage {
-  /** Message type discriminant */
-  type: string
-  /** Task identifier */
-  id: string
-}
-
-/**
- * Options for {@link WorkerPool} constructor
- *
- * @template _TMessage Message type that extends BaseMessage
- * @template _TResponse Response type that extends BaseMessage
- * @internal
- */
-export interface WorkerPoolOptions<
-  _TMessage extends BaseMessage = BaseMessage,
-  _TResponse extends BaseMessage = BaseMessage,
-> {
-  /** How long workers can be idle before termination (ms) */
-  idleTimeout?: number
-
-  /**
-   * Maximum number of concurrent workers.
-   *
-   * Defaults to `os.availableParallelism() - 1` (minimum 1). Tasks submitted
-   * when all workers are busy will queue and dispatch as workers become
-   * available.
-   */
-  maxWorkers?: number
-}
-
-/**
- * Message type for requesting inspection
- *
- * @internal
- */
-export interface InspectMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['Inspect']
-  /** Source bytes */
-  source: Uint8Array
-  /** Type of source */
-  sourceType: SourceType
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
-}
-
-/**
  * A single structured violation with location information
  *
  * @internal
@@ -338,70 +268,145 @@ export interface StructuredViolationsResult {
 }
 
 /**
- * Message type for responding with global policy
+ * Per-module inspection results collected during the composed parse pipeline.
  *
  * @internal
  */
-export interface InspectionResultsMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['InspectionResults']
-  /** The resulting global policy */
+export interface ModuleInspectionResult {
   globalPolicy: GlobalPolicy | null
-  /** The resulting builtin policy */
   builtinPolicy: BuiltinPolicy | null
-  /** The resulting SES compatibility violations */
-  violations?: StructuredViolationsResult | null
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
-}
-
-/**
- * Message type for responding with an error
- *
- * @internal
- */
-export interface ErrorMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['Error']
-  /** Error message */
-  error: string
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
+  violations: StructuredViolationsResult | null
 }
 
 /**
  * Callback used to report the progress of the module inspection process
  *
- * @param {number} messageCount The number of messages inspected so far
- * @param {Set<FileUrlString>} inspectedModules The modules that have been
- *   inspected so far
- * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
- *   be inspected
- * @returns {number} The new message count
+ * @param inspectedModules The modules that have been inspected so far
+ * @param modulesToInspect The modules that still need to be inspected
+ * @returns The new message count
+ * @internal
  */
 export type ReportModuleInspectionProgressFn = (
-  messageCount: number,
-  inspectedModules: Set<FileUrlString>,
-  modulesToInspect: Set<FileUrlString>
-) => number
+  inspectedModules: Set<string>,
+  modulesToInspect: Set<string>
+) => void
 
 /**
  * Callback used to report the end of the module inspection process
  *
- * @param {Set<FileUrlString>} inspectedModules The modules that have been
- *   inspected so far
- * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
- *   be inspected
+ * @param inspectedModules The modules that have been inspected so far
+ * @param modulesToInspect The modules that still need to be inspected
+ * @internal
  */
 export type ReportModuleInspectionProgressEndFn = (
-  inspectedModules: Set<FileUrlString>,
-  modulesToInspect: Set<FileUrlString>
+  inspectedModules: Set<string>,
+  modulesToInspect: Set<string>
 ) => void
 
 /**
  * Object returned by `createModuleInspectionProgressReporter`
+ *
+ * @internal
  */
 export interface ModuleInspectionProgressReporter {
   reportModuleInspectionProgress: ReportModuleInspectionProgressFn
   reportModuleInspectionProgressEnd: ReportModuleInspectionProgressEndFn
 }
+
+/**
+ * Worker data passed to the policy-generation worker thread.
+ *
+ * @internal
+ */
+export interface PolicyGenWorkerData {
+  /**
+   * List of symbols referencing `globalThis`
+   */
+  globalRefs: readonly string[]
+  /**
+   * Per-language overrides for globals options. When present and the worker
+   * receives a message with a matching `language`, these options are merged
+   * with `globalsOptions`, with per-language values taking precedence.
+   */
+  globalsOptionsByLanguage?: Record<
+    string,
+    { ignoredRefs?: readonly string[]; globalRefs?: readonly string[] }
+  >
+
+  /**
+   * List of builtin modules
+   */
+  builtinModules: readonly string[]
+}
+
+/**
+ * Combined result returned by `createPolicyGenAnalyzerPass`.
+ *
+ * All three logical analyses (globals, builtins, violations) are performed in a
+ * single Babel traversal and returned as named fields to avoid positional tuple
+ * fragility.
+ *
+ * @internal
+ */
+export interface PolicyGenAnalysisResults {
+  /** Map of global name to policy value. */
+  globals: GlobalsAnalyzerResults
+  /** Set of builtin module names referenced by the module. */
+  builtins: BuiltinsAnalyzerResults
+  /** Serialized SES-compatibility violations, or `null` if none. */
+  violations: ViolationsAnalyzerResults
+}
+
+export interface ModuleInspectionProgressReporterOptions {
+  /**
+   * Reporter to use to report the progress of the module inspection process
+   */
+  reporter: ModuleInspectionProgressReporter
+  /**
+   * Modules to inspect
+   */
+  modulesToInspect: Set<string>
+  /**
+   * Modules that have been inspected
+   */
+  inspectedModules: Set<string>
+}
+
+/**
+ * Options for {@link createPolicyGenWorkerParsers}
+ *
+ * @internal
+ */
+export type CreatePolicyGenWorkerParsersOptions =
+  | (WithLog & ModuleInspectionProgressReporterOptions)
+  | WithLog
+
+/**
+ * Options for {@link createMjsExecParser} and {@link createCjsExecParser}
+ */
+export type ExecParserFactoryOptions = WithLog
+
+export type GlobalsAnalyzerResults = Map<string, GlobalPolicyValue>
+
+export type BuiltinsAnalyzerResults = Set<string>
+
+/**
+ * A structured-clone-safe snapshot of a single violation location.
+ */
+export interface ViolationLocation {
+  line: number
+  column: number
+}
+
+/**
+ * Serialized violations result suitable for transfer via `postMessage`.
+ *
+ * Unlike the raw `InspectSesCompatResult` from `lavamoat-tofu`, this type
+ * contains only plain numeric location data (no Babel path / AST node objects),
+ * making it safe to transfer with the structured clone algorithm.
+ */
+export type ViolationsAnalyzerResults = {
+  primordialMutations: ViolationLocation[]
+  strictModeViolations: ViolationLocation[]
+  dynamicRequires: ViolationLocation[]
+} | null
