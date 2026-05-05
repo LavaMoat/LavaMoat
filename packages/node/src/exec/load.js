@@ -1,5 +1,6 @@
 /**
- * Provides {@link load}, which only loads a compartment map.
+ * Provides {@link load}, which only loads a compartment map and returns an
+ * {@link ApplicationLoader} object.
  *
  * Import via `@lavamoat/node/load` to bypass SES initialization and
  * `lockdown()`.
@@ -14,10 +15,20 @@ import { defaultReadPowers } from '../compartment/power.js'
 import { ExecutionError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { reportInvalidCanonicalNames } from '../report.js'
+import { importHook, importNowHook } from '../compartment/import-hook.js'
+import { createExecParsers } from './exec-parsers.js'
 
 /**
- * @import {ImportLocationOptions, SyncImportLocationOptions, CanonicalName, PackageCompartmentMapDescriptor} from '@endo/compartment-mapper'
- * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
+ * @import {
+ *   CanonicalName,
+ *   ImportLocationOptions,
+ *   PackageCompartmentMapDescriptor,
+ *   SyncImportLocationOptions
+ * } from '@endo/compartment-mapper'
+ * @import {
+ *   ApplicationLoader,
+ *   ExecuteOptions
+ * } from '../types.js'
  */
 
 /**
@@ -27,6 +38,8 @@ import { reportInvalidCanonicalNames } from '../report.js'
  * Use cases:
  *
  * - {@link ApplicationLoader.sha512 hash validation} of the compartment map
+ * - Custom overrides for parsers and options to `@endo/compartment-mapper`'s
+ *   `loadFromMap()`
  * - Other as-of-yet-unknown things
  *
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
@@ -49,13 +62,11 @@ export const load = async (
 ) => {
   /** @type {PackageCompartmentMapDescriptor} */
   let packageCompartmentMap
-
   /** @type {Set<CanonicalName>} */
   let unknownCanonicalNames
   /** @type {Set<CanonicalName>} */
   let knownCanonicalNames
 
-  await Promise.resolve()
   try {
     ;({ packageCompartmentMap, unknownCanonicalNames, knownCanonicalNames } =
       await makeNodeCompartmentMap(entrypointPath, {
@@ -82,7 +93,14 @@ export const load = async (
   /** @type {ImportLocationOptions | SyncImportLocationOptions} */
   const loadFromMapOptions = {
     ...DEFAULT_ENDO_OPTIONS,
+    importHook,
+    importNowHook,
     ...otherOptions,
+    parserForLanguage: {
+      ...DEFAULT_ENDO_OPTIONS.parserForLanguage,
+      ...otherOptions.parserForLanguage,
+      ...createExecParsers(),
+    },
     dev: !prodOnly,
     policy: endoPolicy,
     log: log.debug.bind(log),
