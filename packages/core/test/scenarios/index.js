@@ -5,6 +5,7 @@ const builtin = require('./builtin')
 const config = require('./config')
 const endowments = require('./endowments')
 const exportsDefense = require('./exportsDefense')
+const policyEvasion = require('./policyEvasion')
 const globalWrites = require('./globalWrites')
 const moduleExports = require('./moduleExports')
 const transforms = require('./transforms')
@@ -24,6 +25,7 @@ const scenarios = [
   ...config,
   ...endowments,
   ...exportsDefense,
+  ...policyEvasion,
   ...globalWrites,
   ...moduleExports,
   ...transforms,

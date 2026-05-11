@@ -1,0 +1,11 @@
+{
+  "name": "poc1",
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "setup": "rm -f poc.txt"
+  },
+  "dependencies": {
+    "evil-package": "file:./node-modules/evil-package",
+    "vulnerable-package": "file:./node-modules/vulnerable-package"
+  }
+}

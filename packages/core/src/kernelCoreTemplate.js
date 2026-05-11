@@ -182,9 +182,6 @@
         return parentModuleExports
       }
 
-      // load module
-      let moduleExports = internalRequire(moduleId)
-
       // look up config for module
       const moduleData = loadModuleData(moduleId)
       const packageName = moduleData.package
@@ -207,6 +204,9 @@
         }
         throw new Error(`LavaMoat - required${typeText}package not in allowlist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
+
+      // load module after it's been verified to be allowed
+      let moduleExports = internalRequire(moduleId)
 
       // create minimal selection if its a builtin and the whole path is not selected for
       if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackagePolicy.builtin[moduleId]) {

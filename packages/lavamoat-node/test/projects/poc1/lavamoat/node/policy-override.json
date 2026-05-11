@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "evil-package": {
+      "builtin": {
+        "fs.writeFileSync": true
+      }
+    },
+    "vulnerable-package": {
+      "packages": {
+        "evil-package": false
+      }
+    }
+  }
+}
