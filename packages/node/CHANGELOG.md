@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.4](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.3...node-v1.0.4) (2026-05-13)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.2 to ^18.0.3
+
 ## [1.0.3](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.2...node-v1.0.3) (2026-04-22)
 
 

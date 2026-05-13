@@ -6,6 +6,13 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [5.0.2](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.1...allow-scripts-v5.0.2) (2026-05-13)
+
+
+### Bug Fixes
+
+* **allow-scripts:** fix issues with --skip-versions backward-compatibility ([#1969](https://github.com/LavaMoat/LavaMoat/issues/1969)) ([e68c877](https://github.com/LavaMoat/LavaMoat/commit/e68c877af251b81c4cd2be97d81226608d12fa60))
+
 ## [5.0.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.0...allow-scripts-v5.0.1) (2026-04-16)
 
 
