@@ -6,6 +6,13 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [18.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.2...lavamoat-core-v18.0.3) (2026-05-13)
+
+
+### Bug Fixes
+
+* **core:** move dependency execute after policy check ([#1974](https://github.com/LavaMoat/LavaMoat/issues/1974)) ([886e82f](https://github.com/LavaMoat/LavaMoat/commit/886e82fab62969d4fa45d974796dee45c1e37092))
+
 ## [18.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.1...lavamoat-core-v18.0.2) (2026-04-15)
 
 
