@@ -1,5 +1,5 @@
 const path = require('node:path')
-const { readFileSync } = require('node:fs')
+const { readFileSync, existsSync } = require('node:fs')
 const test = require('ava')
 const { parseForPolicy } = require('../src/parseForPolicy')
 const { runLavamoat } = require('./util')
@@ -169,6 +169,27 @@ test('execute - static require downstream from dynamic require', async (t) => {
     args: [entryId],
   })
   t.is(output.stdout, '{"b":42,"c":42}\n')
+})
+
+test('execute - out of policy', async (t) => {
+  const projectRoot = path.join(__dirname, 'projects', 'poc1')
+  const entryId = path.join(projectRoot, 'index.js')
+  const pocOutput = path.join(projectRoot, 'poc.txt')
+  const { output } = await runLavamoat({
+    cwd: projectRoot,
+    args: [entryId],
+  })
+  t.is(
+    output.stdout,
+    `{
+  "evilPackageImportAllowed": false,
+  "lavaMoatError": "LavaMoat - required package not in allowlist: package \\"vulnerable-package\\" requested \\"evil-package\\" as \\"evil-package\\""
+}\n`
+  )
+  t.true(
+    !existsSync(pocOutput),
+    'LavaMoat should have blocked the execution of the denied package, so the proof file should not exist'
+  )
 })
 
 test('policy - package with falsy main field', async (t) => {
