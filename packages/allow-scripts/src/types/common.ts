@@ -98,6 +98,7 @@ declare global {
   // runAllowedPackages.js
   export interface RunAllowedPackagesParams {
     rootDir: string
+    skipVersions?: boolean
   }
 
   export interface RunScriptParams {
@@ -108,6 +109,7 @@ declare global {
   // report.js
   export interface PrintPackagesListParams {
     rootDir: string
+    skipVersions?: boolean
   }
 
   export interface PrintMissingPoliciesIfAnyParams {

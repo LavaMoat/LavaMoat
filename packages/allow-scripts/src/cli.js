@@ -24,7 +24,7 @@ async function start() {
   switch (command) {
     // (default) run scripts
     case 'run': {
-      await runAllowedPackages({ rootDir })
+      await runAllowedPackages({ rootDir, skipVersions })
       return
     }
     // automatically set configuration
@@ -35,7 +35,7 @@ async function start() {
     // list packages
     case 'list':
     case 'debug': {
-      await printPackagesList({ rootDir })
+      await printPackagesList({ rootDir, skipVersions })
       return
     }
     case 'setup': {

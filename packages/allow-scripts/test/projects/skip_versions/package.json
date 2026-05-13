@@ -13,9 +13,8 @@
   "devDependencies": {},
   "lavamoat": {
     "allowScripts": {
-      "bbbb#1.0.99": true,
-      "aaaa#1.0.0": true,
-      "aaaa#1.0.99": false
+      "aaaa": true,
+      "bbbb": true
     }
   }
 }

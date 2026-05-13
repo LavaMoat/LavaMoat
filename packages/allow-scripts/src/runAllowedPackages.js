@@ -17,11 +17,11 @@ const { FEATURE } = require('./toggles.js')
  * @param {RunAllowedPackagesParams} params
  * @returns {Promise<void>}
  */
-async function runAllowedPackages({ rootDir }) {
+async function runAllowedPackages({ rootDir, skipVersions }) {
   const {
     configs: { lifecycle, bin },
     somePoliciesAreMissing,
-  } = await loadAllPackageConfigurations({ rootDir })
+  } = await loadAllPackageConfigurations({ rootDir, skipVersions })
 
   if (somePoliciesAreMissing) {
     console.log(
@@ -37,7 +37,7 @@ async function runAllowedPackages({ rootDir }) {
     process.exit(1)
   }
 
-  const { allowedWithVersion } = versionAwareMatcher(lifecycle.allowConfig)
+  const { isAllowed } = versionAwareMatcher(lifecycle.allowConfig, skipVersions)
 
   if (FEATURE.bins && bin.allowConfig) {
     // Consider: Might as well delete entire .bin and recreate in case it was left there
@@ -59,7 +59,7 @@ async function runAllowedPackages({ rootDir }) {
     const allowedPackagesWithScriptsLifecycleScripts = Array.from(
       lifecycle.packagesWithScripts.entries()
     )
-      .filter(([pattern]) => allowedWithVersion(pattern))
+      .filter(([pattern]) => isAllowed(pattern))
       .flatMap(([, packages]) => packages)
 
     console.log('running lifecycle scripts for event "preinstall"')

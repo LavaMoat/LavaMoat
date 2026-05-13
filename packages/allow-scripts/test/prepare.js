@@ -10,12 +10,14 @@ readdirSync(baseDir, { withFileTypes: true })
     (p) => p.isDirectory() && existsSync(join(baseDir, p.name, 'package.json'))
   )
   .forEach((dir) => {
+    console.log(`running "auto" command for project "${dir.name}"...`)
     execSync(
       [
         portableExecPath(process.execPath),
         normalize('../../../src/cli.js'),
         'auto',
         '--experimental-bins',
+        dir.name === 'skip_versions' ? '--skip-versions' : '',
       ].join(' '),
       {
         cwd: join(baseDir, dir.name),
