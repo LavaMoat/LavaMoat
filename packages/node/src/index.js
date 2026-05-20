@@ -18,13 +18,26 @@ export { run } from './exec/run.js'
 export { toEndoPolicy } from './policy-converter.js'
 export { generatePolicy } from './policy-gen/generate.js'
 export {
+  loadPolicy,
+  policyInput,
+  policyOverrideAuto,
+  policyOverrideNone,
+  policyOverrideSourceFromFile,
+  policyOverrideSourceFromInline,
+  policySourceFromDefault,
+  policySourceFromFile,
+  policySourceFromInline,
+} from './policy-input.js'
+export {
   assertPolicy,
+  isMergedWrapper,
   isPolicy,
   isTrusted,
-  loadPolicies,
   maybeReadPolicyOverride,
   mergePolicies,
   readPolicy,
+  unwrapMerged,
+  wrapMerged,
   writePolicy,
 } from './policy-util.js'
 export * from './types.js'
