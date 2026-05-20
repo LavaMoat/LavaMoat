@@ -197,11 +197,6 @@ export const SES_VIOLATION_TYPES = freeze(
 )
 
 /**
- * Symbol to brand a policy as a "merged" policy
- */
-export const MERGED_POLICY_FIELD = Symbol.for('@lavamoat/core/mergedPolicy')
-
-/**
  * Source type for ESM sources
  */
 export const SOURCE_TYPE_MODULE = 'module'

@@ -19,6 +19,7 @@ import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { action, hrCode, hrPath, seconds, success } from '../format.js'
 import { log as defaultLog, Loggerr } from '../log.js'
+import { wrapMerged } from '../policy-util.js'
 import { mergePolicies } from '../policy-util.js'
 import {
   createModuleInspectionProgressReporter,
@@ -36,7 +37,6 @@ import { GenerationError } from '../error.js'
 
 /**
  * @import {
- *   CanonicalName,
  *   PackageCompartmentMapDescriptor,
  *   PackageDependenciesHook,
  *   ReadNowPowers
@@ -56,7 +56,10 @@ import { GenerationError } from '../error.js'
  *   StructuredViolationsResult,
  *   UnknownCanonicalNames
  * } from '../internal.js'
- * @import {FileUrlString} from '../types.js'
+ * @import {
+ *   CanonicalName,
+ *   FileUrlString
+ * } from '../types.js'
  */
 
 const { keys } = Object
@@ -321,10 +324,11 @@ export const loadAndGeneratePolicy = async (
     packagePoliciesMap,
     rootUsePolicy
   )
+  const mergedPolicy = mergePolicies(unmergedPolicy, policyOverride)
   /**
    * This is the final generated policy
    */
-  const policy = mergePolicies(unmergedPolicy, policyOverride)
+  const policy = wrapMerged(mergedPolicy)
 
   // #region emit warnings
 
