@@ -8,14 +8,10 @@
 import nodeFs from 'node:fs'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
-import { InvalidArgumentsError } from '../error.js'
 import { action, hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
-import {
-  makeDefaultPolicyOverridePath,
-  makeDefaultPolicyPath,
-  maybeReadPolicyOverride,
-} from '../policy-util.js'
+import { policyInput, resolvePolicySources } from '../policy-input.js'
+import { maybeReadPolicyOverride } from '../policy-util.js'
 import { toAbsolutePath } from '../util.js'
 import { loadAndGeneratePolicy } from './load-for-policy.js'
 
@@ -38,9 +34,7 @@ import { loadAndGeneratePolicy } from './load-for-policy.js'
 export const generatePolicy = async (
   entrypoint,
   {
-    policyPath: rawPolicyPath,
-    policyOverridePath: rawPolicyOverridePath,
-    policyOverride,
+    policies,
     readPowers = defaultReadPowers,
     readFile = nodeFs.promises.readFile,
     log = defaultLog,
@@ -61,56 +55,40 @@ export const generatePolicy = async (
     `Project root must be an absolute path; got ${hrPath(rawProjectRootPath)}`
   )
 
-  /** @type {string} */
-  let policyPath
-  if (rawPolicyPath) {
-    policyPath = toAbsolutePath(
-      rawPolicyPath,
-      `Policy path must be an absolute path; got ${hrPath(rawPolicyPath)}`
-    )
-    log.debug(`Resolved provided policy path: ${hrPath(policyPath)}`)
-  } else {
-    policyPath = makeDefaultPolicyPath(projectRoot)
+  const input = policies ?? policyInput({ projectRoot })
+  const { policyPath: policyPath, overridePath } = resolvePolicySources(input)
+
+  if (policyPath) {
+    log.debug(`Resolved policy path: ${hrPath(policyPath)}`)
   }
 
-  /** @type {string | undefined} */
-  let policyOverridePath
   /**
    * Whether the policy override was loaded from disk by this function (as
    * opposed to being passed in by the caller as an object). Only when it was
    * loaded here do we honour `compact` and propagate `policyOverridePath`.
    */
   let overrideLoadedFromDisk = false
-  // the user may specify a policy override or a path to a policy override.
-  // in this case, we handle the path.
-  if (!policyOverride) {
-    if (rawPolicyOverridePath) {
-      policyOverridePath = toAbsolutePath(
-        rawPolicyOverridePath,
-        `Policy override path must be an absolute path; got ${hrPath(rawPolicyOverridePath)}`
-      )
+  /** @type {import('@lavamoat/types').LavaMoatPolicy | undefined} */
+  let resolvedPolicyOverride
+
+  if (input.override.kind === 'inline') {
+    resolvedPolicyOverride = input.override.policy
+  } else if (
+    (input.override.kind === 'file' || input.override.kind === 'auto') &&
+    overridePath
+  ) {
+    if (input.override.kind === 'file') {
       log.debug(
-        `Resolved provided policy override path: ${hrPath(policyOverridePath)}`
+        `Resolved provided policy override path: ${hrPath(overridePath)}`
       )
-    } else {
-      policyOverridePath = makeDefaultPolicyOverridePath({
-        policyPath,
-        projectRoot,
-      })
     }
-    policyOverride = await maybeReadPolicyOverride(policyOverridePath, {
+    resolvedPolicyOverride = await maybeReadPolicyOverride(overridePath, {
       readFile,
     })
-    overrideLoadedFromDisk = policyOverride !== undefined
-    if (overrideLoadedFromDisk && !rawPolicyOverridePath) {
-      log.info(
-        `Discovered policy override file at ${hrPath(policyOverridePath)}`
-      )
+    overrideLoadedFromDisk = resolvedPolicyOverride !== undefined
+    if (overrideLoadedFromDisk && input.override.kind === 'auto') {
+      log.info(`Discovered policy override file at ${hrPath(overridePath)}`)
     }
-  } else if (rawPolicyOverridePath) {
-    throw new InvalidArgumentsError(
-      `Ignoring user-provided policy override path ${hrPath(rawPolicyOverridePath)} because a policy override object was provided`
-    )
   }
 
   const niceEntrypointPath = hrPath(entrypointPath)
@@ -123,14 +101,14 @@ export const generatePolicy = async (
       ...generateOpts,
       trustRoot,
       readPowers,
-      policyOverride,
+      policyOverride: resolvedPolicyOverride,
       projectRoot,
       compact: overrideLoadedFromDisk ? compact : undefined,
     })
 
-  if (policyOverridePath && compactedPolicyOverride && !compact) {
+  if (overridePath && compactedPolicyOverride && !compact) {
     log.info(
-      `ℹ Policy override at ${hrPath(policyOverridePath)} contains redundant entries and may be compacted; try running again with ${hrCode('--compact-overrides')}`
+      `ℹ Policy override at ${hrPath(overridePath)} contains redundant entries and may be compacted; try running again with ${hrCode('--compact-overrides')}`
     )
   }
 
@@ -138,6 +116,6 @@ export const generatePolicy = async (
     policy,
     hasWarnings,
     compactedPolicyOverride,
-    policyOverridePath: overrideLoadedFromDisk ? policyOverridePath : undefined,
+    policyOverridePath: overrideLoadedFromDisk ? overridePath : undefined,
   }
 }

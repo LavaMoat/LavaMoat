@@ -3,12 +3,12 @@ import '../../../src/preamble.js'
 import test from 'ava'
 import { log, Loggerr } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
+import { unwrapMerged } from '../../../src/policy-util.js'
 import { keysOr } from '../../../src/util.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { fixtureFinder } from '../../test-util.js'
 import { createGeneratePolicyMacros } from './policy-macros.js'
 import path from 'node:path'
-import { MERGED_POLICY_FIELD } from '../../../src/constants.js'
 
 const e2eFixture = fixtureFinder(new URL('../../e2e/', import.meta.url))
 
@@ -183,7 +183,7 @@ test('path stability', async (t) => {
   for (const [iteration, result] of results.entries()) {
     if (result.status === 'fulfilled') {
       t.like(
-        result.value.policy,
+        unwrapMerged(result.value.policy),
         {
           resources: {
             [expectedCanonicalName]: {
@@ -412,7 +412,6 @@ test('additionalLocations support', async (t) => {
       },
     }
   )
-  delete (/** @type {any} */ (policy)[MERGED_POLICY_FIELD])
   t.snapshot(policy)
 })
 
@@ -430,7 +429,9 @@ test('untrusted root: override-declared root deps are seeded correctly', async (
     log.setLevel(Loggerr.EMERGENCY)
   }
 
-  const { policy } = await loadAndGeneratePolicy(entrypoint, {
+  const {
+    policy: { policy },
+  } = await loadAndGeneratePolicy(entrypoint, {
     trustRoot: false,
     log,
     policyOverride: {
