@@ -2,18 +2,26 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import { run } from '../../../src/exec/run.js'
+import {
+  policyInput,
+  policyOverrideNone,
+  policySourceFromInline,
+} from '../../../src/policy-input.js'
 
 test('root trust mismatch (untrusted root)', async (t) => {
   await t.throwsAsync(
     run('/some/file.js', {
-      policy: {
-        resources: {
-          foo: {},
-        },
-        root: {
-          usePolicy: 'foo',
-        },
-      },
+      policies: policyInput({
+        policy: policySourceFromInline({
+          resources: {
+            foo: {},
+          },
+          root: {
+            usePolicy: 'foo',
+          },
+        }),
+        override: policyOverrideNone(),
+      }),
       trustRoot: true,
     }),
     {
@@ -25,11 +33,14 @@ test('root trust mismatch (untrusted root)', async (t) => {
 test('root trust mismatch (trusted root)', async (t) => {
   await t.throwsAsync(
     run('/some/file.js', {
-      policy: {
-        resources: {
-          foo: {},
-        },
-      },
+      policies: policyInput({
+        policy: policySourceFromInline({
+          resources: {
+            foo: {},
+          },
+        }),
+        override: policyOverrideNone(),
+      }),
       trustRoot: false,
     }),
     {
