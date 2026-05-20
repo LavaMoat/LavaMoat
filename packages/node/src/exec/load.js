@@ -20,15 +20,15 @@ import { createExecParsers } from './exec-parsers.js'
 
 /**
  * @import {
- *   CanonicalName,
  *   ImportLocationOptions,
  *   PackageCompartmentMapDescriptor,
  *   SyncImportLocationOptions
- * } from '@endo/compartment-mapper'
+ * } from "@endo/compartment-mapper"
  * @import {
  *   ApplicationLoader,
- *   ExecuteOptions
- * } from '../types.js'
+ *   CanonicalName,
+ *   LoadOptions
+ * } from "../types.js"
  */
 
 /**
@@ -44,7 +44,7 @@ import { createExecParsers } from './exec-parsers.js'
  *
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypointPath Entry point of application
- * @param {ExecuteOptions} [options] Options
+ * @param {LoadOptions} [options] Options
  * @returns {Promise<ApplicationLoader<T>>} Object with `import()` method
  * @public
  */

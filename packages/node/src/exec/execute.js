@@ -16,7 +16,7 @@ import { seconds } from '../format.js'
  * @import {
  *   ApplicationLoader,
  *   ExecuteOptions
- * } from '../types.js'
+ * } from "../types.js"
  */
 
 /**

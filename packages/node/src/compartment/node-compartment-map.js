@@ -15,7 +15,6 @@ import { defaultReadPowers } from './power.js'
 
 /**
  * @import {
- *   CanonicalName,
  *   CompartmentMapDescriptor,
  *   MapNodeModulesOptions,
  *   PackageCompartmentDescriptorName,
@@ -30,6 +29,7 @@ import { defaultReadPowers } from './power.js'
  *   MakeNodeCompartmentMapOptions,
  *   MakeNodeCompartmentMapResult
  * } from "../internal.js"
+ * @import {CanonicalName} from "../types.js"
  */
 
 const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])

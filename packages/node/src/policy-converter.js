@@ -27,24 +27,25 @@ import {
   LAVAMOAT_PKG_POLICY_NATIVE,
 } from './constants.js'
 import { ConversionError } from './error.js'
-import { isMergedPolicy, loadPolicies } from './policy-util.js'
+import { unwrapMerged } from './policy-util.js'
 import { isArray, isBoolean } from './util.js'
 
 const { create, entries, fromEntries } = Object
 
 /**
- * @import {GlobalPolicy,
+ * @import {
+ *   GlobalPolicy,
+ *   LavaMoatPolicy,
  *   PackagePolicy,
- *   ResourcePolicy,
- *   LavaMoatPolicy} from '@lavamoat/types'
- * @import {LavaMoatEndoPackagePolicy,
+ *   ResourcePolicy
+ * } from "@lavamoat/types"
+ * @import {
+ *   LavaMoatEndoPackagePolicy,
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
- *   ToEndoPolicyOptions,
- *   Resources,
- *   MergedLavaMoatPolicy,
- *   ToEndoPolicyOptionsWithoutPolicyOverride,
- *   UnmergedLavaMoatPolicy} from './types.js'
+ *   Merged,
+ *   Resources
+ * } from "./types.js"
  */
 
 /**
@@ -224,57 +225,41 @@ const convertToEndoPackagePolicy = (resources) => {
 }
 
 /**
- * Converts a LavaMoat policy to an Endo policy.
+ * Converts a merged LavaMoat policy to an Endo policy.
  *
- * **Will not** read policy overrides; assumes `policy` has already been merged.
+ * Requires an already-merged policy in the {@link Merged} wrapper. Use
+ * {@link loadPolicy} to obtain a merged policy.
  *
- * Performs validation of policy.
+ * @example
  *
- * @overload
- * @param {MergedLavaMoatPolicy} policy LavaMoat policy to convert
- * @param {ToEndoPolicyOptionsWithoutPolicyOverride} [options] Options for
- *   conversion
+ * ```js
+ * import { loadPolicy, policyInput, policySourceFromFile, toEndoPolicy } from '@lavamoat/node'
+ *
+ * const merged = await loadPolicy(policyInput({ primary: policySourceFromFile(path) }))
+ * const endoPolicy = await toEndoPolicy(merged)
+ * ```
+ *
+ * @param {Merged} merged A merged policy wrapper (from {@link loadPolicy} or
+ *   {@link wrapMerged})
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
-
-/**
- * Given a path to a policy, converts a LavaMoat policy to an Endo policy.
- *
- * Takes policy overrides into account, if provided.
- *
- * Performs validation of policy and policy overrides.
- *
- * @overload
- * @param {string | URL | UnmergedLavaMoatPolicy} policyPath Path or URL to
- *   policy file)
- * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- */
-
-/**
- * Converts a LavaMoat policy to an Endo policy.
- *
- * Performs validation of policy and policy overrides.
- *
- * @privateRemarks
- * The overloads aren't strictly necessary, but they're a little nicer to
- * understand for consumers.
- * @param {MergedLavaMoatPolicy | LavaMoatPolicy | string | URL} [policyOrPolicyPath]
- *   LavaMoat policy to convert (or path to policy file)
- * @param {ToEndoPolicyOptions | ToEndoPolicyOptionsWithoutPolicyOverride} [options]
- *   Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- */
-export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
+export const toEndoPolicy = async (merged) => {
   await Promise.resolve()
+  const policy = unwrapMerged(merged)
+  return convertToEndoPolicy(policy)
+}
 
-  const policy = isMergedPolicy(policyOrPolicyPath)
-    ? policyOrPolicyPath
-    : await loadPolicies(policyOrPolicyPath, options)
-
+/**
+ * Converts a validated, merged `LavaMoatPolicy` into a `LavaMoatEndoPolicy`.
+ *
+ * This is the pure conversion step — it does not load or merge anything.
+ *
+ * @param {LavaMoatPolicy} policy A merged LavaMoat policy
+ * @returns {LavaMoatEndoPolicy}
+ * @internal
+ */
+const convertToEndoPolicy = (policy) => {
   const lavamoatResources = /** @type {Resources} */ (
     policy.resources ?? create(null)
   )
@@ -317,12 +302,9 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
     entry = ENDO_POLICY_ENTRY_TRUSTED
   }
 
-  /** @type {LavaMoatEndoPolicy} */
-  const endoPolicy = {
+  return {
     ...ENDO_POLICY_BOILERPLATE,
     [ENDO_POLICY_RESOURCES]: resources,
     [ENDO_POLICY_ENTRY]: entry,
   }
-
-  return endoPolicy
 }

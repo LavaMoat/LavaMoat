@@ -6,10 +6,12 @@
  */
 
 import type {
+  ImportLocationOptions,
   MapNodeModulesOptions,
   PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
+  SyncImportLocationOptions,
 } from '@endo/compartment-mapper'
 import type { CanonicalName } from '@endo/compartment-mapper/import.js'
 import type {
@@ -19,15 +21,14 @@ import type {
   LavaMoatPolicy,
   Resources,
 } from '@lavamoat/types'
-import type { PackageJson, ValueOf } from 'type-fest'
+import type { Except, PackageJson, ValueOf } from 'type-fest'
 import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
-  MergedLavaMoatPolicy,
+  Merged,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
-  WithPolicyOverride,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
@@ -71,7 +72,7 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
   [
     WithLoadForMapOptions,
     WithReadPowersAndTrust,
-    WithPolicyOverride,
+    { policyOverride?: LavaMoatPolicy },
     WithProjectRoot,
     WithCompact,
   ]
@@ -101,6 +102,41 @@ export type ReadPolicyOptions = ComposeOptions<[WithReadFile]>
  * @internal
  */
 export type ReadPolicyOverrideOptions = ComposeOptions<[WithReadFile]>
+
+/**
+ * The primary half of {@link ResolvedPolicySources}: exactly one of `policyPath`
+ * or `policy` is set.
+ *
+ * @internal
+ */
+export type ResolvedPrimarySource =
+  | { policyPath: string; policy?: never }
+  | { policyPath?: never; policy: LavaMoatPolicy }
+
+/**
+ * The override half of {@link ResolvedPolicySources}: at most one of
+ * `overridePath` or `overridePolicy` is set. Both are absent when the override
+ * source is `{ kind: 'none' }`.
+ *
+ * @internal
+ */
+export type ResolvedOverrideSource =
+  | { overridePath: string; overridePolicy?: never }
+  | { overridePath?: never; overridePolicy: LavaMoatPolicy }
+  | { overridePath?: never; overridePolicy?: never }
+
+/**
+ * Concrete paths and/or inline values resolved from a {@link PolicyInput}.
+ *
+ * Produced by `resolvePolicySources`. Modelled as the intersection of two
+ * discriminated XOR pairs so consumers can narrow `policy` vs `policyPath` (and
+ * `overridePolicy` vs `overridePath`) via property access on the resolved
+ * object.
+ *
+ * @internal
+ */
+export type ResolvedPolicySources = ResolvedPrimarySource &
+  ResolvedOverrideSource
 
 /**
  * Options for `resolveBinScript()`
@@ -190,7 +226,7 @@ export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
  * @internal
  */
 export interface LoadAndGeneratePolicyResult {
-  policy: MergedLavaMoatPolicy
+  policy: Merged<LavaMoatPolicy>
   packageJsonMap: Map<string, PackageJson>
   hasWarnings: boolean
   /**
@@ -462,6 +498,8 @@ export interface ViolationLocation {
  * Unlike the raw `InspectSesCompatResult` from `lavamoat-tofu`, this type
  * contains only plain numeric location data (no Babel path / AST node objects),
  * making it safe to transfer with the structured clone algorithm.
+ *
+ * @internal
  */
 export type ViolationsAnalyzerResults = {
   primordialMutations: ViolationLocation[]

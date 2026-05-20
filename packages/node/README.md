@@ -140,6 +140,67 @@ To see help for the `generate` command, execute:
 npx exec lavamoat generate --help
 ```
 
+## Migration Guide
+
+See [`MIGRATION.md`](./MIGRATION.md) for a migration instructions when updating to a new major version of `@lavamoat/node`.
+
+## Programmatic API
+
+### Policy Loading API
+
+`@lavamoat/node` exposes a typed, composable API for loading policies programmatically.
+
+```js
+import {
+  loadPolicy,
+  policyInput,
+  policyOverrideAuto,
+  policySourceFromFile,
+  toEndo,
+} from '@lavamoat/node'
+
+// Build a structured input — no runtime polymorphism.
+const input = policyInput({
+  policy: policySourceFromFile('/app/lavamoat/node/policy.json'),
+  override: policyOverrideAuto('/app'), // optional project root
+})
+
+// Load and merge.
+const merged = await loadPolicy(input)
+
+// Convert to an Endo policy for use with the runtime.
+const endoPolicy = await toEndo(merged)
+
+// Access the underlying LavaMoatPolicy from the wrapper.
+console.log(merged.policy.resources)
+```
+
+#### Helper factories
+
+| Factory                                  | Returns                                                 |
+| ---------------------------------------- | ------------------------------------------------------- |
+| `policySourceFromFile(path)`             | `PolicySource` reading from a file                      |
+| `policySourceFromInline(policy)`         | `PolicySource` using an in-memory object                |
+| `policySourceFromDefault([projectRoot])` | `PolicySource` using the default path                   |
+| `policyOverrideSourceFromFile(path)`     | `PolicyOverrideSource` reading from a file              |
+| `policyOverrideSourceFromInline(policy)` | `PolicyOverrideSource` using an in-memory object        |
+| `policyOverrideAuto([projectRoot])`      | `PolicyOverrideSource` auto-detecting the override file |
+| `policyOverrideNone()`                   | `PolicyOverrideSource` that disables override loading   |
+
+#### The `Merged<T>` wrapper
+
+`loadPolicy` returns a `Merged<LavaMoatPolicy>` — a plain object `{ policy, merged: true }`. Unlike the legacy symbol-branded `MergedLavaMoatPolicy`, this form survives `JSON.stringify`. Use `unwrapMerged(merged)` to extract the raw policy.
+
+```js
+import { isMergedWrapper, unwrapMerged, wrapMerged } from '@lavamoat/node'
+
+isMergedWrapper(merged) // true
+unwrapMerged(merged) // LavaMoatPolicy
+wrapMerged(someLegacyPolicy) // Merged<LavaMoatPolicy>
+```
+
+Upgrading from v1.x? See [`MIGRATION.md`](./MIGRATION.md).
+
 ## Known Issues
 
 The following issues (or missing features) are _intended to be resolved_:

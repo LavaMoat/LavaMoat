@@ -11,10 +11,15 @@ import { isMainThread, workerData } from 'node:worker_threads'
 import { makeReadPowers } from '../../src/compartment/power.js'
 import { run } from '../../src/exec/run.js'
 import { log as defaultLog } from '../../src/log.js'
+import {
+  policyInput,
+  policyOverrideNone,
+  policySourceFromInline,
+} from '../../src/policy-input.js'
 
 /**
- * @import {FsInterface} from '@endo/compartment-mapper';
- * @import {RunnerWorkerData} from '../types.js';
+ * @import {FsInterface} from "@endo/compartment-mapper"
+ * @import {RunnerWorkerData} from "../types.js"
  */
 
 if (isMainThread) {
@@ -49,9 +54,15 @@ const log = new Loggerr({
   level: Loggerr.EMERGENCY,
 })
 
-void run(entryPath, { policy, scuttleGlobalThis, readPowers, log }).catch(
-  (err) => {
-    defaultLog.error(err)
-    process.exitCode = 1
-  }
-)
+void run(entryPath, {
+  policies: policyInput({
+    policy: policySourceFromInline(policy),
+    override: policyOverrideNone(),
+  }),
+  scuttleGlobalThis,
+  readPowers,
+  log,
+}).catch((err) => {
+  defaultLog.error(err)
+  process.exitCode = 1
+})
