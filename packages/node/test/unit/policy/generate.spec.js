@@ -3,6 +3,7 @@ import '../../../src/preamble.js'
 import test from 'ava'
 import { log, Loggerr } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
+import { unwrapMerged } from '../../../src/policy-util.js'
 import { keysOr } from '../../../src/util.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createGeneratePolicyMacros } from './policy-macros.js'
@@ -178,7 +179,7 @@ test('path stability', async (t) => {
   for (const [iteration, result] of results.entries()) {
     if (result.status === 'fulfilled') {
       t.like(
-        result.value.policy,
+        unwrapMerged(result.value.policy),
         {
           resources: {
             [expectedCanonicalName]: {
