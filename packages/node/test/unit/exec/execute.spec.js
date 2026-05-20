@@ -2,6 +2,11 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import { run } from '../../../src/exec/run.js'
+import {
+  policyInput,
+  policyOverrideNone,
+  policySourceFromInline,
+} from '../../../src/policy-input.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createExecMacros } from './exec-macros.js'
 
@@ -55,11 +60,9 @@ test('policy enforcement - untrusted root', async (t) => {
     new URL('policy-enforcement.json', JSON_FIXTURE_DIR_URL)
   )
   await t.throwsAsync(
-    run(
-      '/node_modules/app/app.js',
-
-      {
-        policy: {
+    run('/node_modules/app/app.js', {
+      policies: policyInput({
+        policy: policySourceFromInline({
           resources: {
             app: {
               packages: {
@@ -75,11 +78,12 @@ test('policy enforcement - untrusted root', async (t) => {
           root: {
             usePolicy: 'app',
           },
-        },
-        readPowers,
-        trustRoot: false,
-      }
-    ),
+        }),
+        override: policyOverrideNone(),
+      }),
+      readPowers,
+      trustRoot: false,
+    }),
     {
       message: `Cannot read properties of undefined (reading 'pid')`,
     }
