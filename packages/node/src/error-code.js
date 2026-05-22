@@ -13,9 +13,9 @@
 export const ErrorCodes = Object.freeze(
   /** @type {const} */ ({
     AttenuationFailure: 'LMN_ATTENUATION_FAILURE',
-    GenerationFailure: 'LMN_GENERATION_FAILURE',
-    ExecutionFailure: 'LMN_EXECUTION_FAILURE',
     ConversionFailure: 'LMN_CONVERSION_FAILURE',
+    ExecutionFailure: 'LMN_EXECUTION_FAILURE',
+    GenerationFailure: 'LMN_GENERATION_FAILURE',
     InvalidArguments: 'LMN_INVALID_ARGUMENTS',
     InvalidPolicy: 'LMN_INVALID_POLICY',
     NoBinScript: 'LMN_NO_BIN_SCRIPT',

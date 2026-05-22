@@ -7,6 +7,7 @@ import test from 'ava'
 import { loadScenarios } from 'lavamoat-core/test/scenarios/index.js'
 // @ts-expect-error - needs types
 import { runAndTestScenario } from 'lavamoat-core/test/util.js'
+
 import { createScenarioRunner } from './scenario-util.js'
 
 /**

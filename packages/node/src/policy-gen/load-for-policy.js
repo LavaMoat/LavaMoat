@@ -10,6 +10,7 @@ import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import chalk from 'chalk'
 import { utils as tofuUtils } from 'lavamoat-tofu'
 import { fileURLToPath } from 'node:url'
+
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
@@ -69,26 +70,26 @@ const { keys } = Object
 export const loadAndGeneratePolicy = async (
   entrypointPath,
   {
-    readPowers = defaultReadPowers,
-    policyOverride,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     log = defaultLog,
+    policyOverride,
     prodOnly,
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...options
   } = {}
 ) => {
   const {
-    packageJsonMap,
-    packageCompartmentMap,
-    unknownCanonicalNames,
     knownCanonicalNames,
+    packageCompartmentMap,
+    packageJsonMap,
     rootUsePolicy,
+    unknownCanonicalNames,
   } = await makeNodeCompartmentMap(entrypointPath, {
-    readPowers,
-    prodOnly,
     log,
-    trustRoot,
     policyOverride,
+    prodOnly,
+    readPowers,
+    trustRoot,
   })
 
   /* c8 ignore next */
@@ -196,9 +197,37 @@ export const loadAndGeneratePolicy = async (
   try {
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
+      _preload: preload,
       importHook: nullImportHook,
       log: log.debug.bind(log),
-      _preload: preload,
+      /**
+       * Called for each module source that Endo finds.
+       *
+       * We use this to inspect each module for globals, builtins, and SES
+       * compatibility violations.
+       */
+      moduleSourceHook: ({ canonicalName: rawCanonicalName, moduleSource }) => {
+        if ('exit' in moduleSource && moduleSource.exit) {
+          if (
+            !ALL_BUILTIN_MODULES.has(moduleSource.exit) &&
+            // these are essentially duplicates; the same thing happens for `foo/package.json` and `foo`.
+            !moduleSource.exit.endsWith('package.json')
+          ) {
+            warnings.push(
+              `${hrLabel(moduleSource.exit)} is not a builtin module, but was loaded as a builtin from ${hrLabel(rawCanonicalName)}. This may be due to an implicit dependency; ensure ${hrLabel(moduleSource.exit)} is explicitly listed as a dependency in ${hrLabel(rawCanonicalName)}'s package.json.`
+            )
+          }
+          return
+        }
+        if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
+          return
+        }
+        const canonicalName =
+          rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
+            ? rootUsePolicy
+            : rawCanonicalName
+        return inspectModuleSource(moduleSource, canonicalName)
+      },
       /**
        * Called for each package in the compartment map with a list of
        * connections (which are also canonical names).
@@ -226,34 +255,6 @@ export const loadAndGeneratePolicy = async (
         if (keys(packagePolicy).length > 0) {
           packagePoliciesMap.set(canonicalName, packagePolicy)
         }
-      },
-      /**
-       * Called for each module source that Endo finds.
-       *
-       * We use this to inspect each module for globals, builtins, and SES
-       * compatibility violations.
-       */
-      moduleSourceHook: ({ moduleSource, canonicalName: rawCanonicalName }) => {
-        if ('exit' in moduleSource && moduleSource.exit) {
-          if (
-            !ALL_BUILTIN_MODULES.has(moduleSource.exit) &&
-            // these are essentially duplicates; the same thing happens for `foo/package.json` and `foo`.
-            !moduleSource.exit.endsWith('package.json')
-          ) {
-            warnings.push(
-              `${hrLabel(moduleSource.exit)} is not a builtin module, but was loaded as a builtin from ${hrLabel(rawCanonicalName)}. This may be due to an implicit dependency; ensure ${hrLabel(moduleSource.exit)} is explicitly listed as a dependency in ${hrLabel(rawCanonicalName)}'s package.json.`
-            )
-          }
-          return
-        }
-        if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
-          return
-        }
-        const canonicalName =
-          rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
-            ? rootUsePolicy
-            : rawCanonicalName
-        return inspectModuleSource(moduleSource, canonicalName)
       },
       ...options,
     })
@@ -291,14 +292,14 @@ export const loadAndGeneratePolicy = async (
       policyOverride,
       rootUsePolicy
     )
-    return { policy, packageJsonMap }
+    return { packageJsonMap, policy }
   } finally {
     // we only check this if we have a policy override, because we're assuming
     // the policy we just generated is valid, which may be a bad idea.
     if (policyOverride) {
       reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
-        policy: policyOverride,
         log,
+        policy: policyOverride,
         what: 'policy overrides',
       })
     }
@@ -467,16 +468,16 @@ const createModuleSourceInspector = (
     if ('error' in moduleSource || 'exit' in moduleSource) {
       return
     }
-    const { bytes: source, location: id, language } = moduleSource
+    const { bytes: source, language, location: id } = moduleSource
     const type = MessageTypes.Inspect
     /** @type {SourceType | undefined} */
     let sourceType
     switch (language) {
-      case LANGUAGE_MJS:
-        sourceType = SOURCE_TYPE_MODULE
-        break
       case LANGUAGE_CJS:
         sourceType = SOURCE_TYPE_SCRIPT
+        break
+      case LANGUAGE_MJS:
+        sourceType = SOURCE_TYPE_MODULE
         break
       default: {
         log.debug(
@@ -504,8 +505,8 @@ const createModuleSourceInspector = (
     if (!workerTask) {
       /** @type {InspectMessage} */
       const message = {
-        source,
         id,
+        source,
         sourceType,
         type,
       }
@@ -593,7 +594,7 @@ const createInspectionResultsHandler = (
    *
    * @param {InspectionResultsMessage} message
    */
-  return ({ globalPolicy, builtinPolicy, violations }) => {
+  return ({ builtinPolicy, globalPolicy, violations }) => {
     if (globalPolicy) {
       const currentGlobalPolicy = globalsForPackage.get(canonicalName)
       globalsForPackage.set(canonicalName, {
@@ -614,6 +615,10 @@ const createInspectionResultsHandler = (
       const currentViolations = violationsForPackage.get(canonicalName)
       if (currentViolations) {
         violationsForPackage.set(canonicalName, {
+          dynamicRequires: [
+            ...currentViolations.dynamicRequires,
+            ...violations.dynamicRequires,
+          ],
           primordialMutations: [
             ...currentViolations.primordialMutations,
             ...violations.primordialMutations,
@@ -621,10 +626,6 @@ const createInspectionResultsHandler = (
           strictModeViolations: [
             ...currentViolations.strictModeViolations,
             ...violations.strictModeViolations,
-          ],
-          dynamicRequires: [
-            ...currentViolations.dynamicRequires,
-            ...violations.dynamicRequires,
           ],
         })
       } else {

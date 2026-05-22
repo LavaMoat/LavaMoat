@@ -22,6 +22,7 @@ import path from 'node:path'
 import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+
 import * as constants from './constants.js'
 import { run } from './exec/run.js'
 import { hrPath } from './format.js'
@@ -206,10 +207,10 @@ const main = async (args = hideBin(process.argv)) => {
     .options({
       bin: {
         alias: ['b'],
-        type: 'boolean',
         description: 'Resolve entrypoint as a bin script',
         global: true,
         group: BEHAVIOR_GROUP,
+        type: 'boolean',
       },
 
       // #region path args
@@ -224,58 +225,58 @@ const main = async (args = hideBin(process.argv)) => {
 
       policy: {
         alias: ['p'],
-        describe: 'Filepath to a policy file',
-        type: 'string',
-        normalize: true,
         default: constants.DEFAULT_POLICY_PATH,
-        nargs: 1,
-        requiresArg: true,
+        describe: 'Filepath to a policy file',
         global: true,
         group: PATH_GROUP,
+        nargs: 1,
+        normalize: true,
+        requiresArg: true,
+        type: 'string',
       },
       'policy-override': {
         alias: ['o'],
-        describe: 'Filepath to a policy override file',
-        type: 'string',
-        normalize: true,
         defaultDescription: `"${constants.DEFAULT_POLICY_OVERRIDE_PATH}"`,
-        nargs: 1,
-        requiresArg: true,
+        describe: 'Filepath to a policy override file',
         global: true,
         group: PATH_GROUP,
-      },
-      'project-root': {
-        alias: ['root'],
-        describe: 'Path to application root directory',
-        type: 'string',
         nargs: 1,
-        requiresArg: true,
         normalize: true,
-        default: process.cwd(),
-        defaultDescription: '(current directory)',
-        coerce: path.resolve,
+        requiresArg: true,
+        type: 'string',
+      },
+      'prod-only': {
+        describe: 'Exclude development dependencies',
         global: true,
-        group: PATH_GROUP,
+        group: BEHAVIOR_GROUP,
+        type: 'boolean',
       },
       // #endregion
 
-      'prod-only': {
-        describe: 'Exclude development dependencies',
-        type: 'boolean',
+      'project-root': {
+        alias: ['root'],
+        coerce: path.resolve,
+        default: process.cwd(),
+        defaultDescription: '(current directory)',
+        describe: 'Path to application root directory',
         global: true,
-        group: BEHAVIOR_GROUP,
-      },
-      verbose: {
-        describe: 'Enable verbose logging',
-        type: 'boolean',
-        global: true,
-        group: BEHAVIOR_GROUP,
+        group: PATH_GROUP,
+        nargs: 1,
+        normalize: true,
+        requiresArg: true,
+        type: 'string',
       },
       quiet: {
         describe: 'Disable all logging',
-        type: 'boolean',
         global: true,
         group: BEHAVIOR_GROUP,
+        type: 'boolean',
+      },
+      verbose: {
+        describe: 'Enable verbose logging',
+        global: true,
+        group: BEHAVIOR_GROUP,
+        type: 'boolean',
       },
     })
     .conflicts('quiet', 'verbose')
@@ -336,10 +337,10 @@ const main = async (args = hideBin(process.argv)) => {
       (yargs) =>
         yargs
           .positional('entrypoint', {
+            demandOption: true,
             describe:
               'Path to the application entry point; relative to --project-root',
             type: 'string',
-            demandOption: true,
           })
           /**
            * These options are hidden because we don't want to encourage running
@@ -356,37 +357,15 @@ const main = async (args = hideBin(process.argv)) => {
             /**
              * @experimental
              */
-            'trust-root': {
-              type: 'boolean',
-              hidden: true,
-              describe: 'Force trusting root compartment [EXPERIMENTAL]',
-              group: BEHAVIOR_GROUP,
-            },
-            /**
-             * @experimental
-             */
             'generate-recklessly': {
-              type: 'boolean',
+              default: false,
               describe:
                 'Generate & write a policy file on-the-fly [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
-              default: false,
               hidden: true,
-            },
-            /**
-             * @experimental
-             */
-            write: {
               type: 'boolean',
-              describe: 'Write policy file(s) to disk [EXPERIMENTAL]',
-              group: BEHAVIOR_GROUP,
-              implies: 'generate-recklessly',
-              hidden: true,
             },
             scuttle: {
-              type: 'boolean',
-              describe: 'Enable scuttling of globalThis',
-              group: BEHAVIOR_GROUP,
               coerce:
                 /**
                  * This is just about all we can do on the CLI without further
@@ -396,6 +375,28 @@ const main = async (args = hideBin(process.argv)) => {
                  * @returns {LavaMoatScuttleOpts}
                  */
                 (value) => (value ? { enabled: true } : { enabled: false }),
+              describe: 'Enable scuttling of globalThis',
+              group: BEHAVIOR_GROUP,
+              type: 'boolean',
+            },
+            /**
+             * @experimental
+             */
+            'trust-root': {
+              describe: 'Force trusting root compartment [EXPERIMENTAL]',
+              group: BEHAVIOR_GROUP,
+              hidden: true,
+              type: 'boolean',
+            },
+            /**
+             * @experimental
+             */
+            write: {
+              describe: 'Write policy file(s) to disk [EXPERIMENTAL]',
+              group: BEHAVIOR_GROUP,
+              hidden: true,
+              implies: 'generate-recklessly',
+              type: 'boolean',
             },
           })
           /**
@@ -412,15 +413,15 @@ const main = async (args = hideBin(process.argv)) => {
       async (argv) => {
         await Promise.resolve()
         const {
-          'generate-recklessly': generate,
           entrypoint,
+          'generate-recklessly': generate,
           policy: policyPath,
           'policy-override': policyOverridePath,
           'prod-only': prodOnly,
           'project-root': projectRoot,
           scuttle: scuttleGlobalThis,
-          write,
           'trust-root': trustRootFlag,
+          write,
         } = argv
 
         const trustRoot =
@@ -444,25 +445,25 @@ const main = async (args = hideBin(process.argv)) => {
           // let this reject since the failure mode could be any number of
           // terrible things
           policy = await generatePolicy(entrypoint, {
-            policyPath,
             policyOverridePath,
-            write,
+            policyPath,
             prodOnly,
-            trustRoot,
             projectRoot,
+            trustRoot,
+            write,
           })
         }
 
         stripProcessArgv(entrypoint)
 
         await run(entrypoint, {
+          policy,
           policyOverridePath,
-          trustRoot,
+          policyPath,
           prodOnly,
           projectRoot,
           scuttleGlobalThis,
-          policy,
-          policyPath,
+          trustRoot,
         })
       }
     )
@@ -473,12 +474,12 @@ const main = async (args = hideBin(process.argv)) => {
         yargs
           .options({
             write: {
-              describe:
-                'Write policy file(s) to disk; if false, print to stdout',
-              type: 'boolean',
               coerce: Boolean,
               default: true,
+              describe:
+                'Write policy file(s) to disk; if false, print to stdout',
               group: BEHAVIOR_GROUP,
+              type: 'boolean',
             },
           })
           .positional('entrypoint', {
@@ -502,11 +503,11 @@ const main = async (args = hideBin(process.argv)) => {
         }
 
         const policy = await generatePolicy(entrypoint, {
-          write,
-          policyPath,
           policyOverridePath,
+          policyPath,
           prodOnly,
           trustRoot,
+          write,
         })
 
         if (!write) {

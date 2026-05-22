@@ -1,6 +1,6 @@
 import test from 'ava'
+
 import {
-  prodOnlyToConditions,
   hasValue,
   isArray,
   isBoolean,
@@ -9,6 +9,7 @@ import {
   isReadNowPowers,
   isString,
   pluralize,
+  prodOnlyToConditions,
   toFileURLString,
 } from '../../src/util.js'
 

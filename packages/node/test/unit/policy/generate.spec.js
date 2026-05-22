@@ -1,12 +1,13 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import { keysOr } from '../../../src/util.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createGeneratePolicyMacros } from './policy-macros.js'
 
-const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
+const { testPolicyForJSON, testPolicyForModule, testPolicyForScript } =
   createGeneratePolicyMacros(test)
 
 // NOTE: All JSON fixtures are virtual filesystem snapshots and live in
@@ -50,31 +51,31 @@ test(
 )
 
 test('policy override merging', testPolicyForJSON, 'override-merging.json', {
-  policyOverride: {
+  expected: {
     resources: {
-      blurmph: {
-        builtin: {
-          'node:path': true,
-        },
-      },
       blurgh: {
         globals: {
           console: true,
         },
       },
-    },
-  },
-  expected: {
-    resources: {
       blurmph: {
         builtin: {
           'node:fs': true,
           'node:path': true,
         },
       },
+    },
+  },
+  policyOverride: {
+    resources: {
       blurgh: {
         globals: {
           console: true,
+        },
+      },
+      blurmph: {
+        builtin: {
+          'node:path': true,
         },
       },
     },
@@ -82,16 +83,43 @@ test('policy override merging', testPolicyForJSON, 'override-merging.json', {
 })
 
 test('override expansion', testPolicyForJSON, 'override-expansion.json', {
+  expected: {
+    include: ['winken>blinken'],
+    resources: {
+      winken: {
+        builtin: {
+          'node:util.format': true,
+        },
+        packages: {
+          fugs: true,
+          'winken>blinken': true,
+          'winken>fred': true,
+        },
+      },
+      'winken>blinken': {
+        builtin: {
+          'node:fs.read': true,
+          'node:util.format': true,
+        },
+      },
+      'winken>fred': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+    },
+  },
   policyOverride: {
+    include: ['winken>blinken'],
     resources: {
       winken: {
         packages: {
-          // is dynamically required by winken
-          'winken>blinken': true,
           // is not required by anything at all, but is present in the fixture's
           // package.json. should not appear in the final policy for winken
           // since it cannot be detected.
           fugs: true,
+          // is dynamically required by winken
+          'winken>blinken': true,
         },
       },
       'winken>blinken': {
@@ -104,33 +132,6 @@ test('override expansion', testPolicyForJSON, 'override-expansion.json', {
         },
       },
     },
-    include: ['winken>blinken'],
-  },
-  expected: {
-    resources: {
-      'winken>blinken': {
-        builtin: {
-          'node:util.format': true,
-          'node:fs.read': true,
-        },
-      },
-      'winken>fred': {
-        builtin: {
-          'node:util.format': true,
-        },
-      },
-      winken: {
-        builtin: {
-          'node:util.format': true,
-        },
-        packages: {
-          fugs: true,
-          'winken>blinken': true,
-          'winken>fred': true,
-        },
-      },
-    },
-    include: ['winken>blinken'],
   },
 })
 
@@ -227,10 +228,10 @@ export {xyz}
     resources: {
       test: {
         globals: {
+          exports: true,
+          module: true,
           nonIgnoredGlobal: true,
           require: true,
-          module: true,
-          exports: true,
         },
       },
     },
@@ -282,23 +283,23 @@ globalThis.foo = 'bar'
 console.log(globalThis.foo)
 `,
   {
+    expected: {
+      resources: {
+        test: {
+          globals: {
+            bar: 'write',
+            'console.log': true,
+            foo: 'write',
+          },
+        },
+      },
+    },
     policyOverride: {
       resources: {
         test: {
           globals: {
             // no such global, but it should persist
             bar: 'write',
-          },
-        },
-      },
-    },
-    expected: {
-      resources: {
-        test: {
-          globals: {
-            foo: 'write',
-            bar: 'write',
-            'console.log': true,
           },
         },
       },

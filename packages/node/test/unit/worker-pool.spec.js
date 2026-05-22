@@ -1,6 +1,7 @@
 import test from 'ava'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
 import { WorkerPool } from '../../src/worker-pool.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -124,9 +125,9 @@ test.serial('WorkerPool sendTask - basic echo task', async (t) => {
 
   /** @type {EchoMessage} */
   const message = {
-    type: 'echo',
-    id: 'test-task-1',
     data: 'hello world',
+    id: 'test-task-1',
+    type: 'echo',
   }
 
   const response = await pool.sendTask(message, 'echo-complete')
@@ -146,9 +147,9 @@ test.serial('WorkerPool sendTask - worker reuse', async (t) => {
   // First task
   /** @type {EchoMessage} */
   const message1 = {
-    type: 'echo',
-    id: 'task-1',
     data: 'first',
+    id: 'task-1',
+    type: 'echo',
   }
 
   const response1 = await pool.sendTask(message1, 'echo-complete')
@@ -158,9 +159,9 @@ test.serial('WorkerPool sendTask - worker reuse', async (t) => {
   // Second task should reuse the worker
   /** @type {EchoMessage} */
   const message2 = {
-    type: 'echo',
-    id: 'task-2',
     data: 'second',
+    id: 'task-2',
+    type: 'echo',
   }
 
   const response2 = await pool.sendTask(message2, 'echo-complete')
@@ -178,8 +179,8 @@ test.serial('WorkerPool sendTask - error handling', async (t) => {
 
   /** @type {ErrorTestMessage} */
   const message = {
-    type: 'error-test',
     id: 'error-task-1',
+    type: 'error-test',
   }
 
   const error = await t.throwsAsync(
@@ -203,25 +204,25 @@ test.serial('WorkerPool sendTask - concurrent tasks', async (t) => {
   const tasks = [
     pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'concurrent-1',
         data: 'task1',
+        id: 'concurrent-1',
+        type: 'echo',
       }),
       'echo-complete'
     ),
     pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'concurrent-2',
         data: 'task2',
+        id: 'concurrent-2',
+        type: 'echo',
       }),
       'echo-complete'
     ),
     pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'concurrent-3',
         data: 'task3',
+        id: 'concurrent-3',
+        type: 'echo',
       }),
       'echo-complete'
     ),
@@ -303,17 +304,17 @@ test.serial('WorkerPool terminate - cleans up all resources', async (t) => {
   // Create some workers and tasks
   const task1 = pool.sendTask(
     /** @type {DelayMessage} */ ({
-      type: 'delay',
-      id: 'cleanup-1',
       delay: 100,
+      id: 'cleanup-1',
+      type: 'delay',
     }),
     'delay-complete'
   )
   const task2 = pool.sendTask(
     /** @type {DelayMessage} */ ({
-      type: 'delay',
-      id: 'cleanup-2',
       delay: 100,
+      id: 'cleanup-2',
+      type: 'delay',
     }),
     'delay-complete'
   )
@@ -351,9 +352,9 @@ test.serial(
     // Send a task to create a worker
     await pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'idle-test',
         data: 'test',
+        id: 'idle-test',
+        type: 'echo',
       }),
       'echo-complete'
     )
@@ -382,9 +383,9 @@ test.serial(
     // Send a task to create a worker
     await pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'cancel-test',
         data: 'test',
+        id: 'cancel-test',
+        type: 'echo',
       }),
       'echo-complete'
     )
@@ -417,9 +418,9 @@ test.serial('WorkerPool handleWorkerMessage - ignores unknown task ID', (t) => {
   pool.handleWorkerMessage(
     worker,
     /** @type {TestResponse} */ ({
-      type: 'echo-complete',
-      id: 'nonexistent-task',
       data: 'test',
+      id: 'nonexistent-task',
+      type: 'echo-complete',
     })
   )
 
@@ -440,9 +441,9 @@ test.serial(
     // Start a task that will send an intermediate message
     const taskPromise = pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'intermediate-test',
         data: 'test',
+        id: 'intermediate-test',
+        type: 'echo',
       }),
       'echo-complete'
     )
@@ -454,9 +455,9 @@ test.serial(
     pool.handleWorkerMessage(
       worker,
       /** @type {TestResponse} */ ({
-        type: 'delay-complete',
-        id: 'intermediate-test',
         data: 'progress',
+        id: 'intermediate-test',
+        type: 'delay-complete',
       })
     )
 
@@ -483,17 +484,17 @@ test.serial(
 
     // Simulate multiple pending tasks for the same worker
     pool.pendingTasks.set('task-1', {
-      worker,
-      resolve: () => {},
-      reject: () => t.pass('Task 1 rejected'),
       completionType: 'complete',
+      reject: () => t.pass('Task 1 rejected'),
+      resolve: () => {},
+      worker,
     })
 
     pool.pendingTasks.set('task-2', {
-      worker,
-      resolve: () => {},
-      reject: () => t.pass('Task 2 rejected'),
       completionType: 'complete',
+      reject: () => t.pass('Task 2 rejected'),
+      resolve: () => {},
+      worker,
     })
 
     t.is(pool.outstandingTaskCount, 2)
@@ -569,9 +570,9 @@ test.serial(
 
     /** @type {EchoMessage} */
     const message = {
-      type: 'echo',
-      id: 'test-creation',
       data: 'test',
+      id: 'test-creation',
+      type: 'echo',
     }
 
     // Should complete normally
@@ -608,9 +609,9 @@ test.serial('WorkerPool with URL workerScript', async (t) => {
 
   const response = await pool.sendTask(
     /** @type {EchoMessage} */ ({
-      type: 'echo',
-      id: 'url-test',
       data: 'test-with-url',
+      id: 'url-test',
+      type: 'echo',
     }),
     'echo-complete'
   )
@@ -636,9 +637,9 @@ test.serial(
     // Execute first task - creates worker
     const response1 = await pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'workflow-1',
         data: 'first',
+        id: 'workflow-1',
+        type: 'echo',
       }),
       'echo-complete'
     )
@@ -650,9 +651,9 @@ test.serial(
     // Execute second task - reuses worker
     const response2 = await pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'workflow-2',
         data: 'second',
+        id: 'workflow-2',
+        type: 'echo',
       }),
       'echo-complete'
     )
@@ -684,9 +685,9 @@ test.serial(
     // Start a task
     const taskPromise = pool.sendTask(
       /** @type {EchoMessage} */ ({
-        type: 'echo',
-        id: 'terminate-test',
         data: 'test',
+        id: 'terminate-test',
+        type: 'echo',
       }),
       'echo-complete'
     )

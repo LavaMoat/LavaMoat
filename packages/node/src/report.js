@@ -6,6 +6,7 @@
 
 import chalk from 'chalk'
 import { stripVTControlCharacters } from 'node:util'
+
 import { InvalidArgumentsError } from './error.js'
 import { hrCode, hrLabel, hrPath } from './format.js'
 import { log as defaultLog } from './log.js'
@@ -84,10 +85,10 @@ export const reportInvalidCanonicalNames = (
   unknownCanonicalNames,
   knownCanonicalNames,
   {
-    policy,
-    policyPath,
     log = defaultLog,
     maxSuggestions = DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS,
+    policy,
+    policyPath,
     what = 'policy',
   }
 ) => {
@@ -172,7 +173,7 @@ export const reportSesViolations = (
    * @internal
    */
   const formatViolation = (violation) => {
-    const { path, line, column, type } = violation
+    const { column, line, path, type } = violation
     const nicePath = hrPath(path)
     const plainPath = stripVTControlCharacters(nicePath)
     return `- ${chalk.yellowBright([plainPath, line, column].join(chalk.yellow(':')))} ${chalk.cyan(`(${type})`)}`
@@ -183,7 +184,7 @@ export const reportSesViolations = (
   let hasPrimordialMutationViolations = false
 
   for (const [canonicalName, violations] of violationsForPackage) {
-    const { primordialMutations, strictModeViolations, dynamicRequires } =
+    const { dynamicRequires, primordialMutations, strictModeViolations } =
       violations
 
     // Process primordial mutations

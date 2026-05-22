@@ -1,6 +1,7 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
+
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
 import { fixtureFinder } from '../test-util.js'
