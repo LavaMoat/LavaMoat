@@ -77,17 +77,13 @@ test('isReadableFileSync returns false for non-readable files', (t) => {
   t.false(isReadableFileSync('/test.txt', { fs }))
 })
 
-// https://github.com/streamich/memfs/issues/1252
-test.failing(
-  'isExecutableSymlink() - returns true for executable symlinks',
-  (t) => {
-    const { vol, fs } = memfs()
-    vol.fromJSON({ '/test.txt': 'content' })
-    vol.symlinkSync('/test.txt', '/test-link')
-    vol.chmodSync('/test-link', 0o755)
-    t.true(isExecutableSymlink('/test-link', { fs }))
-  }
-)
+test('isExecutableSymlink() - returns true for executable symlinks', (t) => {
+  const { vol, fs } = memfs()
+  vol.fromJSON({ '/test.txt': 'content' })
+  vol.symlinkSync('/test.txt', '/test-link')
+  vol.chmodSync('/test-link', 0o755)
+  t.true(isExecutableSymlink('/test-link', { fs }))
+})
 
 test('isExecutableSymlink returns false for non-executable symlinks', (t) => {
   const { vol, fs } = memfs()
