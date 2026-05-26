@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { spinner as cliSpinner } from '@lavamoat/vog'
 import { InvalidArgumentsError } from './error.js'
 import {
   action,
@@ -21,11 +22,10 @@ import {
   emphasis,
   hazard,
   hrCode,
+  hrCodeDim,
   hrLabel,
   hrPath,
   seconds,
-  spinner,
-  spinnerChars,
   success,
 } from './format.js'
 import { log as defaultLog } from './log.js'
@@ -33,7 +33,7 @@ import { noop, pluralize, toKeypath } from './util.js'
 import { fileURLToPath } from 'node:url'
 
 /**
- * @import {WriteStream} from 'node:tty'
+ * @import {Logger} from '@lavamoat/vog/log.js'
  * @import {
  *   ModuleInspectionProgressReporter,
  *   ReportInvalidCanonicalNamesOptions,
@@ -44,7 +44,6 @@ import { fileURLToPath } from 'node:url'
  *   StructuredViolationsResult,
  *   UnknownCanonicalNames
  * } from './internal.js'
- * @import {Loggerr} from './log.js'
  * @import {CanonicalName} from './types.js'
  */
 
@@ -91,7 +90,7 @@ export const reportInvalidCanonicalNames = (
         : `  - ${hrCode(source)}`
     })
     .join('\n')
-  log.warning(msg)
+  log.warn(msg)
 }
 
 /**
@@ -130,12 +129,12 @@ export const reportSesViolations = (
    * @returns {void}
    */
   const printWarnings = (canonicalName, warnings) => {
-    log.warning(
+    log.warn(
       `Package ${hrLabel(canonicalName)} contains potential SES violations at the following ${pluralize(warnings.length, 'location')}:`
     )
 
     for (const warning of warnings) {
-      log.warning(warning)
+      log.warn(warning)
     }
   }
 
@@ -185,29 +184,26 @@ export const reportSesViolations = (
 
     summaryMsg += ` will likely ${action('fail')} at runtime if attempted; patching is advised.`
 
-    log.warning(summaryMsg)
+    log.warn(summaryMsg)
   }
 }
 
 /**
  * Creates a pair of functions for reporting module inspection progress.
  *
- * If the console is not a TTY, this function will return a pair of functions
- * that do nothing.
+ * If stderr is not a TTY, this function will return a pair of no-op functions.
  *
  * @param {Object} options
- * @param {Loggerr} [options.log] - Logger to use for reporting
- * @param {WriteStream} [options.writeStream] - Stream to write progress to
+ * @param {Logger} [options.log] - Logger to use for reporting
  * @param {boolean} [options.disabled] - If true, the reporter will not report
  *   progress
  * @returns {ModuleInspectionProgressReporter}
  */
 export const createModuleInspectionProgressReporter = ({
   log = defaultLog,
-  writeStream = process.stderr,
   disabled = false,
 } = {}) => {
-  if (!writeStream.isTTY || disabled) {
+  if (!process.stderr.isTTY || disabled) {
     return {
       reportModuleInspectionProgress: noop,
       reportModuleInspectionProgressEnd: noop,
@@ -215,21 +211,28 @@ export const createModuleInspectionProgressReporter = ({
   }
 
   /**
-   * Counter for the spinner item
-   */
-  let spinnerCounter = 0
-
-  /**
    * Start timestamp of the module inspection process
    *
-   * @type {number}
+   * @type {number | undefined}
    */
   let startTime
 
   /**
+   * Whether the spinner has been started.
+   */
+  let spinning = false
+
+  const spin = new cliSpinner.Spinner({
+    text: `${chevron} %s ${action('Inspecting')} modules…`,
+    stream: process.stderr,
+  })
+  spin.setSpinnerString('◰◳◲◱')
+  spin.setSpinnerDelay(120)
+
+  /**
    * Reports progress of the module inspection process to the console.
    *
-   * Displays a progress indicator on a single line, overwriting it as it
+   * Displays an animated spinner on a single line, overwriting it as it
    * progresses.
    *
    * @type {ReportModuleInspectionProgressFn}
@@ -239,20 +242,22 @@ export const createModuleInspectionProgressReporter = ({
     modulesToInspect
   ) => {
     startTime ??= Date.now()
-    spinnerCounter++
-    const prefixStr = spinner(
-      spinnerChars[spinnerCounter % spinnerChars.length]
-    )
     const duration = Date.now() - startTime
     const modulesPerSecond = inspectedModules.size / (duration / 1000)
 
     const inspectedRatioStr = colorSplit(
       `${inspectedModules.size}/${modulesToInspect.size}`,
-      { delimiter: '/', color: hrCode, delimiterColor: hrCode.dim }
+      { delimiter: '/', color: hrCode, delimiterColor: hrCodeDim }
     )
-    writeStream.write(
-      `\r        ${chevron} ${prefixStr} ${action('Inspecting')} module ${inspectedRatioStr} (${seconds(modulesPerSecond)} modules/s)`
+
+    spin.setSpinnerTitle(
+      `${chevron} %s ${action('Inspecting')} module ${inspectedRatioStr} (${seconds(modulesPerSecond)} modules/s)`
     )
+
+    if (!spinning) {
+      spin.start()
+      spinning = true
+    }
   }
 
   /**
@@ -264,11 +269,15 @@ export const createModuleInspectionProgressReporter = ({
     inspectedModules,
     modulesToInspect
   ) => {
-    const duration = Date.now() - startTime
+    const duration = Date.now() - (startTime ?? Date.now())
     const modulesPerSecond = inspectedModules.size / (duration / 1000)
+    if (spinning) {
+      spin.stop(true)
+      spinning = false
+    }
     clearLine()
     log.info(
-      `${success} ${action('Inspected')} ${hrCode(modulesToInspect.size)} (${seconds(modulesPerSecond)} modules/s)`
+      `${success} ${action('Inspected')} ${hrCode(`${modulesToInspect.size}`)} (${seconds(modulesPerSecond)} modules/s)`
     )
   }
 
