@@ -1,0 +1,27 @@
+# this workflow stages versions to NPM with laverna after a release was merged
+
+on:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+name: publish-stage
+
+jobs:
+  publish-stage:
+    if: startsWith(github.event.head_commit.message, 'chore: release main')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for tags on this commit
+        run: |
+          TAGS=$(git -c 'versionsort.suffix=-' ls-remote --tags origin | grep "^${{ github.sha }}" || true)
+          if [ -z "$TAGS" ]; then
+            echo "No tags found on this commit, skipping."
+            exit 1
+          fi
+          echo "Tags found:"
+          echo "$TAGS"
+      - name: Publish staged
+        run: npm run release:stage
