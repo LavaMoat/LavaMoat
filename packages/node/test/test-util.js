@@ -5,6 +5,7 @@ import {
   DEFAULT_POLICY_PATH,
 } from '../src/constants.js'
 import { toPath } from '../src/util.js'
+import { log, LogLevels } from '../src/log.js'
 
 /**
  * @import {
@@ -12,6 +13,11 @@ import { toPath } from '../src/util.js'
  *   FixtureOptions
  * } from './types.js'
  */
+
+// eagerly silence logging
+if (process.env.LAVAMOAT_DEBUG === undefined) {
+  log.level = LogLevels.silent
+}
 
 const DEFAULT_ENTRYPOINT_FILENAME = 'index.js'
 

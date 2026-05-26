@@ -1,7 +1,7 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
-import { log, Loggerr } from '../../../src/log.js'
+import { log } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import { unwrapMerged } from '../../../src/policy-util.js'
 import { keysOr } from '../../../src/util.js'
@@ -160,9 +160,6 @@ test(
 
 test('path stability', async (t) => {
   const maxIterations = 20
-  if (process.env.LAVAMOAT_DEBUG === undefined) {
-    log.setLevel(Loggerr.EMERGENCY)
-  }
   t.plan(maxIterations)
 
   const { readPowers } = await loadJSONFixture(
@@ -386,10 +383,6 @@ test(
 test('additionalLocations support', async (t) => {
   const { dir: projectRoot } = e2eFixture('webpackish')
 
-  if (process.env.LAVAMOAT_DEBUG === undefined) {
-    log.setLevel(Loggerr.EMERGENCY)
-  }
-
   const { policy } = await loadAndGeneratePolicy(
     path.join(projectRoot, 'node_modules', 'pantspack', 'pantspack.js'),
     {
@@ -424,10 +417,6 @@ test('untrusted root: override-declared root deps are seeded correctly', async (
   t.plan(3)
 
   const { entrypoint } = e2eFixture('webpackish')
-
-  if (process.env.LAVAMOAT_DEBUG === undefined) {
-    log.setLevel(Loggerr.EMERGENCY)
-  }
 
   const {
     policy: { policy },

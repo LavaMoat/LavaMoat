@@ -9,14 +9,14 @@ import {
 import { noop } from '../../src/util.js'
 
 /**
- * @import {Loggerr} from '../../src/log.js'
+ * @import {Logger} from '@lavamoat/vog'
  */
 
 test('reportSesViolations - should not log if no violations were found', (t) => {
   let logged = false
-  const log = /** @type {Loggerr} */ (
+  const log = /** @type {Logger} */ (
     /** @type {unknown} */ ({
-      warning: () => {
+      warn: () => {
         logged = true
       },
     })
@@ -29,9 +29,9 @@ test('reportSesViolations - should not log if no violations were found', (t) => 
 
 test('reportSesViolations - should log if violations were found', (t) => {
   let logged = false
-  const log = /** @type {Loggerr} */ (
+  const log = /** @type {Logger} */ (
     /** @type {unknown} */ ({
-      warning: () => {
+      warn: () => {
         logged = true
       },
     })
@@ -72,9 +72,9 @@ test('createModuleInspectionProgressReporter - when disabled, functions do nothi
 
 test('reportInvalidCanonicalNames - should not log if no invalid canonical names were found', (t) => {
   let logged = false
-  const log = /** @type {Loggerr} */ (
+  const log = /** @type {Logger} */ (
     /** @type {unknown} */ ({
-      warning: () => {
+      warn: () => {
         logged = true
       },
     })
@@ -88,9 +88,9 @@ test('reportInvalidCanonicalNames - should not log if no invalid canonical names
 
 test('reportInvalidCanonicalNames - should not log if no policy was provided', (t) => {
   let logged = false
-  const log = /** @type {Loggerr} */ (
+  const log = /** @type {Logger} */ (
     /** @type {unknown} */ ({
-      warning: () => {
+      warn: () => {
         logged = true
       },
     })
@@ -116,9 +116,9 @@ test('reportInvalidCanonicalNames - should throw if invalid "what" was provided'
 
 test('reportInvalidCanonicalNames - should log if invalid canonical names were found', (t) => {
   let logged = false
-  const log = /** @type {Loggerr} */ (
+  const log = /** @type {Logger} */ (
     /** @type {unknown} */ ({
-      warning: () => {
+      warn: () => {
         logged = true
       },
     })
@@ -136,9 +136,8 @@ test('reportInvalidCanonicalNames - should log if invalid canonical names were f
 test('reportInvalidCanonicalNames - should include a suggestion when one was provided on the issue', (t) => {
   /** @type {string | undefined} */
   let warning
-  const log = /** @type {Loggerr} */ ({
-    /** @type {Loggerr['warning']} */
-    warning: (msg) => {
+  const log = /** @type {Logger} */ ({
+    warn: (msg) => {
       warning = `${msg}`
     },
   })
