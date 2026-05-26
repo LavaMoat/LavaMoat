@@ -2,13 +2,15 @@
   "compilerOptions": {
     "module": "NodeNext",
     "paths": {
-      "lavamoat-core": ["../../core/types/src/types.d.ts"]
+      "lavamoat-core": ["../../core/types/src/types.d.ts"],
+      "@lavamoat/vog": ["../../vog/src/index.d.ts"],
+      "@lavamoat/vog/*.js": ["../../vog/src/*.d.ts"]
     },
     "rootDir": "..",
     "strict": true,
     "target": "esnext"
   },
-  "exclude": ["unit/fixture", "e2e/fixture"],
+  "exclude": ["**/fixture"],
   "extends": "../../../.config/tsconfig.test.json",
   "include": ["**/*.js", "**/*.ts", "stubs.d.ts"],
   "references": [
