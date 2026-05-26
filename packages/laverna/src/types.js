@@ -1,8 +1,8 @@
 /**
- * @import {Dirent} from 'fs'
- * @import {SpawnOptions} from 'node:child_process'
- * @import {EventEmitter} from 'node:events'
- * @import {GlobOptionsWithFileTypesTrue} from 'glob'
+ * @import {Dirent} from "fs"
+ * @import {GlobOptionsWithFileTypesTrue} from "glob"
+ * @import {SpawnOptions} from "node:child_process"
+ * @import {EventEmitter} from "node:events"
  */
 
 /**
@@ -83,6 +83,7 @@
  * Options for {@link Laverna}, merged with {@link DEFAULT_OPTS the defaults}.
  *
  * @typedef AllLavernaOptions
+ * @property {boolean} local - Whether to publish a package instead of staging
  * @property {boolean} dryRun - Whether to publish in dry-run mode
  * @property {string} root - Workspace root
  * @property {string[]} newPkg - New packages to publish
@@ -128,10 +129,10 @@
  * Function which resolves a list of the known versions of a package
  *
  * @callback GetVersions
+ * @this {Laverna}
  * @param {string} pkgName
  * @param {string} cwd
  * @returns {Promise<string[]>}
- * @this {Laverna}
  */
 
 /**

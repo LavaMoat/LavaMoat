@@ -238,7 +238,7 @@ test(
 test(
   'cli - new package',
   testProject,
-  { name: 'new-pkg', args: ['--newPkg=@lavamoat/larvamoat'] },
+  { name: 'new-pkg', args: ['--newPkg=@lavamoat/larvamoat', '--local'] },
   async (t, result) => {
     t.plan(4)
 
@@ -258,7 +258,7 @@ test(
 test(
   'cli - new package (kebab-case)',
   testProject,
-  { name: 'new-pkg', args: ['--new-pkg=@lavamoat/larvamoat'] },
+  { name: 'new-pkg', args: ['--new-pkg=@lavamoat/larvamoat', '--local'] },
   async (t, result) => {
     t.plan(4)
 
@@ -280,7 +280,11 @@ test(
   testProject,
   {
     name: 'new-pkgs',
-    args: ['--new-pkg=@lavamoat/larvamoat', '--newPkg=@lavamoat/lavamutt'],
+    args: [
+      '--new-pkg=@lavamoat/larvamoat',
+      '--newPkg=@lavamoat/lavamutt',
+      '--local',
+    ],
   },
   async (t, result) => {
     t.plan(6)
@@ -317,6 +321,10 @@ test(
     t.true(
       result.stderr.includes('yarn npm publish'),
       'should mention yarn npm publish'
+    )
+    t.true(
+      result.stderr.includes('npm publish --staged '),
+      'should mention npm publish --staged '
     )
   }
 )

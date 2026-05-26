@@ -2,9 +2,10 @@
 
 > Publish multiple workspaces (that's all)
 
-If you're familiar with [lerna](https://lerna.js.org), **Laverna** does this: `lerna publish from-package`.
+If you're familiar with [lerna](https://lerna.js.org), **`laverna --local`** does this: `lerna publish from-package`.
 
-If you're unfamiliar with it: **Laverna** publishes all workspacess wherein the _current_ version hasn't yet been published.
+If you're unfamiliar with it: **Laverna** publishes all workspacess wherein the _current_ version hasn't yet been published.  
+The default is to use [**Staged publishing**](https://docs.npmjs.com/staged-publishing)
 
 ## Features
 
@@ -35,9 +36,17 @@ Perhaps more importantly, **Laverna**:
 
 ## Supported Environments
 
+For local publishing with `--local` flag:
+
 - Node.js v20.19.0+
 - `npm` v8.19.3+
 - `yarn` v2+ (for Yarn Berry workspaces; detected automatically via `yarn.lock`)
+
+For staged publishing (default):
+
+- Node.js v22.14.0+
+- `npm` v11.15.0+
+- `yarn` v4.15.0+
 
 ## Install
 
@@ -56,6 +65,7 @@ laverna [options..]
 
 Options:
 
+ --local         - Publish a package instead of staging it (default: false)␊
  --dryRun        - Enable dry-run mode
  --root=<path>   - Path to workspace root (default: current working dir)
  --newPkg=<name> - Workspace <name> should be treated as a new package (repeatable)
@@ -71,16 +81,22 @@ Problems? Visit https://github.com/LavaMoat/LavaMoat/issues
 For a typical release workflow, you might:
 
 1. Bump workspace versions (e.g. via [release-please-action](https://github.com/google-github-actions/release-please-action))
-2. In your updated working copy's workspace root, run `npm exec laverna` (or `npm exec laverna -- --dryRun` first)
-3. Bask in glory
+2. In a workflow that is set up with OIDC, run `npm exec laverna`
+3. Approve the staged package with 2FA
+
+Or if you're releasing from your local machine with 2FA:
+
+1. Bump workspace versions (e.g. via [release-please-action](https://github.com/google-github-actions/release-please-action))
+2. In your updated working copy's workspace root, run `npm exec laverna -- --local` (or `npm exec laverna -- --local --dryRun` first)
+3. Verify with 2FA
 
 ### Publishing a New Package
 
 If you're publishing a package in a new workspace, you might:
 
 1. Set the initial version of the new package (call it `foo`) in its `package.json`.
-2. Run `npm exec laverna -- --newPkg=foo` (or `npm exec laverna -- --newPkg=foo --dryRun` first)
-3. Profit
+2. Run `npm exec laverna -- --local --newPkg=foo` (or `npm exec laverna -- --local --newPkg=foo --dryRun` first)
+3. Verify with 2FA
 
 ### Using with Yarn Berry (workspace: protocol)
 
@@ -88,7 +104,7 @@ If your monorepo uses Yarn Berry (v2+) and `workspace:` protocol specifiers (e.g
 
 ```shell
 # From a Yarn Berry workspace root (yarn.lock present):
-npx laverna --dryRun
+npx laverna --local --dryRun
 # Laverna detects yarn.lock and uses: yarn workspaces foreach -A --no-private --include <pkg> npm publish --dry-run
 ```
 
@@ -97,7 +113,7 @@ npx laverna --dryRun
 If the `CI` environment variable is present, `laverna` will skip the confirmation prompt before final publish (i.e., `--yes` defaults to `true`).
 
 > [!WARNING]
-> Publishing via CI can bypass 2FA protections. Use at your own risk!
+> Non-staged publishing via CI would bypass 2FA protections. We no longer support that!
 
 ## API
 

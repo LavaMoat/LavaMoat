@@ -62,6 +62,7 @@ const DEFAULT_OPTS = Object.freeze(
     yes: false,
     root: DEFAULT_ROOT,
     newPkg: [],
+    local: false,
   })
 )
 exports.DEFAULT_OPTS = DEFAULT_OPTS

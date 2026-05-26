@@ -8,9 +8,13 @@
  */
 
 /**
- * @import {SpawnFn, LavernaOptions, LavernaCapabilities} from '../src/types'
- * @import {TestFn} from 'ava'
- * @import {SpawnOptions} from 'node:child_process'
+ * @import {TestFn} from "ava"
+ * @import {SpawnOptions} from "node:child_process"
+ * @import {
+ *   LavernaCapabilities,
+ *   LavernaOptions,
+ *   SpawnFn
+ * } from "../src/types"
  */
 
 const kleur = require('kleur')
@@ -877,6 +881,17 @@ test('publish - basic usage', async (t) => {
 
   t.deepEqual(t.context.spawn.mock.calls[0].arguments, [
     'npm',
+    ['stage', 'publish', `--workspace=${pkgName}`, '--dry-run'],
+    { stdio: 'inherit', cwd: '/', shell: true },
+  ])
+})
+
+test('publish - basic usage - local', async (t) => {
+  const pkgName = getRandomPkgName()
+  await t.context.runPublish([pkgName], { local: true })
+
+  t.deepEqual(t.context.spawn.mock.calls[0].arguments, [
+    'npm',
     ['publish', `--workspace=${pkgName}`, '--dry-run'],
     { stdio: 'inherit', cwd: '/', shell: true },
   ])
@@ -884,6 +899,16 @@ test('publish - basic usage', async (t) => {
 
 test('publish - dry run', async (t) => {
   await t.context.runPublish(['foo'])
+
+  t.deepEqual(t.context.spawn.mock.calls[0].arguments, [
+    'npm',
+    ['stage', 'publish', `--workspace=foo`, '--dry-run'],
+    { stdio: 'inherit', cwd: '/', shell: true },
+  ])
+})
+
+test('publish - dry run - local', async (t) => {
+  await t.context.runPublish(['foo'], { local: true })
 
   t.deepEqual(t.context.spawn.mock.calls[0].arguments, [
     'npm',
@@ -947,7 +972,7 @@ test('publish - yarn.lock present - uses yarn command', async (t) => {
   const [cmd, args] = t.context.spawn.mock.calls[0].arguments
   t.is(
     [cmd, ...args].join(' '),
-    'yarn workspaces foreach -A --no-private --include foo npm publish --tolerate-republish --dry-run'
+    'yarn workspaces foreach -A --no-private --include foo npm publish --staged --tolerate-republish --dry-run'
   )
 })
 
@@ -959,6 +984,26 @@ test('publish - yarn.lock present - multiple packages', async (t) => {
   })
 
   await t.context.runPublish(['@endo/ses', '@endo/init'], {}, { fs: yarnFs })
+
+  const [cmd, args] = t.context.spawn.mock.calls[0].arguments
+  t.is(
+    [cmd, ...args].join(' '),
+    'yarn workspaces foreach -A --no-private --include @endo/ses --include @endo/init npm publish --staged --tolerate-republish --dry-run'
+  )
+})
+
+test('publish - yarn.lock present - multiple packages - local', async (t) => {
+  const { fs: yarnFs } = memfs({
+    '/': {
+      'yarn.lock': '',
+    },
+  })
+
+  await t.context.runPublish(
+    ['@endo/ses', '@endo/init'],
+    { local: true },
+    { fs: yarnFs }
+  )
 
   const [cmd, args] = t.context.spawn.mock.calls[0].arguments
   t.is(
@@ -990,7 +1035,8 @@ test('publish - yarn.lock present - nonzero exit code', async (t) => {
       }
     ),
     {
-      message: /yarn workspaces foreach npm publish exited with code 1/,
+      message:
+        /yarn workspaces foreach npm publish --staged exited with code 1/,
     }
   )
 })

@@ -8,7 +8,13 @@
  */
 
 /**
- * @import {Publisher, AllLavernaOptions, AllLavernaCapabilities, PublishFn, PublisherFactory} from './types'
+ * @import {
+ *   AllLavernaCapabilities,
+ *   AllLavernaOptions,
+ *   Publisher,
+ *   PublisherFactory,
+ *   PublishFn
+ * } from "./types"
  */
 
 const path = require('node:path')
@@ -49,11 +55,13 @@ class NpmPublisher {
 
   /** @type {PublishFn} */
   async publish(pkgs) {
-    const { dryRun, root: cwd } = this.opts
+    const { dryRun, root: cwd, local } = this.opts
     const { spawn, console } = this.caps
 
+    const publishCmd = local ? ['publish'] : ['stage', 'publish']
+
     await new Promise((resolve, reject) => {
-      const args = ['publish', ...pkgs.map((name) => `--workspace=${name}`)]
+      const args = [...publishCmd, ...pkgs.map((name) => `--workspace=${name}`)]
       if (dryRun) {
         args.push('--dry-run')
       }
@@ -104,8 +112,10 @@ class YarnPublisher {
 
   /** @type {PublishFn} */
   async publish(pkgs) {
-    const { dryRun, root: cwd } = this.opts
+    const { dryRun, root: cwd, local } = this.opts
     const { spawn, console } = this.caps
+
+    const publishCmd = local ? ['publish'] : ['publish', '--staged']
 
     await new Promise((resolve, reject) => {
       const args = [
@@ -115,7 +125,7 @@ class YarnPublisher {
         '--no-private',
         ...pkgs.flatMap((name) => ['--include', name]),
         'npm',
-        'publish',
+        ...publishCmd,
         '--tolerate-republish',
       ]
       if (dryRun) {
@@ -135,7 +145,7 @@ class YarnPublisher {
           } else {
             reject(
               new Error(
-                `yarn workspaces foreach npm publish exited with code ${code}`
+                `yarn workspaces foreach npm ${publishCmd.join(' ')} exited with code ${code}`
               )
             )
           }

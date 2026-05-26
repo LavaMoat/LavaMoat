@@ -23,6 +23,9 @@ const { name, bugs, version, description } = require('../package.json')
 const options = /**
  * @type {const}
  */ ({
+  local: {
+    type: 'boolean',
+  },
   dryRun: {
     type: 'boolean',
   },
@@ -77,6 +80,7 @@ function main() {
 
   Options:
 
+  ${bold('--local')}         - Publish a package instead of staging it (default: false)
   ${bold('--dryRun')}        - Enable dry-run mode
   ${bold('--root=<path>')}   - Path to workspace root (default: current working dir)
   ${bold('--newPkg=<name>')} - Workspace <name> should be treated as a new package (repeatable)
@@ -91,8 +95,16 @@ function main() {
     opts.newPkg = [
       ...new Set([...(opts.newPkg ?? []), ...(opts['new-pkg'] ?? [])]),
     ]
+    const isCI = Boolean(process.env.CI)
+
+    if (opts.local && isCI) {
+      throw new Error(
+        'Publishing from CI with --local is not supported as it would bypass 2FA protections. Please stage the package and approve with 2FA instead.'
+      )
+    }
+
     // must be true in CI; --yes=false is not a thing
-    opts.yes = Boolean(process.env.CI) || opts.yes
+    opts.yes = isCI || opts.yes
 
     console.error(`📦 ${bold(magenta(name)) + gray('@') + magenta(version)}\n`)
     const laverna = new Laverna(opts)
