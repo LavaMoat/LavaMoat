@@ -110,7 +110,7 @@ module.exports = [
         try {
           require(specifier)
         } catch (err) {
-          console.log('Import failed', err)
+          // console.error('Import failed', err)
         }
       },
       expectedResult: {
