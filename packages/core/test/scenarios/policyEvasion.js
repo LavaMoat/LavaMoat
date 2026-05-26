@@ -1,8 +1,16 @@
 const { createScenarioFromScaffold } = require('../util.js')
 
+const makeFakeFs = (storage = {}) => ({
+  writeFileSync(path, contents) {
+    storage[path] = contents
+  },
+  existsSync(path) {
+    return path in storage
+  },
+})
+
 module.exports = [
   async () => {
-    const storage = {}
     return createScenarioFromScaffold({
       name: 'policyEvasion - package should not be evaluated before policy check',
       defaultPolicy: false,
@@ -29,14 +37,7 @@ module.exports = [
       },
       // Supply the Node builtin to the harness so policy can grant it to a package.
       builtin: {
-        fs: {
-          writeFileSync(path, contents) {
-            storage[path] = contents
-          },
-          existsSync(path) {
-            return path in storage
-          },
-        },
+        fs: makeFakeFs(),
       },
       defineOne: () => {
         const fs = require('fs')
@@ -65,6 +66,55 @@ module.exports = [
       expectedResult: {
         importAllowed: false,
         pocWritten: false,
+      },
+    })
+  },
+  async () => {
+    return createScenarioFromScaffold({
+      name: 'policyEvasion - toString specifier',
+      defaultPolicy: false,
+      config: {
+        resources: {
+          one: {
+            packages: {
+              two: true,
+            },
+          },
+          two: {
+            globals: {
+              console: true,
+            },
+            builtin: {
+              url: true,
+            },
+          },
+        },
+      },
+      // Supply the Node builtin to the harness so policy can grant it to a package.
+      builtin: {
+        url: { me: 'is url' },
+      },
+      defineOne: () => {
+        const { counter } = require('two')
+        module.exports = { result: counter.count }
+      },
+      defineTwo: () => {
+        const counter = { count: 0 }
+        const specifier = {
+          toString() {
+            counter.count++
+            return 'url'
+          },
+        }
+        exports.counter = counter
+        try {
+          require(specifier)
+        } catch (err) {
+          // console.error('Import failed', err)
+        }
+      },
+      expectedResult: {
+        result: 1,
       },
     })
   },
