@@ -221,3 +221,5 @@ npm run test:workspaces
 
 - When importing types in `.js` sources, _always_ use the `@import {T} from './specifier'` comment syntax.
 - Combine multiple imports from a single module into a single `@import {X, Y, Z} from './specifier'` comment.
+- Within `.ts` sources, _always_ import types as `import` statements at the top of the file; no inline imports.
+- Create new types in `.ts` sources only; do not use JSDoc to declare new types in `.js` sources.
