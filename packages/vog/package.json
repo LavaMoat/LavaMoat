@@ -21,18 +21,22 @@
       "import": "./src/index.js",
       "types": "./src/index.d.ts"
     },
-    "./log": {
+    "./log.js": {
       "import": "./src/log.js",
       "types": "./src/log.d.ts"
     },
     "./package.json": "./package.json",
-    "./progress": {
+    "./progress.js": {
       "import": "./src/progress.js",
       "types": "./src/progress.d.ts"
     },
-    "./spinner": {
+    "./spinner.js": {
       "import": "./src/spinner.js",
       "types": "./src/spinner.d.ts"
+    },
+    "./util.js": {
+      "import": "./src/util.js",
+      "types": "./src/util.d.ts"
     }
   },
   "directories": {
@@ -53,7 +57,8 @@
     "@opentf/cli-pbar": "0.7.2",
     "@types/cli-spinner": "0.2.3",
     "cli-spinner": "0.2.10",
-    "consola": "3.4.2"
+    "consola": "3.4.2",
+    "terminal-link": "3.0.0"
   },
   "publishConfig": {
     "access": "public"
