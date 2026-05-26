@@ -21,7 +21,7 @@ import type {
 } from '@endo/compartment-mapper'
 import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { IsBuiltinFn, LavaMoatScuttleOpts } from 'lavamoat-core'
-import type { Loggerr } from 'loggerr'
+import type { Logger } from '@lavamoat/vog/log.js'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
 import type { Except, Simplify, Writable } from 'type-fest'
@@ -82,9 +82,9 @@ export interface WithIsBuiltin {
 
 export interface WithLog {
   /**
-   * `Loggerr` instance for logging
+   * Logger instance for logging
    */
-  log?: Loggerr
+  log?: Logger
 }
 
 export interface WithPolicyOnly {
