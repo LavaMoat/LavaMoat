@@ -18,7 +18,7 @@ import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { action, hrCode, hrPath, seconds, success } from '../format.js'
-import { log as defaultLog, Loggerr } from '../log.js'
+import { log as defaultLog, LogLevels } from '../log.js'
 import { wrapMerged } from '../policy-util.js'
 import { mergePolicies } from '../policy-util.js'
 import {
@@ -47,6 +47,7 @@ import { GenerationError } from '../error.js'
  *   LavaMoatPolicy,
  *   PackagePolicy
  * } from '@lavamoat/types'
+ * @import {Logger} from '@lavamoat/vog/log.js'
  * @import {PackageJson} from 'type-fest'
  * @import {
  *   ConsumerMapNodeModulesOptions,
@@ -257,7 +258,7 @@ export const loadAndGeneratePolicy = async (
 
   const reporter = createModuleInspectionProgressReporter({
     log,
-    disabled: log.level > Loggerr.INFO,
+    disabled: log.level > LogLevels.info,
   })
 
   const preload = buildPreloads(
@@ -334,7 +335,7 @@ export const loadAndGeneratePolicy = async (
 
   // printing of these warnings is deferred until after inspection is complete
   for (const moduleSourceHookWarning of moduleSourceHookWarnings) {
-    log.warning(moduleSourceHookWarning)
+    log.warn(moduleSourceHookWarning)
   }
 
   reportInvalidCanonicalNames(unknownCanonicalNames, {
