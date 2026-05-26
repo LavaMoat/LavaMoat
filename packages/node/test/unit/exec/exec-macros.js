@@ -1,6 +1,6 @@
 import '../../../src/preamble.js'
 
-import chalk from 'chalk'
+import { colors } from '@lavamoat/vog'
 import { run } from '../../../src/exec/run.js'
 import {
   policyInput as makePolicyInput,
@@ -85,7 +85,7 @@ export const createExecMacros = (test) => {
             'program output did not match expected value'
           )
         } catch (err) {
-          t.log(`Volume tree:\n${chalk.yellow(vol.toTree())}`)
+          t.log(`Volume tree:\n${colors.yellow(vol.toTree())}`)
           throw err
         }
       },
