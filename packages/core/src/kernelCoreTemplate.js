@@ -161,6 +161,7 @@
     // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
     // the exports are processed via "protectExportsRequireTime" per the module's configuration
     function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId }) {
+      requestedName = `${requestedName}`
       const parentModulePackageName = parentModuleData.package
       const parentPackagesWhitelist = parentPackagePolicy.packages
       const parentBuiltinsWhitelist = Object.entries(parentPackagePolicy.builtin)
