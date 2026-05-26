@@ -303,7 +303,7 @@ const makeDefaultPath = (
   if (policyPath) {
     policyPath = toAbsolutePath(
       policyPath,
-      `Policy path must be an absolute path; got ${hrCode(policyPath)}`
+      `Policy path must be an absolute path; got ${hrCode(`${policyPath}`)}`
     )
     dir = nodePath.dirname(policyPath)
     return nodePath.join(
@@ -313,7 +313,7 @@ const makeDefaultPath = (
   } else if (projectRoot) {
     projectRoot = toAbsolutePath(
       projectRoot,
-      `Project root must be an absolute path; got ${hrCode(projectRoot)}`
+      `Project root must be an absolute path; got ${hrCode(`${projectRoot}`)}`
     )
     dir = nodePath.join(projectRoot, defaultDir)
   } else {

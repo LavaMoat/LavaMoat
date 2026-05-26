@@ -1,10 +1,9 @@
 import '../../../src/preamble.js'
 
-import { Loggerr } from 'loggerr'
 import { fileURLToPath } from 'node:url'
 import { defaultReadPowers } from '../../../src/compartment/power.js'
 import { SourceTypes } from '../../../src/constants.js'
-import { log as defaultLog } from '../../../src/log.js'
+import { log as defaultLog, LogLevels } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import { isPolicy, unwrapMerged } from '../../../src/policy-util.js'
 import { isFunction } from '../../../src/util.js'
@@ -16,10 +15,8 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {
- *   LavaMoatPolicy,
- *   LavaMoatPolicy
- * } from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {Logger} from '@lavamoat/vog/log.js'
  * @import {
  *   Macro,
  *   Macro,
@@ -117,14 +114,14 @@ export function createGeneratePolicyMacros(test) {
       { expectedPolicy = {}, sourceType = SourceTypes.Module } = {}
     ) => {
       const { readPowers } = await scaffoldFixture(content, { sourceType })
-      /** @type {Loggerr} */
+      /** @type {Logger} */
       let log
       if (!isPolicy(expectedPolicy) && expectedPolicy.log) {
         log = expectedPolicy.log
       } else {
         log = defaultLog
         if (process.env.LAVAMOAT_DEBUG === undefined) {
-          log.setLevel(Loggerr.EMERGENCY)
+          log.level = LogLevels.silent
         }
       }
 
@@ -273,7 +270,7 @@ export function createGeneratePolicyMacros(test) {
         let { log } = otherOptions
         if (!log && process.env.LAVAMOAT_DEBUG === undefined) {
           log = defaultLog
-          log.setLevel(Loggerr.EMERGENCY)
+          log.level = LogLevels.silent
         }
 
         const { policy: wrappedPolicy } = await loadAndGeneratePolicy(
@@ -383,7 +380,7 @@ export function createGeneratePolicyMacros(test) {
         let { log } = otherOptions
         if (!log && process.env.LAVAMOAT_DEBUG === undefined) {
           log = defaultLog
-          log.setLevel(Loggerr.EMERGENCY)
+          log.level = LogLevels.silent
         }
 
         const { entrypoint: entrypointPath, dir: projectRoot } = fixture(name, {

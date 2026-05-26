@@ -1,7 +1,7 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
-import { log, Loggerr } from '../../../src/log.js'
+import { log, LogLevels } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import { unwrapMerged } from '../../../src/policy-util.js'
 import { keysOr } from '../../../src/util.js'
@@ -157,7 +157,7 @@ test(
 test('path stability', async (t) => {
   const maxIterations = 20
   if (process.env.LAVAMOAT_DEBUG === undefined) {
-    log.setLevel(Loggerr.EMERGENCY)
+    log.level = LogLevels.silent
   }
   t.plan(maxIterations)
 
