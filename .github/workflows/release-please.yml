@@ -39,7 +39,9 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "releases_created=true" >> "$GITHUB_OUTPUT"
-          echo 'paths_released=${{ inputs.pathsReleased }}' >> "$GITHUB_OUTPUT"
+          echo 'paths_released=${INPUTS_PATHSRELEASED}' >> "$GITHUB_OUTPUT"
+        env:
+          INPUTS_PATHSRELEASED: ${{ inputs.pathsReleased }}
 
   # If any releases were created in release-please, this job packs the released
   # workspaces into tarballs and uploads them as artifacts.
