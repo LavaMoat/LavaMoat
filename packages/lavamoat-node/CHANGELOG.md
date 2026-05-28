@@ -19,21 +19,6 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
-## [11.1.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.1.2...lavamoat-v11.1.3) (2026-05-28)
-
-
-### Bug Fixes
-
-* **lavamoat-node:** fix old resolution bug where paths containing # were misinterpreted ([#1971](https://github.com/LavaMoat/LavaMoat/issues/1971)) ([494f852](https://github.com/LavaMoat/LavaMoat/commit/494f85238577bb3ced97ee1c08a412f0f9a13873))
-
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * lavamoat-core bumped from ^18.0.3 to ^18.0.4
-    * lavamoat-tofu bumped from ^9.0.1 to ^9.0.2
-
 ## [11.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.1.1...lavamoat-v11.1.2) (2026-05-13)
 
 
