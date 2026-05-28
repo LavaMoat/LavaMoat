@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.5](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.4...node-v1.0.5) (2026-05-28)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([#1982](https://github.com/LavaMoat/LavaMoat/issues/1982)) ([5b375cb](https://github.com/LavaMoat/LavaMoat/commit/5b375cb85d85bc3e37962eae5836b67de9ed474c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.3 to ^18.0.4
+    * lavamoat-tofu bumped from ^9.0.1 to ^9.0.2
+
 ## [1.0.4](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.3...node-v1.0.4) (2026-05-13)
 
 
