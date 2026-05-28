@@ -1,19 +1,5 @@
 # Changelog
 
-## [9.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.0.1...lavamoat-tofu-v9.0.2) (2026-05-28)
-
-
-### Bug Fixes
-
-* **deps:** update babel monorepo ([#1982](https://github.com/LavaMoat/LavaMoat/issues/1982)) ([5b375cb](https://github.com/LavaMoat/LavaMoat/commit/5b375cb85d85bc3e37962eae5836b67de9ed474c))
-
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * peerDependencies
-    * lavamoat-core bumped from >15.4.0 to >18.0.4
-
 ## [9.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.0.0...lavamoat-tofu-v9.0.1) (2026-04-15)
 
 

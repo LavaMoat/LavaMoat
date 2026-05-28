@@ -6,20 +6,6 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
-## [18.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.3...lavamoat-core-v18.0.4) (2026-05-28)
-
-
-### Bug Fixes
-
-* ensure internal sequence of specifier handling does not leak con… ([#1992](https://github.com/LavaMoat/LavaMoat/issues/1992)) ([6acf157](https://github.com/LavaMoat/LavaMoat/commit/6acf157cd43d2855d6d9250c507bda40225e5dab))
-
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * lavamoat-tofu bumped from ^9.0.1 to ^9.0.2
-
 ## [18.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.2...lavamoat-core-v18.0.3) (2026-05-13)
 
 
