@@ -39,7 +39,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "releases_created=true" >> "$GITHUB_OUTPUT"
-          echo "paths_released=${{ inputs.pathsReleased }}" >> "$GITHUB_OUTPUT"
+          echo 'paths_released=${{ inputs.pathsReleased }}' >> "$GITHUB_OUTPUT"
 
   # If any releases were created in release-please, this job packs the released
   # workspaces into tarballs and uploads them as artifacts.
@@ -65,12 +65,13 @@ jobs:
       - run: npm run build
       - id: pack
         run: |
-          paths='${NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED}'
+          paths="${NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED}"
           outdir='${{ runner.temp }}/lavamoat-pack'
           mkdir -p "$outdir"
           readarray -t workspace_args < <(jq -r '.[] | "--workspace=" + .' <<< "$paths")
           echo "Packing workspaces: ${workspace_args[*]}"
           pack_output=$(npm pack "${workspace_args[@]}" --pack-destination="$outdir" --json --silent)
+          echo $pack_output
           files=$(jq -c '[.[].filename]' <<< "$pack_output")
           echo "files=$files" >> "$GITHUB_OUTPUT"
         shell: bash
@@ -105,7 +106,7 @@ jobs:
           node-version: 24.x
       - run: npm install -g 'npm@^11.15.0'
       - run: |
-          files='${NEEDS_PACK_OUTPUTS_FILES}'
+          files="${NEEDS_PACK_OUTPUTS_FILES}""
           pkgdir='${{ runner.temp }}/lavamoat-tarballs'
           while IFS= read -r filename; do
             echo "Publishing $filename to staging registry..."
