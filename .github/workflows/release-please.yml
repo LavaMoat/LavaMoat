@@ -54,6 +54,7 @@ jobs:
         run: |
           paths='${NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED}'
           outdir='${{ runner.temp }}/lavamoat-pack'
+          mkdir -p "$outdir"
           readarray -t workspace_args < <(jq -r '.[] | "--workspace=" + .' <<< "$paths")
           echo "Packing workspaces: ${workspace_args[*]}"
           pack_output=$(npm pack "${workspace_args[@]}" --pack-destination="$outdir" --json)
