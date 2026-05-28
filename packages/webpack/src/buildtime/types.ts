@@ -28,6 +28,7 @@ export interface CompleteLavaMoatPluginOptions {
   unlockedChunksUnsafe?: RegExp
   staticShims_experimental?: string[]
   runtimeConfigurationPerChunk_experimental?: (chunk: Chunk) => LavaMoatChunkRuntimeConfiguration
+  isolateLocations_experimental?: Record<string, string>
 }
 
 export type LavaMoatPluginOptions = Partial<CompleteLavaMoatPluginOptions>
