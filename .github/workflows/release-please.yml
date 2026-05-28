@@ -65,12 +65,13 @@ jobs:
       - run: npm run build
       - id: pack
         run: |
-          paths='${NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED}'
+          paths="${NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED}"
           outdir='${{ runner.temp }}/lavamoat-pack'
           mkdir -p "$outdir"
           readarray -t workspace_args < <(jq -r '.[] | "--workspace=" + .' <<< "$paths")
           echo "Packing workspaces: ${workspace_args[*]}"
           pack_output=$(npm pack "${workspace_args[@]}" --pack-destination="$outdir" --json --silent)
+          echo $pack_output
           files=$(jq -c '[.[].filename]' <<< "$pack_output")
           echo "files=$files" >> "$GITHUB_OUTPUT"
         shell: bash
