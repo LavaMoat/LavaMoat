@@ -5,6 +5,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      pathsReleased:
+        description: 'JSON array of workspace paths to release (e.g. ["packages/core","packages/node"])'
+        required: true
+        type: string
 
 name: Release & Publish
 
@@ -18,15 +24,22 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       # boolean indicating whether any releases were created
-      releases_created: ${{ steps.release.outputs.releases_created }}
+      releases_created: ${{ steps.release.outputs.releases_created || steps.manual.outputs.releases_created }}
       # JSON array of workspace paths that were released
-      paths_released: ${{ steps.release.outputs.paths_released }}
+      paths_released: ${{ steps.release.outputs.paths_released || steps.manual.outputs.paths_released }}
     permissions:
       contents: write
       pull-requests: write
     steps:
       - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         id: release
+        if: github.event_name != 'workflow_dispatch'
+      - name: Use manual input
+        id: manual
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "releases_created=true" >> "$GITHUB_OUTPUT"
+          echo "paths_released=${{ inputs.pathsReleased }}" >> "$GITHUB_OUTPUT"
 
   # If any releases were created in release-please, this job packs the released
   # workspaces into tarballs and uploads them as artifacts.
@@ -57,7 +70,7 @@ jobs:
           mkdir -p "$outdir"
           readarray -t workspace_args < <(jq -r '.[] | "--workspace=" + .' <<< "$paths")
           echo "Packing workspaces: ${workspace_args[*]}"
-          pack_output=$(npm pack "${workspace_args[@]}" --pack-destination="$outdir" --json)
+          pack_output=$(npm pack "${workspace_args[@]}" --pack-destination="$outdir" --json --silent)
           files=$(jq -c '[.[].filename]' <<< "$pack_output")
           echo "files=$files" >> "$GITHUB_OUTPUT"
         shell: bash
