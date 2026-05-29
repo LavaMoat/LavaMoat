@@ -10,6 +10,8 @@ on:
 
 jobs:
   rerun:
+    permissions:
+      actions: write
     runs-on: ${{ inputs.runner }}
     steps:
       - name: rerun ${{ inputs.run_id }}
@@ -17,6 +19,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
           GH_DEBUG: api
+          RUN_ID: ${{ inputs.run_id }}
         run: |
-          gh run watch ${{ inputs.run_id }}
-          gh run rerun ${{ inputs.run_id }} --failed
+          gh run watch "${RUN_ID}"
+          gh run rerun "${RUN_ID}" --failed
