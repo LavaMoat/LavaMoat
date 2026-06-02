@@ -5,6 +5,8 @@ on:
     types: [opened, reopened]
     branches: [main]
 
+permissions: {}
+
 jobs:
   assign-author:
     if: github.repository == 'LavaMoat/LavaMoat'

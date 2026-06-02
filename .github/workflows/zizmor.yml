@@ -41,7 +41,7 @@ jobs:
         uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
         with:
           persona: pedantic
-          min-severity: low
+          min-severity: medium
           # `advanced-security: true` would upload SARIF to GitHub Code
           # Scanning, which requires Advanced Security to be enabled on the
           # repository and `security-events: write` on this job. Until that

@@ -8,6 +8,8 @@ on:
         description: 'The runner to use for the rerun'
         required: true
 
+permissions: {}
+
 jobs:
   rerun:
     permissions:
