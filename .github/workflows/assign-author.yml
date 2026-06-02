@@ -5,13 +5,12 @@ on:
     types: [opened, reopened]
     branches: [main]
 
-permissions:
-  pull-requests: write
-
 jobs:
   assign-author:
     if: github.repository == 'LavaMoat/LavaMoat'
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: toshimaru/auto-author-assign@5cd66f093de6691e0812ef186b7492589b0b7866 # v2.1.2
 
