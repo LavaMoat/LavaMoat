@@ -41,6 +41,57 @@ class VirtualRuntimeModule extends RuntimeModule {
   }
 }
 
+/**
+ * Compare runtime IDs in a stable way without changing their types.
+ *
+ * @param {string | number} a
+ * @param {string | number} b
+ * @returns {number}
+ */
+const compareIds = (a, b) => {
+  const typeA = typeof a
+  const typeB = typeof b
+  if (typeA !== typeB) {
+    return typeA < typeB ? -1 : 1
+  }
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a - b
+  }
+  const stringA = String(a)
+  const stringB = String(b)
+  if (stringA < stringB) {
+    return -1
+  }
+  if (stringA > stringB) {
+    return 1
+  }
+  return 0
+}
+
+/**
+ * @template {string | number} T
+ * @param {T[]} ids
+ * @returns {T[]}
+ */
+const sortedIds = (ids) => [...ids].sort(compareIds)
+
+/**
+ * @param {[string, (string | number)[]][]} identifiersForModuleIds
+ * @returns {[string, (string | number)[]][]}
+ */
+const sortedIdentifierMap = (identifiersForModuleIds) =>
+  identifiersForModuleIds
+    .map(
+      ([resourceId, moduleIds]) =>
+        /** @type {[string, (string | number)[]]} */ ([
+          resourceId,
+          sortedIds(moduleIds),
+        ])
+    )
+    .sort(([resourceIdA], [resourceIdB]) =>
+      compareIds(resourceIdA, resourceIdB)
+    )
+
 /** @import {LavaMoatPluginOptions, LavaMoatChunkRuntimeConfiguration} from '../buildtime/types' */
 /** @import {LavaMoatPolicy} from '@lavamoat/types' */
 /** @import {RuntimeFragment} from './assemble.js' */
@@ -190,7 +241,7 @@ const LOCKDOWN_SHIMS = [];`
         // a mapping used to look up resource ids by module id
         {
           name: 'idmap',
-          data: identifiersForModuleIds,
+          data: sortedIdentifierMap(identifiersForModuleIds),
           json: true,
         },
         // list of ids of modules to skip in policy enforcement
@@ -208,7 +259,7 @@ const LOCKDOWN_SHIMS = [];`
         // known chunk ids
         {
           name: 'kch',
-          data: chunkIds,
+          data: sortedIds(chunkIds),
           json: true,
         },
         // a record of module ids that are externals and need to be enforced as builtins
