@@ -143,16 +143,36 @@ exports.generateIdentifierLookup = ({
 
   crossReference(identifiersWithKnownPaths, usedIdentifiers)
 
-  const identifiersForModuleIds = Object.entries(
-    Object.entries(pathLookup).reduce((acc, [, { aa, moduleIds }]) => {
+  // Module/chunk ids may be numbers or strings; compare them numerically so
+  // the resulting order is stable and independent of insertion order.
+  const byId = (a, b) =>
+    String(a).localeCompare(String(b), 'en', { numeric: true })
+
+  const grouped = Object.entries(pathLookup).reduce(
+    (acc, [, { aa, moduleIds }]) => {
       const key = translate(aa)
       if (acc[key] === undefined) {
         acc[key] = []
       }
       acc[key].push(...moduleIds)
       return acc
-    }, /** @type {Record<string, (string | number)[]>} */ ({}))
+    },
+    /** @type {Record<string, (string | number)[]>} */ ({})
   )
+
+  // Sort entries by resource key and module ids within each entry. The source
+  // data is collected by iterating webpack's `compilation.chunks` Set, whose
+  // iteration order is not stable between builds; sorting here keeps the
+  // emitted runtime (LAVAMOAT.idmap) byte-for-byte reproducible.
+  const identifiersForModuleIds = Object.entries(grouped)
+    .map(
+      ([key, moduleIds]) =>
+        /** @type {[string, (string | number)[]]} */ ([
+          key,
+          [...moduleIds].sort(byId),
+        ])
+    )
+    .sort(([a], [b]) => byId(a, b))
 
   /**
    * TODO: use real policy type here

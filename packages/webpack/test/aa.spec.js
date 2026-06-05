@@ -99,3 +99,48 @@ test('aa - generateIdentifierLookup translates and narrows the policy', (t) => {
   t.is(Object.keys(translatedPolicy.resources).length, 3)
   t.snapshot(translatedPolicy.resources)
 })
+
+test('aa - identifiersForModuleIds is sorted', (t) => {
+  const { identifiersForModuleIds } = generateIdentifierLookup({
+    ...lookupFixture,
+    readableResourceIds: true,
+  })
+
+  // Entries must be sorted by resource key.
+  const keys = identifiersForModuleIds.map(([key]) => key)
+  t.deepEqual(
+    keys,
+    [...keys].sort((a, b) =>
+      String(a).localeCompare(String(b), 'en', { numeric: true })
+    )
+  )
+
+  // Module ids within each entry must be sorted.
+  for (const [, moduleIds] of identifiersForModuleIds) {
+    t.deepEqual(
+      moduleIds,
+      [...moduleIds].sort((a, b) =>
+        String(a).localeCompare(String(b), 'en', { numeric: true })
+      )
+    )
+  }
+})
+
+test('aa - identifiersForModuleIds is independent of input order', (t) => {
+  const ordered = generateIdentifierLookup({
+    ...lookupFixture,
+    readableResourceIds: true,
+  }).identifiersForModuleIds
+
+  // Reversing the order of the input paths must not change the output. The
+  // real plugin collects these by iterating webpack's `compilation.chunks`
+  // Set, whose order is not stable between builds; the lookup must normalize
+  // it so the emitted runtime is reproducible.
+  const shuffled = generateIdentifierLookup({
+    ...lookupFixture,
+    paths: [...lookupFixture.paths].reverse(),
+    readableResourceIds: true,
+  }).identifiersForModuleIds
+
+  t.deepEqual(shuffled, ordered)
+})

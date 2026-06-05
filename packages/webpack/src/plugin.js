@@ -427,13 +427,24 @@ class LavaMoatPlugin {
               }
             })
 
+            // These lists are derived by iterating webpack's
+            // `compilation.chunks` Set, whose iteration order is not stable
+            // between builds. Sort every module/chunk id list emitted into the
+            // runtime so the output is byte-for-byte reproducible. Module/chunk
+            // ids may be numbers or strings, so compare them numerically.
+            const byId = (a, b) =>
+              String(a).localeCompare(String(b), 'en', { numeric: true })
+
             STORE.root = identifierLookup.root
             STORE.identifiersForModuleIds =
               identifierLookup.identifiersForModuleIds
-            STORE.unenforceableModuleIds = moduleData.unenforceableModuleIds
-            STORE.contextModuleIds = moduleData.contextModules.map(
-              ({ moduleId }) => moduleId
-            )
+            STORE.chunkIds = [...STORE.chunkIds].sort(byId)
+            STORE.unenforceableModuleIds = [
+              ...moduleData.unenforceableModuleIds,
+            ].sort(byId)
+            STORE.contextModuleIds = moduleData.contextModules
+              .map(({ moduleId }) => moduleId)
+              .sort(byId)
             STORE.externals = moduleData.externals
             // narrow down the policy and map to module identifiers
             // TODO: theoretically policy could be optimized per chunk, but configuring webpack to emit a runtime chunk or have separate builds seems better for most usecases.
