@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.5...node-v1.0.6) (2026-06-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/node to v20.19.41 ([#1983](https://github.com/LavaMoat/LavaMoat/issues/1983)) ([3fad831](https://github.com/LavaMoat/LavaMoat/commit/3fad831c95de9cdaed0307aebe710083c94bf5c4))
+
 ## [1.0.5](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.4...node-v1.0.5) (2026-05-28)
 
 
