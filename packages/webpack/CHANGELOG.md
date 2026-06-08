@@ -18,6 +18,13 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [2.2.3](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.2...webpack-v2.2.3) (2026-06-08)
+
+
+### Bug Fixes
+
+* **webpack:** reproducible builds require runtime to be stable on unstable input ordering ([#2014](https://github.com/LavaMoat/LavaMoat/issues/2014)) ([798651c](https://github.com/LavaMoat/LavaMoat/commit/798651c21f46c1db01ab69322126514d87c52f22))
+
 ## [2.2.2](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.1...webpack-v2.2.2) (2026-05-28)
 
 
