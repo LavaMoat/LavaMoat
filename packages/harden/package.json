@@ -1,0 +1,55 @@
+{
+  "name": "@lavamoat/harden",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A tool for providing reasonable defaults and security hardening to your project",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/allow-scripts"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/harden",
+  "author": "LavaMoat Team",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.5.1 || ^24.0.0"
+  },
+  "bin": {
+    "harden": "src/cli.js"
+  },
+  "main": "src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": "./src/index.js",
+    "./setup": "./src/setup.js"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src",
+    "types",
+    "!*.tsbuildinfo",
+    "!tsconfig.json"
+  ],
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "npm run test:run",
+    "test:prep": "node test/prepare.js",
+    "test:run": "ava"
+  },
+  "dependencies": {
+    "yaml": "^2.7.1"
+  },
+  "devDependencies": {},
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "60s"
+  }
+}
