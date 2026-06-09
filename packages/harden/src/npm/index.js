@@ -1,5 +1,6 @@
 // @ts-check
 import { opinions } from '../opinions.js'
+import { warnSkipped } from '../tools/print.js'
 import { applyNpmrc } from '../tools/npmrc.js'
 import { applyPackageJson } from '../tools/packagejson.js'
 
@@ -11,10 +12,7 @@ import { applyPackageJson } from '../tools/packagejson.js'
  *     facts: import('../tools/detect.js').Facts
  *   ) => Promise<boolean>
  * }} decisions
- * @returns {Promise<{
- *   result: { file: string; key: string }[]
- *   summary: string
- * }>}
+ * @returns {Promise<{ file: string; key: string }[]>}
  */
 export async function reasonableDefaults(facts, decisions) {
   const result = []
@@ -43,7 +41,7 @@ export async function reasonableDefaults(facts, decisions) {
           changes = modified
         }
       } catch (err) {
-        console.warn(`⚠️  ${opinion.description}: ${err.message}`)
+        warnSkipped(opinion, err)
         continue
       }
     }
@@ -63,11 +61,5 @@ export async function reasonableDefaults(facts, decisions) {
     }
   }
 
-  const summary =
-    result.length === 0
-      ? 'No changes needed — config already hardened.'
-      : 'Applied hardening changes:\n' +
-        result.map((r) => `  ✓ ${r.file}: ${r.key}`).join('\n')
-
-  return { result, summary }
+  return result
 }

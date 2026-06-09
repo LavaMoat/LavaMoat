@@ -1,13 +1,20 @@
 // @ts-check
 
-import { execSync } from 'node:child_process'
+/**
+ * @typedef {{
+ *   key: string
+ *   value: any
+ *   comment?: string
+ *   ifNotExist?: boolean
+ * }} ConfigEntry
+ */
 
 /**
  * @typedef {{
- *   npm?: { key: string; value: string; comment?: string }[]
- *   yarn?: { key: string; value: any; comment?: string }[]
- *   pnpm?: { key: string; value: any; comment?: string }[]
- *   packagejson?: { key: string; value: any; ifNotExist?: boolean }[]
+ *   npm?: ConfigEntry[]
+ *   yarn?: ConfigEntry[]
+ *   pnpm?: ConfigEntry[]
+ *   packagejson?: ConfigEntry[]
  * }} Changes
  */
 
@@ -99,6 +106,7 @@ export const opinions = [
         console.warn(
           `Found git dependencies in package.json. Adjusting config to allow direct git dependencies only. Consider replacing them with safer sources if possible.`
         )
+        // @ts-expect-error visibly exists
         changes.npm[0].value = 'root'
       }
     },
@@ -125,6 +133,7 @@ export const opinions = [
         console.warn(
           `Found git dependencies in package.json. Edit approvedGitRepositories in .yarnrc.yml accordingly.`
         )
+        // @ts-expect-error visibly exists
         changes.yarn[0].value = facts.directGitDeps
       }
     },
@@ -149,24 +158,6 @@ export const opinions = [
         },
       ],
     },
-    execute: (changes, facts) => {
-      try {
-        const version = execSync('npm --version', { encoding: 'utf8' }).trim()
-        const match = version.match(/^(\d+)\.(\d+)/)
-        if (
-          match &&
-          (Number(match[1]) < 11 ||
-            (Number(match[1]) === 11 && Number(match[2]) < 16))
-        ) {
-          console.warn(
-            `⚠️  Current npm version (${version}) is below the minimum recommended (11.16.0). Please upgrade npm.`
-          )
-        }
-      } catch {
-        // Can't determine npm version, skip warning
-      }
-      return undefined
-    },
   },
 
   {
@@ -185,21 +176,21 @@ export const opinions = [
     },
   },
 
-  {
-    description:
-      'Enforce minimum pnpm version via packageManager field in package.json.',
-    level: 'moderate',
-    applicableTo: ['pnpm'],
-    changes: {
-      packagejson: [
-        {
-          ifNotExist: true,
-          key: 'packageManager',
-          value: 'pnpm@11.0.0',
-        },
-      ],
-    },
-  },
+  // {
+  //   description:
+  //     'Enforce minimum pnpm version via packageManager field in package.json.',
+  //   level: 'moderate',
+  //   applicableTo: ['pnpm'],
+  //   changes: {
+  //     packagejson: [
+  //       {
+  //         ifNotExist: true,
+  //         key: 'packageManager',
+  //         value: 'pnpm@11.0.0',
+  //       },
+  //     ],
+  //   },
+  // },
 
   {
     description:

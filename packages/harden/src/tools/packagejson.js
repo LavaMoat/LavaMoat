@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 /**
- * @typedef {{ key: string; value: any; ifNotExist?: boolean }} PackageJsonEntry
+ * @typedef {import('../opinions.js').ConfigEntry} PackageJsonEntry
  */
 
 /**

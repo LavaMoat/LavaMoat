@@ -1,5 +1,6 @@
 // @ts-check
 import { collectFacts, detectPackageManager, isYarnV1 } from './tools/detect.js'
+import { warnPmMismatch } from './tools/print.js'
 import { reasonableDefaults as npmDefaults } from './npm/index.js'
 import { reasonableDefaults as yarnDefaults } from './yarn/index.js'
 import { reasonableDefaults as pnpmDefaults } from './pnpm/index.js'
@@ -34,7 +35,7 @@ export async function hardenDefaults(options) {
   const { cwd, decisions } = options
 
   const facts = await collectFacts(cwd)
-  let detected = detectPackageManager(facts)
+  const detected = detectPackageManager(facts)
 
   // Determine package manager
   let pmName = options.packageManager ?? null
@@ -52,9 +53,7 @@ export async function hardenDefaults(options) {
 
   // Warn if detected differs from declared
   if (detected && pmName !== detected.name) {
-    console.warn(
-      `⚠️  Declared package manager (${pmName}) differs from detected (${detected.name}).`
-    )
+    warnPmMismatch(pmName, detected.name)
   }
 
   // Refuse yarn v1
@@ -62,14 +61,26 @@ export async function hardenDefaults(options) {
     throw new Error('Yarn v1 is not supported. Please upgrade to Yarn 4.15+.')
   }
 
+  let result
   switch (pmName) {
     case 'npm':
-      return npmDefaults(facts, decisions)
+      result = await npmDefaults(facts, decisions)
+      break
     case 'yarn':
-      return yarnDefaults(facts, decisions)
+      result = await yarnDefaults(facts, decisions)
+      break
     case 'pnpm':
-      return pnpmDefaults(facts, decisions)
+      result = await pnpmDefaults(facts, decisions)
+      break
     default:
       throw new Error(`Unsupported package manager: ${pmName}`)
   }
+
+  const summary =
+    result.length === 0
+      ? 'No changes needed — config already hardened.'
+      : 'Applied hardening changes:\n' +
+        result.map((r) => `  ✓ ${r.file}: ${r.key}`).join('\n')
+
+  return { result, summary }
 }

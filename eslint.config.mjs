@@ -305,6 +305,7 @@ export default defineConfig(
   // ---------------------------------------------------------------------------
   ...typedPackageConfigs('aa'),
   ...typedPackageConfigs('allow-scripts'),
+  ...typedPackageConfigs('harden'),
   ...typedPackageConfigs('core'),
   ...typedPackageConfigs('laverna'),
   ...typedPackageConfigs('node'),
