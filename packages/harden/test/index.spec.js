@@ -1,10 +1,13 @@
-/* eslint-disable ava/assertion-arguments */
 import test from 'ava'
-import { cp, readFile, mkdtemp } from 'node:fs/promises'
+import { cp, mkdtemp } from 'node:fs/promises'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { hardenDefaults } from '../src/index.js'
 import { createFallbackDecisions } from '../src/tools/fallback-decisions.js'
+
+const execFileAsync = promisify(execFile)
 
 const PROJECTS_DIR = new URL('./projects/', import.meta.url).pathname
 
@@ -20,24 +23,40 @@ async function copyProject(name) {
 }
 
 /**
- * Reads a file relative to cwd, returns null if it doesn't exist.
+ * Returns a normalized unified diff between originalDir and modifiedDir. Paths
+ * and timestamps are replaced with stable placeholders.
  *
- * @param {string} cwd
- * @param {string} file
+ * @param {string} originalDir
+ * @param {string} modifiedDir
  */
-async function readOutput(cwd, file) {
+async function diffDirs(originalDir, modifiedDir) {
+  let stdout = ''
   try {
-    return await readFile(join(cwd, file), 'utf8')
-  } catch {
-    return null
+    ;({ stdout } = await execFileAsync('diff', [
+      '-u',
+      '-r',
+      '-N',
+      originalDir,
+      modifiedDir,
+    ]))
+  } catch (err) {
+    if (err && typeof err === 'object' && /** @type {any} */ (err).code === 1) {
+      stdout = /** @type {any} */ (err).stdout
+    } else {
+      throw err
+    }
   }
+  // Strip timestamps from --- / +++ header lines, normalize paths, replace diff command lines with blank separator
+  return stdout
+    .replaceAll(modifiedDir, '<modified>')
+    .replaceAll(originalDir, '<original>')
+    .replace(/^(---|\+\+\+) (.+?)\s+\S+\s+\S+\s+\S+$/gm, '$1 $2')
+    .replace(/^diff -u -r -N .+$/gm, '\n')
 }
 
-for (const [pm, configFile] of [
-  ['npm', '.npmrc'],
-  ['yarn', '.yarnrc.yml'],
-  ['pnpm', 'pnpm-workspace.yaml'],
-]) {
+for (const pm of ['npm', 'yarn', 'pnpm']) {
+  const originalDir = join(PROJECTS_DIR, pm)
+
   test(`hardenDefaults - ${pm} - moderate level`, async (t) => {
     const cwd = await copyProject(pm)
     const decisions = createFallbackDecisions('moderate')
@@ -49,8 +68,7 @@ for (const [pm, configFile] of [
     })
 
     t.snapshot(result, 'changed keys')
-    t.snapshot(await readOutput(cwd, configFile), configFile)
-    t.snapshot(await readOutput(cwd, 'package.json'), 'package.json')
+    t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 
   test(`hardenDefaults - ${pm} - paranoid level`, async (t) => {
@@ -64,8 +82,7 @@ for (const [pm, configFile] of [
     })
 
     t.snapshot(result, 'changed keys')
-    t.snapshot(await readOutput(cwd, configFile), configFile)
-    t.snapshot(await readOutput(cwd, 'package.json'), 'package.json')
+    t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 
   test(`hardenDefaults - ${pm} - idempotent (paranoid applied twice)`, async (t) => {

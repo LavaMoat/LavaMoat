@@ -9,7 +9,7 @@ export const opinions = Object.freeze([
     level: 'moderate',
     changes: [
       {
-        target: 'config',
+        target: 'pnpm-workspace.yaml',
         key: 'minimumReleaseAge',
         value: 4320,
         comment:
@@ -51,10 +51,29 @@ export const opinions = Object.freeze([
     level: 'paranoid',
     changes: [
       {
-        target: 'config',
+        target: 'pnpm-workspace.yaml',
         key: 'blockExoticSubdeps',
         value: true,
         comment: 'Disable exotic subdeps in older pnpm versions.',
+      },
+    ],
+  },
+  {
+    description:
+      'Prevent npm from being used in case someone accidentally runs an old version of it.',
+    level: 'paranoid',
+    changes: [
+      {
+        target: '.npmrc',
+        key: 'offline',
+        value: true,
+        comment: 'Make using npm impossible.',
+      },
+      {
+        target: '.npmrc',
+        key: 'ignore-scripts',
+        value: true,
+        comment: 'Ignore scripts just in case.',
       },
     ],
   },
@@ -64,7 +83,7 @@ export const opinions = Object.freeze([
     level: 'moderate',
     changes: [
       {
-        target: 'config',
+        target: 'pnpm-workspace.yaml',
         key: 'trustPolicy',
         value: 'no-downgrade',
         comment:

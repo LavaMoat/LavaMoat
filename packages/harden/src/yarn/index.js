@@ -1,11 +1,13 @@
 import { opinions } from './opinions.js'
 import { warnSkipped } from '../tools/print.js'
 import { applyOpinion } from '../tools/apply-change.js'
-/** @import {
-  AppliedChange,
-  Decisions,
-  Facts
-} from "../tools/types.js" */
+/**
+ * @import {
+ *   AppliedChange,
+ *   Decisions,
+ *   Facts
+ * } from "../tools/types.js"
+ */
 
 /**
  * @param {Facts} facts
@@ -30,9 +32,7 @@ export async function reasonableDefaults(facts, decisions) {
     }
 
     try {
-      result.push(
-        await applyOpinion(facts.cwd, 'yarn', opinion, facts, askToHarden)
-      )
+      result.push(await applyOpinion(facts.cwd, opinion, facts, askToHarden))
     } catch (err) {
       warnSkipped(opinion, err)
     }

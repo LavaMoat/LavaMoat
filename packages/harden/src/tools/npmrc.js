@@ -1,8 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { escapeRegex } from './regex-escape.js'
 /** @import {
-  Change,
-  ChangeResult
+  AppliedChange,
+  Change
 } from "./types.js" */
 
 /**
@@ -26,7 +27,8 @@ async function readNpmrc(cwd) {
  *
  * @param {string} cwd
  * @param {Change[]} entries
- * @returns {Promise<ChangeResult[]>} List of entries that were changed or added
+ * @returns {Promise<AppliedChange[]>} List of entries that were changed or
+ *   added
  */
 export async function applyNpmrc(cwd, entries) {
   const lines = await readNpmrc(cwd)
@@ -55,19 +57,19 @@ export async function applyNpmrc(cwd, entries) {
           lines.splice(existingIdx, 0, commentLine)
           // existingIdx shifted by 1
           lines[existingIdx + 1] = newLine
-          changed.push({ key: entry.key, value: strValue })
+          changed.push({ file: '.npmrc', key: entry.key, value: strValue })
           continue
         }
       }
       lines[existingIdx] = newLine
-      changed.push({ key: entry.key, value: strValue })
+      changed.push({ file: '.npmrc', key: entry.key, value: strValue })
     } else {
       // Append new entry
       if (commentLine) {
         lines.push(commentLine)
       }
       lines.push(newLine)
-      changed.push({ key: entry.key, value: strValue })
+      changed.push({ file: '.npmrc', key: entry.key, value: strValue })
     }
   }
 
@@ -75,11 +77,4 @@ export async function applyNpmrc(cwd, entries) {
   const content = lines.join('\n').trimEnd() + '\n'
   await writeFile(join(cwd, '.npmrc'), content)
   return changed
-}
-
-/**
- * @param {string} str
- */
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

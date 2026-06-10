@@ -14,7 +14,7 @@ export const opinions = Object.freeze([
       if (shouldIgnoreAll) {
         return [
           {
-            target: 'config',
+            target: '.npmrc',
             key: 'ignore-scripts',
             value: 'true',
             comment: 'Ignore all lifecycle scripts always.',
@@ -32,7 +32,7 @@ export const opinions = Object.freeze([
     level: 'moderate',
     changes: [
       {
-        target: 'config',
+        target: '.npmrc',
         key: 'min-release-age',
         value: '3',
         comment: 'Avoid installing packages published in last 3 days.',
@@ -46,7 +46,7 @@ export const opinions = Object.freeze([
     level: 'baseline',
     changes: [
       {
-        target: 'config',
+        target: '.npmrc',
         key: 'allow-git',
         value: 'none',
         comment: "Don't install packages from git urls.",
@@ -99,7 +99,7 @@ export const opinions = Object.freeze([
     level: 'paranoid',
     changes: [
       {
-        target: 'config',
+        target: '.npmrc',
         key: 'git',
         value: 'false',
         comment:

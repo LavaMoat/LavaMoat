@@ -23,8 +23,15 @@ export interface Facts {
   directGitDeps: string[]
 }
 
+export type ConfigTarget =
+  | '.npmrc'
+  | '.yarnrc'
+  | '.yarnrc.yml'
+  | 'pnpm-workspace.yaml'
+export type ChangeTarget = ConfigTarget | 'package.json'
+
 export interface Change {
-  target: 'config' | 'package.json'
+  target: ChangeTarget
   key: string
   value: SerializableValue
   comment?: string
@@ -32,6 +39,10 @@ export interface Change {
 }
 
 export type ChangeResult = Pick<Change, 'key' | 'value'>
+
+export interface AppliedChange extends ChangeResult {
+  file: string
+}
 
 export interface Opinion {
   description: string
@@ -48,12 +59,6 @@ export interface Decisions {
   shouldApplyOpinion: (opinion: Opinion, facts: Facts) => Promise<boolean>
   packageManager?: () => Promise<string | null>
   askToHarden?: (opinion: Opinion, facts: Facts) => Promise<boolean | null>
-}
-
-export interface AppliedChange {
-  file: string
-  key: string
-  value: SerializableValue
 }
 
 export interface HardenResult {

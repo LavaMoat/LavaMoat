@@ -9,7 +9,7 @@ export const opinions = Object.freeze([
     level: 'baseline',
     changes: [
       {
-        target: 'config',
+        target: '.yarnrc.yml',
         key: 'enableScripts',
         value: false,
         comment: "Don't run lifecycle scripts by default.",
@@ -23,7 +23,7 @@ export const opinions = Object.freeze([
     level: 'moderate',
     changes: [
       {
-        target: 'config',
+        target: '.yarnrc.yml',
         key: 'npmMinimalAgeGate',
         value: 4320,
         comment:
@@ -38,7 +38,7 @@ export const opinions = Object.freeze([
     level: 'baseline',
     changes: [
       {
-        target: 'config',
+        target: '.yarnrc.yml',
         key: 'approvedGitRepositories',
         value: [],
         comment: 'Allowlist of git dependencies. Empty to block all.',
@@ -88,10 +88,44 @@ export const opinions = Object.freeze([
     level: 'paranoid',
     changes: [
       {
-        target: 'config',
+        target: '.yarnrc.yml',
         key: 'enableGlobalCache',
         value: false,
         comment: 'Disable global cache to avoid cross-project poisoning.',
+      },
+    ],
+  },
+
+  {
+    description:
+      'Prevent npm from being used in case someone accidentally runs an old version of it.',
+    level: 'paranoid',
+    changes: [
+      {
+        target: '.npmrc',
+        key: 'offline',
+        value: true,
+        comment: 'Make using npm impossible.',
+      },
+      {
+        target: '.npmrc',
+        key: 'ignore-scripts',
+        value: true,
+        comment: 'Ignore scripts just in case.',
+      },
+    ],
+  },
+
+  {
+    description:
+      'Prevent yarn1 from running scripts in case someone accidentally uses it before setting up.',
+    level: 'paranoid',
+    changes: [
+      {
+        target: '.yarnrc',
+        key: 'ignore-scripts',
+        value: true,
+        comment: 'Ignore scripts in case yarn1 is accidentally used.',
       },
     ],
   },

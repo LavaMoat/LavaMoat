@@ -1,12 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parseDocument } from 'yaml'
-/**
- * @import {
- *   Change,
- *   ChangeResult
- * } from "./types.js"
- */
+/** @import {
+  AppliedChange,
+  Change
+} from "./types.js" */
 
 /**
  * Applies config entries to a YAML file, merging with existing content.
@@ -14,7 +12,8 @@ import { parseDocument } from 'yaml'
  * @param {string} cwd
  * @param {string} filename - E.g. '.yarnrc.yml' or 'pnpm-workspace.yaml'
  * @param {Change[]} entries
- * @returns {Promise<ChangeResult[]>} List of entries that were changed or added
+ * @returns {Promise<AppliedChange[]>} List of entries that were changed or
+ *   added
  */
 export async function applyYamlConfig(cwd, filename, entries) {
   const filePath = join(cwd, filename)
@@ -55,7 +54,7 @@ export async function applyYamlConfig(cwd, filename, entries) {
       }
     }
 
-    changed.push({ key: entry.key, value: entry.value })
+    changed.push({ file: filename, key: entry.key, value: entry.value })
   }
 
   await writeFile(filePath, doc.toString())

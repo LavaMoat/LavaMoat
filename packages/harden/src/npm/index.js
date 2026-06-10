@@ -30,9 +30,7 @@ export async function reasonableDefaults(facts, decisions) {
     }
 
     try {
-      result.push(
-        await applyOpinion(facts.cwd, 'npm', opinion, facts, askToHarden)
-      )
+      result.push(await applyOpinion(facts.cwd, opinion, facts, askToHarden))
     } catch (err) {
       warnSkipped(opinion, err)
     }
