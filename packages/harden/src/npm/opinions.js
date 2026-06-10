@@ -1,5 +1,9 @@
 /** @import {Opinion} from "../tools/types.js" */
 
+import { promisify } from 'node:util'
+import child_process from 'node:child_process'
+const execFile = promisify(child_process.execFile)
+
 /** @type {readonly Opinion[]} */
 export const opinions = Object.freeze([
   {
@@ -8,7 +12,10 @@ export const opinions = Object.freeze([
     level: 'baseline', // it's conditional on askToHarden, so will end up being applied in paranoid or asked in interactive mode
     execute: async (changes, facts, askToHarden) => {
       const shouldIgnoreAll = await askToHarden(
-        { description: 'Disable all lifecycle scripts always' },
+        {
+          description:
+            'Disable all lifecycle scripts always (instead of using allowScripts)',
+        },
         facts
       )
       if (shouldIgnoreAll) {
@@ -76,25 +83,6 @@ export const opinions = Object.freeze([
 
   {
     description:
-      'Enforce minimum npm version via devEngines in package.json to ensure security features are available.',
-    level: 'baseline',
-    changes: [
-      {
-        target: 'package.json',
-        key: 'devEngines',
-        value: {
-          packageManager: {
-            name: 'npm',
-            version: '>=12.0.0',
-            onFail: 'error',
-          },
-        },
-      },
-    ],
-  },
-
-  {
-    description:
       'Disable git command entirely in npm to prevent git dependency resolution in older npm versions.',
     level: 'paranoid',
     changes: [
@@ -113,5 +101,104 @@ export const opinions = Object.freeze([
         )
       }
     },
+  },
+
+  {
+    description: 'Pin versions when adding items to allowScripts.',
+    level: 'moderate',
+    changes: [
+      {
+        target: '.npmrc',
+        key: 'allow-scripts-pin',
+        value: true,
+        comment:
+          'Pin allowed scripts to exact versions of dependencies to prevent unexpected script execution.',
+      },
+    ],
+  },
+  {
+    description: 'Set up allowScripts config',
+    level: 'baseline',
+    execute: async (changes, facts, askToHarden) => {
+      // use npm approve-scripts
+      const denyAll = await askToHarden(
+        {
+          description:
+            'Deny all lifecycle scripts and let the user allow them manually.',
+        },
+        facts
+      )
+
+      const command = denyAll
+        ? ['deny-scripts', '--all']
+        : ['approve-scripts', '--allow-scripts-pin', '--all']
+      try {
+        const { stdout } = await execFile('npm', [...command, '--json'], {
+          cwd: facts.cwd,
+        })
+        let nothingFound = true
+        // if stdout parses as json and contains a field "allowScripts" with a non-empty array, it worked. Otherwise, assume no scripts were found.
+        // https://github.com/npm/cli/issues/9529
+        try {
+          const parsed = JSON.parse(stdout)
+          if (
+            parsed.allowScripts &&
+            Array.isArray(parsed.allowScripts) &&
+            parsed.allowScripts.length > 0
+          ) {
+            nothingFound = false
+          }
+        } catch {
+          // ignore parse errors and assume nothing found
+        }
+        if (nothingFound) {
+          return [
+            {
+              target: 'package.json',
+              key: 'allowScripts',
+              value: {},
+            },
+          ]
+        }
+        if (denyAll) {
+          console.log(
+            `Denied all lifecycle scripts. You can allow specific ones using 'npm approve-scripts'.`
+          )
+        } else {
+          console.log(
+            `Approved lifecycle scripts for direct dependencies. Output:\n${stdout}`
+          )
+        }
+      } catch (err) {
+        console.error(`Failed to execute npm ${command}:`, err)
+        return [
+          {
+            target: 'package.json',
+            key: 'allowScripts',
+            value: {},
+          },
+        ]
+      }
+    },
+  },
+
+  {
+    description:
+      'Enforce minimum npm version via devEngines in package.json to ensure security features are available.',
+    level: 'baseline',
+    changes: [
+      {
+        target: 'package.json',
+        key: 'devEngines',
+        value: {
+          packageManager: {
+            name: 'npm',
+            // TODO: set to 12 ASAP
+            version: '>=11.16.0',
+            onFail: 'error',
+          },
+        },
+      },
+    ],
   },
 ])

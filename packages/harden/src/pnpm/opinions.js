@@ -1,4 +1,7 @@
 import { applyLatestVersion } from '../tools/versions.js'
+import { promisify } from 'node:util'
+import child_process from 'node:child_process'
+const execFile = promisify(child_process.execFile)
 /** @import {Opinion} from "../tools/types.js" */
 
 /** @type {readonly Opinion[]} */
@@ -58,6 +61,7 @@ export const opinions = Object.freeze([
       },
     ],
   },
+
   {
     description:
       'Prevent npm from being used in case someone accidentally runs an old version of it.',
@@ -90,5 +94,36 @@ export const opinions = Object.freeze([
           'Fail if trusted publishing or provenance is gone from a package that used to have it.',
       },
     ],
+  },
+
+  {
+    description: 'Set up allowBuilds config for lifecycle scripts.',
+    level: 'baseline',
+    execute: async (changes, facts, askToHarden) => {
+      const approveAll = !(await askToHarden(
+        {
+          description:
+            'Skip approving all builds as initial state, will need interactive approval later.',
+        },
+        facts
+      ))
+
+      if (approveAll) {
+        try {
+          await execFile('pnpm', ['approve-builds', '--all'], {
+            cwd: facts.cwd,
+          })
+          console.log(
+            `Approved all pending builds. Review allowBuilds in pnpm-workspace.yaml and remove entries you don't need.`
+          )
+        } catch (err) {
+          console.error(`Failed to execute pnpm approve-builds --all`, err)
+        }
+      } else {
+        console.log(
+          `Run 'pnpm approve-builds' to interactively approve or deny lifecycle scripts.`
+        )
+      }
+    },
   },
 ])
