@@ -1,3 +1,4 @@
+/* eslint-disable n/no-unsupported-features/node-builtins */
 import test from 'ava'
 import { cp, mkdtemp } from 'node:fs/promises'
 import { execFile } from 'node:child_process'

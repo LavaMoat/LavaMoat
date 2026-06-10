@@ -54,13 +54,13 @@ export const opinions = Object.freeze([
     ],
     execute: async (changes, facts, askToHarden) => {
       if (facts.directGitDeps.length > 0) {
-        const decision = await askToHarden(
+        const shouldBlockAnyway = await askToHarden(
           {
             description: `Block git dependencies entirely instead of allowing 'root' despite direct git dependencies being present`,
           },
           facts
         )
-        if (decision) {
+        if (shouldBlockAnyway) {
           console.warn(
             `Found git dependencies in package.json. Blocking them by setting allow-git to none. Consider replacing them with safer sources if needed.`
           )
