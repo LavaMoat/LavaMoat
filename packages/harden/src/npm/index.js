@@ -65,7 +65,6 @@ async function buildAllowlist(facts, decisions) {
     console.log(
       `No install scripts were approved. You can allow specific ones using 'npm approve-scripts'.`
     )
-    return
   }
 
   try {

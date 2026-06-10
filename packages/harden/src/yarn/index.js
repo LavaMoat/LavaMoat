@@ -69,6 +69,10 @@ async function buildAllowlist(facts, decisions) {
     console.log(`Approved packages with lifecycle scripts: [${allBuilds}] .`)
   }
 
+  if (allBuilds.length === 0) {
+    return []
+  }
+
   // put the list of packages with lifecycle scripts in dependenciesMeta in package.json
   const dependenciesMeta = Object.fromEntries(
     allBuilds.map((pkg) => [pkg, { built: true }])
