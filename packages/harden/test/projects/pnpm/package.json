@@ -1,0 +1,8 @@
+{
+  "name": "test-pnpm-project",
+  "version": "1.0.0",
+  "packageManager": "pnpm@11.0.0",
+  "dependencies": {
+    "some-lib": "github:lavamoat/nonexistent"
+  }
+}

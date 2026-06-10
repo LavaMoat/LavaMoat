@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-// @ts-check
+
 import { parseArgs } from 'node:util'
 import { resolve } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { hardenDefaults } from './index.js'
+/** @import {Level} from "./tools/types.js" */
 import { createFallbackDecisions } from './tools/fallback-decisions.js'
 import {
   printError,
@@ -30,7 +31,7 @@ Commands:
 
 Options:
   -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
-  -l, --level <level>         Hardening level (baseline, moderate, strict) [default: moderate]
+  -l, --level <level>         Hardening level (baseline, moderate, paranoid) [default: moderate]
   -h, --help                  Show this help
   -v, --version               Show version`)
   process.exit(0)
@@ -47,21 +48,20 @@ if (values.version) {
 const command = positionals[0]
 
 if (command === 'defaults') {
-  const level = /** @type {import('./index.js').Level} */ (
-    values.level ?? 'moderate'
-  )
-  if (!['baseline', 'moderate', 'strict'].includes(level)) {
+  const level = /** @type {Level} */ (values.level ?? 'moderate')
+  if (!['baseline', 'moderate', 'paranoid'].includes(level)) {
     printError(
-      `Error: Invalid level "${level}". Use baseline, moderate, or strict.`
+      `Error: Invalid level "${level}". Use baseline, moderate, or paranoid.`
     )
     process.exit(1)
   }
 
   try {
+    const decisions = createFallbackDecisions(level)
     const { summary } = await hardenDefaults({
       cwd: resolve('.'),
       packageManager: values['package-manager'] || undefined,
-      decisions: createFallbackDecisions(level),
+      decisions,
     })
 
     printSummary(summary)

@@ -1,10 +1,9 @@
-// @ts-check
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-
-/**
- * @typedef {{ key: string; value: string; comment?: string }} NpmrcEntry
- */
+/** @import {
+  Change,
+  ChangeResult
+} from "./types.js" */
 
 /**
  * Reads an .npmrc file and returns its lines.
@@ -26,8 +25,8 @@ async function readNpmrc(cwd) {
  * overrides keys that are specified in entries.
  *
  * @param {string} cwd
- * @param {NpmrcEntry[]} entries
- * @returns {Promise<string[]>} List of keys that were changed or added
+ * @param {Change[]} entries
+ * @returns {Promise<ChangeResult[]>} List of entries that were changed or added
  */
 export async function applyNpmrc(cwd, entries) {
   const lines = await readNpmrc(cwd)
@@ -37,7 +36,8 @@ export async function applyNpmrc(cwd, entries) {
     const keyPattern = new RegExp(`^\\s*;?\\s*${escapeRegex(entry.key)}\\s*=`)
     const existingIdx = lines.findIndex((line) => keyPattern.test(line))
 
-    const newLine = `${entry.key}=${entry.value}`
+    const strValue = String(entry.value)
+    const newLine = `${entry.key}=${strValue}`
     const commentLine = entry.comment ? `## ${entry.comment}` : null
 
     if (existingIdx !== -1) {
@@ -55,19 +55,19 @@ export async function applyNpmrc(cwd, entries) {
           lines.splice(existingIdx, 0, commentLine)
           // existingIdx shifted by 1
           lines[existingIdx + 1] = newLine
-          changed.push(entry.key)
+          changed.push({ key: entry.key, value: strValue })
           continue
         }
       }
       lines[existingIdx] = newLine
-      changed.push(entry.key)
+      changed.push({ key: entry.key, value: strValue })
     } else {
       // Append new entry
       if (commentLine) {
         lines.push(commentLine)
       }
       lines.push(newLine)
-      changed.push(entry.key)
+      changed.push({ key: entry.key, value: strValue })
     }
   }
 

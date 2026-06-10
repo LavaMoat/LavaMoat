@@ -1,10 +1,10 @@
-// @ts-check
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-/**
- * @typedef {import('../opinions.js').ConfigEntry} PackageJsonEntry
- */
+/** @import {
+  ChangeResult,
+  Change as PackageJsonEntry
+} from "./types.js" */
 
 /**
  * Applies entries to package.json using deep path keys (e.g.
@@ -12,7 +12,7 @@ import { join } from 'node:path'
  *
  * @param {string} cwd
  * @param {PackageJsonEntry[]} entries
- * @returns {Promise<string[]>} List of keys that were changed or added
+ * @returns {Promise<ChangeResult[]>} List of entries that were changed or added
  */
 export async function applyPackageJson(cwd, entries) {
   const filePath = join(cwd, 'package.json')
@@ -50,7 +50,7 @@ export async function applyPackageJson(cwd, entries) {
     }
 
     target[lastKey] = entry.value
-    changed.push(entry.key)
+    changed.push({ key: entry.key, value: entry.value })
   }
 
   // Detect indentation from original file

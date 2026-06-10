@@ -1,23 +1,12 @@
-// @ts-check
 import { collectFacts, detectPackageManager, isYarnV1 } from './tools/detect.js'
 import { warnPmMismatch } from './tools/print.js'
 import { reasonableDefaults as npmDefaults } from './npm/index.js'
 import { reasonableDefaults as yarnDefaults } from './yarn/index.js'
 import { reasonableDefaults as pnpmDefaults } from './pnpm/index.js'
-
-/**
- * @typedef {'baseline' | 'moderate' | 'strict'} Level
- */
-
-/**
- * @typedef {{
- *   shouldApplyOpinion: (
- *     opinion: import('./opinions.js').Opinion,
- *     facts: import('./tools/detect.js').Facts
- *   ) => Promise<boolean>
- *   packageManager?: () => Promise<string | null>
- * }} Decisions
- */
+/** @import {
+  Decisions,
+  HardenResult
+} from "./tools/types.js" */
 
 /**
  * Main API: apply hardening defaults to the project at cwd.
@@ -26,10 +15,7 @@ import { reasonableDefaults as pnpmDefaults } from './pnpm/index.js'
  * @param {string} options.cwd
  * @param {string} [options.packageManager] - Override detected PM
  * @param {Decisions} options.decisions
- * @returns {Promise<{
- *   result: { file: string; key: string }[]
- *   summary: string
- * }>}
+ * @returns {Promise<HardenResult>}
  */
 export async function hardenDefaults(options) {
   const { cwd, decisions } = options

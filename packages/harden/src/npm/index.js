@@ -1,27 +1,25 @@
-// @ts-check
-import { opinions } from '../opinions.js'
+import { opinions } from './opinions.js'
 import { warnSkipped } from '../tools/print.js'
-import { applyNpmrc } from '../tools/npmrc.js'
-import { applyPackageJson } from '../tools/packagejson.js'
+import { applyOpinion } from '../tools/apply-change.js'
+/**
+ * @import {
+ *   AppliedChange,
+ *   Decisions,
+ *   Facts
+ * } from "../tools/types.js"
+ */
 
 /**
- * @param {import('../tools/detect.js').Facts} facts
- * @param {{
- *   shouldApplyOpinion: (
- *     opinion: import('../opinions.js').Opinion,
- *     facts: import('../tools/detect.js').Facts
- *   ) => Promise<boolean>
- * }} decisions
- * @returns {Promise<{ file: string; key: string }[]>}
+ * @param {Facts} facts
+ * @param {Decisions} decisions
+ * @returns {Promise<AppliedChange[]>}
  */
 export async function reasonableDefaults(facts, decisions) {
   const result = []
+  const askToHarden =
+    decisions.askToHarden ?? ((_opinion, _facts) => Promise.resolve(null))
 
   for (const opinion of opinions) {
-    // Filter by applicability
-    if (opinion.applicableTo && !opinion.applicableTo.includes('npm')) {
-      continue
-    }
     if (!opinion.changes && !opinion.execute) {
       continue
     }
@@ -31,35 +29,14 @@ export async function reasonableDefaults(facts, decisions) {
       continue
     }
 
-    let changes = opinion.changes ?? {}
-
-    // Run execute - it can modify changes or throw to skip
-    if (opinion.execute) {
-      try {
-        const modified = opinion.execute(changes, facts)
-        if (modified !== undefined) {
-          changes = modified
-        }
-      } catch (err) {
-        warnSkipped(opinion, err)
-        continue
-      }
-    }
-
-    if (changes.npm) {
-      const changed = await applyNpmrc(facts.cwd, changes.npm)
-      for (const key of changed) {
-        result.push({ file: '.npmrc', key })
-      }
-    }
-
-    if (changes.packagejson) {
-      const changed = await applyPackageJson(facts.cwd, changes.packagejson)
-      for (const key of changed) {
-        result.push({ file: 'package.json', key })
-      }
+    try {
+      result.push(
+        await applyOpinion(facts.cwd, 'npm', opinion, facts, askToHarden)
+      )
+    } catch (err) {
+      warnSkipped(opinion, err)
     }
   }
 
-  return result
+  return result.flat()
 }

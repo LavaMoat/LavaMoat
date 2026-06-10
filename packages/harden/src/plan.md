@@ -21,7 +21,7 @@ that way the codebase will be prepared to use
 
 - use the knowledge from [./detecting-config.md](./detecting-config.md) to detect package manager
 - accept `--package-manager` (`-p` for short) flag to select package manager
-- accept `--level` (`-l` for short) flag to select hardening level (strict, moderate, baseline)
+- accept `--level` (`-l` for short) flag to select hardening level (paranoid, moderate, baseline)
 - if the detected package manager is different than declared, warn the user
 - package manager detection is a separate module with two methods:
   - `collectFacts` that checks for existence and contents of all necessary files and returns a well defined and typed object with all the relevant info
@@ -31,14 +31,14 @@ that way the codebase will be prepared to use
    Each module should accept an input of an array of objects representing a config change (a config entry and a comment to put on it OR an item to comment-out with explanation why). The module should be responsible for merging the new entries with the existing config, ensuring that the output is deterministic and that comments are preserved. (for the .npmrc file we can avoid dependencies and just read it line-by-line and search for keys in lines)
 
 4. separate modules for each package manager that will generate the config based on the facts collected in (2) and some reasonable defaults. These modules will be used both in the cli and in the programmatic api.
-   Each packagemanager specific module should export a method `reasonableDefaults(facts)` that takes the facts collected in (2) and returns an array of config changes (see (3)) that should be applied to harden the project. Each config change should also have a level assigned to it (e.g. "strict", "moderate", "baseline") that indicates how strong the change is and can be used to allow users to select a level of hardening.
+   Each packagemanager specific module should export a method `reasonableDefaults(facts)` that takes the facts collected in (2) and returns an array of config changes (see (3)) that should be applied to harden the project. Each config change should also have a level assigned to it (e.g. "paranoid", "moderate", "baseline") that indicates how strong the change is and can be used to allow users to select a level of hardening.
 
 5. all opinions about reasonable config are to be stored in a single module called opinions, with the following shape:
 
 ```js
 {
     description: "some text describing the opinion and the reasoning behind it",
-    level: "strict" | "moderate" | "baseline", // a level indicating how strong the opinion is. this can be used to allow users to select a level of hardening
+    level: "paranoid" | "moderate" | "baseline", // a level indicating how strong the opinion is. this can be used to allow users to select a level of hardening
     applicableTo: ["npm", "yarn", "pnpm"], // an array of package managers that this opinion applies to. if empty or not present, it passes initial filtering. The changes are package-manager-config-file specific anyway.
     //NOTE: it is possible for a change to aply to yarn but have a pnpm config - to prevent pnpm from running at all, for example.
     // all below are optional:
@@ -64,7 +64,7 @@ Create an initial set of opinions based on the knowledge in the [./detecting-con
 
 ### Level selection
 
-- `--level baseline|moderate|strict` flag is used by the `shouldApplyOpinion` decision function to filter opinions.
+- `--level baseline|moderate|paranoid` flag is used by the `shouldApplyOpinion` decision function to filter opinions.
 - In non-interactive mode, level is the only input. In future interactive mode, the same decision function can prompt the user per-opinion.
 
 ### Decision function shape

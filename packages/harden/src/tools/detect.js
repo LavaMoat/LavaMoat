@@ -1,22 +1,8 @@
-// @ts-check
 import { readFile, access } from 'node:fs/promises'
 import { join } from 'node:path'
 
 /**
- * @typedef {{
- *   cwd: string
- *   packageJson: Record<string, any> | null
- *   packageManagerField: string | null
- *   hasPackageLock: boolean
- *   lockfileVersion: number | null
- *   hasNpmrc: boolean
- *   hasYarnLock: boolean
- *   hasYarnrc: boolean
- *   hasYarnrcYml: boolean
- *   hasPnpmLock: boolean
- *   hasPnpmWorkspace: boolean
- *   directGitDeps: string[]
- * }} Facts
+ * @import {Facts} from "./types.js"
  */
 
 /**

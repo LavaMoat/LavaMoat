@@ -1,10 +1,11 @@
-// @ts-check
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { parseDocument, stringify } from 'yaml'
-
+import { parseDocument } from 'yaml'
 /**
- * @typedef {{ key: string; value: any; comment?: string }} YamlEntry
+ * @import {
+ *   Change,
+ *   ChangeResult
+ * } from "./types.js"
  */
 
 /**
@@ -12,8 +13,8 @@ import { parseDocument, stringify } from 'yaml'
  *
  * @param {string} cwd
  * @param {string} filename - E.g. '.yarnrc.yml' or 'pnpm-workspace.yaml'
- * @param {YamlEntry[]} entries
- * @returns {Promise<string[]>} List of keys that were changed or added
+ * @param {Change[]} entries
+ * @returns {Promise<ChangeResult[]>} List of entries that were changed or added
  */
 export async function applyYamlConfig(cwd, filename, entries) {
   const filePath = join(cwd, filename)
@@ -41,16 +42,20 @@ export async function applyYamlConfig(cwd, filename, entries) {
     doc.set(entry.key, valueToSet)
 
     // Add comment above the key if provided
-    if (entry.comment) {
-      const pair = doc.contents?.items?.find(
-        (/** @type {any} */ item) => item.key?.value === entry.key
+    if (entry.comment && doc.contents && 'items' in doc.contents) {
+      const pair = doc.contents.items.find(
+        (/** @type {any} */ item) => (item.key?.value ?? item.key) === entry.key
       )
-      if (pair) {
+      if (pair && 'key' in pair) {
+        // Ensure the key is a Scalar node so commentBefore works
+        if (typeof pair.key === 'string') {
+          pair.key = doc.createNode(pair.key)
+        }
         pair.key.commentBefore = ` ${entry.comment}`
       }
     }
 
-    changed.push(entry.key)
+    changed.push({ key: entry.key, value: entry.value })
   }
 
   await writeFile(filePath, doc.toString())
