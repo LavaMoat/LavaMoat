@@ -7,9 +7,11 @@ import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { hardenDefaults } from '../src/index.js'
 import { createFallbackDecisions } from '../src/tools/fallback-decisions.js'
+import { rmSync } from 'node:fs'
 
 const execFileAsync = promisify(execFile)
 
+const PKGMGR_LIST = ['npm', 'yarn', 'pnpm']
 const PROJECTS_DIR = new URL('./projects/', import.meta.url).pathname
 
 /**
@@ -35,7 +37,6 @@ async function diffDirs(originalDir, modifiedDir) {
   try {
     ;({ stdout } = await execFileAsync('diff', [
       '-u',
-      '-r',
       '-N',
       originalDir,
       modifiedDir,
@@ -52,10 +53,10 @@ async function diffDirs(originalDir, modifiedDir) {
     .replaceAll(modifiedDir, '<modified>')
     .replaceAll(originalDir, '<original>')
     .replace(/^(---|\+\+\+) (.+?)\s+\S+\s+\S+\s+\S+$/gm, '$1 $2')
-    .replace(/^diff -u -r -N .+$/gm, '\n')
+    .replace(/^diff -u -N .+$/gm, '\n')
 }
 
-for (const pm of ['npm', 'yarn', 'pnpm']) {
+for (const pm of PKGMGR_LIST) {
   const originalDir = join(PROJECTS_DIR, pm)
 
   test(`hardenDefaults - ${pm} - moderate level`, async (t) => {
@@ -98,5 +99,25 @@ for (const pm of ['npm', 'yarn', 'pnpm']) {
     })
 
     t.deepEqual(secondResult, [], 'second run should produce no changes')
+  })
+  test(`hardenDefaults - ${pm} - with scripts - moderate`, async (t) => {
+    const cwd = await copyProject(pm)
+    await execFileAsync(pm, ['add', '@lavamoat/preinstall-always-fail@3.0.0'], {
+      cwd,
+    }).catch(() => {})
+    const decisions = createFallbackDecisions('moderate')
+
+    const { result } = await hardenDefaults({
+      cwd,
+      packageManager: pm,
+      decisions,
+    })
+
+    rmSync(join(cwd, 'pnpm-lock.yaml'), { force: true }) // ignore changes to lockfile which are not relevant to this test
+    rmSync(join(cwd, 'yarn.lock'), { force: true }) // ignore changes to lockfile which are not relevant to this test
+    rmSync(join(cwd, 'package-lock.json'), { force: true }) // ignore changes to lockfile which are not relevant to this test
+
+    t.snapshot(result, 'changed keys')
+    t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 }

@@ -38,5 +38,57 @@ export async function reasonableDefaults(facts, decisions) {
     }
   }
 
+  result.push(await buildAllowlist(facts, decisions))
+
   return result.flat()
+}
+
+/**
+ * Build the allowlist for approved lifecycle scripts. Yarn uses
+ * `dependenciesMeta` in package.json to control which packages are allowed to
+ * run install scripts.
+ *
+ * @param {Facts} facts
+ * @param {Decisions} decisions
+ * @returns {Promise<AppliedChange[]>}
+ */
+async function buildAllowlist(facts, decisions) {
+  const denyAll =
+    decisions.askToHarden &&
+    (await decisions.askToHarden(
+      {
+        description: "Don't approve existing install scripts. ",
+      },
+      facts
+    ))
+
+  // TODO: discover packages with lifecycle scripts from yarn's lockfile or node_modules
+  const allBuilds = /** @type {string[]} */ ([])
+
+  if (!denyAll) {
+    console.log(`Approved packages with lifecycle scripts: [${allBuilds}] .`)
+  }
+
+  // put the list of packages with lifecycle scripts in dependenciesMeta in package.json
+  const dependenciesMeta = Object.fromEntries(
+    allBuilds.map((pkg) => [pkg, { built: true }])
+  )
+
+  return applyOpinion(
+    facts.cwd,
+    {
+      description: `Set dependenciesMeta in package.json to allowlisted packages with lifecycle scripts.`,
+      changes: [
+        {
+          target: 'package.json',
+          key: 'dependenciesMeta',
+          value: dependenciesMeta,
+          comment:
+            'List of packages with lifecycle scripts that are allowed to run.',
+        },
+      ],
+    },
+    facts,
+    () => Promise.resolve(true)
+  )
 }

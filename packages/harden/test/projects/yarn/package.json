@@ -2,7 +2,7 @@
   "name": "test-yarn-project",
   "version": "1.0.0",
   "packageManager": "yarn@4.15.0",
-  "dependencies": {
+  "optionalDependencies": {
     "some-lib": "github:lavamoat/nonexistent"
   }
 }

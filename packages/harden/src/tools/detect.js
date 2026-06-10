@@ -58,6 +58,7 @@ function findDirectGitDeps(packageJson) {
   const allDeps = [
     ...Object.values(packageJson.dependencies || {}),
     ...Object.values(packageJson.devDependencies || {}),
+    ...Object.values(packageJson.optionalDependencies || {}),
   ]
   return allDeps.filter((v) => typeof v === 'string' && GIT_DEP_PATTERN.test(v))
 }

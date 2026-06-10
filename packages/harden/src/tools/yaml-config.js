@@ -1,10 +1,28 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parseDocument } from 'yaml'
-/** @import {
-  AppliedChange,
-  Change
-} from "./types.js" */
+/**
+ * @import {
+ *   AppliedChange,
+ *   Change
+ * } from "./types.js"
+ */
+
+/**
+ * Reads a YAML file and returns a parsed document. Returns an empty document if
+ * the file does not exist.
+ *
+ * @param {string} filePath
+ * @returns {Promise<import('yaml').Document>}
+ */
+export async function readYamlDocument(filePath) {
+  try {
+    const content = await readFile(filePath, 'utf8')
+    return parseDocument(content)
+  } catch {
+    return parseDocument('')
+  }
+}
 
 /**
  * Applies config entries to a YAML file, merging with existing content.
@@ -17,13 +35,7 @@ import { parseDocument } from 'yaml'
  */
 export async function applyYamlConfig(cwd, filename, entries) {
   const filePath = join(cwd, filename)
-  let doc
-  try {
-    const content = await readFile(filePath, 'utf8')
-    doc = parseDocument(content)
-  } catch {
-    doc = parseDocument('')
-  }
+  const doc = await readYamlDocument(filePath)
 
   const changed = []
 

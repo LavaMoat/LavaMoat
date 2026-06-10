@@ -95,35 +95,4 @@ export const opinions = Object.freeze([
       },
     ],
   },
-
-  {
-    description: 'Set up allowBuilds config for lifecycle scripts.',
-    level: 'baseline',
-    execute: async (changes, facts, askToHarden) => {
-      const approveAll = !(await askToHarden(
-        {
-          description:
-            'Skip approving all builds as initial state, will need interactive approval later.',
-        },
-        facts
-      ))
-
-      if (approveAll) {
-        try {
-          await execFile('pnpm', ['approve-builds', '--all'], {
-            cwd: facts.cwd,
-          })
-          console.log(
-            `Approved all pending builds. Review allowBuilds in pnpm-workspace.yaml and remove entries you don't need.`
-          )
-        } catch (err) {
-          console.error(`Failed to execute pnpm approve-builds --all`, err)
-        }
-      } else {
-        console.log(
-          `Run 'pnpm approve-builds' to interactively approve or deny lifecycle scripts.`
-        )
-      }
-    },
-  },
 ])

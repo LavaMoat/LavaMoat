@@ -1,7 +1,7 @@
 {
   "name": "test-npm-project",
   "version": "1.0.0",
-  "dependencies": {
+  "optionalDependencies": {
     "some-lib": "github:lavamoat/nonexistent"
   }
 }
