@@ -11,6 +11,8 @@ import { rmSync } from 'node:fs'
 
 const execFileAsync = promisify(execFile)
 
+const DEBUG = false
+
 const PKGMGR_LIST = ['npm', 'yarn', 'pnpm']
 const PROJECTS_DIR = new URL('./projects/', import.meta.url).pathname
 
@@ -20,6 +22,9 @@ const PROJECTS_DIR = new URL('./projects/', import.meta.url).pathname
  * @param {string} name - Project folder name (npm, yarn, pnpm)
  */
 async function copyProject(name) {
+  if (DEBUG) {
+    return join(PROJECTS_DIR, name)
+  }
   const tmp = await mkdtemp(join(tmpdir(), `harden-test-${name}-`))
   await cp(join(PROJECTS_DIR, name), tmp, { recursive: true })
   return tmp

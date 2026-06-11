@@ -39,7 +39,7 @@ export async function reasonableDefaults(facts, decisions) {
     }
   }
 
-  await buildAllowlist(facts, decisions)
+  result.push(await buildAllowlist(facts, decisions))
 
   return result.flat()
 }
@@ -49,7 +49,7 @@ export async function reasonableDefaults(facts, decisions) {
  *
  * @param {Facts} facts
  * @param {Decisions} decisions
- * @returns {Promise<void>}
+ * @returns {Promise<AppliedChange[]>}
  */
 async function buildAllowlist(facts, decisions) {
   const denyAll =
@@ -94,18 +94,29 @@ async function buildAllowlist(facts, decisions) {
         parsed.allowScripts.length > 0
       ) {
         nothingFound = false
-        approvedScripts = parsed.allowScripts.map((s) => s.name)
+        approvedScripts = parsed.allowScripts.flatMap((s) =>
+          s.changes.map((c) => c.key)
+        )
       }
     } catch {
       // ignore parse errors and assume nothing found
     }
     if (nothingFound) {
-      return
+      return []
     }
 
     console.log(
       `Approved lifecycle scripts for direct dependencies: [${approvedScripts}]. You can review and adjust them later in package.json.`
     )
+    const changes = [
+      {
+        file: 'package.json',
+        key: 'allowScripts',
+        value: Object.fromEntries(approvedScripts.map((s) => [s, true])),
+      },
+    ]
+
+    return changes
   } catch (err) {
     console.warn(`Failed to execute npm approve-scripts:`, err)
   }
