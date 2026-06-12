@@ -1,8 +1,14 @@
 // @ts-check
 
 /**
- * @import {TestFn, ExecutionContext} from 'ava'
- * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from '@lavamoat/types'
+ * @import {
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicyDebug
+ * } from "@lavamoat/types"
+ * @import {
+ *   ExecutionContext,
+ *   TestFn
+ * } from "ava"
  */
 
 const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
@@ -231,7 +237,7 @@ You could set the parent "abc" to false if you intended to override to a less pe
 })
 
 test(
-  'general - no spontaneously-appearing fields (include, root, resolutions, debugInfo)',
+  'general - no spontaneously-appearing fields (include, additionalLocations, root, resolutions, debugInfo)',
   testMergePolicy,
   { resources: {} },
   { resources: {} },
@@ -400,6 +406,108 @@ test(
     include: [
       { name: 'pkg', entry: './a.js' },
       { name: 'pkg', entry: './b.js' },
+    ],
+  }
+)
+// #endregion
+
+// #region AdditionalLocationsPolicy
+test(
+  'additionalLocations - deduplicates string items',
+  testMergePolicy,
+  { resources: {}, additionalLocations: ['./a', './b'] },
+  { resources: {}, additionalLocations: ['./a', './c'] },
+  { resources: {}, additionalLocations: ['./a', './b', './c'] }
+)
+
+test(
+  'additionalLocations - deduplicates object items',
+  testMergePolicy,
+  {
+    resources: {},
+    additionalLocations: [{ location: './a', modules: ['./index.js'] }],
+  },
+  {
+    resources: {},
+    additionalLocations: [{ location: './a', modules: ['./index.js'] }],
+  },
+  {
+    resources: {},
+    additionalLocations: [{ location: './a', modules: ['./index.js'] }],
+  }
+)
+
+test(
+  'additionalLocations - mixed string and object items',
+  testMergePolicy,
+  { resources: {}, additionalLocations: ['./a'] },
+  {
+    resources: {},
+    additionalLocations: [{ location: './a', modules: ['./other.js'] }],
+  },
+  {
+    resources: {},
+    additionalLocations: ['./a', { location: './a', modules: ['./other.js'] }],
+  }
+)
+
+test(
+  'additionalLocations - no overlap',
+  testMergePolicy,
+  { resources: {}, additionalLocations: ['./a'] },
+  { resources: {}, additionalLocations: ['./b'] },
+  { resources: {}, additionalLocations: ['./a', './b'] }
+)
+
+test(
+  'additionalLocations - only policy has additionalLocations',
+  testMergePolicy,
+  { resources: {}, additionalLocations: ['./a'] },
+  { resources: {} },
+  { resources: {}, additionalLocations: ['./a'] }
+)
+
+test(
+  'additionalLocations - only override has additionalLocations',
+  testMergePolicy,
+  { resources: {} },
+  { resources: {}, additionalLocations: ['./b'] },
+  { resources: {}, additionalLocations: ['./b'] }
+)
+
+test(
+  'additionalLocations - same location, different modules are distinct',
+  testMergePolicy,
+  {
+    resources: {},
+    additionalLocations: [{ location: './pkg', modules: ['./a.js'] }],
+  },
+  {
+    resources: {},
+    additionalLocations: [{ location: './pkg', modules: ['./b.js'] }],
+  },
+  {
+    resources: {},
+    additionalLocations: [
+      { location: './pkg', modules: ['./a.js'] },
+      { location: './pkg', modules: ['./b.js'] },
+    ],
+  }
+)
+
+test(
+  'additionalLocations - same location, with and without modules are distinct',
+  testMergePolicy,
+  { resources: {}, additionalLocations: [{ location: './pkg' }] },
+  {
+    resources: {},
+    additionalLocations: [{ location: './pkg', modules: ['./a.js'] }],
+  },
+  {
+    resources: {},
+    additionalLocations: [
+      { location: './pkg' },
+      { location: './pkg', modules: ['./a.js'] },
     ],
   }
 )
