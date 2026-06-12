@@ -1,13 +1,11 @@
 {
-  "include": [
-    "babel-loader",
-    "@babel/preset-env"
-  ],
+  "include": ["babel-loader", "@babel/preset-env", "@babel/preset-react"],
   "resources": {
     "@babel/core": {
       "packages": {
         "@babel/preset-env": true,
-        "@babel/preset-typescript": true
+        "@babel/preset-typescript": true,
+        "@babel/preset-react": true
       }
     },
     "webpack>graceful-fs": {
