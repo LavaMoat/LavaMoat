@@ -15,13 +15,15 @@ const {
 const { entries, keys } = Object
 
 /**
- * @import {LavaMoatPolicy,
- *   GlobalPolicy,
+ * @import {
  *   BuiltinPolicy,
- *   ResourcePolicy,
- *   Resources,
+ *   GlobalPolicy,
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicyDebug,
  *   Resolutions,
- *   LavaMoatPolicyDebug} from '@lavamoat/types'
+ *   ResourcePolicy,
+ *   Resources
+ * } from "@lavamoat/types"
  */
 
 /**
@@ -277,6 +279,52 @@ const mergeResolutions = (policy, policyOverride, mergedPolicy) => {
 }
 
 /**
+ * Merges the {@link LavaMoatPolicy.additionalLocations} fields of two policies.
+ *
+ * Mutates {@link mergedPolicy} in place.
+ *
+ * @param {LavaMoatPolicy} policy
+ * @param {LavaMoatPolicy} policyOverride
+ * @param {LavaMoatPolicy} mergedPolicy
+ */
+const mergeAdditionalLocations = (policy, policyOverride, mergedPolicy) => {
+  if (policy.additionalLocations || policyOverride.additionalLocations) {
+    /** @type {NonNullable<LavaMoatPolicy['additionalLocations']>} */
+    const combined = [
+      ...(policy.additionalLocations ?? []),
+      ...(policyOverride.additionalLocations ?? []),
+    ]
+
+    /** @type {Set<string>} */
+    const seenStrings = new Set()
+    /** @type {Map<string, Set<string>>} */
+    const seenObjects = new Map()
+
+    mergedPolicy.additionalLocations = combined.reduce((acc, item) => {
+      if (typeof item === 'string') {
+        if (!seenStrings.has(item)) {
+          seenStrings.add(item)
+          acc.push(item)
+        }
+      } else {
+        const modulesKey =
+          item.modules === undefined ? '' : JSON.stringify(item.modules)
+        const entries = seenObjects.get(item.location)
+        if (!entries?.has(modulesKey)) {
+          if (entries) {
+            entries.add(modulesKey)
+          } else {
+            seenObjects.set(item.location, new Set([modulesKey]))
+          }
+          acc.push({ ...item })
+        }
+      }
+      return acc
+    }, /** @type {NonNullable<LavaMoatPolicy['additionalLocations']>} */ ([]))
+  }
+}
+
+/**
  * Copies the `debugInfo` field, if present, from {@link policy} to
  * {@link mergedPolicy}.
  *
@@ -322,6 +370,7 @@ const mergePolicy = (policy, policyOverrides) => {
   mergeResolutions(policy, policyOverrides, mergedPolicy)
   mergeRoot(policy, policyOverrides, mergedPolicy)
   mergeInclude(policy, policyOverrides, mergedPolicy)
+  mergeAdditionalLocations(policy, policyOverrides, mergedPolicy)
   retainDebugInfo(policy, mergedPolicy)
 
   return mergedPolicy
