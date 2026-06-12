@@ -1,6 +1,6 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import test from 'ava'
-import { cp, mkdtemp } from 'node:fs/promises'
+import { cp, mkdtemp, readdir } from 'node:fs/promises'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { join } from 'node:path'
@@ -54,12 +54,31 @@ async function diffDirs(originalDir, modifiedDir) {
       throw err
     }
   }
+
+  // List files in modified dir
+  const files = await readdir(modifiedDir, {
+    recursive: true,
+    withFileTypes: true,
+  })
+  const fileList = files
+    .filter((f) => f.isFile())
+    .map((f) =>
+      f.parentPath
+        ? f.parentPath.slice(modifiedDir.length + 1) + '/' + f.name
+        : f.name
+    )
+    .filter((p) => !p.startsWith('node_modules/'))
+    .sort()
+    .join('\n')
+
   // Strip timestamps from --- / +++ header lines, normalize paths, replace diff command lines with blank separator
-  return stdout
+  const diff = stdout
     .replaceAll(modifiedDir, '<modified>')
     .replaceAll(originalDir, '<original>')
     .replace(/^(---|\+\+\+) (.+?)\s+\S+\s+\S+\s+\S+$/gm, '$1 $2')
     .replace(/^diff -u -N .+$/gm, '\n')
+
+  return `--- files ---\n${fileList}\n--- diff ---\n${diff}`
 }
 
 for (const pm of PKGMGR_LIST) {

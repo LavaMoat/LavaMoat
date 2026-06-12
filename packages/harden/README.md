@@ -59,7 +59,7 @@ Options:
 
 ## Opinions
 
-The package comes with opinions about:
+This package comes with opinions about:
 
 - package manager versions
 - what's allowed to install and run at install time

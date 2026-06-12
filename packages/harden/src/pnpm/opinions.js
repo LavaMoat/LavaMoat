@@ -80,6 +80,30 @@ export const opinions = Object.freeze([
   },
 
   {
+    description:
+      'Take over pnpm run and remove bin scripts confusion possibility and limit env variables exposure to the shell running the scripts.',
+    level: 'paranoid',
+    changes: [
+      {
+        target: '/lavamoat',
+        key: '.runner.js',
+        value: null,
+      },
+      {
+        target: '/lavamoat',
+        key: '.env.ban.json',
+        value: null,
+      },
+      {
+        target: 'pnpm-workspace.yaml',
+        key: 'scriptShell',
+        value: './lavamoat/.runner.js',
+        comment: 'Protect the runtime of calls to pnpm run ',
+      },
+    ],
+  },
+
+  {
     description: 'Enable trust policy in pnpm to detect provenance downgrades.',
     level: 'moderate',
     changes: [

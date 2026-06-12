@@ -29,7 +29,7 @@ export type ConfigTarget =
   | '.yarnrc'
   | '.yarnrc.yml'
   | 'pnpm-workspace.yaml'
-export type ChangeTarget = ConfigTarget | 'package.json'
+export type ChangeTarget = ConfigTarget | 'package.json' | '/lavamoat'
 
 export interface Change {
   target: ChangeTarget

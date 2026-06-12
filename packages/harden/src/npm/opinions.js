@@ -42,6 +42,29 @@ export const opinions = Object.freeze([
       },
     ],
   },
+  {
+    description:
+      'Take over npm run and remove bin scripts confusion possibility and limit env variables exposure to the shell running the scripts.',
+    level: 'paranoid',
+    changes: [
+      {
+        target: '/lavamoat',
+        key: '.runner.js',
+        value: null,
+      },
+      {
+        target: '/lavamoat',
+        key: '.env.ban.json',
+        value: null,
+      },
+      {
+        target: '.npmrc',
+        key: 'script-shell',
+        value: './lavamoat/.runner.js',
+        comment: 'Protect the runtime of calls to npm run ',
+      },
+    ],
+  },
 
   {
     description:

@@ -2,6 +2,7 @@ import { applyNpmrc } from './npmrc.js'
 import { applyYamlConfig } from './yaml-config.js'
 import { applyPackageJson } from './packagejson.js'
 import { applyLegacyYarnrc } from './legacyYarnrc.js'
+import { applyLavamoatFolder } from './lavamoat-folder.js'
 /**
  * @import {
  *   AppliedChange,
@@ -25,6 +26,7 @@ const configAppliers = {
   'pnpm-workspace.yaml': (cwd, entries) =>
     applyYamlConfig(cwd, 'pnpm-workspace.yaml', entries),
   'package.json': applyPackageJson,
+  '/lavamoat': applyLavamoatFolder,
 }
 
 /**
