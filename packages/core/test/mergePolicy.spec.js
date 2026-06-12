@@ -1,8 +1,14 @@
 // @ts-check
 
 /**
- * @import {TestFn, ExecutionContext} from 'ava'
- * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from '@lavamoat/types'
+ * @import {
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicyDebug
+ * } from '@lavamoat/types'
+ * @import {
+ *   ExecutionContext,
+ *   TestFn
+ * } from 'ava'
  */
 
 const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
@@ -351,19 +357,19 @@ test(
 )
 
 test(
-  'include - deduplicates object items',
+  'include - deduplicates ByName object items',
   testMergePolicy,
-  { resources: {}, include: [{ name: 'a>b', entry: './index.js' }] },
-  { resources: {}, include: [{ name: 'a>b', entry: './index.js' }] },
-  { resources: {}, include: [{ name: 'a>b', entry: './index.js' }] }
+  { resources: {}, include: [{ name: 'a>b', modules: ['./index.js'] }] },
+  { resources: {}, include: [{ name: 'a>b', modules: ['./index.js'] }] },
+  { resources: {}, include: [{ name: 'a>b', modules: ['./index.js'] }] }
 )
 
 test(
   'include - mixed string and object items',
   testMergePolicy,
   { resources: {}, include: ['a>b'] },
-  { resources: {}, include: [{ name: 'a>b', entry: './other.js' }] },
-  { resources: {}, include: ['a>b', { name: 'a>b', entry: './other.js' }] }
+  { resources: {}, include: [{ name: 'a>b', modules: ['./other.js'] }] },
+  { resources: {}, include: ['a>b', { name: 'a>b', modules: ['./other.js'] }] }
 )
 
 test(
@@ -391,16 +397,79 @@ test(
 )
 
 test(
-  'include - same name, different entries are distinct',
+  'include - same name, different modules arrays are distinct',
   testMergePolicy,
-  { resources: {}, include: [{ name: 'pkg', entry: './a.js' }] },
-  { resources: {}, include: [{ name: 'pkg', entry: './b.js' }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js'] }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./b.js'] }] },
   {
     resources: {},
     include: [
-      { name: 'pkg', entry: './a.js' },
-      { name: 'pkg', entry: './b.js' },
+      { name: 'pkg', modules: ['./a.js'] },
+      { name: 'pkg', modules: ['./b.js'] },
     ],
+  }
+)
+
+test(
+  'include - ByName with no modules vs ByName with modules are distinct',
+  testMergePolicy,
+  { resources: {}, include: [{ name: 'pkg' }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js'] }] },
+  {
+    resources: {},
+    include: [{ name: 'pkg' }, { name: 'pkg', modules: ['./a.js'] }],
+  }
+)
+
+test(
+  'include - ByName dedup is order-independent for modules',
+  testMergePolicy,
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js', './b.js'] }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./b.js', './a.js'] }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js', './b.js'] }] }
+)
+
+test(
+  'include - deduplicates ByLocation object items',
+  testMergePolicy,
+  { resources: {}, include: [{ location: './vendor' }] },
+  { resources: {}, include: [{ location: './vendor' }] },
+  { resources: {}, include: [{ location: './vendor' }] }
+)
+
+test(
+  'include - ByLocation same location, different modules arrays are distinct',
+  testMergePolicy,
+  { resources: {}, include: [{ location: './vendor', modules: ['./a.js'] }] },
+  { resources: {}, include: [{ location: './vendor', modules: ['./b.js'] }] },
+  {
+    resources: {},
+    include: [
+      { location: './vendor', modules: ['./a.js'] },
+      { location: './vendor', modules: ['./b.js'] },
+    ],
+  }
+)
+
+test(
+  'include - ByLocation distinct locations are both retained',
+  testMergePolicy,
+  { resources: {}, include: [{ location: './vendor' }] },
+  { resources: {}, include: [{ location: './other' }] },
+  {
+    resources: {},
+    include: [{ location: './vendor' }, { location: './other' }],
+  }
+)
+
+test(
+  'include - ByName and ByLocation with the same value are distinct variants',
+  testMergePolicy,
+  { resources: {}, include: [{ name: './foo' }] },
+  { resources: {}, include: [{ location: './foo' }] },
+  {
+    resources: {},
+    include: [{ name: './foo' }, { location: './foo' }],
   }
 )
 // #endregion
@@ -476,7 +545,7 @@ test('mutation - merged policy contains no references to original objects', (t) 
     },
     resolutions: { pkg: { './a': './b' } },
     root: { usePolicy: 'pkg' },
-    include: [{ name: 'pkg', entry: './index.js' }],
+    include: [{ name: 'pkg', modules: ['./index.js'] }],
   }
 
   /** @type {LavaMoatPolicy} */
