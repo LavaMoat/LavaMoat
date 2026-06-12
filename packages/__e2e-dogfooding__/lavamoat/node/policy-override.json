@@ -1,10 +1,45 @@
 {
+  "include": [
+    "webpack-cli",
+    "webpack-cli>import-local",
+    "file-loader>webpack",
+    {
+      "name": "@lavamoat/__e2e-dogfooding__",
+      "entry": "./webpack.config.js"
+    }
+  ],
   "resources": {
     "graceful-fs": {
       "globals": {
         "___graceful-fs_previous": "write",
         "___graceful-fs_queue": "write"
       }
+    },
+    "webpack": {
+      "packages": {
+        "webpack-cli": true
+      }
+    },
+    "webpack-cli": {
+      "packages": {
+        "webpack-cli>import-local": true,
+        "webpack": true,
+        "@lavamoat/__e2e-dogfooding__": true
+      }
+    },
+    "webpack-cli>import-local": {
+      "packages": {
+        "webpack-cli": true
+      }
     }
-  }
+  },
+  "root": {
+    "usePolicy": "webpack"
+  },
+  "additionalLocations": [
+    {
+      "location": ".",
+      "modules": ["./webpack.config.js"]
+    }
+  ]
 }
