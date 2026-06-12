@@ -25,6 +25,25 @@ export async function readYamlDocument(filePath) {
 }
 
 /**
+ * Reads a YAML document field and returns it as an array.
+ *
+ * @param {import('yaml').Document} doc
+ * @param {string} fieldName
+ * @returns {unknown[]}
+ */
+export function readYamlArrayField(doc, fieldName) {
+  const value = doc.get(fieldName)
+  const yamlValue = /** @type {{ toJSON?: () => unknown } | null} */ (value)
+
+  if (!yamlValue || typeof yamlValue.toJSON !== 'function') {
+    return []
+  }
+
+  const arrayValue = yamlValue.toJSON()
+  return Array.isArray(arrayValue) ? arrayValue : []
+}
+
+/**
  * Applies config entries to a YAML file, merging with existing content.
  *
  * @param {string} cwd
@@ -54,15 +73,17 @@ export async function applyYamlConfig(cwd, filename, entries) {
 
     // Add comment above the key if provided
     if (entry.comment && doc.contents && 'items' in doc.contents) {
-      const pair = doc.contents.items.find(
+      const items = /** @type {any[]} */ (doc.contents.items)
+      const pair = items.find(
         (/** @type {any} */ item) => (item.key?.value ?? item.key) === entry.key
       )
-      if (pair && 'key' in pair) {
+      if (pair && typeof pair === 'object' && 'key' in pair) {
         // Ensure the key is a Scalar node so commentBefore works
         if (typeof pair.key === 'string') {
           pair.key = doc.createNode(pair.key)
         }
-        pair.key.commentBefore = ` ${entry.comment}`
+        /** @type {{ commentBefore?: string }} */ ;(pair.key).commentBefore =
+          ` ${entry.comment}`
       }
     }
 

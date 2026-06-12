@@ -3,7 +3,7 @@ import { warnSkipped } from '../tools/print.js'
 import { applyOpinion } from '../tools/apply-change.js'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
-import { readYamlDocument } from '../tools/yaml-config.js'
+import { readYamlArrayField, readYamlDocument } from '../tools/yaml-config.js'
 /**
  * @import {
  *   AppliedChange,
@@ -69,8 +69,8 @@ async function buildAllowlist(facts, decisions) {
     return []
   }
   const modulesYaml = await readYamlDocument(modulesYamlPath)
-  const pendingBuilds = modulesYaml.get('pendingBuilds')?.toJSON() ?? []
-  const ignoredBuilds = modulesYaml.get('ignoredBuilds')?.toJSON() ?? []
+  const pendingBuilds = readYamlArrayField(modulesYaml, 'pendingBuilds')
+  const ignoredBuilds = readYamlArrayField(modulesYaml, 'ignoredBuilds')
   const allBuilds = [...pendingBuilds, ...ignoredBuilds]
 
   if (!denyAll) {

@@ -13,6 +13,11 @@ const execFile = promisify(child_process.execFile)
  */
 
 /**
+ * @typedef {Object} NpmApproveOutput
+ * @property {{ changes: { key: string }[] }[]} allowScripts
+ */
+
+/**
  * @param {Facts} facts
  * @param {Decisions} decisions
  * @returns {Promise<AppliedChange[]>}
@@ -65,6 +70,7 @@ async function buildAllowlist(facts, decisions) {
     console.log(
       `No install scripts were approved. You can allow specific ones using 'npm approve-scripts'.`
     )
+    return []
   }
 
   try {
@@ -83,10 +89,12 @@ async function buildAllowlist(facts, decisions) {
     )
 
     let nothingFound = true
+    /** @type {string[]} */
     let approvedScripts = []
     // if stdout parses as json and contains a field "allowScripts" with a non-empty array, it worked. Otherwise, assume no scripts were found.
     // https://github.com/npm/cli/issues/9529
     try {
+      /** @type {NpmApproveOutput} */
       const parsed = JSON.parse(stdout)
       if (
         parsed.allowScripts &&
@@ -120,4 +128,5 @@ async function buildAllowlist(facts, decisions) {
   } catch (err) {
     console.warn(`Failed to execute npm approve-scripts:`, err)
   }
+  return []
 }

@@ -18,6 +18,7 @@ export interface Facts {
   hasYarnLock: boolean
   hasYarnrc: boolean
   hasYarnrcYml: boolean
+  hasYarnState: boolean
   hasPnpmLock: boolean
   hasPnpmWorkspace: boolean
   directGitDeps: string[]

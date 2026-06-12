@@ -2,6 +2,6 @@
   "name": "test-npm-project",
   "version": "1.0.0",
   "optionalDependencies": {
-    "some-lib": "github:lavamoat/nonexistent"
+    "@lavamoat/preinstall-always-fail": "github:lavamoat/nonexistent"
   }
 }

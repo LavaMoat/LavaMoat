@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "packageManager": "pnpm@11.0.0",
   "optionalDependencies": {
-    "some-lib": "github:lavamoat/nonexistent"
+    "@lavamoat/preinstall-always-fail": "github:lavamoat/nonexistent"
   }
 }

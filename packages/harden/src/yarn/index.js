@@ -1,6 +1,10 @@
 import { opinions } from './opinions.js'
 import { warnSkipped } from '../tools/print.js'
 import { applyOpinion } from '../tools/apply-change.js'
+import {
+  ensureWorkspaceInitialized,
+  findPackagesWithScripts,
+} from './internals.js'
 /**
  * @import {
  *   AppliedChange,
@@ -62,11 +66,20 @@ async function buildAllowlist(facts, decisions) {
       facts
     ))
 
-  // TODO: discover packages with lifecycle scripts from yarn's lockfile or node_modules
-  const allBuilds = /** @type {string[]} */ ([])
+  if (!facts.hasYarnState) {
+    if (denyAll) {
+      return []
+    } else {
+      ensureWorkspaceInitialized(facts)
+    }
+  }
+
+  const allBuilds = await findPackagesWithScripts(facts)
 
   if (!denyAll) {
-    console.log(`Approved packages with lifecycle scripts: [${allBuilds}] .`)
+    console.log(
+      `Approved packages with lifecycle scripts: [${allBuilds.map((pkg) => pkg.name).join(', ')}] .`
+    )
   }
 
   if (allBuilds.length === 0) {
@@ -75,7 +88,7 @@ async function buildAllowlist(facts, decisions) {
 
   // put the list of packages with lifecycle scripts in dependenciesMeta in package.json
   const dependenciesMeta = Object.fromEntries(
-    allBuilds.map((pkg) => [pkg, { built: true }])
+    allBuilds.map((pkg) => [pkg.name, { built: !denyAll }])
   )
 
   return applyOpinion(

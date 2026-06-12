@@ -21,12 +21,13 @@ const PROJECTS_DIR = new URL('./projects/', import.meta.url).pathname
  *
  * @param {string} name - Project folder name (npm, yarn, pnpm)
  */
-async function copyProject(name) {
+async function copyProject(t, name) {
   if (DEBUG) {
     return join(PROJECTS_DIR, name)
   }
   const tmp = await mkdtemp(join(tmpdir(), `harden-test-${name}-`))
   await cp(join(PROJECTS_DIR, name), tmp, { recursive: true })
+  t.log(`--- setting up test in ${tmp}`)
   return tmp
 }
 
@@ -65,7 +66,7 @@ for (const pm of PKGMGR_LIST) {
   const originalDir = join(PROJECTS_DIR, pm)
 
   test(`hardenDefaults - ${pm} - moderate level`, async (t) => {
-    const cwd = await copyProject(pm)
+    const cwd = await copyProject(t, pm)
     const decisions = createFallbackDecisions('moderate')
 
     const { result } = await hardenDefaults({
@@ -79,7 +80,7 @@ for (const pm of PKGMGR_LIST) {
   })
 
   test(`hardenDefaults - ${pm} - paranoid level`, async (t) => {
-    const cwd = await copyProject(pm)
+    const cwd = await copyProject(t, pm)
     const decisions = createFallbackDecisions('paranoid')
 
     const { result } = await hardenDefaults({
@@ -93,7 +94,7 @@ for (const pm of PKGMGR_LIST) {
   })
 
   test(`hardenDefaults - ${pm} - idempotent (paranoid applied twice)`, async (t) => {
-    const cwd = await copyProject(pm)
+    const cwd = await copyProject(t, pm)
     const decisions = createFallbackDecisions('paranoid')
 
     await hardenDefaults({ cwd, packageManager: pm, decisions })
@@ -106,7 +107,8 @@ for (const pm of PKGMGR_LIST) {
     t.deepEqual(secondResult, [], 'second run should produce no changes')
   })
   test(`hardenDefaults - ${pm} - with scripts - moderate`, async (t) => {
-    const cwd = await copyProject(pm)
+    const cwd = await copyProject(t, pm)
+
     await execFileAsync(pm, ['add', '@lavamoat/preinstall-always-fail@3.0.0'], {
       cwd,
     }).catch(() => {})
@@ -120,6 +122,7 @@ for (const pm of PKGMGR_LIST) {
 
     rmSync(join(cwd, 'pnpm-lock.yaml'), { force: true }) // ignore changes to lockfile which are not relevant to this test
     rmSync(join(cwd, 'yarn.lock'), { force: true }) // ignore changes to lockfile which are not relevant to this test
+    rmSync(join(cwd, '.pnp.cjs'), { force: true }) // ignore install artifact
     rmSync(join(cwd, 'package-lock.json'), { force: true }) // ignore changes to lockfile which are not relevant to this test
 
     t.snapshot(result, 'changed keys')

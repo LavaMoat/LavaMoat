@@ -2,7 +2,12 @@
 
 A tool for applying security-hardening defaults to your project's package manager configuration.
 
-> For an overview of LavaMoat tools see [the main README](https://github.com/LavaMoat/LavaMoat/tree/main/README.md)
+> [!NOTE]
+> This is an early preview of the package versioned 0.x. Changes planned:
+>
+> - the composition of opinions included in each hardening level may change
+> - the CLI visuals and interactions to improve
+> - with the release of yarn6 new major changes are to be expected.
 
 ## Usage
 

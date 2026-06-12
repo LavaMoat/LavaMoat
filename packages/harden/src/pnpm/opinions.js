@@ -1,7 +1,4 @@
 import { applyLatestVersion } from '../tools/versions.js'
-import { promisify } from 'node:util'
-import child_process from 'node:child_process'
-const execFile = promisify(child_process.execFile)
 /** @import {Opinion} from "../tools/types.js" */
 
 /** @type {readonly Opinion[]} */

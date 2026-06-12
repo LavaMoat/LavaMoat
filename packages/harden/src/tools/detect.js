@@ -41,6 +41,7 @@ export async function collectFacts(cwd) {
     hasYarnLock: await exists('yarn.lock'),
     hasYarnrc: await exists('.yarnrc'),
     hasYarnrcYml: await exists('.yarnrc.yml'),
+    hasYarnState: await exists('.yarn/install-state.gz'),
     hasPnpmLock: await exists('pnpm-lock.yaml'),
     hasPnpmWorkspace: await exists('pnpm-workspace.yaml'),
     directGitDeps: findDirectGitDeps(packageJson),
