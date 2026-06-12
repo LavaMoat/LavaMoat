@@ -48,10 +48,22 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
    * entrypoint of the package. Otherwise, name is the canonical name of the
    * package and entry is the relative path from the package root to the desired
    * module.
+   *
+   * Canonical names do not need to be present in {@link Resources}.
    */
-  include?: Array<
-    { name: Extract<keyof T, string>; entry: string } | Extract<keyof T, string>
-  >
+  include?: Array<{ name: string; entry: string } | string>
+
+  /**
+   * Additional package locations to include in the policy.
+   *
+   * `location` is a path to a directory containing a `package.json` which may
+   * be absolute or relative to the project root; `modules` is an optional array
+   * of module paths to expose as external aliases, relative to `location`.
+   *
+   * If a `string`, the location is assumed to be a path to a directory
+   * containing a `package.json` and the entry module is resolved as `.`.
+   */
+  additionalLocations?: Array<{ location: string; modules?: string[] } | string>
 }
 
 /**
@@ -65,9 +77,12 @@ export interface RootPolicy<T extends Resources = Resources> {
    *
    * The root will inherit policy from this package.
    */
-  usePolicy?: keyof T
+  usePolicy?: Extract<keyof T, string>
 }
 
+/**
+ * @deprecated Debug info is no longer supported.
+ */
 export interface DebugInfo {
   /**
    * @todo This is an array of `@babel/parser`'s `ParseError`.
