@@ -12,16 +12,22 @@ const {
   objToMap,
   mapToObj,
 } = require('lavamoat-tofu/src/util')
+const stringify = require('json-stable-stringify')
+
 const { entries, keys } = Object
+const { isArray } = Array
 
 /**
- * @import {LavaMoatPolicy,
- *   GlobalPolicy,
+ * @import {
  *   BuiltinPolicy,
- *   ResourcePolicy,
- *   Resources,
+ *   GlobalPolicy,
+ *   IncludePolicy,
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicyDebug,
  *   Resolutions,
- *   LavaMoatPolicyDebug} from '@lavamoat/types'
+ *   ResourcePolicy,
+ *   Resources
+ * } from '@lavamoat/types'
  */
 
 /**
@@ -188,6 +194,20 @@ const mergeResourcePolicies = (policy, policyOverride, mergedPolicy) => {
 }
 
 /**
+ * Deep-clones an include item so the merged result shares no object references
+ * with the inputs.
+ *
+ * @param {IncludePolicy} item
+ * @returns {IncludePolicy}
+ */
+const cloneIncludePolicy = (item) =>
+  typeof item === 'string'
+    ? item
+    : item.modules
+      ? { ...item, modules: [...item.modules] }
+      : { ...item }
+
+/**
  * Merges the {@link LavaMoatPolicy.include} fields of two policies.
  *
  * Mutates {@link mergedPolicy} in place.
@@ -206,26 +226,23 @@ const mergeInclude = (policy, policyOverride, mergedPolicy) => {
     ]
 
     /** @type {Set<string>} */
-    const seenStrings = new Set()
-    /** @type {Map<string, Set<string>>} */
-    const seenObjects = new Map()
+    const seen = new Set()
+
+    /**
+     * Replacer for {@link stringify} to sort the `modules` array.
+     *
+     * @param {stringify.Key} key
+     * @param {unknown} value
+     * @returns {unknown}
+     */
+    const replacer = (key, value) =>
+      key === 'modules' && isArray(value) ? value.toSorted() : value
 
     mergedPolicy.include = combined.reduce((acc, item) => {
-      if (typeof item === 'string') {
-        if (!seenStrings.has(item)) {
-          seenStrings.add(item)
-          acc.push(item)
-        }
-      } else {
-        const entries = seenObjects.get(item.name)
-        if (!entries?.has(item.entry)) {
-          if (entries) {
-            entries.add(item.entry)
-          } else {
-            seenObjects.set(item.name, new Set([item.entry]))
-          }
-          acc.push({ ...item })
-        }
+      const key = `${stringify(item, { replacer })}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        acc.push(cloneIncludePolicy(item))
       }
       return acc
     }, /** @type {NonNullable<LavaMoatPolicy['include']>} */ ([]))
