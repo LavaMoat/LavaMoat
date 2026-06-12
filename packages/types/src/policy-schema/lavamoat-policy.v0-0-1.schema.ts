@@ -41,18 +41,50 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
   root?: RootPolicy<T>
 
   /**
-   * List of canonical names and/or entry paths to forcefully include in the
-   * policy
+   * List of canonical names and optionally relative module paths to forcefully
+   * include in the policy.
    *
-   * If an array of strings is provided, the entry is assumed to be the
-   * entrypoint of the package. Otherwise, name is the canonical name of the
-   * package and entry is the relative path from the package root to the desired
-   * module.
+   * Canonical names do not need to be present in {@link Resources}.
    */
-  include?: Array<
-    { name: Extract<keyof T, string>; entry: string } | Extract<keyof T, string>
-  >
+  include?: IncludePolicy[]
 }
+
+/**
+ * List of canonical names and optionally relative module paths to forcefully
+ * include in the policy.
+ *
+ * Canonical names do not need to be present in {@link Resources}.
+ */
+export interface IncludeEntryByName {
+  name: string
+  modules?: string[]
+}
+
+/**
+ * List of locations and optionally relative module paths to forcefully include
+ * in the policy.
+ */
+export interface IncludeEntryByLocation {
+  /**
+   * This location is relative to the project root, but cannot ascend _above_
+   * the project root.
+   *
+   * In other words, `./foo` is allowed, but `../foo` is not.
+   */
+  location: string
+  /**
+   * A module path relative to {@link location}.
+   */
+  modules?: string[]
+}
+
+/**
+ * The type of {@link LavaMoatPolicy.include}.
+ *
+ * If a `string`, it is treated as an {@link IncludeEntryByName} with a single
+ * module path of `.` (which resolves to the package's declared entrypoint).
+ */
+export type IncludePolicy = IncludeEntryByName | IncludeEntryByLocation | string
 
 /**
  * Root configuration
@@ -65,9 +97,12 @@ export interface RootPolicy<T extends Resources = Resources> {
    *
    * The root will inherit policy from this package.
    */
-  usePolicy?: keyof T
+  usePolicy?: Extract<keyof T, string>
 }
 
+/**
+ * @deprecated Debug info is no longer supported.
+ */
 export interface DebugInfo {
   /**
    * @todo This is an array of `@babel/parser`'s `ParseError`.
