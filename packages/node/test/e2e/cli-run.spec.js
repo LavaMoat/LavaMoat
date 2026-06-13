@@ -20,6 +20,7 @@ const devDeptree = fixture('deptree', {
 const missingFromDisk = fixture('missing-from-disk')
 const missingFromDescriptors = fixture('missing-from-descriptors')
 const circularRootDep = fixture('circular-root-dep')
+const webpackish = fixture('webpackish', { entrypoint: 'pantspack' })
 
 const { testCLI } = createCLIMacros(test)
 
@@ -78,6 +79,23 @@ test(
   testCLI,
   ['run', bin.entrypoint, '--bin', '--project-root', bin.dir],
   'scripty test'
+)
+
+test(
+  'additionalLocations support',
+  testCLI,
+  [
+    'run',
+    webpackish.entrypoint,
+    '--bin',
+    '--project-root',
+    webpackish.dir,
+    '--',
+    '--config',
+    './pantspack.config.js',
+  ],
+  'webpackish-app-v1.2.3',
+  { cwd: webpackish.dir }
 )
 
 test(

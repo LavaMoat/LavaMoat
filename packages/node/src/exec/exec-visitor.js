@@ -28,6 +28,8 @@
  * @internal
  */
 
+import { isArray } from '../util.js'
+
 /**
  * @import {
  *   BinaryExpression,
@@ -190,7 +192,7 @@ export const createExecVisitor = () => {
           // nodes via leading/inner/trailingComments. Mutating each
           // comment's `value` here updates every reference at once.
           const file = path.parent
-          if (file && file.type === 'File' && Array.isArray(file.comments)) {
+          if (file && file.type === 'File' && isArray(file.comments)) {
             for (const comment of file.comments) {
               defangEvalInComment(comment)
             }
