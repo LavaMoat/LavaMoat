@@ -13,7 +13,7 @@ import {
   LAVAMOAT_POLICY_ITEM_WRITE,
 } from '../constants.js'
 import { AttenuationError } from '../error.js'
-import { isObjectyObject } from '../util.js'
+import { isNonArrayObject } from '../util.js'
 
 /**
  * @import {
@@ -58,7 +58,7 @@ export const makeAttenuators = ({
   // gather writable fields from policy. this is needed by `endowmentsToolkit`
   if (resources) {
     for (const resource of values(resources)) {
-      if (isObjectyObject(resource.globals)) {
+      if (isNonArrayObject(resource.globals)) {
         for (const [key, value] of entries(resource.globals)) {
           if (value === LAVAMOAT_POLICY_ITEM_WRITE) {
             knownWritableFields.add(key)

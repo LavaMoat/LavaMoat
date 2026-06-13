@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { ROOT_COMPARTMENT } from './constants.js'
 import { InvalidArgumentsError } from './error.js'
 import {
   action,
@@ -90,6 +91,9 @@ export const reportInvalidCanonicalNames = (
   // representations
   const unknownCanonicalNameMap = [...unknownCanonicalNames].map(
     (canonicalName) => {
+      if (canonicalName === ROOT_COMPARTMENT && policy?.root?.usePolicy) {
+        canonicalName = policy.root.usePolicy
+      }
       const keypath = findCanonicalNameKeypath(policy, canonicalName)
       return {
         name: canonicalName,

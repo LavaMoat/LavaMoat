@@ -19,7 +19,10 @@ import { log as fallbackLog } from '../../src/log.js'
  * @import {PlatformRunScenario} from 'lavamoat-core/test/util.js'
  * @import {Volume} from 'memfs'
  * @import {LavaMoatEndoPolicy} from '../../src/types.js'
+ * @import {LavaMoatNodeScenario} from '../types.js'
  */
+
+export const FAILING_SCENARIO_TAG = '[incompatible platform]'
 
 /**
  * Path to `./runner.js`
@@ -165,7 +168,7 @@ export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
    * scenario; I don't feel that is necessary for our purposes. It _is_ useful
    * and necessary to test the CLI, but I'm not convinced there's added value in
    * doing so for _every scenario_.
-   * @param {{ scenario: any }} opts
+   * @param {{ scenario: LavaMoatNodeScenario }} opts
    * @returns {Promise<Result>} Result of the stdout of the scenario parsed as
    *   JSON
    * @todo Scenario needs a type definition
@@ -242,7 +245,7 @@ export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
       }
       ;[stdout, stderr] = await outputPromise
     } catch (err) {
-      if (!scenario.expectedFailure) {
+      if (!scenario.expectedFailure && !scenario.expectedLavaMoatNodeFailure) {
         dumpError(err, vol, { lavamoatPolicy, log })
       }
       throw err
