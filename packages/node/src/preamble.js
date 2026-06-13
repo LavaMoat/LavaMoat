@@ -8,6 +8,8 @@
 import 'ses'
 
 lockdown({
+  // no reporting to the console; can be overridden via LOCKDOWN_REPORTING env var
+  reporting: 'none',
   // lets code observe call stack, but easier debuggability
   errorTaming: 'unsafe',
   // shows the full call stack
