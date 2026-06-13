@@ -32,11 +32,19 @@ import {
 } from './util.js'
 
 /**
- * @import {RootPolicy, LavaMoatPolicy} from '@lavamoat/types'
- * @import {MergedLavaMoatPolicy,
- *  LoadPoliciesOptions,
- *  WritableFsInterface} from './types.js'
- * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
+ * @import {
+ *   LavaMoatPolicy,
+ *   RootPolicy
+ * } from "@lavamoat/types"
+ * @import {
+ *   ReadPolicyOptions,
+ *   ReadPolicyOverrideOptions
+ * } from "./internal.js"
+ * @import {
+ *   LoadPoliciesOptions,
+ *   MergedLavaMoatPolicy,
+ *   WritableFsInterface
+ * } from "./types.js"
  */
 
 /**
@@ -319,11 +327,16 @@ export const assertPolicy = (
  *
  * @param {string | URL} file Path to write to
  * @param {LavaMoatPolicy} policy Any policy
- * @param {{ fs?: WritableFsInterface }} opts Options
+ * @param {{ fs?: WritableFsInterface; what?: 'policy' | 'policy override' }} opts
+ *   Options
  * @returns {Promise<void>}
  * @public
  */
-export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
+export const writePolicy = async (
+  file,
+  policy,
+  { fs = nodeFs, what = 'policy' } = {}
+) => {
   const filepath = toPath(file)
   const policyDir = nodePath.dirname(filepath)
   /**
@@ -336,7 +349,7 @@ export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
     })
   } catch (err) {
     throw new WritePolicyError(
-      `Failed to create policy directory ${hrPath(policyDir)}`,
+      `Failed to create directory for ${what} at ${hrPath(policyDir)}`,
       {
         cause: err,
       }
@@ -351,12 +364,12 @@ export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
         await fs.promises.rm(createdDir, { recursive: true })
       } catch {
         log.debug(
-          `Failed to remove created policy directory ${hrPath(createdDir)}; may need manual cleanup`
+          `Failed to remove created directory ${hrPath(createdDir)}; may need manual cleanup`
         )
       }
     }
     throw new WritePolicyError(
-      `Failed to write policy to ${hrPath(filepath)}`,
+      `Failed to write ${what} to ${hrPath(filepath)}`,
       {
         cause: err,
       }
