@@ -1,4 +1,6 @@
 import test from 'ava'
+import { Volume } from 'memfs'
+import { makeLavaMoatReadPowers } from '../../src/compartment/power.js'
 import {
   prodOnlyToConditions,
   hasValue,
@@ -9,8 +11,13 @@ import {
   isReadNowPowers,
   isString,
   pluralize,
+  readEntryPackageDescriptor,
   toFileURLString,
 } from '../../src/util.js'
+
+/**
+ * @import {FsInterface} from "@endo/compartment-mapper"
+ */
 
 test('toURLString - converts URL to URL-like string', (t) => {
   const url = new URL('file:///test/path')
@@ -132,6 +139,7 @@ test('isReadNowPowers - returns true for valid ReadNowPowers', (t) => {
     fileURLToPath: () => {},
     isAbsolute: () => {},
     maybeReadNow: () => {},
+    maybeRead: () => {},
   }
   t.true(isReadNowPowers(validReadNowPowers))
 })
@@ -153,4 +161,72 @@ test('pluralize - returns plural form when count is not 1', (t) => {
   t.is(pluralize(0, 'item'), 'items')
   t.is(pluralize(5, 'item'), 'items')
   t.is(pluralize(2, 'ox', 'oxen'), 'oxen')
+})
+
+// readEntryPackageDescriptor
+
+test('readEntryPackageDescriptor - reads package.json in the same directory as entrypoint', async (t) => {
+  const vol = Volume.fromJSON({
+    '/app/package.json': JSON.stringify({ name: 'my-app', version: '1.0.0' }),
+    '/app/index.js': '',
+  })
+  const readPowers = makeLavaMoatReadPowers({
+    fs: /** @type {FsInterface} */ (vol),
+  })
+
+  const result = await readEntryPackageDescriptor(
+    readPowers,
+    'file:///app/index.js'
+  )
+
+  t.is(result.name, 'my-app')
+  t.is(result.version, '1.0.0')
+})
+
+test('readEntryPackageDescriptor - walks up to a parent directory to find package.json', async (t) => {
+  const vol = Volume.fromJSON({
+    '/workspace/package.json': JSON.stringify({ name: 'workspace-root' }),
+    '/workspace/src/deep/index.js': '',
+  })
+  const readPowers = makeLavaMoatReadPowers({
+    fs: /** @type {FsInterface} */ (vol),
+  })
+
+  const result = await readEntryPackageDescriptor(
+    readPowers,
+    'file:///workspace/src/deep/index.js'
+  )
+
+  t.is(result.name, 'workspace-root')
+})
+
+test('readEntryPackageDescriptor - throws when no package.json exists along the path', async (t) => {
+  const vol = Volume.fromJSON({
+    '/lonely/index.js': '',
+  })
+  const readPowers = makeLavaMoatReadPowers({
+    fs: /** @type {FsInterface} */ (vol),
+  })
+
+  await t.throwsAsync(
+    () => readEntryPackageDescriptor(readPowers, 'file:///lonely/index.js'),
+    { instanceOf: Error, message: /Cannot find package\.json/ }
+  )
+})
+
+test('readEntryPackageDescriptor - accepts a URL object as entrypoint', async (t) => {
+  const vol = Volume.fromJSON({
+    '/app/package.json': JSON.stringify({ name: 'url-app' }),
+    '/app/main.js': '',
+  })
+  const readPowers = makeLavaMoatReadPowers({
+    fs: /** @type {FsInterface} */ (vol),
+  })
+
+  const result = await readEntryPackageDescriptor(
+    readPowers,
+    new URL('file:///app/main.js')
+  )
+
+  t.is(result.name, 'url-app')
 })

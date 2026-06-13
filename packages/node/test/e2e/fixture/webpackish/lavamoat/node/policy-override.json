@@ -1,0 +1,24 @@
+{
+  "resources": {
+    "pantspack": {
+      "packages": {
+        "webpackish-app>jorts-folder": true,
+        "webpackish-app": true
+      }
+    },
+    "webpackish-app>jorts-folder": {
+      "packages": {
+        "webpackish-app": true
+      }
+    },
+    "pantspack-folder-runner": {
+      "packages": {
+        "webpackish-app>jorts-folder": true
+      }
+    }
+  },
+  "include": ["webpackish-app"],
+  "additionalLocations": [
+    { "location": ".", "modules": ["./pantspack.config.js"] }
+  ]
+}

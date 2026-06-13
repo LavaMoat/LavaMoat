@@ -1,10 +1,10 @@
-import { type ReadNowPowers } from '@endo/compartment-mapper'
 import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
 import { type Volume } from 'memfs'
 import type {
   ComposeOptions,
   GeneratePolicyOptions,
+  LavaMoatReadPowers,
   MergedLavaMoatPolicy,
   SourceType,
   WithLog,
@@ -93,7 +93,7 @@ export type TestPolicyExpectationFn<Context = unknown> = (
  */
 export type ScaffoldFixtureResult = {
   vol: Volume
-  readPowers: ReadNowPowers
+  readPowers: LavaMoatReadPowers
 }
 
 /**

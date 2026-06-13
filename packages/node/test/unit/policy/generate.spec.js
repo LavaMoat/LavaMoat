@@ -5,7 +5,12 @@ import { log, Loggerr } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import { keysOr } from '../../../src/util.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
+import { fixtureFinder } from '../../test-util.js'
 import { createGeneratePolicyMacros } from './policy-macros.js'
+import path from 'node:path'
+import { MERGED_POLICY_FIELD } from '../../../src/constants.js'
+
+const e2eFixture = fixtureFinder(new URL('../../e2e/', import.meta.url))
 
 const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
   createGeneratePolicyMacros(test)
@@ -377,3 +382,82 @@ test(
     },
   }
 )
+
+test('additionalLocations support', async (t) => {
+  const { dir: projectRoot } = e2eFixture('webpackish')
+
+  if (process.env.LAVAMOAT_DEBUG === undefined) {
+    log.setLevel(Loggerr.EMERGENCY)
+  }
+
+  const { policy } = await loadAndGeneratePolicy(
+    path.join(projectRoot, 'node_modules', 'pantspack', 'pantspack.js'),
+    {
+      trustRoot: false,
+      log,
+      projectRoot,
+      policyOverride: {
+        resources: {
+          pantspack: {
+            packages: {
+              'webpackish-app': true,
+              'jorts-folder': true,
+            },
+          },
+        },
+        include: ['webpackish-app'],
+        additionalLocations: [
+          { location: '.', modules: ['./pantspack.config.js'] },
+        ],
+      },
+    }
+  )
+  delete (/** @type {any} */ (policy)[MERGED_POLICY_FIELD])
+  t.snapshot(policy)
+})
+
+// Regression test: when trustRoot is false, the packageDependenciesHook must
+// rewrite the root compartment's synthetic canonical name ('$root$') to the
+// real package name before looking up the entry in policyOverride.resources.
+// Previously, the hook used '$root$' directly and found nothing, so override-
+// declared root dependencies were never seeded into the crawl.
+test('untrusted root: override-declared root deps are seeded correctly', async (t) => {
+  t.plan(3)
+
+  const { entrypoint } = e2eFixture('webpackish')
+
+  if (process.env.LAVAMOAT_DEBUG === undefined) {
+    log.setLevel(Loggerr.EMERGENCY)
+  }
+
+  const { policy } = await loadAndGeneratePolicy(entrypoint, {
+    trustRoot: false,
+    log,
+    policyOverride: {
+      resources: {
+        'webpackish-app': {
+          packages: {
+            'jorts-folder': true,
+          },
+        },
+      },
+    },
+  })
+
+  // root.usePolicy must be the entry package name, not '$root$'
+  t.is(
+    policy.root?.usePolicy,
+    'webpackish-app',
+    'root.usePolicy should be the entry package name'
+  )
+  // '$root$' must never leak as a resource key
+  t.false(
+    '$root$' in (policy.resources ?? {}),
+    '$root$ must not appear as a resource key'
+  )
+  // Override-declared dependency must appear in the final policy
+  t.true(
+    policy.resources?.['webpackish-app']?.packages?.['jorts-folder'] === true,
+    'jorts-folder should be in webpackish-app.packages (seeded from override)'
+  )
+})

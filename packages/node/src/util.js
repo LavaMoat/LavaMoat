@@ -8,25 +8,27 @@
  */
 import nodeUrl from 'node:url'
 import { assertAbsolutePath } from './fs.js'
+import { hrPath } from './format.js'
+import { REQUIRED_READ_NOW_POWERS } from './constants.js'
 
 /**
  * @import {
  *   FileURLToPathFn,
  *   ReadNowPowers
- * } from '@endo/compartment-mapper'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * } from "@endo/compartment-mapper"
+ * @import {LavaMoatPolicy} from "@lavamoat/types"
  * @import {
  *   PackageJson,
  *   SetNonNullable
- * } from 'type-fest'
- * @import {RequiredReadNowPowers} from './internal.js'
+ * } from "type-fest"
  * @import {
  *   CanonicalName,
- *   FileUrlString
- * } from './types.js'
+ *   FileUrlString,
+ *   LavaMoatReadPowers
+ * } from "./types.js"
  */
 const { isArray: isArray_ } = Array
-const { freeze, keys } = Object
+const { keys } = Object
 
 /**
  * Converts a {@link URL} or `string` to a URL-like `string` starting with the
@@ -143,16 +145,6 @@ export const hasValue = (obj, prop) => {
  */
 export const prodOnlyToConditions = (prodOnly) =>
   prodOnly ? new Set() : new Set(['development'])
-
-/**
- * Ordered array of every property in {@link ReadNowPowers} which is _required_.
- *
- * @satisfies {RequiredReadNowPowers}
- * @internal
- */
-const REQUIRED_READ_NOW_POWERS = freeze(
-  /** @type {const} */ (['fileURLToPath', 'isAbsolute', 'maybeReadNow'])
-)
 
 /**
  * Returns `true` if `value` is a {@link ReadNowPowers}
@@ -326,6 +318,54 @@ export const isOptionalDependency = (packageJson, dependency) =>
  * @returns {void}
  */
 export const noop = () => {}
+
+/**
+ * Decoder for converting `Uint8Array` bytes returned by `readPowers.read()`
+ * into text.
+ */
+const textDecoder = new TextDecoder()
+
+/**
+ * Walks up the directory tree from `entrypoint`, reads the nearest
+ * `package.json`, and returns its parsed contents.
+ *
+ * Mirrors the walk-up logic in `@endo/compartment-mapper`'s internal `search()`
+ * function, which is not part of the public export surface.
+ *
+ * @param {LavaMoatReadPowers} readPowers
+ * @param {string | URL} entrypoint Path or URL of the entry module
+ * @returns {Promise<PackageJson>} Parsed package descriptor
+ * @throws If no `package.json` is found before the filesystem root
+ * @internal
+ */
+export const readEntryPackageDescriptor = async ({ maybeRead }, entrypoint) => {
+  const location = toFileURLString(entrypoint)
+
+  let directory = new URL('./', location).href
+  while (true) {
+    const pkgUrl = new URL('package.json', directory).href
+    const bytes = await maybeRead(pkgUrl)
+    if (bytes !== undefined) {
+      try {
+        return /** @type {PackageJson} */ (
+          JSON.parse(textDecoder.decode(bytes))
+        )
+      } catch (err) {
+        throw new Error(
+          `Invalid package.json at ${hrPath(pkgUrl)}; failed to parse JSON`,
+          { cause: err }
+        )
+      }
+    }
+    const parent = new URL('../', directory).href
+    if (parent === directory) {
+      throw new Error(
+        `Cannot find package.json along path to ${hrPath(location)}`
+      )
+    }
+    directory = parent
+  }
+}
 
 /**
  * Gets the keypath for a canonical name within a LavaMoat policy object

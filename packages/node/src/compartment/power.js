@@ -1,49 +1,75 @@
-import { makeReadNowPowers } from '@endo/compartment-mapper/node-powers.js'
+import {
+  makeReadNowPowers,
+  makeReadPowers,
+} from '@endo/compartment-mapper/node-powers.js'
 import nodeCrypto from 'node:crypto'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import nodeUrl from 'node:url'
 
 /**
- * @import {ReadNowPowers} from '@endo/compartment-mapper'
- * @import {MakeReadPowersOptions} from '../types.js';
+ * @import {
+ *   LavaMoatReadPowers,
+ *   MakeReadPowersOptions,
+ *   WithRawPowers
+ * } from "../types.js"
  */
+
+/**
+ * Creates {@link LavaMoatReadPowers} from raw powers.
+ *
+ * Defaults to using the `node:fs`, `node:url`, `node:crypto`, and `node:path`
+ * modules.
+ *
+ * @param {Partial<WithRawPowers>} [options]
+ * @returns {LavaMoatReadPowers}
+ */
+const createReadPowers = ({
+  fs = nodeFs,
+  url = nodeUrl,
+  crypto = nodeCrypto,
+  path = nodePath,
+} = {}) => ({
+  // gives us maybeRead
+  ...makeReadPowers({
+    fs,
+    url,
+    crypto,
+    path,
+  }),
+
+  // gives us required "read now" powers
+  ...makeReadNowPowers({
+    fs,
+    url,
+    crypto,
+    path,
+  }),
+})
 
 /**
  * Default read powers for Endo
  *
- * @type {ReadNowPowers}
+ * @type {LavaMoatReadPowers}
  */
-export const defaultReadPowers = makeReadNowPowers({
-  fs: nodeFs,
-  url: nodeUrl,
-  crypto: nodeCrypto,
-  path: nodePath,
-})
+export const defaultReadPowers = createReadPowers()
 
 /**
- * Creates a {@link ReadNowPowers} object from raw powers.
+ * Creates a {@link LavaMoatReadPowers} object from raw powers.
  *
- * If option `fs` is present, it takes precedence over `readPowers`.
+ * If any "raw powers" (`fs`, `url`, `crypto`, `path`) are provided, they take
+ * precedence over `readPowers`. Any missing "raw powers" are filled with
+ * Node.js built-in modules.
  *
  * @param {MakeReadPowersOptions} options
- * @returns {ReadNowPowers}
+ * @returns {LavaMoatReadPowers}
  */
-export const makeReadPowers = (options) => {
-  const { readPowers } = options
-  const { fs, url = nodeUrl, path = nodePath, crypto = nodeCrypto } = options
+export const makeLavaMoatReadPowers = (options) => {
+  const { readPowers, ...rest } = options
   // FIXME: it might be possible that the way endo uses node:url won't work consistently
   // with non-default fs passed in. Some assumptions about path resolution are used in url
-  if (fs) {
-    return makeReadNowPowers({
-      fs,
-      url,
-      crypto,
-      path,
-    })
+  if ('fs' in rest || 'url' in rest || 'crypto' in rest || 'path' in rest) {
+    return createReadPowers(rest)
   }
-  if (readPowers) {
-    return readPowers
-  }
-  return defaultReadPowers
+  return readPowers ?? defaultReadPowers
 }

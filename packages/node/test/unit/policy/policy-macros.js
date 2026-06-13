@@ -16,10 +16,20 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions, TestPolicyForFixtureOptions} from './types.js'
- * @import {SourceType} from '../../../src/types.js'
- * @import {TestFn, MacroDeclarationOptions, Macro} from 'ava'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from "@lavamoat/types"
+ * @import {
+ *   Macro,
+ *   MacroDeclarationOptions,
+ *   TestFn
+ * } from "ava"
+ * @import {SourceType} from "../../../src/types.js"
+ * @import {
+ *   ScaffoldFixtureOptions,
+ *   ScaffoldFixtureResult,
+ *   TestPolicyForFixtureOptions,
+ *   TestPolicyForJSONOptions,
+ *   TestPolicyMacroOptions
+ * } from "./types.js"
  */
 
 const fixture = fixtureFinder(new URL('..', import.meta.url))
@@ -379,6 +389,7 @@ export function createGeneratePolicyMacros(test) {
         t.plan(options?.policyOverride ? 2 : 1)
 
         if (isPolicy(expected)) {
+          delete (/** @type {any} */ (actualPolicy)[MERGED_POLICY_FIELD])
           t.deepEqual(
             actualPolicy,
             expected,

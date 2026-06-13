@@ -10,6 +10,7 @@
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
+import { buildAdditionalLocations } from '../compartment/additional-locations.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { ExecutionError } from '../error.js'
@@ -24,11 +25,12 @@ import { createExecParsers } from './exec-parsers.js'
  *   ImportLocationOptions,
  *   PackageCompartmentMapDescriptor,
  *   SyncImportLocationOptions
- * } from '@endo/compartment-mapper'
+ * } from "@endo/compartment-mapper"
+ * @import {MakeNodeCompartmentMapOptions} from "../internal.js"
  * @import {
  *   ApplicationLoader,
  *   ExecuteOptions
- * } from '../types.js'
+ * } from "../types.js"
  */
 
 /**
@@ -57,25 +59,50 @@ export const load = async (
     endoPolicy,
     readPowers = defaultReadPowers,
     policy,
+    projectRoot,
     ...otherOptions
   } = {}
 ) => {
-  /** @type {PackageCompartmentMapDescriptor} */
+  /**
+   * Compartment map created by {@link makNodeCompartmentMap}
+   *
+   * @type {PackageCompartmentMapDescriptor}
+   */
   let packageCompartmentMap
-  /** @type {Set<CanonicalName>} */
+
+  /**
+   * Canonical names that were not found in the compartment map; returned by
+   * {@link makeNodeCompartmentMap}
+   *
+   * @type {Set<CanonicalName>}
+   */
   let unknownCanonicalNames
-  /** @type {Set<CanonicalName>} */
+
+  /**
+   * Canonical names that were found in the compartment map; returned by
+   * {@link makeNodeCompartmentMap}
+   *
+   * @type {Set<CanonicalName>}
+   */
   let knownCanonicalNames
+
+  /** @type {MakeNodeCompartmentMapOptions} */
+  const makeNodeCompartmentMapOptions = {
+    readPowers,
+    prodOnly,
+    log,
+    endoPolicy,
+    mapNodeModulesOptions: {
+      additionalLocations: buildAdditionalLocations(policy, projectRoot),
+    },
+  }
 
   try {
     ;({ packageCompartmentMap, unknownCanonicalNames, knownCanonicalNames } =
-      await makeNodeCompartmentMap(entrypointPath, {
-        readPowers,
-        prodOnly,
-        log,
-        trustRoot,
-        endoPolicy,
-      }))
+      await makeNodeCompartmentMap(
+        entrypointPath,
+        makeNodeCompartmentMapOptions
+      ))
     if (policy) {
       reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
         policy,
