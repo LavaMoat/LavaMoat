@@ -2,14 +2,17 @@ import { fromJsonSnapshot } from '@jsonjoy.com/fs-snapshot'
 import { memfs, Volume } from 'memfs'
 import fs from 'node:fs'
 import { scheduler } from 'node:timers/promises'
-import { makeReadPowers } from '../../src/compartment/power.js'
+import { makeLavaMoatReadPowers } from '../../src/compartment/power.js'
 import { isString } from '../../src/util.js'
 
 /**
- * @import {ReadNowPowers, FsInterface} from '@endo/compartment-mapper'
- * @import {DirectoryJSON} from 'memfs'
- * @import {SnapshotNode} from '@jsonjoy.com/fs-snapshot'
- * @import {JsonUint8Array} from '@jsonjoy.com/fs-snapshot'
+ * @import {FsInterface} from "@endo/compartment-mapper"
+ * @import {
+ *   JsonUint8Array,
+ *   SnapshotNode
+ * } from "@jsonjoy.com/fs-snapshot"
+ * @import {DirectoryJSON} from "memfs"
+ * @import {LavaMoatReadPowers} from "../../src/types.js"
  */
 
 /**
@@ -68,7 +71,7 @@ const MAX_DELAY = 200
  *   `false`
  * @returns {Promise<{
  *   vol: Volume
- *   readPowers: ReadNowPowers
+ *   readPowers: LavaMoatReadPowers
  * }>}
  * @see {@link https://github.com/streamich/memfs/blob/master/docs/snapshot/index.md}
  * @todo Standardize entry point filename and return the entry point path.
@@ -112,7 +115,9 @@ export async function loadJSONFixture(
       : Volume.fromJSON(json)
   }
 
-  const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (vol) })
+  const readPowers = makeLavaMoatReadPowers({
+    fs: /** @type {FsInterface} */ (vol),
+  })
   if (randomDelay) {
     const { maybeRead } = readPowers
     readPowers.maybeRead = async (specifier) => {
@@ -120,7 +125,6 @@ export async function loadJSONFixture(
       await scheduler.wait(
         Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1)) + MIN_DELAY
       )
-      // @ts-expect-error needs type fix
       return maybeRead(specifier)
     }
   }

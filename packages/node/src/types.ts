@@ -10,6 +10,7 @@
 import type {
   CryptoInterface,
   Policy as EndoPolicy,
+  FileUrlString,
   FsInterface,
   ImportLocationOptions,
   PackagePolicy,
@@ -23,7 +24,7 @@ import type { IsBuiltinFn, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
-import type { Except, LiteralUnion, Simplify } from 'type-fest'
+import type { Except, LiteralUnion, SetRequired, Simplify } from 'type-fest'
 import type {
   ATTENUATORS_COMPARTMENT,
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
@@ -184,7 +185,7 @@ export interface WithReadPowers {
   /**
    * Read powers to use when loading the compartment map.
    */
-  readPowers?: ReadNowPowers
+  readPowers?: LavaMoatReadPowers
   url?: never
 }
 
@@ -254,6 +255,7 @@ export type ExecuteOptions = ComposeOptions<
     WithLog,
     WithProdOnly,
     WithPolicyOnly,
+    WithProjectRoot,
   ]
 >
 
@@ -524,6 +526,14 @@ export interface FsUtilInterface {
 export interface WithFs {
   fs?: FsUtilInterface
 }
+
+/**
+ * Read powers needed by LavaMoat.
+ */
+export type LavaMoatReadPowers = SetRequired<
+  ReadNowPowers<FileUrlString>,
+  'maybeRead'
+>
 
 /**
  * `true` if all overlapping keys between `A` and `B` have identical types;
