@@ -10,6 +10,7 @@
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
+import { buildAdditionalLocations } from '../compartment/includes.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { ExecutionError } from '../error.js'
@@ -24,7 +25,10 @@ import { createExecParsers } from './exec-parsers.js'
  *   PackageCompartmentMapDescriptor,
  *   SyncImportLocationOptions
  * } from '@endo/compartment-mapper'
- * @import {UnknownCanonicalNames} from '../internal.js'
+ * @import {
+ *   MakeNodeCompartmentMapOptions,
+ *   UnknownCanonicalNames
+ * } from '../internal.js'
  * @import {
  *   ApplicationLoader,
  *   ExecuteOptions
@@ -57,23 +61,38 @@ export const load = async (
     endoPolicy,
     readPowers = defaultReadPowers,
     policy,
+    projectRoot,
     ...otherOptions
   } = {}
 ) => {
-  /** @type {PackageCompartmentMapDescriptor} */
+  /**
+   * Compartment map created by {@link makNodeCompartmentMap}
+   *
+   * @type {PackageCompartmentMapDescriptor}
+   */
   let packageCompartmentMap
   /** @type {UnknownCanonicalNames} */
   let unknownCanonicalNames
 
+  /** @type {MakeNodeCompartmentMapOptions} */
+  const makeNodeCompartmentMapOptions = {
+    readPowers,
+    prodOnly,
+    log,
+    endoPolicy,
+    mapNodeModulesOptions: {
+      additionalLocations: buildAdditionalLocations(policy?.include, {
+        projectRoot,
+      }),
+    },
+  }
+
   try {
     ;({ packageCompartmentMap, unknownCanonicalNames } =
-      await makeNodeCompartmentMap(entrypointPath, {
-        readPowers,
-        prodOnly,
-        log,
-        trustRoot,
-        endoPolicy,
-      }))
+      await makeNodeCompartmentMap(
+        entrypointPath,
+        makeNodeCompartmentMapOptions
+      ))
     // note: for execution, warnings are likely disabled by default, and this
     // function only prints warnings.
     reportInvalidCanonicalNames(unknownCanonicalNames, {

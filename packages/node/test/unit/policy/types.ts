@@ -1,4 +1,4 @@
-import { type ReadNowPowers } from '@endo/compartment-mapper'
+import type { ReadNowPowers } from '@endo/compartment-mapper'
 import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
 import { type Volume } from 'memfs'
