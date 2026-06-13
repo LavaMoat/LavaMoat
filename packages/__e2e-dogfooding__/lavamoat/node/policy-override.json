@@ -6,7 +6,14 @@
     {
       "name": "@lavamoat/__e2e-dogfooding__",
       "entry": "./webpack.config.js"
-    }
+    },
+    "@lavamoat/__e2e-dogfooding__>html-webpack-plugin",
+    "babel-loader",
+    "@lavamoat/__e2e-dogfooding__>@babel/preset-env",
+    "@lavamoat/__e2e-dogfooding__>@babel/preset-env>@babel/plugin-transform-modules-umd",
+    "@lavamoat/__e2e-dogfooding__>@babel/preset-env>@babel/plugin-transform-regenerator",
+    "@lavamoat/__e2e-dogfooding__>@babel/preset-env>babel-plugin-polyfill-corejs2>@babel/helper-define-polyfill-provider",
+    "@babel/preset-react>@babel/plugin-transform-react-display-name"
   ],
   "resources": {
     "graceful-fs": {
@@ -30,6 +37,35 @@
     "webpack-cli>import-local": {
       "packages": {
         "webpack-cli": true
+      }
+    },
+    "loader-runner": {
+      "packages": {
+        "@lavamoat/__e2e-dogfooding__>html-webpack-plugin": true,
+        "babel-loader": true
+      }
+    },
+    "@lavamoat/__e2e-dogfooding__>html-webpack-plugin": {
+      "builtin": {
+        "node:url": true
+      }
+    },
+    "terser-webpack-plugin>jest-worker": {
+      "packages": {
+        "terser-webpack-plugin": true
+      }
+    },
+    "@babel/core": {
+      "packages": {
+        "@lavamoat/__e2e-dogfooding__>@babel/preset-env": true,
+        "@lavamoat/__e2e-dogfooding__>@babel/preset-typescript": true,
+        "@babel/preset-react": true
+      }
+    },
+    "@lavamoat/__e2e-dogfooding__>@babel/preset-env>babel-plugin-polyfill-corejs2>@babel/helper-define-polyfill-provider": {
+      "builtin": {
+        "path": true,
+        "module": true
       }
     }
   },
