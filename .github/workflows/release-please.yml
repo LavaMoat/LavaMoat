@@ -33,7 +33,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: release
         if: github.event_name != 'workflow_dispatch'
       - name: Use manual input
@@ -105,7 +105,7 @@ jobs:
           name: lavamoat-pack
           path: ${{ runner.temp }}/lavamoat-tarballs
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24.16.0
       - run: npm install -g 'npm@^11.15.0'
