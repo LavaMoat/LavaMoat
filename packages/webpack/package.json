@@ -64,7 +64,7 @@
     "html-webpack-plugin": "5.6.7",
     "memfs": "4.57.2",
     "mini-css-extract-plugin": "2.10.2",
-    "webpack": "5.104.1"
+    "webpack": "5.107.2"
   },
   "ava": {
     "files": [
