@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { ROOT_COMPARTMENT } from './constants.js'
 import { InvalidArgumentsError } from './error.js'
 import {
   action,
@@ -33,8 +34,8 @@ import { findCanonicalNameKeypath, noop, pluralize } from './util.js'
 import { fileURLToPath } from 'node:url'
 
 /**
- * @import {CanonicalName} from '@endo/compartment-mapper'
- * @import {WriteStream} from 'node:tty'
+ * @import {CanonicalName} from "@endo/compartment-mapper"
+ * @import {WriteStream} from "node:tty"
  * @import {
  *   ModuleInspectionProgressReporter,
  *   ReportInvalidCanonicalNames,
@@ -43,8 +44,8 @@ import { fileURLToPath } from 'node:url'
  *   ReportSesViolationsOptions,
  *   StructuredViolation,
  *   StructuredViolationsResult
- * } from './internal.js'
- * @import {Loggerr} from './log.js'
+ * } from "./internal.js"
+ * @import {Loggerr} from "./log.js"
  */
 
 /**
@@ -91,6 +92,9 @@ export const reportInvalidCanonicalNames = (
   // representations
   const unknownCanonicalNameMap = [...unknownCanonicalNames].map(
     (canonicalName) => {
+      if (canonicalName === ROOT_COMPARTMENT && policy?.root?.usePolicy) {
+        canonicalName = policy.root.usePolicy
+      }
       const keypath = findCanonicalNameKeypath(policy, canonicalName)
       return {
         name: canonicalName,

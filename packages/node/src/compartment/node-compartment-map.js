@@ -7,7 +7,7 @@
  */
 
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
-import { ATTENUATORS_COMPARTMENT, ROOT_COMPARTMENT } from '../constants.js'
+import { ATTENUATORS_COMPARTMENT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { toFileURLString } from '../util.js'
 import { DEFAULT_ENDO_OPTIONS } from './options.js'
@@ -97,7 +97,6 @@ export const makeNodeCompartmentMap = async (
     prodOnly,
     log = defaultLog,
     endoPolicy,
-    trustRoot,
     mapNodeModulesOptions = {},
   } = {}
 ) => {
@@ -121,9 +120,6 @@ export const makeNodeCompartmentMap = async (
    * @type {Set<CanonicalName>}
    */
   const knownCanonicalNames = new Set()
-
-  /** @type {CanonicalName | undefined} */
-  let rootUsePolicy
 
   /**
    * Order matters: consumer-provided options come first so the controlled
@@ -151,12 +147,7 @@ export const makeNodeCompartmentMap = async (
         packageDescriptor,
         location,
         canonicalName,
-        name,
       } of packageData.values()) {
-        // @ts-expect-error - https://github.com/endojs/endo/pull/3111
-        if (!trustRoot && canonicalName === ROOT_COMPARTMENT) {
-          rootUsePolicy = name
-        }
         knownCanonicalNames.add(canonicalName)
         packageJsonsByLocation.set(
           location,
@@ -193,6 +184,5 @@ export const makeNodeCompartmentMap = async (
     packageJsonMap,
     unknownCanonicalNames,
     knownCanonicalNames,
-    rootUsePolicy,
   }
 }

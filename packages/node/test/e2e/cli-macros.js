@@ -1,6 +1,12 @@
 /**
- * @import {MacroDeclarationOptions, TestFn} from 'ava'
- * @import {TestCLIExpectation as TestCLIExpectation} from '../types.js'
+ * @import {
+ *   MacroDeclarationOptions,
+ *   TestFn
+ * } from "ava"
+ * @import {
+ *   RunCLIOptions,
+ *   TestCLIExpectation as TestCLIExpectation
+ * } from "../types.js"
  */
 
 import { stripVTControlCharacters } from 'node:util'
@@ -30,13 +36,21 @@ export const createCLIMacros = (test) => {
   const testCLI = test.macro(
     /**
      * @type {MacroDeclarationOptions<
-     *   [args: string[], expected?: TestCLIExpectation]
+     *   [
+     *     args: string[],
+     *     expected?: TestCLIExpectation,
+     *     options?: RunCLIOptions,
+     *   ]
      * >}
      */ ({
       title: (title) =>
         title ?? `program output matches expected (${genericTitleIndex++}`,
-      exec: async (t, args, expected) => {
-        const { stdout, stderr, code, hrCommand } = await runCLI(args, t)
+      exec: async (t, args, expected, options = {}) => {
+        const { stdout, stderr, code, hrCommand } = await runCLI(
+          args,
+          t,
+          options
+        )
 
         /**
          * Human-readable command

@@ -25,14 +25,15 @@ import type {
   ComposeOptions,
   MergedLavaMoatPolicy,
   WithFs,
+  WithLavaMoatEndoPolicy,
   WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
+  WithReadPowers,
   WithReadPowersAndTrust,
-  WithReadPowersAndTrustAndEndoPolicy,
   WithScuttleGlobalThis,
   WithTrustRoot,
 } from './types.js'
@@ -132,18 +133,6 @@ export type ResolveEntrypointOptions = ComposeOptions<[WithFrom]>
  * @internal
  */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
-
-/**
- * N array of required properties for {@link ReadNowPowers}
- *
- * @internal
- */
-export type RequiredReadNowPowers = ReadonlyArray<
-  {
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
-  }[ReadNowPowersProp]
->
 
 /**
  * Options for {@link reportInvalidCanonicalNames}
@@ -246,7 +235,8 @@ export interface WithMapNodeModulesOptions {
 export type MakeNodeCompartmentMapOptions = ComposeOptions<
   [
     WithLog,
-    WithReadPowersAndTrustAndEndoPolicy,
+    WithLavaMoatEndoPolicy,
+    WithReadPowers,
     WithProdOnly,
     WithMapNodeModulesOptions,
   ]
@@ -262,7 +252,6 @@ export interface MakeNodeCompartmentMapResult {
   packageCompartmentMap: PackageCompartmentMapDescriptor
   unknownCanonicalNames: Set<CanonicalName>
   knownCanonicalNames: Set<CanonicalName>
-  rootUsePolicy?: CanonicalName
 }
 
 /**

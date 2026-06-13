@@ -8,13 +8,13 @@ import '../../src/preamble.js'
 import { Loggerr } from 'loggerr'
 import { memfs } from 'memfs'
 import { isMainThread, workerData } from 'node:worker_threads'
-import { makeReadPowers } from '../../src/compartment/power.js'
+import { makeLavaMoatReadPowers } from '../../src/compartment/power.js'
 import { run } from '../../src/exec/run.js'
 import { log as defaultLog } from '../../src/log.js'
 
 /**
- * @import {FsInterface} from '@endo/compartment-mapper';
- * @import {RunnerWorkerData} from '../types.js';
+ * @import {FsInterface} from "@endo/compartment-mapper"
+ * @import {RunnerWorkerData} from "../types.js"
  */
 
 if (isMainThread) {
@@ -32,7 +32,9 @@ const { entryPath, policy, vol, scuttleGlobalThis } =
 
 const { fs } = memfs(vol)
 
-const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (fs) })
+const readPowers = makeLavaMoatReadPowers({
+  fs: /** @type {FsInterface} */ (fs),
+})
 
 const log = new Loggerr({
   formatter: 'cli',

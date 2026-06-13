@@ -9,8 +9,8 @@ import { builtinModules } from 'node:module'
 import path from 'node:path'
 
 /**
- * @import {Language} from '@endo/compartment-mapper'
- * @import {LiteralUnion} from 'type-fest'
+ * @import {Language} from "@endo/compartment-mapper"
+ * @import {LiteralUnion} from "type-fest"
  */
 
 const { freeze } = Object
@@ -250,4 +250,19 @@ export const ALL_BUILTIN_MODULES = freeze(
  */
 export const INSPECTABLE_LANGUAGES = freeze(
   new Set([LANGUAGE_MJS, LANGUAGE_CJS])
+)
+
+/**
+ * Ordered array of every property in {@link LavaMoatReadPowers} which is
+ * _required_.
+ *
+ * @internal
+ */
+export const REQUIRED_READ_NOW_POWERS = freeze(
+  /** @type {const} */ ([
+    'fileURLToPath',
+    'isAbsolute',
+    'maybeReadNow',
+    'maybeRead',
+  ])
 )

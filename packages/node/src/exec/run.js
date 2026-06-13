@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import nodeFs from 'node:fs'
-import { makeReadPowers } from '../compartment/power.js'
+import { makeLavaMoatReadPowers } from '../compartment/power.js'
 import {
   DEFAULT_ATTENUATOR,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
@@ -20,13 +20,19 @@ import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
 
 /**
- * @import {ExecuteOptions, LoadPoliciesOptions, MergedLavaMoatPolicy, RunOptions} from '../types.js';
+ * @import {
+ *   ExecuteOptions,
+ *   LoadPoliciesOptions,
+ *   MergedLavaMoatPolicy,
+ *   RunOptions
+ * } from "../types.js"
  */
 
 /**
  * Runs a module or script with provided LavaMoat policy
  *
- * Allows creation of read powers from raw interfaces; see {@link makeReadPowers}
+ * Allows creation of read powers from raw interfaces; see
+ * {@link makeLavaMoatReadPowers}
  *
  * @privateRemarks
  * Mainly a wrapper around {@link execute}
@@ -95,9 +101,10 @@ export const run = async (
     endoPolicy,
     prodOnly,
     log,
-    readPowers: makeReadPowers(options),
+    readPowers: makeLavaMoatReadPowers(options),
     trustRoot,
     policy,
+    projectRoot,
   }
 
   return execute(entrypoint, executeOptions)

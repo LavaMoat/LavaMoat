@@ -8,20 +8,15 @@
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
-import { utils as tofuUtils } from 'lavamoat-tofu'
 import { compactPolicyOverride } from 'lavamoat-core'
+import { utils as tofuUtils } from 'lavamoat-tofu'
 import { nullImportHook as importHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
+import { buildAdditionalLocations } from '../compartment/additional-locations.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
-import {
-  ALL_BUILTIN_MODULES,
-  DEFAULT_TRUST_ROOT_COMPARTMENT,
-  INSPECTABLE_LANGUAGES,
-  ROOT_COMPARTMENT,
-} from '../constants.js'
-import { GenerationError } from '../error.js'
-import { action, hrCode, hrLabel, seconds, success } from '../format.js'
+import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
+import { action, hrCode, seconds, success } from '../format.js'
 import { log as defaultLog, Loggerr } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
 import {
@@ -29,14 +24,18 @@ import {
   reportInvalidCanonicalNames,
   reportSesViolations,
 } from '../report.js'
-import { isOptionalDependency, pluralize } from '../util.js'
+import { pluralize, readEntryPackageDescriptor } from '../util.js'
 import { createPolicyGenParsers } from './policy-gen-parsers.js'
+import {
+  createModuleSourceHook,
+  createPackageConnectionsHook,
+  createPackageDependenciesHook,
+} from './hooks.js'
 
 /**
  * @import {
  *   CanonicalName,
- *   ModuleSourceHook,
- *   PackageConnectionsHook
+ *   PackageDependenciesHook
  * } from "@endo/compartment-mapper"
  * @import {
  *   BuiltinPolicy,
@@ -44,7 +43,6 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
  *   LavaMoatPolicy,
  *   PackagePolicy
  * } from "@lavamoat/types"
- * @import {PackageJson} from "type-fest"
  * @import {
  *   ConsumerMapNodeModulesOptions,
  *   LoadAndGeneratePolicyOptions,
@@ -52,7 +50,10 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
  *   ModuleInspectionResult,
  *   StructuredViolationsResult
  * } from "../internal.js"
- * @import {FileUrlString} from "../types.js"
+ * @import {
+ *   FileUrlString,
+ *   LavaMoatReadPowers
+ * } from "../types.js"
  */
 
 const { keys } = Object
@@ -81,12 +82,27 @@ export const loadAndGeneratePolicy = async (
     log = defaultLog,
     prodOnly,
     compact,
+    projectRoot = process.cwd(),
     ...options
   } = {}
 ) => {
   const startTime = Date.now()
 
   log.info(`${action('Crawling')} dependency graph…`)
+
+  /**
+   * When the root compartment is not trusted, the entry package's `name` field
+   * is used as the canonical name for the root's policy entry (instead of
+   * `$root$`). We pre-compute it here — before `mapNodeModules` runs — so that
+   * the `packageDependenciesHook` below can correctly look up and seed the
+   * root's override-declared package dependencies.
+   *
+   * @type {CanonicalName | undefined}
+   */
+  let rootUsePolicy
+  if (!trustRoot) {
+    rootUsePolicy = await findEntryCanonicalName(entrypointPath, { readPowers })
+  }
 
   /**
    * For each canonical name, the set of dependency canonical names that the
@@ -98,52 +114,43 @@ export const loadAndGeneratePolicy = async (
    * connections so `packagePoliciesMap` reflects only statically-discovered
    * package dependencies.
    *
+   * Should be empty of no `policyOverride` is provided.
+   *
    * @type {Map<CanonicalName, Set<CanonicalName>>}
    */
   const seededPackagesByCanonicalName = new Map()
 
   /**
-   * Forwarded subset of `mapNodeModules` options. When a `policyOverride` is
-   * provided we install a `packageDependenciesHook` that seeds the override's
-   * declared package dependencies into the dependency graph, and records what
-   * was newly added in {@link seededPackagesByCanonicalName}.
+   * Forwarded subset of `mapNodeModules` options.
+   *
+   * When a `policyOverride` is provided we install a
+   * {@link PackageDependenciesHook} that seeds the override's declared package
+   * dependencies into the dependency graph, and records what was newly added in
+   * {@link seededPackagesByCanonicalName}.
    *
    * @type {ConsumerMapNodeModulesOptions}
    */
-  const mapNodeModulesOptions = policyOverride
-    ? {
-        packageDependenciesHook: ({ canonicalName, dependencies }) => {
-          const overridePackages =
-            policyOverride.resources[canonicalName]?.packages
-          if (overridePackages) {
-            for (const dep of keys(overridePackages)) {
-              if (!dependencies.has(dep)) {
-                const seeded =
-                  seededPackagesByCanonicalName.get(canonicalName) ??
-                  /** @type {Set<CanonicalName>} */ (new Set())
-                seeded.add(dep)
-                seededPackagesByCanonicalName.set(canonicalName, seeded)
-                dependencies.add(dep)
-              }
-            }
-          }
-          return { dependencies }
-        },
-      }
-    : {}
+  const mapNodeModulesOptions = {
+    additionalLocations: buildAdditionalLocations(policyOverride, projectRoot),
+    ...(policyOverride
+      ? {
+          packageDependenciesHook: createPackageDependenciesHook({
+            rootUsePolicy,
+            policyOverride,
+            seededPackagesByCanonicalName,
+            log,
+          }),
+        }
+      : {}),
+  }
 
-  const {
-    packageJsonMap,
-    packageCompartmentMap,
-    knownCanonicalNames,
-    rootUsePolicy,
-  } = await makeNodeCompartmentMap(entrypointPath, {
-    readPowers,
-    prodOnly,
-    log,
-    trustRoot,
-    mapNodeModulesOptions,
-  })
+  const { packageJsonMap, packageCompartmentMap, knownCanonicalNames } =
+    await makeNodeCompartmentMap(entrypointPath, {
+      readPowers,
+      prodOnly,
+      log,
+      mapNodeModulesOptions,
+    })
 
   const duration = (Date.now() - startTime) / 1000
   const { size: totalPackageCount } = packageJsonMap
@@ -152,17 +159,18 @@ export const loadAndGeneratePolicy = async (
     `${success} Found ${hrCode(totalPackageCount)} ${pluralize(totalPackageCount, 'package')} in ${seconds(duration)}s`
   )
 
-  /* c8 ignore next */
-  if (!trustRoot && !rootUsePolicy) {
-    throw new GenerationError(
-      `Root compartment is not trusted, but no data for ${hrCode('root.usePolicy')} exists`
-    )
-  }
-
-  /** @type {Map<CanonicalName, GlobalPolicy>} */
+  /**
+   * Mapping of canonical names to global policies.
+   *
+   * @type {Map<CanonicalName, GlobalPolicy>}
+   */
   const globalsForPackage = new Map()
 
-  /** @type {Map<CanonicalName, BuiltinPolicy>} */
+  /**
+   * Mapping of canonical names to builtin policies.
+   *
+   * @type {Map<CanonicalName, BuiltinPolicy>}
+   */
   const builtinsForPackage = new Map()
 
   /**
@@ -172,7 +180,11 @@ export const loadAndGeneratePolicy = async (
    */
   const packagePoliciesMap = new Map()
 
-  /** @type {Map<CanonicalName, StructuredViolationsResult>} */
+  /**
+   * Mapping of canonical names to SES violation results.
+   *
+   * @type {Map<CanonicalName, StructuredViolationsResult>}
+   */
   const violationsForPackage = new Map()
 
   /**
@@ -260,6 +272,7 @@ export const loadAndGeneratePolicy = async (
     moduleSourceHook,
     ...options,
   })
+
   reporter.reportModuleInspectionProgressEnd(inspectedModules, modulesToInspect)
 
   const unmergedPolicy = compilePolicy(
@@ -286,6 +299,9 @@ export const loadAndGeneratePolicy = async (
   }
 
   if (policyOverride) {
+    if (rootUsePolicy) {
+      knownCanonicalNames.add(rootUsePolicy)
+    }
     unknownCanonicalNames = findUnknownCanonicalNames(
       knownCanonicalNames,
       policyOverride
@@ -297,71 +313,27 @@ export const loadAndGeneratePolicy = async (
     })
   }
 
-  const hasWarnings =
-    unknownCanonicalNames.size > 0 || violationsForPackage.size > 0
-
   if (violationsForPackage.size > 0) {
     reportSesViolations(violationsForPackage, { log })
   }
+
+  const hasWarnings = !!(
+    unknownCanonicalNames.size +
+    violationsForPackage.size +
+    warnings.length
+  )
+  // #endregion
 
   if (!compact && compacted) {
     log.info(
       `❕ Policy override contains redundant entries and may be compacted; try running again with --compact`
     )
   }
-  // #endregion
   return {
     policy,
     packageJsonMap,
     hasWarnings,
     compactedPolicyOverride: compact ? compactedPolicyOverride : undefined,
-  }
-}
-
-/**
- * @param {CanonicalName} canonicalName
- * @param {ModuleInspectionResult} result
- * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
- * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
- * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
- */
-const applyInspectionResults = (
-  canonicalName,
-  { globalPolicy, builtinPolicy, violations },
-  globalsForPackage,
-  builtinsForPackage,
-  violationsForPackage
-) => {
-  if (globalPolicy) {
-    const current = globalsForPackage.get(canonicalName)
-    globalsForPackage.set(canonicalName, { ...current, ...globalPolicy })
-  }
-
-  if (builtinPolicy) {
-    const current = builtinsForPackage.get(canonicalName)
-    builtinsForPackage.set(canonicalName, { ...current, ...builtinPolicy })
-  }
-
-  if (violations) {
-    const current = violationsForPackage.get(canonicalName)
-    if (current) {
-      violationsForPackage.set(canonicalName, {
-        primordialMutations: [
-          ...current.primordialMutations,
-          ...violations.primordialMutations,
-        ],
-        strictModeViolations: [
-          ...current.strictModeViolations,
-          ...violations.strictModeViolations,
-        ],
-        dynamicRequires: [
-          ...current.dynamicRequires,
-          ...violations.dynamicRequires,
-        ],
-      })
-    } else {
-      violationsForPackage.set(canonicalName, violations)
-    }
   }
 }
 
@@ -429,135 +401,25 @@ const compilePolicy = (
 }
 
 /**
- * Connections passed to this hook by the compartment mapper include any
- * dependencies injected by `packageDependenciesHook` in
- * `makeNodeCompartmentMap` (which seeds
- * `policyOverride.resources[name].packages` into the dependency set so the
- * crawler visits them). To keep `packagePoliciesMap` semantically accurate —
- * "packages discovered by static analysis" — we skip any connection that was
- * _newly_ added by that hook (as recorded in
- * {@link seededPackagesByCanonicalName}). Connections that were both statically
- * discovered _and_ listed in the override are NOT in the seeded set, so they
- * remain in the base policy and `compactPolicyOverride` can correctly identify
- * the corresponding override entry as redundant.
+ * Finds the name of the package at the given entrypoint.
  *
- * @param {Object} params
- * @param {CanonicalName | undefined} params.rootUsePolicy
- * @param {Map<CanonicalName, PackagePolicy>} params.packagePoliciesMap
- * @param {Map<CanonicalName, Set<CanonicalName>>} params.seededPackagesByCanonicalName
- * @returns {PackageConnectionsHook}
+ * Used to determine the canonical name of the entry compartment.
+ *
+ * @param {string | URL} entrypointPath
+ * @param {Object} options
+ * @param {LavaMoatReadPowers} [options.readPowers]
+ * @returns {Promise<CanonicalName | undefined>}
  */
-const createPackageConnectionsHook =
-  ({ rootUsePolicy, packagePoliciesMap, seededPackagesByCanonicalName }) =>
-  ({ canonicalName: rawCanonicalName, connections }) => {
-    if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
-      return
-    }
-    const canonicalName =
-      rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
-        ? rootUsePolicy
-        : rawCanonicalName
-    const seededPackages = seededPackagesByCanonicalName.get(canonicalName)
-    const packagePolicy = packagePoliciesMap.get(canonicalName) ?? {}
-    for (const connection of connections) {
-      if (connection === canonicalName) {
-        continue
-      }
-      if (seededPackages?.has(connection)) {
-        continue
-      }
-      packagePolicy[connection] = true
-    }
-    if (keys(packagePolicy).length > 0) {
-      packagePoliciesMap.set(canonicalName, packagePolicy)
-    }
+export const findEntryCanonicalName = async (
+  entrypointPath,
+  { readPowers = defaultReadPowers }
+) => {
+  const entryPkg = await readEntryPackageDescriptor(readPowers, entrypointPath)
+  if (!entryPkg.name) {
+    throw new Error(
+      `Entry ${hrCode('package.json')} has no ${hrCode('name')} field; cannot determine root policy name`
+    )
   }
 
-/**
- * Creates a {@link ModuleSourceHook} which applies inspection results to the
- * global and builtin policies and adds warnings for implicit dependencies.
- *
- * @param {Object} params
- * @param {Map<CanonicalName, PackageJson>} params.packageJsonMap
- * @param {string[]} params.warnings
- * @param {Loggerr} params.log
- * @param {CanonicalName | undefined} params.rootUsePolicy
- * @param {Map<FileUrlString, ModuleInspectionResult>} params.inspectionResults
- * @param {Map<CanonicalName, GlobalPolicy>} params.globalsForPackage
- * @param {Map<CanonicalName, BuiltinPolicy>} params.builtinsForPackage
- * @param {Map<CanonicalName, StructuredViolationsResult>} params.violationsForPackage
- * @returns {ModuleSourceHook}
- */
-const createModuleSourceHook =
-  ({
-    packageJsonMap,
-    warnings,
-    log,
-    rootUsePolicy,
-    inspectionResults,
-    globalsForPackage,
-    builtinsForPackage,
-    violationsForPackage,
-  }) =>
-  ({ moduleSource, canonicalName: rawCanonicalName }) => {
-    if ('exit' in moduleSource) {
-      if (
-        !ALL_BUILTIN_MODULES.has(moduleSource.exit) &&
-        !moduleSource.exit.endsWith('package.json')
-      ) {
-        const packageJson = packageJsonMap.get(rawCanonicalName)
-        // ignore optional dependencies
-        if (
-          packageJson &&
-          isOptionalDependency(packageJson, moduleSource.exit)
-        ) {
-          return
-        }
-
-        if (packageJson && packageJson.dependencies?.[moduleSource.exit]) {
-          warnings.push(
-            `${hrLabel(moduleSource.exit)} is not a builtin module, but was otherwise not accessible from ${hrLabel(rawCanonicalName)}. Consider adding it to policy overrides.`
-          )
-        } else {
-          warnings.push(
-            `${hrLabel(moduleSource.exit)} is not a builtin module, but was otherwise not accessible from ${hrLabel(rawCanonicalName)}. This may be due to an implicit dependency.`
-          )
-          if (!packageJson) {
-            log.debug(
-              `${hrLabel(rawCanonicalName)} is apparently missing a ${hrCode('package.json')}.`
-            )
-          }
-        }
-      }
-      return
-    }
-
-    // root compartment has access to everything; no need to generate policy for it
-    if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
-      return
-    }
-
-    const { language, location } = moduleSource
-
-    if (!INSPECTABLE_LANGUAGES.has(language)) {
-      return
-    }
-
-    const canonicalName =
-      rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
-        ? rootUsePolicy
-        : rawCanonicalName
-
-    const result = inspectionResults.get(location)
-    if (result) {
-      applyInspectionResults(
-        canonicalName,
-        result,
-        globalsForPackage,
-        builtinsForPackage,
-        violationsForPackage
-      )
-    } else {
-      log.debug(`No inspection results found for ${hrLabel(location)}`)
-    }
-  }
+  return entryPkg.name
+}
