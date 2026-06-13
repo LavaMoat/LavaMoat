@@ -46,6 +46,7 @@ export const generatePolicy = async (
     log = defaultLog,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     projectRoot: rawProjectRootPath = process.cwd(),
+    compact,
     ...generateOpts
   } = {}
 ) => {
@@ -74,6 +75,12 @@ export const generatePolicy = async (
 
   /** @type {string | undefined} */
   let policyOverridePath
+  /**
+   * Whether the policy override was loaded from disk by this function (as
+   * opposed to being passed in by the caller as an object). Only when it was
+   * loaded here do we honour `compact` and propagate `policyOverridePath`.
+   */
+  let overrideLoadedFromDisk = false
   // the user may specify a policy override or a path to a policy override.
   // in this case, we handle the path.
   if (!policyOverride) {
@@ -94,6 +101,12 @@ export const generatePolicy = async (
     policyOverride = await maybeReadPolicyOverride(policyOverridePath, {
       readFile,
     })
+    overrideLoadedFromDisk = policyOverride !== undefined
+    if (overrideLoadedFromDisk && !rawPolicyOverridePath) {
+      log.info(
+        `Discovered policy override file at ${hrPath(policyOverridePath)}`
+      )
+    }
   } else if (rawPolicyOverridePath) {
     throw new InvalidArgumentsError(
       `Ignoring user-provided policy override path ${hrPath(rawPolicyOverridePath)} because a policy override object was provided`
@@ -105,13 +118,20 @@ export const generatePolicy = async (
   log.info(
     `${action('Generating')} LavaMoat policy from ${niceEntrypointPath}…`
   )
-  const { policy, hasWarnings } = await loadAndGeneratePolicy(entrypointPath, {
-    ...generateOpts,
-    trustRoot,
-    readPowers,
-    policyOverride,
-    projectRoot,
-  })
+  const { policy, hasWarnings, compactedPolicyOverride } =
+    await loadAndGeneratePolicy(entrypointPath, {
+      ...generateOpts,
+      trustRoot,
+      readPowers,
+      policyOverride,
+      projectRoot,
+      compact: overrideLoadedFromDisk ? compact : undefined,
+    })
 
-  return { policy, hasWarnings }
+  return {
+    policy,
+    hasWarnings,
+    compactedPolicyOverride,
+    policyOverridePath: overrideLoadedFromDisk ? policyOverridePath : undefined,
+  }
 }
