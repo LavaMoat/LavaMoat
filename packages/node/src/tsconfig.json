@@ -5,14 +5,10 @@
     "paths": {
       "@lavamoat/types": ["../../types"],
       "lavamoat-core": ["../../core/types/src/types.d.ts"],
-      "lavamoat-tofu/src/inspectSource.js": [
-        "../../tofu/types/inspectSource.d.ts"
-      ],
-      "lavamoat-tofu/src/inspectSesCompat.js": [
-        "../../tofu/types/inspectSesCompat.d.ts"
-      ]
+      "lavamoat-tofu/src/*.js": ["../../tofu/types/*.d.ts"],
+      "@lavamoat/vog": ["../../vog/src/index.d.ts"],
+      "@lavamoat/vog/*.js": ["../../vog/src/*.d.ts"]
     },
-    "preserveSymlinks": true,
     "rootDir": ".",
     "strict": true,
     "stripInternal": true,
@@ -30,6 +26,9 @@
     },
     {
       "path": "../../tofu/tsconfig.json"
+    },
+    {
+      "path": "../../vog/tsconfig.json"
     }
   ]
 }

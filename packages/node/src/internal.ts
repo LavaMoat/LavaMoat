@@ -6,12 +6,10 @@
  */
 
 import type {
-  ImportLocationOptions,
   MapNodeModulesOptions,
   PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
-  SyncImportLocationOptions,
 } from '@endo/compartment-mapper'
 import type { CanonicalName } from '@endo/compartment-mapper/import.js'
 import type {
@@ -21,7 +19,7 @@ import type {
   LavaMoatPolicy,
   Resources,
 } from '@lavamoat/types'
-import type { Except, PackageJson, ValueOf } from 'type-fest'
+import type { PackageJson, ValueOf } from 'type-fest'
 import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
