@@ -87,6 +87,102 @@ test('isPolicy - returns false for invalid policy', (t) => {
   t.false(isPolicy({}))
 })
 
+test('isPolicy - returns false for non-object values', (t) => {
+  t.plan(5)
+  t.false(isPolicy(null))
+  t.false(isPolicy(undefined))
+  t.false(isPolicy(42))
+  t.false(isPolicy('string'))
+  t.false(isPolicy([]))
+})
+
+test('isPolicy - returns true when include is absent', (t) => {
+  t.true(isPolicy({ resources: { foo: {} } }))
+})
+
+test('isPolicy - returns true for policy with string include entries', (t) => {
+  t.true(isPolicy({ resources: {}, include: ['my-package'] }))
+})
+
+test('isPolicy - returns false for policy with empty string include entry', (t) => {
+  t.false(isPolicy({ resources: {}, include: [''] }))
+})
+
+test('isPolicy - returns false when include is not an array', (t) => {
+  t.false(isPolicy({ resources: {}, include: 'my-package' }))
+})
+
+test('isPolicy - returns true for policy with IncludeEntryByName', (t) => {
+  t.true(isPolicy({ resources: {}, include: [{ name: 'my-package' }] }))
+})
+
+test('isPolicy - returns true for policy with IncludeEntryByName with modules', (t) => {
+  t.true(
+    isPolicy({
+      resources: {},
+      include: [{ name: 'my-package', modules: ['./foo.js', 'bar.js'] }],
+    })
+  )
+})
+
+test('isPolicy - returns false for policy with IncludeEntryByName with empty name', (t) => {
+  t.false(isPolicy({ resources: {}, include: [{ name: '' }] }))
+})
+
+test('isPolicy - returns false for policy with IncludeEntryByName with empty string in modules', (t) => {
+  t.false(
+    isPolicy({
+      resources: {},
+      include: [{ name: 'my-package', modules: [''] }],
+    })
+  )
+})
+
+test('isPolicy - returns true for policy with IncludeEntryByLocation', (t) => {
+  t.true(isPolicy({ resources: {}, include: [{ location: './local-pkg' }] }))
+})
+
+test('isPolicy - returns true for policy with IncludeEntryByLocation with modules', (t) => {
+  t.true(
+    isPolicy({
+      resources: {},
+      include: [{ location: './local-pkg', modules: ['./index.js'] }],
+    })
+  )
+})
+
+test('isPolicy - returns false for policy with IncludeEntryByLocation with empty location', (t) => {
+  t.false(isPolicy({ resources: {}, include: [{ location: '' }] }))
+})
+
+test('isPolicy - returns false for policy with IncludeEntryByLocation with absolute location', (t) => {
+  t.false(
+    isPolicy({ resources: {}, include: [{ location: '/absolute/path' }] })
+  )
+})
+
+test('isPolicy - returns false for policy with IncludeEntryByLocation with empty string in modules', (t) => {
+  t.false(
+    isPolicy({
+      resources: {},
+      include: [{ location: './local-pkg', modules: [''] }],
+    })
+  )
+})
+
+test('isPolicy - returns false for include item missing both name and location', (t) => {
+  t.false(isPolicy({ resources: {}, include: [{ modules: ['foo.js'] }] }))
+})
+
+test('isPolicy - returns true for policy with mixed valid include entry types', (t) => {
+  t.true(
+    isPolicy({
+      resources: {},
+      include: ['my-package', { name: 'other-pkg' }, { location: './local' }],
+    })
+  )
+})
+
 test('assertPolicy - does not throw for valid policy', (t) => {
   t.notThrows(() => assertPolicy({ resources: {} }))
 })
