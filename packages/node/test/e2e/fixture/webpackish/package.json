@@ -1,0 +1,13 @@
+{
+  "name": "webpackish-app",
+  "version": "1.2.3",
+  "main": "index.js",
+  "scripts": {
+    "build": "node ./node_modules/pantspack/pantspack.js --config pantspack.config.js",
+    "start": "npx snapshot-fs ../../json-fixture/webpackish.json"
+  },
+  "devDependencies": {
+    "jorts-folder": "^1.0.0",
+    "pantspack": "^1.0.0"
+  }
+}
