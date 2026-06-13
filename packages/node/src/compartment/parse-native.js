@@ -12,8 +12,9 @@ import { fileURLToPath } from 'node:url'
 import { NATIVE_PARSER_NAME } from '../constants.js'
 import { PermissionDeniedError } from '../error.js'
 import { hrLabel } from '../format.js'
+import { keysOr } from '../util.js'
 
-const { freeze, keys } = Object
+const { freeze } = Object
 
 /**
  * @import {
@@ -70,7 +71,7 @@ const parseNative = (
 
     // copies the contents of `default` into the root of the module environment record
     moduleEnvironmentRecord.default = finalExports
-    for (const prop of keys(moduleEnvironmentRecord.default || {})) {
+    for (const prop of keysOr(moduleEnvironmentRecord.default)) {
       if (prop !== 'default') {
         moduleEnvironmentRecord[prop] = moduleEnvironmentRecord.default[prop]
       }
