@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/types",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Common types for LavaMoat packages",
   "repository": {
     "directory": "packages/types",

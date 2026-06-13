@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.7](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.6...node-v1.0.7) (2026-06-13)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.29.7 ([#2010](https://github.com/LavaMoat/LavaMoat/issues/2010)) ([9627a86](https://github.com/LavaMoat/LavaMoat/commit/9627a86d477d9c70b387b860899a30fbbc0ad479))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^1.0.1 to ^1.0.2
+    * lavamoat-core bumped from ^18.0.4 to ^18.0.5
+    * lavamoat-tofu bumped from ^9.0.2 to ^9.0.3
+
 ## [1.0.6](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.5...node-v1.0.6) (2026-06-08)
 
 

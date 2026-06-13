@@ -18,6 +18,21 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [2.2.4](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.3...webpack-v2.2.4) (2026-06-13)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.29.7 ([#2010](https://github.com/LavaMoat/LavaMoat/issues/2010)) ([9627a86](https://github.com/LavaMoat/LavaMoat/commit/9627a86d477d9c70b387b860899a30fbbc0ad479))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^1.0.1 to ^1.0.2
+    * lavamoat-core bumped from ^18.0.4 to ^18.0.5
+
 ## [2.2.3](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.2...webpack-v2.2.3) (2026-06-08)
 
 
