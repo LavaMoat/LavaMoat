@@ -33,7 +33,7 @@ import { defaultReadPowers } from './power.js'
 
 const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])
 
-const { entries, keys } = Object
+const { entries } = Object
 
 /**
  * Creates a map of canonical names to their corresponding `package.json`
@@ -95,8 +95,8 @@ export const makeNodeCompartmentMap = async (
     prodOnly,
     log = defaultLog,
     endoPolicy,
-    policyOverride,
     trustRoot,
+    mapNodeModulesOptions = {},
   } = {}
 ) => {
   log.debug(
@@ -123,8 +123,16 @@ export const makeNodeCompartmentMap = async (
   /** @type {CanonicalName | undefined} */
   let rootUsePolicy
 
-  /** @type {MapNodeModulesOptions} */
-  const mapNodeModulesOptions = {
+  /**
+   * Order matters: consumer-provided options come first so the controlled
+   * fields below take precedence. The {@link ConsumerMapNodeModulesOptions} type
+   * already excludes the controlled keys, but spreading them last is
+   * belt-and-braces against the runtime case where the type is bypassed.
+   *
+   * @type {MapNodeModulesOptions}
+   */
+  const mergedMapNodeModulesOptions = {
+    ...mapNodeModulesOptions,
     conditions: new Set(DEFAULT_CONDITIONS),
     dev: !prodOnly,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
@@ -163,33 +171,10 @@ export const makeNodeCompartmentMap = async (
     },
   }
 
-  if (policyOverride) {
-    /**
-     * Adds any missing dependencies from `policyOverride` to the list of
-     * dependencies for a package
-     */
-    mapNodeModulesOptions.packageDependenciesHook = ({
-      canonicalName,
-      dependencies,
-    }) => {
-      if (policyOverride) {
-        const { resources } = policyOverride
-        if (canonicalName in resources) {
-          for (const dependencyCanonicalName of keys(
-            resources[canonicalName].packages ?? {}
-          )) {
-            dependencies.add(dependencyCanonicalName)
-          }
-        }
-      }
-      return { dependencies }
-    }
-  }
-
   const packageCompartmentMap = await mapNodeModules(
     readPowers,
     entrypoint,
-    mapNodeModulesOptions
+    mergedMapNodeModulesOptions
   )
 
   /**
