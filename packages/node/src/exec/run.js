@@ -103,6 +103,7 @@ export const run = async (
     readPowers: makeReadPowers(options),
     trustRoot,
     policy,
+    projectRoot,
   }
 
   return execute(entrypoint, executeOptions)
