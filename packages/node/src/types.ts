@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 import type {
+  CaptureLiteOptions,
   CryptoInterface,
   Policy as EndoPolicy,
   FsInterface,
@@ -18,7 +19,7 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatPolicy, Resources } from '@lavamoat/types'
 import type { IsBuiltinFn, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
@@ -65,7 +66,16 @@ export interface LavaMoatEndoPackagePolicyOptions {
   native?: boolean
 }
 
+/**
+ * Options having a `prodOnly` property
+ */
 export interface WithProdOnly {
+  /**
+   * This is the negation of `@endo/compartment-mapper`'s
+   * `MapNodeModulesOptions.dev` option.
+   *
+   * @defaultValue `false`
+   */
   prodOnly?: boolean
 }
 
@@ -82,6 +92,9 @@ export interface WithIsBuiltin {
   isBuiltin?: IsBuiltinFn
 }
 
+/**
+ * Options having a `log` property
+ */
 export interface WithLog {
   /**
    * `Loggerr` instance for logging
@@ -89,14 +102,16 @@ export interface WithLog {
   log?: Loggerr
 }
 
+/**
+ * Options having a `policyPath` prop
+ */
 export interface WithPolicyPath {
   policyPath?: string | URL
 }
 
-export interface WithPolicy {
-  policy?: LavaMoatPolicy
-}
-
+/**
+ * Options having a `policy` prop and _not_ a `policyPath` prop
+ */
 export interface WithPolicyOnly {
   /**
    * A {@link LavaMoatPolicy} object.
@@ -111,26 +126,17 @@ export interface WithPolicyOnly {
 /**
  * Options having a `policyOverride` property and _not_ a `policyOverridePath`
  */
-export type WithPolicyOverrideOnly = {
+export interface WithPolicyOverrideOnly extends WithPolicyOverride {
   /**
    * Disallowed in lieu of {@link policyOverride}
    */
   policyOverridePath?: never
-  /**
-   * A policy override object.
-   */
-  policyOverride?: LavaMoatPolicy
 }
 
 /**
  * Options having a `policyOverridePath` property and _not_ a `policyOverride`
  */
-export type WithPolicyOverridePathOnly = {
-  /**
-   * Path to a policy override file.
-   */
-  policyOverridePath?: string | URL
-
+export interface WithPolicyOverridePathOnly extends WithPolicyOverridePath {
   /**
    * Disallowed in lieu of {@link policyOverridePath}
    */
@@ -138,8 +144,8 @@ export type WithPolicyOverridePathOnly = {
 }
 
 /**
- * Options having a `policyOverride` or `policyOverridePath` property (not both
- * at once!)
+ * Options having a `policyOverride` _xor_ `policyOverridePath` property (not
+ * both at once!)
  */
 export type WithPolicyOverrideOrPath =
   | WithPolicyOverrideOnly
@@ -160,16 +166,15 @@ export interface WithPolicyOverridePath {
 }
 
 /**
- * Raw powers which can be converted to a {@link ReadNowPowers} object.
+ * Interfaces which can be used to build a {@link ReadNowPowers} object.
  *
- * For this to work, {@link WithRawPowers.fs} _must_ be defined. It cannot
+ * For this to work, {@link PowerBuilders.fs} _must_ be defined. It cannot
  * contain a `readPowers` property.
  */
-export interface WithRawPowers {
+export interface PowerBuilders {
   crypto?: CryptoInterface
   fs: FsInterface
   path?: PathInterface
-  readPowers?: never
   url?: UrlInterface
 }
 
@@ -177,15 +182,10 @@ export interface WithRawPowers {
  * Options having a `readPowers` property.
  */
 export interface WithReadPowers {
-  crypto?: never
-  fs?: never
-  path?: never
-
   /**
    * Read powers to use when loading the compartment map.
    */
   readPowers?: ReadNowPowers
-  url?: never
 }
 
 /**
@@ -222,12 +222,19 @@ export interface WritePowers {
   rm: (path: string, { recursive }: { recursive: true }) => Promise<void>
 }
 
-export type WithLoadForMapOptions = ComposeOptions<
-  [
-    Except<ImportLocationOptions, 'importHook' | 'log' | '_preload'>,
-    WithLog,
-    WithProdOnly,
-  ]
+/**
+ * Options for `captureFromMap()` via {@link generatePolicy}
+ *
+ * Disallows properties which are overwritten by LavaMoat.
+ */
+export type ConsumerCaptureFromMapOptions = Except<
+  CaptureLiteOptions,
+  | 'importHook'
+  | 'log'
+  | '_preload'
+  | 'parserForLanguage'
+  | 'packageConnectionsHook'
+  | 'moduleSourceHook'
 >
 
 /**
@@ -250,10 +257,13 @@ export type ExecuteOptions = ComposeOptions<
       ImportLocationOptions | SyncImportLocationOptions,
       'log' | 'dev' | 'policy'
     >,
-    WithReadPowersAndTrustAndEndoPolicy,
+    WithReadPowers,
+    WithTrustRoot,
+    WithLavaMoatEndoPolicy,
     WithLog,
     WithProdOnly,
     WithPolicyOnly,
+    WithProjectRoot,
   ]
 >
 
@@ -282,9 +292,12 @@ export interface WithCompact {
  */
 export type GeneratePolicyOptions = ComposeOptions<
   [
-    WithReadPowersAndTrust,
+    WithReadPowers,
+    WithTrustRoot,
     WithIsBuiltin,
-    WithLoadForMapOptions,
+    WithLog,
+    WithProdOnly,
+    ConsumerCaptureFromMapOptions,
     WithScuttleGlobalThis,
     LoadPoliciesOptions,
     WithCompact,
@@ -294,7 +307,7 @@ export type GeneratePolicyOptions = ComposeOptions<
 /**
  * Result of `generatePolicy()`
  */
-export type GeneratePolicyResult = {
+export interface GeneratePolicyResult {
   policy: MergedLavaMoatPolicy
   hasWarnings: boolean
   /**
@@ -370,7 +383,7 @@ export type LavaMoatEndoWritablePropertyPolicy = Record<
 /**
  * Options for _our_ `makeReadPowers()` function
  */
-export type MakeReadPowersOptions = WithRawReadPowers
+export type MakeReadPowersOptions = WithReadPowersXorBuilders
 
 /**
  * Options for `run()`
@@ -378,14 +391,14 @@ export type MakeReadPowersOptions = WithRawReadPowers
 
 export type RunOptions = ComposeOptions<
   [
-    WithRawReadPowers,
+    WithReadPowersXorBuilders,
     WithProdOnly,
     WithTrustRoot,
     WithScuttleGlobalThis,
     WithLog,
-    WithPolicy,
     WithPolicyPath,
     LoadPoliciesOptions,
+    WithPolicy,
   ]
 >
 
@@ -420,30 +433,22 @@ export type ToEndoPolicyOptionsWithoutPolicyOverride = ComposeOptions<
 >
 
 /**
- * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
+ * Options which may either {@link WithReadPowers} or {@link PowerBuilders} but
  * not both.
  */
-export type WithRawReadPowers = WithReadPowers | WithRawPowers
-
-/**
- * Options having both {@link WithReadPowers} and {@link WithTrustRoot}
- * properties.
- *
- * These properties always appear together in compartment map operations.
- */
-export type WithReadPowersAndTrust = ComposeOptions<
-  [WithReadPowers, WithTrustRoot]
+export type WithReadPowersXorBuilders = Simplify<
+  | (WithReadPowers & { [k in keyof PowerBuilders]?: never })
+  | (PowerBuilders & { [k in keyof WithReadPowers]?: never })
 >
 
 /**
- * Options having {@link WithReadPowersAndTrust} and
- * {@link WithLavaMoatEndoPolicy} properties.
+ * Options containing a `policy` prop
  *
- * These properties always appear together in compartment map execution.
+ * @template T The type of the resources in the policy
  */
-export type WithReadPowersAndTrustAndEndoPolicy = ComposeOptions<
-  [WithReadPowersAndTrust, WithLavaMoatEndoPolicy]
->
+export interface WithPolicy<T extends Resources = Resources> {
+  policy?: LavaMoatPolicy<T>
+}
 
 /**
  * Options for `loadPolicies()`
@@ -458,6 +463,10 @@ export type LoadPoliciesOptions = ComposeOptions<
   ]
 >
 
+/**
+ * A potential label within compartments of a
+ * {@link PackageCompartmentMapDescriptor}
+ */
 export type CanonicalName = LiteralUnion<
   typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
   string
@@ -477,8 +486,9 @@ export type {
   ResourcePolicy,
   Resources as ResourcePolicyRecord,
   Resources,
-  RootPolicy,
+  RootPolicy
 } from '@lavamoat/types'
+
 export type * from './errors.js'
 
 /**
@@ -519,7 +529,7 @@ export interface FsUtilInterface {
 
 /**
  * Options bucket containing an `fs` prop (for internal utilities; not for use
- * with {@link WithRawPowers})
+ * with {@link PowerBuilders})
  */
 export interface WithFs {
   fs?: FsUtilInterface
@@ -571,3 +581,5 @@ export type MergedLavaMoatPolicy = LavaMoatPolicy & {
 export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
   [MERGED_POLICY_FIELD]?: never
 }
+
+export type { Except, LiteralUnion, Simplify } from 'type-fest'
