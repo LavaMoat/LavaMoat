@@ -34,9 +34,9 @@ import { stripVTControlCharacters } from 'node:util'
 import { writePolicy } from './policy-util.js'
 
 /**
- * @import {LavaMoatPolicy} from '@lavamoat/types'
- * @import {LavaMoatScuttleOpts} from 'lavamoat-core'
- * @import {PackageJson} from 'type-fest'
+ * @import {LavaMoatPolicy} from "@lavamoat/types"
+ * @import {LavaMoatScuttleOpts} from "lavamoat-core"
+ * @import {PackageJson} from "type-fest"
  */
 
 /**
@@ -531,6 +531,13 @@ const main = async (args = hideBin(process.argv)) => {
               coerce: Boolean,
               group: BEHAVIOR_GROUP,
             },
+            'compact-overrides': {
+              describe:
+                'Remove redundant entries from existing policy override file & overwrite it',
+              type: 'boolean',
+              coerce: Boolean,
+              group: BEHAVIOR_GROUP,
+            },
           })
           .positional('entrypoint', {
             demandOption: true,
@@ -542,10 +549,11 @@ const main = async (args = hideBin(process.argv)) => {
       async ({
         entrypoint,
         policy: policyPath,
-        'policy-override': policyOverridePath,
+        'policy-override': policyOverridePathArg,
         'prod-only': prodOnly,
         'treat-warnings-as-errors': treatWarningsAsErrors,
         write: shouldWrite,
+        'compact-overrides': compactOverrides,
       }) => {
         const startTime = Date.now()
         const trustRoot = shouldTrustRoot(entrypoint)
@@ -555,11 +563,17 @@ const main = async (args = hideBin(process.argv)) => {
           )
         }
 
-        const { policy, hasWarnings } = await generatePolicy(entrypoint, {
-          policyPath,
+        const {
+          policy,
+          hasWarnings,
+          compactedPolicyOverride,
           policyOverridePath,
+        } = await generatePolicy(entrypoint, {
+          policyPath,
+          policyOverridePath: policyOverridePathArg,
           prodOnly,
           trustRoot,
+          compact: compactOverrides,
         })
 
         const duration = (Date.now() - startTime) / 1000
@@ -581,6 +595,21 @@ const main = async (args = hideBin(process.argv)) => {
           // console used here since the logger only uses stderr
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))
+        }
+
+        if (compactOverrides) {
+          if (compactedPolicyOverride && policyOverridePath) {
+            await writePolicy(policyOverridePath, compactedPolicyOverride, {
+              what: 'policy override',
+            })
+            log.info(
+              `${success} ${action('Wrote')} compacted policy override to ${hrPath(policyOverridePath)}`
+            )
+          } else {
+            log.warning(
+              `No policy override file to compact; skipping compaction`
+            )
+          }
         }
       }
     )
