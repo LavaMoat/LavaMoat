@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { ROOT_COMPARTMENT } from './constants.js'
 import { InvalidArgumentsError } from './error.js'
 import {
   action,
