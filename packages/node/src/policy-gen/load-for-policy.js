@@ -8,6 +8,7 @@
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
 import { utils as tofuUtils } from 'lavamoat-tofu'
+import { compactPolicyOverride } from 'lavamoat-core'
 import { nullImportHook as importHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
@@ -44,15 +45,13 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
  * } from '@lavamoat/types'
  * @import {PackageJson} from 'type-fest'
  * @import {
+ *   ConsumerMapNodeModulesOptions,
  *   LoadAndGeneratePolicyOptions,
- *   LoadCompartmentMapResult,
+ *   LoadAndGeneratePolicyResult,
  *   ModuleInspectionResult,
  *   StructuredViolationsResult
  * } from '../internal.js'
- * @import {
- *   FileUrlString,
- *   MergedLavaMoatPolicy
- * } from '../types.js'
+ * @import {FileUrlString} from '../types.js'
  */
 
 const { keys } = Object
@@ -69,7 +68,7 @@ const { keys } = Object
  *
  * @param {string | URL} entrypointPath
  * @param {LoadAndGeneratePolicyOptions} options
- * @returns {Promise<LoadCompartmentMapResult>}
+ * @returns {Promise<LoadAndGeneratePolicyResult>}
  */
 export const loadAndGeneratePolicy = async (
   entrypointPath,
@@ -79,12 +78,57 @@ export const loadAndGeneratePolicy = async (
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     log = defaultLog,
     prodOnly,
+    compact,
     ...options
   } = {}
 ) => {
   const startTime = Date.now()
 
   log.info(`${action('Crawling')} dependency graph…`)
+
+  /**
+   * For each canonical name, the set of dependency canonical names that the
+   * policy-gen-specific {@link packageDependenciesHook} _newly_ added on top of
+   * the statically-discovered dependency set (i.e. were _only_ there because
+   * `policyOverride` told us to include them).
+   *
+   * Used by {@link createPackageConnectionsHook} to filter out hook-seeded
+   * connections so `packagePoliciesMap` reflects only statically-discovered
+   * package dependencies.
+   *
+   * @type {Map<CanonicalName, Set<CanonicalName>>}
+   */
+  const seededPackagesByCanonicalName = new Map()
+
+  /**
+   * Forwarded subset of `mapNodeModules` options. When a `policyOverride` is
+   * provided we install a `packageDependenciesHook` that seeds the override's
+   * declared package dependencies into the dependency graph, and records what
+   * was newly added in {@link seededPackagesByCanonicalName}.
+   *
+   * @type {ConsumerMapNodeModulesOptions}
+   */
+  const mapNodeModulesOptions = policyOverride
+    ? {
+        packageDependenciesHook: ({ canonicalName, dependencies }) => {
+          const overridePackages =
+            policyOverride.resources[canonicalName]?.packages
+          if (overridePackages) {
+            for (const dep of keys(overridePackages)) {
+              if (!dependencies.has(dep)) {
+                const seeded =
+                  seededPackagesByCanonicalName.get(canonicalName) ??
+                  /** @type {Set<CanonicalName>} */ (new Set())
+                seeded.add(dep)
+                seededPackagesByCanonicalName.set(canonicalName, seeded)
+                dependencies.add(dep)
+              }
+            }
+          }
+          return { dependencies }
+        },
+      }
+    : {}
 
   const {
     packageJsonMap,
@@ -96,7 +140,7 @@ export const loadAndGeneratePolicy = async (
     prodOnly,
     log,
     trustRoot,
-    policyOverride,
+    mapNodeModulesOptions,
   })
 
   const duration = (Date.now() - startTime) / 1000
@@ -182,6 +226,7 @@ export const loadAndGeneratePolicy = async (
   const packageConnectionsHook = createPackageConnectionsHook({
     rootUsePolicy,
     packagePoliciesMap,
+    seededPackagesByCanonicalName,
   })
 
   const moduleSourceHook = createModuleSourceHook({
@@ -215,13 +260,23 @@ export const loadAndGeneratePolicy = async (
   })
   reporter.reportModuleInspectionProgressEnd(inspectedModules, modulesToInspect)
 
-  const policy = compilePolicy(
+  const unmergedPolicy = compilePolicy(
     globalsForPackage,
     builtinsForPackage,
     packagePoliciesMap,
-    policyOverride,
     rootUsePolicy
   )
+
+  /**
+   * When compaction is requested and an override was provided, compute the
+   * compacted override against the un-merged generated policy so it contains
+   * only what the generator missed.
+   */
+  const { policy: compactedPolicyOverride, compacted = false } = policyOverride
+    ? compactPolicyOverride(policyOverride, unmergedPolicy)
+    : { policy: undefined }
+
+  const policy = mergePolicies(unmergedPolicy, policyOverride)
 
   // #region emit warnings
   for (const warning of warnings) {
@@ -246,8 +301,19 @@ export const loadAndGeneratePolicy = async (
   if (violationsForPackage.size > 0) {
     reportSesViolations(violationsForPackage, { log })
   }
+
+  if (!compact && compacted) {
+    log.info(
+      `❕ Policy override contains redundant entries and may be compacted; try running again with --compact`
+    )
+  }
   // #endregion
-  return { policy, packageJsonMap, hasWarnings }
+  return {
+    policy,
+    packageJsonMap,
+    hasWarnings,
+    compactedPolicyOverride: compact ? compactedPolicyOverride : undefined,
+  }
 }
 
 /**
@@ -298,20 +364,21 @@ const applyInspectionResults = (
 }
 
 /**
- * Compiles a policy from the inspection results.
+ * Compiles an un-merged policy from the inspection results.
+ *
+ * The caller is responsible for merging the result with any policy override via
+ * {@link mergePolicies}.
  *
  * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
  * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
  * @param {Map<CanonicalName, PackagePolicy>} packagesForPackage
- * @param {LavaMoatPolicy} [policyOverride]
  * @param {CanonicalName | undefined} [rootUsePolicy]
- * @returns {MergedLavaMoatPolicy}
+ * @returns {LavaMoatPolicy}
  */
 const compilePolicy = (
   globalsForPackage,
   builtinsForPackage,
   packagesForPackage,
-  policyOverride,
   rootUsePolicy
 ) => {
   /** @type {LavaMoatPolicy} */
@@ -355,17 +422,30 @@ const compilePolicy = (
     }
   }
 
-  return mergePolicies(policy, policyOverride)
+  return policy
 }
 
 /**
+ * Connections passed to this hook by the compartment mapper include any
+ * dependencies injected by `packageDependenciesHook` in
+ * `makeNodeCompartmentMap` (which seeds
+ * `policyOverride.resources[name].packages` into the dependency set so the
+ * crawler visits them). To keep `packagePoliciesMap` semantically accurate —
+ * "packages discovered by static analysis" — we skip any connection that was
+ * _newly_ added by that hook (as recorded in
+ * {@link seededPackagesByCanonicalName}). Connections that were both statically
+ * discovered _and_ listed in the override are NOT in the seeded set, so they
+ * remain in the base policy and `compactPolicyOverride` can correctly identify
+ * the corresponding override entry as redundant.
+ *
  * @param {Object} params
  * @param {CanonicalName | undefined} params.rootUsePolicy
  * @param {Map<CanonicalName, PackagePolicy>} params.packagePoliciesMap
+ * @param {Map<CanonicalName, Set<CanonicalName>>} params.seededPackagesByCanonicalName
  * @returns {PackageConnectionsHook}
  */
 const createPackageConnectionsHook =
-  ({ rootUsePolicy, packagePoliciesMap }) =>
+  ({ rootUsePolicy, packagePoliciesMap, seededPackagesByCanonicalName }) =>
   ({ canonicalName: rawCanonicalName, connections }) => {
     if (!rootUsePolicy && rawCanonicalName === ROOT_COMPARTMENT) {
       return
@@ -374,11 +454,16 @@ const createPackageConnectionsHook =
       rawCanonicalName === ROOT_COMPARTMENT && rootUsePolicy
         ? rootUsePolicy
         : rawCanonicalName
+    const seededPackages = seededPackagesByCanonicalName.get(canonicalName)
     const packagePolicy = packagePoliciesMap.get(canonicalName) ?? {}
     for (const connection of connections) {
-      if (connection !== canonicalName) {
-        packagePolicy[connection] = true
+      if (connection === canonicalName) {
+        continue
       }
+      if (seededPackages?.has(connection)) {
+        continue
+      }
+      packagePolicy[connection] = true
     }
     if (keys(packagePolicy).length > 0) {
       packagePoliciesMap.set(canonicalName, packagePolicy)

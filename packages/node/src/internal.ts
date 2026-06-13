@@ -6,6 +6,7 @@
  */
 
 import type {
+  MapNodeModulesOptions,
   PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
@@ -27,7 +28,6 @@ import type {
   WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
-  WithPolicyOverrideOnly,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
@@ -49,6 +49,20 @@ import type {
 export type ContextTestFn = (context: object) => boolean
 
 /**
+ * Options bucket containing a `compact` prop
+ *
+ * @internal
+ */
+export interface WithCompact {
+  /**
+   * When `true`, compute a compacted policy override (see
+   * `compactPolicyOverride`) and return it as `compactedPolicyOverride` on the
+   * result. Has no effect when no `policyOverride` was provided.
+   */
+  compact?: boolean
+}
+
+/**
  * Options for `loadCompartmentMapForPolicy()`
  *
  * @internal
@@ -59,6 +73,7 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
     WithReadPowersAndTrust,
     WithPolicyOverride,
     WithProjectRoot,
+    WithCompact,
   ]
 >
 
@@ -170,14 +185,57 @@ export type ReportInvalidCanonicalNames = ComposeOptions<
 export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
 
 /**
- * Result of `loadCompartmentMap()`
+ * Result of `loadAndGeneratePolicy()`
  *
  * @internal
  */
-export interface LoadCompartmentMapResult {
+export interface LoadAndGeneratePolicyResult {
   policy: MergedLavaMoatPolicy
   packageJsonMap: Map<string, PackageJson>
   hasWarnings: boolean
+  /**
+   * Present only when `compact: true` was passed in options **and** a
+   * `policyOverride` was provided. Contains the policy override with all
+   * entries already covered by the generated policy removed.
+   */
+  compactedPolicyOverride?: LavaMoatPolicy
+}
+
+/**
+ * Subset of {@link MapNodeModulesOptions} that consumers of
+ * {@link makeNodeCompartmentMap} may pass through. The fields
+ * {@link makeNodeCompartmentMap} controls itself are excluded.
+ *
+ * Notably, this allows consumers to provide their own `packageDependenciesHook`
+ * — used by the policy-generation path to seed override-listed dependencies
+ * into the dependency graph.
+ *
+ * @internal
+ */
+export type ConsumerMapNodeModulesOptions = Omit<
+  MapNodeModulesOptions,
+  | 'conditions'
+  | 'dev'
+  | 'languageForExtension'
+  | 'policy'
+  | 'log'
+  | 'packageDataHook'
+  | 'unknownCanonicalNameHook'
+>
+
+/**
+ * Options bucket containing a `mapNodeModulesOptions` prop
+ *
+ * @internal
+ */
+export interface WithMapNodeModulesOptions {
+  /**
+   * Pass-through subset of {@link MapNodeModulesOptions} forwarded to
+   * `mapNodeModules`. Use this to inject hooks (e.g. `packageDependenciesHook`)
+   * without coupling {@link makeNodeCompartmentMap} to consumer-specific
+   * concerns.
+   */
+  mapNodeModulesOptions?: ConsumerMapNodeModulesOptions
 }
 
 /**
@@ -190,7 +248,7 @@ export type MakeNodeCompartmentMapOptions = ComposeOptions<
     WithLog,
     WithReadPowersAndTrustAndEndoPolicy,
     WithProdOnly,
-    WithPolicyOverrideOnly,
+    WithMapNodeModulesOptions,
   ]
 >
 
