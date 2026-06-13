@@ -9,8 +9,8 @@ import { builtinModules } from 'node:module'
 import path from 'node:path'
 
 /**
- * @import {Language} from '@endo/compartment-mapper'
- * @import {LiteralUnion} from 'type-fest'
+ * @import {Language} from "@endo/compartment-mapper"
+ * @import {LiteralUnion} from "type-fest"
  */
 
 const { freeze } = Object
@@ -195,11 +195,6 @@ export const SES_VIOLATION_TYPES = freeze(
     StrictModeViolation: 'strict-mode violation',
   })
 )
-
-/**
- * Symbol to brand a policy as a "merged" policy
- */
-export const MERGED_POLICY_FIELD = Symbol.for('@lavamoat/core/mergedPolicy')
 
 /**
  * Source type for ESM sources

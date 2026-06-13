@@ -4,11 +4,7 @@ import type { LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import type { ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
-import type {
-  ComposeOptions,
-  WithPolicyOverridePath,
-  WithPolicyPath,
-} from '../src/types.js'
+import type { ComposeOptions } from '../src/types.js'
 
 export interface RunnerWorkerData {
   entryPath: string
@@ -127,9 +123,13 @@ export type FixtureOptions = ComposeOptions<
        * fixture dir.
        */
       entrypointFilename?: string
+
+      /** Path to the policy file */
+      policyPath?: string | URL
+
+      /** Path to the policy override file */
+      policyOverridePath?: string | URL
     },
-    WithPolicyPath,
-    WithPolicyOverridePath,
   ]
 >
 /**

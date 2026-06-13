@@ -12,20 +12,24 @@
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
-import * as constants from './constants.js'
 import {
   DEFAULT_POLICY_DIR,
   DEFAULT_POLICY_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
+  DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from './constants.js'
-import { InvalidPolicyError, NoPolicyError, WritePolicyError } from './error.js'
+import {
+  InvalidPolicyError,
+  NoPolicyError,
+  TrustMismatchError,
+  WritePolicyError,
+} from './error.js'
 import { hrCode, hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import {
   hasValue,
   isObjectyObject,
-  isPathLike,
   isString,
   toAbsolutePath,
   toPath,
@@ -41,11 +45,12 @@ import {
  *   ReadPolicyOverrideOptions
  * } from "./internal.js"
  * @import {
- *   LoadPoliciesOptions,
- *   MergedLavaMoatPolicy,
+ *   Merged,
  *   WritableFsInterface
  * } from "./types.js"
  */
+
+const { freeze } = Object
 
 /**
  * Reads a `policy.json` from disk
@@ -145,162 +150,6 @@ export const maybeReadPolicyOverride = async (
       { cause: err }
     )
   }
-}
-
-/**
- * Reads a policy and policy override from object or disk and merges them into a
- * single policy.
- *
- * If `policyOrPolicyPath` is a `LavaMoatPolicy`, providing `options.policyPath`
- * is a hint for guessing the policy override path if neither
- * `options.policyOverride` nor `options.policyOverridePath` are provided.
- *
- * @privateRemarks
- * TODO: The way this fails is not user-friendly; it will just throw a
- * `InvalidPolicyError` saying that the policy is invalid. **We should use
- * proper schema validation** to provide a more helpful error message.
- * @param {string | URL | LavaMoatPolicy} [policyOrPolicyPath] Path to
- *   `policy.json` or the policy itself. Defaults to
- *   `./lavamoat/node/policy.json` relative to
- *   {@link LoadPoliciesOptions.projectRoot}
- * @param {LoadPoliciesOptions} [options] Options
- * @returns {Promise<MergedLavaMoatPolicy>}
- * @throws If a policy is invalid
- * @public
- */
-export const loadPolicies = async (
-  policyOrPolicyPath,
-  {
-    readFile = nodeFs.promises.readFile,
-    projectRoot = process.cwd(),
-    ...options
-  } = {}
-) => {
-  policyOrPolicyPath ??=
-    options.policyPath ?? makeDefaultPolicyPath(projectRoot)
-
-  /**
-   * Path to policy
-   *
-   * `undefined` if {@link policyOrPolicyPath} is a policy. Mutually exclusive
-   * with {@link allgedPolicy}
-   *
-   * @type {string | undefined}
-   */
-  let policyPath
-  /**
-   * Path to policy override
-   *
-   * `undefined` if {@link options.policyOverride} is a policy. Mutually
-   * exclusive with {@link allegedPolicyOverride}
-   *
-   * @type {string | undefined}
-   */
-  let policyOverridePath
-
-  /**
-   * Policy prior to validation
-   *
-   * `undefined` if {@link policyOrPolicyPath} is a pathlike value. Truthy values
-   * mutually exclusive with {@link policyPath}
-   *
-   * @type {unknown | undefined}
-   */
-  let allegedPolicy
-
-  /**
-   * Policy override prior to validation
-   *
-   * `undefined` if {@link options.policyOverridePath} is a pathlike value, or no
-   * such file exists on disk. Truthy values mutually exclusive with
-   * {@link policyOverridePath}
-   *
-   * @type {unknown | undefined}
-   */
-  let allegedPolicyOverride
-
-  // either / or
-  if (isPathLike(policyOrPolicyPath)) {
-    policyPath = toPath(policyOrPolicyPath)
-  } else {
-    allegedPolicy = policyOrPolicyPath
-  }
-
-  // either / or / or nothing at all
-  if (hasValue(options, 'policyOverride')) {
-    allegedPolicyOverride = options.policyOverride
-  } else if (hasValue(options, 'policyOverridePath')) {
-    policyOverridePath = toPath(options.policyOverridePath)
-  } else {
-    let policyPathToUse = policyPath
-    // use the hint if it's provided
-    if (!policyPathToUse && hasValue(options, 'policyPath')) {
-      policyPathToUse = toPath(options.policyPath)
-    }
-    // if the user specified a policy path, resolve as its sibling;
-    // otherwise resolve from `projectRoot` since that's about all we can do.
-    policyOverridePath = makeDefaultPolicyOverridePath({
-      policyPath: policyPathToUse,
-      projectRoot,
-    })
-  }
-
-  /**
-   * An tuple of `Promise`s; each performs either a file read & a validation
-   * _or_ just a validation.
-   *
-   * @type {[
-   *   policy: Promise<LavaMoatPolicy> | LavaMoatPolicy,
-   *   policyOverride:
-   *     | Promise<LavaMoatPolicy | undefined>
-   *     | LavaMoatPolicy
-   *     | undefined,
-   * ]}
-   */
-  const jobs = /** @type {any} */ ([])
-  if (policyPath) {
-    jobs.push(readPolicy(policyPath, { readFile }))
-  } else {
-    jobs.push(
-      (() => {
-        assertPolicy(
-          allegedPolicy,
-          `Invalid LavaMoat policy; does not match expected schema`
-        )
-
-        return allegedPolicy
-      })()
-    )
-  }
-  if (policyOverridePath) {
-    jobs.push(
-      maybeReadPolicyOverride(policyOverridePath, {
-        readFile,
-      })
-    )
-  } else {
-    jobs.push(
-      (() => {
-        assertPolicy(
-          allegedPolicyOverride,
-          `Invalid LavaMoat policy overrides; does not match expected schema`
-        )
-        return allegedPolicyOverride
-      })()
-    )
-  }
-
-  /**
-   * This type is only here for documentation purposes and is not needed
-   *
-   * @type {[
-   *   policy: LavaMoatPolicy,
-   *   policyOverride: LavaMoatPolicy | undefined,
-   * ]}
-   */
-  const policies = await Promise.all(jobs)
-
-  return mergePolicies(...policies)
 }
 
 /**
@@ -422,12 +271,11 @@ export const isTrusted = (policy) => {
  *
  * @param {LavaMoatPolicy} policyA A policy
  * @param {LavaMoatPolicy} [policyB] Usually an override policy
- * @returns {MergedLavaMoatPolicy} Merged policy
+ * @returns {LavaMoatPolicy} Merged policy
  * @public
  */
 export const mergePolicies = (policyA, policyB) => ({
   ...mergePolicy(policyA, policyB),
-  [constants.MERGED_POLICY_FIELD]: true,
 })
 
 /**
@@ -512,13 +360,69 @@ export const makeDefaultPolicyPath = (projectRoot = process.cwd()) => {
 }
 
 /**
- * Type guard for a merged LavaMoat policy.
+ * Asserts the value of `trustRoot` matches that returned by {@link isTrusted}
+ * when run against `policy`
  *
- * @param {unknown} policy
- * @returns {policy is MergedLavaMoatPolicy} Whether the policy is a merged
- *   LavaMoat policy
+ * @remarks
+ * This only makes sense prior to execution.
+ * @param {Merged} mergedPolicy LavaMoat policy
+ * @param {string | URL} entrypoint Path to entry point (for error message)
+ * @param {boolean} trustRoot Whether we plan to trust the root environment
  */
-export const isMergedPolicy = (policy) =>
-  isPolicy(policy) &&
-  constants.MERGED_POLICY_FIELD in policy &&
-  policy[constants.MERGED_POLICY_FIELD] === true
+export const assertTrustRootMatchesPolicy = (
+  mergedPolicy,
+  entrypoint,
+  trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT
+) => {
+  const policy = unwrapMerged(mergedPolicy)
+  if (trustRoot && !isTrusted(policy)) {
+    throw new TrustMismatchError(
+      `Attempted to execute entrypoint ${hrPath(entrypoint)} as trusted, but policy expects an untrusted root. Either call ${hrCode('run()')} with option ${hrCode('{trustRoot: true}')} or provide a policy which trusts the root (without ${hrCode('root.usePolicy')}). Aborting`
+    )
+  } else if (!trustRoot && isTrusted(policy)) {
+    throw new TrustMismatchError(
+      `Attempted to execute entrypoint ${hrPath(entrypoint)} as untrusted, but policy expects a trusted root. Either call ${hrCode('run()')} with option ${hrCode('{trustRoot: false}')} or provide a policy which does not trust the root. Aborting`
+    )
+  }
+}
+
+/**
+ * Extracts the `LavaMoatPolicy` from a {@link Merged} wrapper.
+ *
+ * @template {LavaMoatPolicy} [P=LavaMoatPolicy] The policy type. Default is
+ *   `LavaMoatPolicy`
+ * @param {Merged<P>} merged A merged policy wrapper
+ * @returns {P}
+ * @public
+ */
+export const unwrapMerged = (merged) => merged.policy
+
+/**
+ * Wraps a merged `LavaMoatPolicy` in the new {@link Merged} container.
+ *
+ * The wrapped form survives serialization (unlike the symbol-branded
+ * `MergedLavaMoatPolicy`). Access the underlying policy via `.policy` or
+ * {@link unwrapMerged}.
+ *
+ * @template {LavaMoatPolicy} [P=LavaMoatPolicy] The policy type. Default is
+ *   `LavaMoatPolicy`
+ * @param {P} policy A merged policy (typically produced by `mergePolicies`)
+ * @returns {Merged<P>}
+ * @public
+ */
+
+export const wrapMerged = (policy) => freeze({ policy, merged: true })
+
+/**
+ * Returns `true` if `value` is a {@link Merged} wrapper.
+ *
+ * @param {unknown} value
+ * @returns {value is Merged}
+ * @public
+ */
+export const isMergedWrapper = (value) =>
+  isObjectyObject(value) &&
+  'merged' in value &&
+  value.merged === true &&
+  'policy' in value &&
+  isPolicy(value.policy)

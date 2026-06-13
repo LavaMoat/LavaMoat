@@ -33,8 +33,7 @@ import { findCanonicalNameKeypath, noop, pluralize } from './util.js'
 import { fileURLToPath } from 'node:url'
 
 /**
- * @import {CanonicalName} from '@endo/compartment-mapper'
- * @import {WriteStream} from 'node:tty'
+ * @import {WriteStream} from "node:tty"
  * @import {
  *   ModuleInspectionProgressReporter,
  *   ReportInvalidCanonicalNames,
@@ -43,8 +42,9 @@ import { fileURLToPath } from 'node:url'
  *   ReportSesViolationsOptions,
  *   StructuredViolation,
  *   StructuredViolationsResult
- * } from './internal.js'
- * @import {Loggerr} from './log.js'
+ * } from "./internal.js"
+ * @import {Loggerr} from "./log.js"
+ * @import {CanonicalName} from "./types.js"
  */
 
 /**
