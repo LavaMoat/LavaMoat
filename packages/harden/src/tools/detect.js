@@ -1,5 +1,6 @@
 import { readFile, access } from 'node:fs/promises'
 import { join } from 'node:path'
+import { parseDocument } from 'yaml'
 
 /**
  * @import {Facts} from "./types.js"
@@ -28,6 +29,17 @@ export async function collectFacts(cwd) {
     }
   }
 
+  const readYarnNodeLinker = async () => {
+    try {
+      const content = await readFile(join(cwd, '.yarnrc.yml'), 'utf8')
+      const doc = parseDocument(content)
+      const nodeLinker = doc.get('nodeLinker')
+      return typeof nodeLinker === 'string' ? nodeLinker : null
+    } catch {
+      return null
+    }
+  }
+
   const packageJson = await readJson('package.json')
   const packageLock = await readJson('package-lock.json')
 
@@ -41,6 +53,7 @@ export async function collectFacts(cwd) {
     hasYarnLock: await exists('yarn.lock'),
     hasYarnrc: await exists('.yarnrc'),
     hasYarnrcYml: await exists('.yarnrc.yml'),
+    yarnNodeLinker: await readYarnNodeLinker(),
     hasYarnState: await exists('.yarn/install-state.gz'),
     hasPnpmLock: await exists('pnpm-lock.yaml'),
     hasPnpmWorkspace: await exists('pnpm-workspace.yaml'),

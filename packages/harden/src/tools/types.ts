@@ -18,6 +18,7 @@ export interface Facts {
   hasYarnLock: boolean
   hasYarnrc: boolean
   hasYarnrcYml: boolean
+  yarnNodeLinker: string | null
   hasYarnState: boolean
   hasPnpmLock: boolean
   hasPnpmWorkspace: boolean
@@ -33,7 +34,7 @@ export type ChangeTarget = ConfigTarget | 'package.json' | '/lavamoat'
 
 export interface Change {
   target: ChangeTarget
-  key: string
+  key: string | string[]
   value: SerializableValue
   comment?: string
   ifNotExist?: boolean
@@ -45,19 +46,46 @@ export interface AppliedChange extends ChangeResult {
   file: string
 }
 
-export interface Opinion {
+/**
+ * An opinion that can be applied directly (has changes and/or execute, no
+ * alternatives).
+ */
+export interface ApplicableOpinion {
   description: string
-  level?: 'paranoid' | 'moderate' | 'baseline'
+  level?: Level
   changes?: Change[]
   execute?: (
     changes: Change[],
     facts: Facts,
-    askToHarden: (opinion: Opinion, facts: Facts) => Promise<boolean | null>
+    decisions: Decisions
   ) => Promise<Change[] | undefined | void>
+  alternatives?: never
 }
+
+/**
+ * An opinion that presents a choice among alternatives; may not have changes or
+ * execute.
+ */
+export interface OpinionWithAlternatives {
+  description: string
+  level?: Level
+  alternatives: ApplicableOpinion[]
+  changes?: never
+  execute?: never
+}
+
+export type Opinion = ApplicableOpinion | OpinionWithAlternatives
 
 export interface Decisions {
   shouldApplyOpinion: (opinion: Opinion, facts: Facts) => Promise<boolean>
+  /**
+   * For opinions that offer alternatives, choose which one to apply (or null
+   * for none). When absent, opinions with alternatives are skipped.
+   */
+  chooseOpinion?: (
+    opinion: OpinionWithAlternatives,
+    facts: Facts
+  ) => Promise<ApplicableOpinion | null>
   packageManager?: () => Promise<string | null>
   askToHarden?: (opinion: Opinion, facts: Facts) => Promise<boolean | null>
 }

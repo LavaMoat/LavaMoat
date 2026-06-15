@@ -1,32 +1,68 @@
 /** @import {Opinion} from "../tools/types.js" */
+import { buildAllowlistChanges } from './build-allowlist.js'
 
 /** @type {readonly Opinion[]} */
 export const opinions = Object.freeze([
   {
     description:
-      'Disable lifecycle scripts by default to prevent malicious code execution on install.',
-    level: 'baseline', // it's conditional on askToHarden, so will end up being applied in paranoid or asked in interactive mode
-    execute: async (changes, facts, askToHarden) => {
-      const shouldIgnoreAll = await askToHarden(
-        {
-          description:
-            'Disable all lifecycle scripts always (instead of using allowScripts)',
+      'Enforce minimum npm version via devEngines in package.json to ensure security features are available.',
+    level: 'baseline',
+    changes: [
+      {
+        target: 'package.json',
+        key: 'devEngines',
+        value: {
+          packageManager: {
+            name: 'npm',
+            // TODO: set to 12 ASAP
+            version: '>=11.16.0',
+            onFail: 'error',
+          },
         },
-        facts
-      )
-      if (shouldIgnoreAll) {
-        return [
+      },
+    ],
+  },
+
+  {
+    description: 'Choose whether to disable all install scripts or allow some',
+    level: 'baseline',
+    alternatives: [
+      {
+        description:
+          'Use the allowScripts field in package.json. Default to an empty allowScripts list.',
+        level: 'baseline',
+        changes: [
+          {
+            ifNotExist: true,
+            target: 'package.json',
+            key: 'allowScripts',
+            value: {},
+            comment: 'Empty default.',
+          },
+        ],
+        execute: async (changes, facts, decisions) => {
+          const allowlistChanges = await buildAllowlistChanges(facts, decisions)
+          if (allowlistChanges.length > 0) {
+            return allowlistChanges
+          } else {
+            return changes
+          }
+        },
+      },
+      {
+        description:
+          'Disable lifecycle scripts permanently to prevent malicious code execution on install, with no exceptions.',
+        level: 'paranoid',
+        changes: [
           {
             target: '.npmrc',
             key: 'ignore-scripts',
             value: 'true',
             comment: 'Ignore all lifecycle scripts always.',
           },
-        ]
-      } else {
-        return []
-      }
-    },
+        ],
+      },
+    ],
   },
 
   {
@@ -78,8 +114,10 @@ export const opinions = Object.freeze([
         comment: "Don't install packages from git urls.",
       },
     ],
-    execute: async (changes, facts, askToHarden) => {
+    execute: async (changes, facts, decisions) => {
       if (facts.directGitDeps.length > 0) {
+        const askToHarden =
+          decisions.askToHarden ?? ((_opinion, _facts) => Promise.resolve(null))
         const shouldBlockAnyway = await askToHarden(
           {
             description: `Block git dependencies entirely instead of allowing 'root' despite direct git dependencies being present`,
@@ -132,39 +170,6 @@ export const opinions = Object.freeze([
         value: true,
         comment:
           'Pin allowed scripts to exact versions of dependencies to prevent unexpected script execution.',
-      },
-    ],
-  },
-  {
-    description: 'Default to an empty allowScripts if one is not set.',
-    level: 'moderate',
-    changes: [
-      {
-        ifNotExist: true,
-        target: 'package.json',
-        key: 'allowScripts',
-        value: {},
-        comment: 'Empty default.',
-      },
-    ],
-  },
-
-  {
-    description:
-      'Enforce minimum npm version via devEngines in package.json to ensure security features are available.',
-    level: 'baseline',
-    changes: [
-      {
-        target: 'package.json',
-        key: 'devEngines',
-        value: {
-          packageManager: {
-            name: 'npm',
-            // TODO: set to 12 ASAP
-            version: '>=11.16.0',
-            onFail: 'error',
-          },
-        },
       },
     ],
   },

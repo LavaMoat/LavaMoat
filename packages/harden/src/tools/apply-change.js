@@ -5,11 +5,12 @@ import { applyLegacyYarnrc } from './legacyYarnrc.js'
 import { applyLavamoatFolder } from './lavamoat-folder.js'
 /**
  * @import {
+ *   ApplicableOpinion,
  *   AppliedChange,
  *   Change,
  *   ChangeTarget,
- *   Facts,
- *   Opinion
+ *   Decisions,
+ *   Facts
  * } from "./types.js"
  */
 
@@ -47,17 +48,17 @@ async function applyChange(cwd, change) {
  * execute function if present.
  *
  * @param {string} cwd
- * @param {Opinion} opinion
+ * @param {ApplicableOpinion} opinion
  * @param {Facts} facts
- * @param {(opinion: Opinion, facts: Facts) => Promise<boolean | null>} askToHarden
+ * @param {Decisions} decisions
  * @returns {Promise<AppliedChange[]>}
  */
-export async function applyOpinion(cwd, opinion, facts, askToHarden) {
+export async function applyOpinion(cwd, opinion, facts, decisions) {
   // make a copy of declared changes
   let changes = opinion.changes ? structuredClone(opinion.changes) : []
 
   if (opinion.execute) {
-    const modified = await opinion.execute(changes, facts, askToHarden)
+    const modified = await opinion.execute(changes, facts, decisions)
     if (modified !== undefined) {
       changes = modified
     }

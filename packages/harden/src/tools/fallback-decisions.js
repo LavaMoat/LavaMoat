@@ -1,7 +1,9 @@
 /**
  * @import {
+ *   ApplicableOpinion,
  *   Decisions,
- *   Level
+ *   Level,
+ *   OpinionWithAlternatives
  * } from "./types.js"
  */
 
@@ -19,6 +21,35 @@ function levelIncludes(selected, opinionLevel) {
 }
 
 /**
+ * Default non-interactive chooseOpinion:
+ *
+ * - If the opinion's own level is above the selected level, return null.
+ * - Otherwise pick the alternative with the highest level that does not exceed
+ *   the selected level. Ties are broken by order (last wins).
+ *
+ * @param {Level} selected
+ * @param {OpinionWithAlternatives} opinion
+ * @returns {ApplicableOpinion | null}
+ */
+function defaultChooseOpinion(selected, opinion) {
+  if (!levelIncludes(selected, opinion.level)) {
+    return null
+  }
+  let best = /** @type {ApplicableOpinion | null} */ (null)
+  let bestRank = -1
+  for (const alt of opinion.alternatives) {
+    if (levelIncludes(selected, alt.level)) {
+      const rank = alt.level ? LEVEL_ORDER.indexOf(alt.level) : 0
+      if (rank >= bestRank) {
+        bestRank = rank
+        best = alt
+      }
+    }
+  }
+  return best
+}
+
+/**
  * Creates a fallback decisions object that filters opinions by level.
  *
  * @param {Level} level
@@ -28,6 +59,9 @@ export function createFallbackDecisions(level) {
   return {
     async shouldApplyOpinion(opinion, _facts) {
       return levelIncludes(level, opinion.level)
+    },
+    async chooseOpinion(opinion, _facts) {
+      return defaultChooseOpinion(level, opinion)
     },
     askToHarden:
       level === 'paranoid'

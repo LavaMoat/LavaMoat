@@ -1,4 +1,5 @@
 import { applyLatestVersion } from '../tools/versions.js'
+import { buildAllowlistChanges } from './build-allowlist.js'
 /** @import {Opinion} from "../tools/types.js" */
 
 /** @type {readonly Opinion[]} */
@@ -57,6 +58,16 @@ export const opinions = Object.freeze([
         comment: 'Disable exotic subdeps in older pnpm versions.',
       },
     ],
+  },
+
+  {
+    description:
+      'Allow running lifecycle scripts only for explicitly allowlisted packages, and ask the user to approve the existing ones if any.',
+    level: 'baseline',
+    execute: async (changes, facts, decisions) => {
+      const allowlistChanges = await buildAllowlistChanges(facts, decisions)
+      return [...allowlistChanges]
+    },
   },
 
   {

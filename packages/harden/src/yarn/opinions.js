@@ -1,5 +1,7 @@
 /** @import {Opinion} from "../tools/types.js" */
 import { applyLatestVersion } from '../tools/versions.js'
+import { buildAllowlistChanges } from './yarn-build-allowlist.js'
+import { buildAllowlistChanges as buildLmAllowlistChanges } from './lm-build-allowlist.js'
 
 /** @type {readonly Opinion[]} */
 export const opinions = Object.freeze([
@@ -13,6 +15,80 @@ export const opinions = Object.freeze([
         key: 'enableScripts',
         value: false,
         comment: "Don't run lifecycle scripts by default.",
+      },
+    ],
+  },
+
+  {
+    description:
+      'Enforce minimum yarn version via packageManager field in package.json.',
+    level: 'baseline',
+    changes: [
+      {
+        target: 'package.json',
+        key: 'packageManager',
+        value: 'yarn@4.15.0',
+        ifNotExist: true,
+      },
+    ],
+    execute: async (changes, facts) => {
+      try {
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
+        const response = await fetch(`https://repo.yarnpkg.com/tags`)
+
+        const tags = /** @type {{ latest: { stable: string } }} */ (
+          await response.json()
+        )
+        return applyLatestVersion(changes, facts, tags.latest.stable)
+      } catch (err) {
+        console.error(`    Failed to fetch latest yarn version: ${err}`)
+      }
+    },
+  },
+
+  {
+    description: `Choose whether to use yarn's built-in handling of dependenciesMeta to allow specific lifecycle scripts without the ability to control versions and duplicates of the same name, or to use @lavamoat/allow-scripts to manage script permissions.`,
+    level: 'baseline',
+    alternatives: [
+      {
+        description:
+          'Use dependenciesMeta in package.json. This is simpler but less flexible and may cause issues with duplicates and version mismatches.',
+        level: 'baseline',
+        changes: [
+          {
+            target: 'package.json',
+            key: 'dependenciesMeta',
+            value: {},
+            comment:
+              'List of packages with lifecycle scripts that are allowed to run.',
+          },
+        ],
+        execute: async (changes, facts, decisions) => {
+          const allowlistChanges = await buildAllowlistChanges(facts, decisions)
+          if (allowlistChanges.length > 0) {
+            return allowlistChanges
+          } else {
+            return changes
+          }
+        },
+      },
+      {
+        description:
+          'Use @lavamoat/allow-scripts to manage script permissions. This is more complex but allows precise control over which scripts are allowed to run.',
+        level: 'paranoid',
+        changes: [
+          {
+            target: 'package.json',
+            key: 'allowScripts',
+            value: {},
+            comment:
+              'List of lifecycle scripts that are allowed to run, managed by @lavamoat/allow-scripts.',
+          },
+        ],
+        execute: async (changes, facts, decisions) => {
+          const result = await buildLmAllowlistChanges(facts, decisions)
+          return result.length > 0 ? result : changes
+        },
       },
     ],
   },
@@ -51,33 +127,6 @@ export const opinions = Object.freeze([
           `Found git dependencies in package.json. Edit approvedGitRepositories in .yarnrc.yml accordingly.`
         )
         changes[0].value = facts.directGitDeps
-      }
-    },
-  },
-
-  {
-    description:
-      'Enforce minimum yarn version via packageManager field in package.json.',
-    level: 'moderate',
-    changes: [
-      {
-        target: 'package.json',
-        key: 'packageManager',
-        value: 'yarn@4.15.0',
-        ifNotExist: true,
-      },
-    ],
-    execute: async (changes, facts) => {
-      try {
-        // eslint-disable-next-line n/no-unsupported-features/node-builtins
-        const response = await fetch(`https://repo.yarnpkg.com/tags`)
-
-        const tags = /** @type {{ latest: { stable: string } }} */ (
-          await response.json()
-        )
-        return applyLatestVersion(changes, facts, tags.latest.stable)
-      } catch (err) {
-        console.error(`    Failed to fetch latest yarn version: ${err}`)
       }
     },
   },

@@ -3,10 +3,12 @@ import { warnPmMismatch } from './tools/print.js'
 import { reasonableDefaults as npmDefaults } from './npm/index.js'
 import { reasonableDefaults as yarnDefaults } from './yarn/index.js'
 import { reasonableDefaults as pnpmDefaults } from './pnpm/index.js'
-/** @import {
-  Decisions,
-  HardenResult
-} from "./tools/types.js" */
+/**
+ * @import {
+ *   Decisions,
+ *   HardenResult
+ * } from "./tools/types.js"
+ */
 
 /**
  * Main API: apply hardening defaults to the project at cwd.
@@ -61,6 +63,15 @@ export async function hardenDefaults(options) {
     default:
       throw new Error(`Unsupported package manager: ${pmName}`)
   }
+
+  // sort results by file and key for consistent output
+  result.sort((a, b) => {
+    if (a.file < b.file) return -1
+    if (a.file > b.file) return 1
+    if (a.key < b.key) return -1
+    if (a.key > b.key) return 1
+    return 0
+  })
 
   const summary =
     result.length === 0

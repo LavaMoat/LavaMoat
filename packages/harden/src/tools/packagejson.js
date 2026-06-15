@@ -9,8 +9,9 @@ import { join } from 'node:path'
  */
 
 /**
- * Applies entries to package.json using deep path keys (e.g.
- * "devEngines.packageManager.name").
+ * Applies entries to package.json using deep path keys (e.g. ['devEngines',
+ * 'packageManager', 'name']). String keys are treated as literal top-level
+ * keys.
  *
  * @param {string} cwd
  * @param {PackageJsonEntry[]} entries
@@ -30,7 +31,7 @@ export async function applyPackageJson(cwd, entries) {
   const changed = []
 
   for (const entry of entries) {
-    const parts = entry.key.split('.')
+    const parts = Array.isArray(entry.key) ? entry.key : [entry.key]
     let target = pkg
     for (let i = 0; i < parts.length - 1; i++) {
       if (
