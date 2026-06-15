@@ -11,8 +11,60 @@ const execFile = promisify(child_process.execFile)
 
 /**
  * @typedef {Object} NpmApproveOutput
- * @property {{ changes: { key: string }[] }[]} allowScripts
+ * @property {{ name: string; changes: { key: string }[] }[]} allowScripts
  */
+
+/**
+ * Parses stdout from `npm approve-scripts --json`.
+ *
+ * @param {string} stdout
+ * @returns {string[]}
+ */
+function parseAllowScripts(stdout) {
+  try {
+    /** @type {NpmApproveOutput} */
+    const parsed = JSON.parse(stdout)
+    if (
+      parsed.allowScripts &&
+      Array.isArray(parsed.allowScripts) &&
+      parsed.allowScripts.length > 0
+    ) {
+      return parsed.allowScripts.map((entry) => entry.changes[0].key)
+    }
+  } catch {
+    // stdout can be plain text when nothing is found
+  }
+  return []
+}
+
+/**
+ * Discover packages with pending lifecycle scripts via npm approve-scripts.
+ *
+ * @param {string} cwd
+ * @returns {Promise<string[]>}
+ */
+async function discoverPendingScripts(cwd) {
+  try {
+    const { stdout } = await execFile(
+      'npm',
+      [
+        'approve-scripts',
+        '--ignore-scripts=false',
+        '--allow-scripts-pending',
+        '--json',
+      ],
+      { cwd }
+    )
+    return parseAllowScripts(stdout)
+  } catch (err) {
+    const stdout = /** @type {{ stdout?: string } | undefined} */ (err)?.stdout
+    if (stdout) {
+      return parseAllowScripts(stdout)
+    }
+    console.warn(`Failed to execute npm approve-scripts:`, err)
+  }
+  return []
+}
 
 /**
  * Build the allowlist for approved lifecycle scripts.
@@ -35,59 +87,22 @@ export async function buildAllowlistChanges(facts, decisions) {
     console.log(
       `No install scripts were approved. You can allow specific ones using 'npm approve-scripts'.`
     )
-    return []
   }
 
   try {
-    const { stdout } = await execFile(
-      'npm',
-      [
-        'approve-scripts',
-        '--ignore-scripts=false',
-        '--allow-scripts-pin',
-        '--all',
-        '--json',
-      ],
-      {
-        cwd: facts.cwd,
-      }
-    )
-
-    let nothingFound = true
-    /** @type {string[]} */
-    let approvedScripts = []
-    // if stdout parses as json and contains a field "allowScripts" with a non-empty array, it worked. Otherwise, assume no scripts were found.
-    // https://github.com/npm/cli/issues/9529
-    try {
-      /** @type {NpmApproveOutput} */
-      const parsed = JSON.parse(stdout)
-      if (
-        parsed.allowScripts &&
-        Array.isArray(parsed.allowScripts) &&
-        parsed.allowScripts.length > 0
-      ) {
-        nothingFound = false
-        approvedScripts = parsed.allowScripts.flatMap((s) =>
-          s.changes.map((c) => c.key)
-        )
-      }
-    } catch {
-      // ignore parse errors and assume nothing found
-    }
-    if (nothingFound) {
+    const approvedScripts = await discoverPendingScripts(facts.cwd)
+    if (approvedScripts.length === 0) {
       return []
     }
 
     console.log(
       `Approved lifecycle scripts for direct dependencies: [${approvedScripts}]. You can review and adjust them later in package.json.`
     )
-    return [
-      {
-        target: 'package.json',
-        key: 'allowScripts',
-        value: Object.fromEntries(approvedScripts.map((s) => [s, true])),
-      },
-    ]
+    return approvedScripts.map((scriptName) => ({
+      target: 'package.json',
+      key: ['allowScripts', scriptName],
+      value: !denyAll,
+    }))
   } catch (err) {
     console.warn(`Failed to execute npm approve-scripts:`, err)
   }

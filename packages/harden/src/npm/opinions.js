@@ -15,7 +15,7 @@ export const opinions = Object.freeze([
           packageManager: {
             name: 'npm',
             // TODO: set to 12 ASAP
-            version: '>=11.16.0',
+            version: '>=11.17.0',
             onFail: 'error',
           },
         },

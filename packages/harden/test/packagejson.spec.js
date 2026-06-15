@@ -90,3 +90,42 @@ test('applyPackageJson preserves existing devDependencies when adding another it
     },
   ])
 })
+
+test('applyPackageJson preserves existing allowScripts when adding another item', async (t) => {
+  const cwd = await mkdtemp(join(tmpdir(), 'harden-pkgjson-allow-scripts-'))
+  const filePath = join(cwd, 'package.json')
+  await writeFile(
+    filePath,
+    JSON.stringify(
+      {
+        name: 'fixture',
+        allowScripts: {
+          existing: true,
+        },
+      },
+      null,
+      2
+    ) + '\n'
+  )
+
+  const changed = await applyPackageJson(cwd, [
+    {
+      target: 'package.json',
+      key: ['allowScripts', '@lavamoat/preinstall-always-fail@3.0.0'],
+      value: true,
+    },
+  ])
+
+  const pkg = JSON.parse(await readFile(filePath, 'utf8'))
+  t.deepEqual(pkg.allowScripts, {
+    existing: true,
+    '@lavamoat/preinstall-always-fail@3.0.0': true,
+  })
+  t.deepEqual(changed, [
+    {
+      file: 'package.json',
+      key: ['allowScripts', '@lavamoat/preinstall-always-fail@3.0.0'],
+      value: true,
+    },
+  ])
+})
