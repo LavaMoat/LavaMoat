@@ -1,25 +1,27 @@
 import { collectFacts, detectPackageManager, isYarnV1 } from './tools/detect.js'
-import { warnPmMismatch } from './tools/print.js'
-import { reasonableDefaults as npmDefaults } from './npm/index.js'
-import { reasonableDefaults as yarnDefaults } from './yarn/index.js'
-import { reasonableDefaults as pnpmDefaults } from './pnpm/index.js'
+import { print as defaultPrint } from './tools/print.js'
+import { applyOpinions } from './tools/apply-opinions.js'
+
+import { opinions as npmOpinions } from './npm/opinions.js'
+import { opinions as yarnOpinions } from './yarn/opinions.js'
+import { opinions as pnpmOpinions } from './pnpm/opinions.js'
 /**
  * @import {
- *   Decisions,
- *   HardenResult
+ *   HardenDefaultsOptions,
+ *   HardenResult,
+ *   PrintApi
  * } from "./tools/types.js"
  */
 
 /**
  * Main API: apply hardening defaults to the project at cwd.
  *
- * @param {object} options
- * @param {string} options.cwd
- * @param {string} [options.packageManager] - Override detected PM
- * @param {Decisions} options.decisions
+ * @param {HardenDefaultsOptions} options
  * @returns {Promise<HardenResult>}
  */
 export async function hardenDefaults(options) {
+  /** @type {PrintApi} */
+  const print = options.print ?? defaultPrint
   const { cwd, decisions } = options
 
   const facts = await collectFacts(cwd)
@@ -41,7 +43,9 @@ export async function hardenDefaults(options) {
 
   // Warn if detected differs from declared
   if (detected && pmName !== detected.name) {
-    warnPmMismatch(pmName, detected.name)
+    print(
+      `⚠️  Declared package manager (${pmName}) differs from detected (${detected.name}).`
+    )
   }
 
   // Refuse yarn v1
@@ -49,20 +53,22 @@ export async function hardenDefaults(options) {
     throw new Error('Yarn v1 is not supported. Please upgrade to Yarn 4.15+.')
   }
 
-  let result
+  let opinions
   switch (pmName) {
     case 'npm':
-      result = await npmDefaults(facts, decisions)
+      opinions = npmOpinions
       break
     case 'yarn':
-      result = await yarnDefaults(facts, decisions)
+      opinions = yarnOpinions
       break
     case 'pnpm':
-      result = await pnpmDefaults(facts, decisions)
+      opinions = pnpmOpinions
       break
     default:
       throw new Error(`Unsupported package manager: ${pmName}`)
   }
+
+  const result = await applyOpinions(opinions, facts, decisions, print)
 
   // sort results by file and key for consistent output
   result.sort((a, b) => {

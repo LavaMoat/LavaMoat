@@ -2,7 +2,7 @@
 import { buildAllowlistChanges } from './build-allowlist.js'
 
 /** @type {readonly Opinion[]} */
-export const opinions = Object.freeze([
+const definedOpinions = [
   {
     description:
       'Enforce minimum npm version via devEngines in package.json to ensure security features are available.',
@@ -40,8 +40,12 @@ export const opinions = Object.freeze([
             comment: 'Empty default.',
           },
         ],
-        execute: async (changes, facts, decisions) => {
-          const allowlistChanges = await buildAllowlistChanges(facts, decisions)
+        execute: async (changes, facts, decisions, print) => {
+          const allowlistChanges = await buildAllowlistChanges(
+            facts,
+            decisions,
+            print
+          )
           if (allowlistChanges.length > 0) {
             return allowlistChanges
           } else {
@@ -114,22 +118,20 @@ export const opinions = Object.freeze([
         comment: "Don't install packages from git urls.",
       },
     ],
-    execute: async (changes, facts, decisions) => {
+    execute: async (changes, facts, decisions, print) => {
       if (facts.directGitDeps.length > 0) {
-        const askToHarden =
-          decisions.askToHarden ?? ((_opinion, _facts) => Promise.resolve(null))
-        const shouldBlockAnyway = await askToHarden(
+        const shouldBlockAnyway = await decisions.askToHarden(
           {
             description: `Block git dependencies entirely instead of allowing 'root' despite direct git dependencies being present`,
           },
           facts
         )
         if (shouldBlockAnyway) {
-          console.warn(
+          print(
             `Found git dependencies in package.json. Blocking them by setting allow-git to none. Consider replacing them with safer sources if needed.`
           )
         } else {
-          console.warn(
+          print(
             `Found git dependencies in package.json. Adjusting config to allow direct git dependencies only. Consider replacing them with safer sources if possible.`
           )
           changes[0].value = 'root'
@@ -151,9 +153,9 @@ export const opinions = Object.freeze([
           'Disable git entirely (false is a POSIX command that always fails).',
       },
     ],
-    execute: async (changes, facts) => {
+    execute: async (changes, facts, decisions, print) => {
       if (facts.directGitDeps && facts.directGitDeps.length > 0) {
-        console.warn(
+        print(
           `Found git dependencies in package.json. They won't work with git disabled and you chose paranoid level. Consider removing them or moving to a safer source if possible.`
         )
       }
@@ -173,4 +175,6 @@ export const opinions = Object.freeze([
       },
     ],
   },
-])
+]
+
+export const opinions = Object.freeze(definedOpinions)

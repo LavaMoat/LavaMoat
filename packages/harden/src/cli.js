@@ -6,12 +6,7 @@ import { readFile } from 'node:fs/promises'
 import { hardenDefaults } from './index.js'
 /** @import {Level} from "./tools/types.js" */
 import { createFallbackDecisions } from './tools/fallback-decisions.js'
-import {
-  printError,
-  printHelp,
-  printSummary,
-  printVersion,
-} from './tools/print.js'
+import { print } from './tools/print.js'
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -24,7 +19,7 @@ const { values, positionals } = parseArgs({
 })
 
 if (values.help) {
-  printHelp(`Usage: harden <command> [options]
+  print(`Usage: harden <command> [options]
 
 Commands:
   defaults    Generate hardened config with reasonable defaults
@@ -41,7 +36,7 @@ if (values.version) {
   const pkg = JSON.parse(
     await readFile(new URL('../package.json', import.meta.url), 'utf8')
   )
-  printVersion(pkg.version)
+  print(pkg.version)
   process.exit(0)
 }
 
@@ -50,27 +45,32 @@ const command = positionals[0]
 if (command === 'defaults') {
   const level = /** @type {Level} */ (values.level ?? 'moderate')
   if (!['baseline', 'moderate', 'paranoid'].includes(level)) {
-    printError(
+    print(
       `Error: Invalid level "${level}". Use baseline, moderate, or paranoid.`
     )
     process.exit(1)
   }
 
   try {
-    const decisions = createFallbackDecisions(level)
+    const decisions = createFallbackDecisions({
+      level,
+      print,
+      packageManager: values['package-manager'],
+    })
     const { summary } = await hardenDefaults({
       cwd: resolve('.'),
       packageManager: values['package-manager'] || undefined,
       decisions,
+      print,
     })
 
-    printSummary(summary)
+    print(summary)
   } catch (err) {
-    printError(err)
+    print(err)
     process.exit(1)
   }
 } else {
-  printError(
+  print(
     `Unknown command: ${command ?? '(none)'}. Run "harden --help" for usage.`
   )
   process.exit(1)

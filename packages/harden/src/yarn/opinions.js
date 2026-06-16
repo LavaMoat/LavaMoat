@@ -4,7 +4,7 @@ import { buildAllowlistChanges } from './yarn-build-allowlist.js'
 import { buildAllowlistChanges as buildLmAllowlistChanges } from './lm-build-allowlist.js'
 
 /** @type {readonly Opinion[]} */
-export const opinions = Object.freeze([
+const definedOpinions = [
   {
     description:
       'Disable lifecycle scripts by default to prevent malicious code execution on install.',
@@ -31,17 +31,26 @@ export const opinions = Object.freeze([
         ifNotExist: true,
       },
     ],
-    execute: async (changes, facts) => {
-      try {
-        // eslint-disable-next-line n/no-unsupported-features/node-builtins
-        const response = await fetch(`https://repo.yarnpkg.com/tags`)
-
-        const tags = /** @type {{ latest: { stable: string } }} */ (
-          await response.json()
+    execute: async (changes, facts, decisions, print) => {
+      if (
+        await decisions.askToHarden(
+          {
+            description: 'Force yarn to be at the latest stable version',
+          },
+          facts
         )
-        return applyLatestVersion(changes, facts, tags.latest.stable)
-      } catch (err) {
-        console.error(`    Failed to fetch latest yarn version: ${err}`)
+      ) {
+        try {
+          // eslint-disable-next-line n/no-unsupported-features/node-builtins
+          const response = await fetch(`https://repo.yarnpkg.com/tags`)
+
+          const tags = /** @type {{ latest: { stable: string } }} */ (
+            await response.json()
+          )
+          return applyLatestVersion(changes, facts, tags.latest.stable)
+        } catch (err) {
+          print(Error(`    Failed to fetch latest yarn version: ${err}`))
+        }
       }
     },
   },
@@ -63,14 +72,19 @@ export const opinions = Object.freeze([
               'List of packages with lifecycle scripts that are allowed to run.',
           },
         ],
-        execute: async (changes, facts, decisions) => {
-          const allowlistChanges = await buildAllowlistChanges(facts, decisions)
+        execute: async (changes, facts, decisions, print) => {
+          const allowlistChanges = await buildAllowlistChanges(
+            facts,
+            decisions,
+            print
+          )
           if (allowlistChanges.length > 0) {
             return allowlistChanges
           } else {
             return changes
           }
         },
+        recommendCommands: ['yarn install'],
       },
       {
         description:
@@ -85,10 +99,11 @@ export const opinions = Object.freeze([
               'List of lifecycle scripts that are allowed to run, managed by @lavamoat/allow-scripts.',
           },
         ],
-        execute: async (changes, facts, decisions) => {
-          const result = await buildLmAllowlistChanges(facts, decisions)
+        execute: async (changes, facts, decisions, print) => {
+          const result = await buildLmAllowlistChanges(facts, decisions, print)
           return result.length > 0 ? result : changes
         },
+        recommendCommands: ['yarn install', 'yarn allow-scripts auto'],
       },
     ],
   },
@@ -120,10 +135,10 @@ export const opinions = Object.freeze([
         comment: 'Allowlist of git dependencies. Empty to block all.',
       },
     ],
-    execute: async (changes, facts) => {
+    execute: async (changes, facts, decisions, print) => {
       if (facts.directGitDeps.length > 0) {
         // TODO: the way git deps are specified is not exactly the same as the way the allowlist works, so it should need editing. We could implement processing them to create proper allowlist entries.
-        console.warn(
+        print(
           `Found git dependencies in package.json. Edit approvedGitRepositories in .yarnrc.yml accordingly.`
         )
         changes[0].value = facts.directGitDeps
@@ -178,4 +193,6 @@ export const opinions = Object.freeze([
       },
     ],
   },
-])
+]
+
+export const opinions = Object.freeze(definedOpinions)

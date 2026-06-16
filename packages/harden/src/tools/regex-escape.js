@@ -6,8 +6,8 @@
  * @returns {string}
  */
 export const escapeRegex =
-  // @ts-ignore -- RegExp.escape is Node 24+
+  // @ts-expect-error -- RegExp.escape is Node 24+
   typeof RegExp.escape === 'function'
-    ? // @ts-ignore
+    ? // @ts-expect-error -- RegExp.escape is Node 24+
       RegExp.escape
     : (/** @type {string} */ str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

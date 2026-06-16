@@ -39,7 +39,7 @@ async function copyProject(t, name) {
  * @param {string} modifiedDir
  */
 async function diffDirs(originalDir, modifiedDir) {
-  let stdout = ''
+  let stdout
   try {
     ;({ stdout } = await execFileAsync('diff', [
       '-u',
@@ -72,13 +72,24 @@ async function diffDirs(originalDir, modifiedDir) {
     .join('\n')
 
   // Strip timestamps from --- / +++ header lines, normalize paths, replace diff command lines with blank separator
-  const diff = stdout
+  const diff = (stdout ?? '')
     .replaceAll(modifiedDir, '<modified>')
     .replaceAll(originalDir, '<original>')
     .replace(/^(---|\+\+\+) (.+?)\s+\S+\s+\S+\s+\S+$/gm, '$1 $2')
-    .replace(/^diff -u -N .+$/gm, '\n')
+    .replace(/^\s*diff -u -N .+$/gm, '\n')
 
   return `--- files ---\n${fileList}\n--- diff ---\n${diff}`
+}
+
+function logPrint() {
+  const log = []
+  return {
+    forget: () => {},
+    print: (...args) => {
+      log.push(args.join(' '))
+    },
+    log,
+  }
 }
 
 for (const pm of PKGMGR_LIST) {
@@ -86,57 +97,69 @@ for (const pm of PKGMGR_LIST) {
 
   test(`hardenDefaults - ${pm} - moderate level`, async (t) => {
     const cwd = await copyProject(t, pm)
-    const decisions = createFallbackDecisions('moderate')
+    const { print, log } = logPrint()
 
     const { result } = await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions,
+      decisions: createFallbackDecisions({ level: 'moderate', print }),
+      print,
     })
 
     t.snapshot(result, 'changed keys')
+    t.snapshot(log, 'log')
     t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 
   test(`hardenDefaults - ${pm} - paranoid level`, async (t) => {
     const cwd = await copyProject(t, pm)
-    const decisions = createFallbackDecisions('paranoid')
+    const { print, log } = logPrint()
 
     const { result } = await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions,
+      decisions: createFallbackDecisions({ level: 'paranoid', print }),
+      print,
     })
 
     t.snapshot(result, 'changed keys')
+    t.snapshot(log, 'log')
     t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 
   test(`hardenDefaults - ${pm} - idempotent (paranoid applied twice)`, async (t) => {
     const cwd = await copyProject(t, pm)
-    const decisions = createFallbackDecisions('paranoid')
+    const { print, log, forget } = logPrint()
 
-    await hardenDefaults({ cwd, packageManager: pm, decisions })
-    const { result: secondResult } = await hardenDefaults({
+    await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions,
+      decisions: createFallbackDecisions({ level: 'paranoid', print: forget }),
+      print: forget,
+    })
+    const { result } = await hardenDefaults({
+      cwd,
+      packageManager: pm,
+      decisions: createFallbackDecisions({ level: 'paranoid', print }),
+      print,
     })
 
-    t.deepEqual(secondResult, [], 'second run should produce no changes')
+    t.snapshot(log, 'log')
+    t.deepEqual(result, [], 'second run should produce no changes')
   })
   test(`hardenDefaults - ${pm} - with scripts - moderate`, async (t) => {
     const cwd = await copyProject(t, pm)
+    const { print, log } = logPrint()
 
     await execFileAsync(pm, ['add', '@lavamoat/preinstall-always-fail@3.0.0'], {
       cwd,
     }).catch(() => {})
-    const decisions = createFallbackDecisions('moderate')
 
     const { result } = await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions,
+      decisions: createFallbackDecisions({ level: 'moderate', print }),
+      print,
     })
 
     rmSync(join(cwd, 'pnpm-lock.yaml'), { force: true }) // ignore changes to lockfile which are not relevant to this test
@@ -145,6 +168,7 @@ for (const pm of PKGMGR_LIST) {
     rmSync(join(cwd, 'package-lock.json'), { force: true }) // ignore changes to lockfile which are not relevant to this test
 
     t.snapshot(result, 'changed keys')
+    t.snapshot(log, 'log')
     t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 }

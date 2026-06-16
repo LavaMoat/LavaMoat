@@ -3,7 +3,12 @@ import { Configuration, Project } from '@yarnpkg/core'
 import { npath } from '@yarnpkg/fslib'
 // import { getPluginConfiguration } from '@yarnpkg/cli'
 
-/** @import {Facts} from "../tools/types.js" */
+/**
+ * @import {
+ *   Facts,
+ *   PrintApi
+ * } from "../tools/types.js"
+ */
 
 const projectCache = new Map()
 
@@ -35,14 +40,15 @@ async function getProject(location) {
  * Ensures the project is in a state where skipped builds can be detected
  *
  * @param {Facts} facts
+ * @param {PrintApi} print
  */
-export async function ensureWorkspaceInitialized(facts) {
+export async function ensureWorkspaceInitialized(facts, print) {
   if (facts.hasYarnLock && facts.hasYarnState) {
     return
   }
   // An attempt to programmatically run Project.install was headed towards pulling in all of yarn cli as dependencies, so instead we just shell out to `yarn install` which will have the same effect of initializing the workspace and generating the install state.
   // Running `yarn install --non-interactive --immutable=facts.hasYarnLock` in the target directory has its own problems with errors being likely.
-  console.warn(
+  print(
     `Yarn workspace is not fully initialized. Please run 'yarn install' in the project directory to initialize the workspace and allow harden to detect existing lifecycle scripts.`
   )
 }

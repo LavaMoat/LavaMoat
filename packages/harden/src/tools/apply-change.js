@@ -10,7 +10,8 @@ import { applyLavamoatFolder } from './lavamoat-folder.js'
  *   Change,
  *   ChangeTarget,
  *   Decisions,
- *   Facts
+ *   Facts,
+ *   PrintApi
  * } from "./types.js"
  */
 
@@ -51,14 +52,15 @@ async function applyChange(cwd, change) {
  * @param {ApplicableOpinion} opinion
  * @param {Facts} facts
  * @param {Decisions} decisions
+ * @param {PrintApi} print
  * @returns {Promise<AppliedChange[]>}
  */
-export async function applyOpinion(cwd, opinion, facts, decisions) {
+export async function applyOpinion(cwd, opinion, facts, decisions, print) {
   // make a copy of declared changes
   let changes = opinion.changes ? structuredClone(opinion.changes) : []
 
   if (opinion.execute) {
-    const modified = await opinion.execute(changes, facts, decisions)
+    const modified = await opinion.execute(changes, facts, decisions, print)
     if (modified !== undefined) {
       changes = modified
     }

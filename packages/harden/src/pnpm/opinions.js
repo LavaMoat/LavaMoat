@@ -3,7 +3,7 @@ import { buildAllowlistChanges } from './build-allowlist.js'
 /** @import {Opinion} from "../tools/types.js" */
 
 /** @type {readonly Opinion[]} */
-export const opinions = Object.freeze([
+const definedOpinions = [
   {
     description:
       'Set a minimum release age to avoid installing recently-published (potentially malicious) packages.',
@@ -31,7 +31,7 @@ export const opinions = Object.freeze([
         ifNotExist: true,
       },
     ],
-    execute: async (changes, facts) => {
+    execute: async (changes, facts, decisions, print) => {
       try {
         // eslint-disable-next-line n/no-unsupported-features/node-builtins
         const response = await fetch(`https://registry.npmjs.org/pnpm/latest`)
@@ -41,7 +41,7 @@ export const opinions = Object.freeze([
         )
         return applyLatestVersion(changes, facts, packument.version)
       } catch (err) {
-        console.error(`    Failed to fetch latest pnpm version: ${err}`)
+        print(Error(`    Failed to fetch latest pnpm version: ${err}`))
       }
     },
   },
@@ -64,10 +64,15 @@ export const opinions = Object.freeze([
     description:
       'Allow running lifecycle scripts only for explicitly allowlisted packages, and ask the user to approve the existing ones if any.',
     level: 'baseline',
-    execute: async (changes, facts, decisions) => {
-      const allowlistChanges = await buildAllowlistChanges(facts, decisions)
+    execute: async (changes, facts, decisions, print) => {
+      const allowlistChanges = await buildAllowlistChanges(
+        facts,
+        decisions,
+        print
+      )
       return [...allowlistChanges]
     },
+    recommendCommands: ['pnpm approve-scripts'],
   },
 
   {
@@ -127,4 +132,6 @@ export const opinions = Object.freeze([
       },
     ],
   },
-])
+]
+
+export const opinions = Object.freeze(definedOpinions)

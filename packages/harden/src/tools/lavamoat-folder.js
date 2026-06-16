@@ -29,6 +29,11 @@ export async function applyLavamoatFolder(cwd, entries) {
   const applied = []
 
   for (const entry of entries) {
+    if (Array.isArray(entry.key)) {
+      throw Error(
+        'lavamoat folder entries must have string keys representing file paths'
+      )
+    }
     const src = join(templateDir, entry.key)
     const dest = join(destDir, entry.key)
     await mkdir(dirname(dest), { recursive: true })

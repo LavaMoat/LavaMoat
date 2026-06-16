@@ -54,10 +54,12 @@ export interface ApplicableOpinion {
   description: string
   level?: Level
   changes?: Change[]
+  recommendCommands?: string[]
   execute?: (
     changes: Change[],
     facts: Facts,
-    decisions: Decisions
+    decisions: Decisions,
+    print: PrintApi
   ) => Promise<Change[] | undefined | void>
   alternatives?: never
 }
@@ -76,18 +78,28 @@ export interface OpinionWithAlternatives {
 
 export type Opinion = ApplicableOpinion | OpinionWithAlternatives
 
+export type PrintApi = (input: unknown) => void
+
 export interface Decisions {
   shouldApplyOpinion: (opinion: Opinion, facts: Facts) => Promise<boolean>
   /**
    * For opinions that offer alternatives, choose which one to apply (or null
    * for none). When absent, opinions with alternatives are skipped.
    */
-  chooseOpinion?: (
+  chooseOpinion: (
     opinion: OpinionWithAlternatives,
     facts: Facts
   ) => Promise<ApplicableOpinion | null>
-  packageManager?: () => Promise<string | null>
-  askToHarden?: (opinion: Opinion, facts: Facts) => Promise<boolean | null>
+  packageManager: () => Promise<string | null>
+  askToHarden: (opinion: Opinion, facts: Facts) => Promise<boolean | null>
+  shouldFollowupCommand: (command: string, facts: Facts) => Promise<boolean>
+}
+
+export interface HardenDefaultsOptions {
+  cwd: string
+  packageManager?: string
+  decisions: Decisions
+  print?: PrintApi
 }
 
 export interface HardenResult {

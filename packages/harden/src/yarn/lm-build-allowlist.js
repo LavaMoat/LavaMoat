@@ -2,7 +2,8 @@
  * @import {
  *   Change,
  *   Decisions,
- *   Facts
+ *   Facts,
+ *   PrintApi
  * } from "../tools/types.js"
  */
 
@@ -15,9 +16,10 @@
  *
  * @param {Facts} facts
  * @param {Decisions} _decisions
+ * @param {PrintApi} _print
  * @returns {Promise<Change[]>}
  */
-export async function buildAllowlistChanges(facts, _decisions) {
+export async function buildAllowlistChanges(facts, _decisions, _print) {
   /** @type {Change[]} */
   const changes = []
 

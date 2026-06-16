@@ -6,7 +6,8 @@ import {
  * @import {
  *   Change,
  *   Decisions,
- *   Facts
+ *   Facts,
+ *   PrintApi
  * } from "../tools/types.js"
  */
 
@@ -17,9 +18,10 @@ import {
  *
  * @param {Facts} facts
  * @param {Decisions} decisions
+ * @param {PrintApi} print
  * @returns {Promise<Change[]>}
  */
-export async function buildAllowlistChanges(facts, decisions) {
+export async function buildAllowlistChanges(facts, decisions, print) {
   const denyAll =
     decisions.askToHarden &&
     (await decisions.askToHarden(
@@ -33,13 +35,13 @@ export async function buildAllowlistChanges(facts, decisions) {
     if (denyAll) {
       return []
     }
-    ensureWorkspaceInitialized(facts)
+    ensureWorkspaceInitialized(facts, print)
   }
 
   const allBuilds = await findPackagesWithScripts(facts)
 
   if (!denyAll) {
-    console.log(
+    print(
       `Approved packages with lifecycle scripts: [${allBuilds.map((pkg) => pkg.name).join(', ')}] .`
     )
   }

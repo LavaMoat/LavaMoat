@@ -3,9 +3,11 @@
  *   ApplicableOpinion,
  *   Decisions,
  *   Level,
- *   OpinionWithAlternatives
+ *   OpinionWithAlternatives,
+ *   PrintApi
  * } from "./types.js"
  */
+import { print as defaultPrint } from './print.js'
 
 const LEVEL_ORDER = /** @type {const} */ (['baseline', 'moderate', 'paranoid'])
 
@@ -52,11 +54,21 @@ function defaultChooseOpinion(selected, opinion) {
 /**
  * Creates a fallback decisions object that filters opinions by level.
  *
- * @param {Level} level
+ * @param {object} options
+ * @param {Level} options.level
+ * @param {PrintApi} [options.print]
+ * @param {string} [options.packageManager]
  * @returns {Decisions}
  */
-export function createFallbackDecisions(level) {
+export function createFallbackDecisions({
+  level,
+  print = defaultPrint,
+  packageManager,
+}) {
   return {
+    async packageManager() {
+      return packageManager || null
+    },
     async shouldApplyOpinion(opinion, _facts) {
       return levelIncludes(level, opinion.level)
     },
@@ -67,5 +79,9 @@ export function createFallbackDecisions(level) {
       level === 'paranoid'
         ? async (_opinion, _facts) => true
         : async (_opinion, _facts) => false,
+    async shouldFollowupCommand(command, _facts) {
+      print(`Recommended follow-up command: ${command}`)
+      return false
+    },
   }
 }
