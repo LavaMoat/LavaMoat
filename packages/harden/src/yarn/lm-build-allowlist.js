@@ -23,7 +23,7 @@ export async function buildAllowlistChanges(facts, _decisions, _print) {
   /** @type {Change[]} */
   const changes = []
 
-  const maybeNodeLinker = facts.yarnNodeLinker
+  const maybeNodeLinker = facts.yarnConfig?.nodeLinker
   if (maybeNodeLinker !== 'node-modules') {
     changes.push({
       target: '.yarnrc.yml',
@@ -32,6 +32,31 @@ export async function buildAllowlistChanges(facts, _decisions, _print) {
       comment:
         '@lavamoat/allow-scripts requires Yarn node-modules linker (not PnP).',
     })
+  }
+
+  const plugins = /** @type {{ path: string; spec?: string }[]} */ (
+    facts.yarnConfig?.plugins || []
+  )
+
+  if (
+    plugins.length === 0 ||
+    !JSON.stringify(plugins).includes('lavamoat/plugin-allow-scripts.js')
+  ) {
+    plugins.push({ path: './lavamoat/plugin-allow-scripts.js' })
+    changes.push(
+      {
+        target: '.yarnrc.yml',
+        key: 'plugins',
+        value: plugins,
+        comment:
+          '@lavamoat/allow-scripts uses a plugin to execute allowed scripts after install.',
+      },
+      {
+        target: '/lavamoat',
+        key: 'plugin-allow-scripts.js',
+        value: null,
+      }
+    )
   }
 
   changes.push(

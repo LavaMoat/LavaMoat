@@ -29,12 +29,11 @@ export async function collectFacts(cwd) {
     }
   }
 
-  const readYarnNodeLinker = async () => {
+  const readYarnConfig = async () => {
     try {
       const content = await readFile(join(cwd, '.yarnrc.yml'), 'utf8')
       const doc = parseDocument(content)
-      const nodeLinker = doc.get('nodeLinker')
-      return typeof nodeLinker === 'string' ? nodeLinker : null
+      return doc.toJSON()
     } catch {
       return null
     }
@@ -53,7 +52,7 @@ export async function collectFacts(cwd) {
     hasYarnLock: await exists('yarn.lock'),
     hasYarnrc: await exists('.yarnrc'),
     hasYarnrcYml: await exists('.yarnrc.yml'),
-    yarnNodeLinker: await readYarnNodeLinker(),
+    yarnConfig: await readYarnConfig(),
     hasYarnState: await exists('.yarn/install-state.gz'),
     hasPnpmLock: await exists('pnpm-lock.yaml'),
     hasPnpmWorkspace: await exists('pnpm-workspace.yaml'),

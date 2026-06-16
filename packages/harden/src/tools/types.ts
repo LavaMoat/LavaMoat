@@ -18,7 +18,7 @@ export interface Facts {
   hasYarnLock: boolean
   hasYarnrc: boolean
   hasYarnrcYml: boolean
-  yarnNodeLinker: string | null
+  yarnConfig: Record<string, SerializableValue> | null
   hasYarnState: boolean
   hasPnpmLock: boolean
   hasPnpmWorkspace: boolean
