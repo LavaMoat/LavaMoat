@@ -6,4 +6,4 @@
 
 ## yarn plugin-allow-scripts
 
-It's a copy of the plugin-allow-scripts plugin from Lavamoat repo, for the purpose of installing with cp instead of downloading.
+It's a cleaner rewrite of plugin-allow-scripts plugin from Lavamoat repo, for the purpose of installing with cp instead of downloading. The code is verbosely readble to make it more trustworthy.
