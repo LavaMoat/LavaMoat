@@ -15,22 +15,26 @@ const yamlDocumentCache = new Map()
  * during a run
  *
  * @param {string} filePath
- * @param {string} key - Unique key to cache the document by
+ * @param {string} [key] - Unique key to cache the document by
  * @returns {Promise<import('yaml').Document>}
  */
 export async function readYamlDocument(filePath, key) {
-  if (yamlDocumentCache.has(key)) {
+  if (key && yamlDocumentCache.has(key)) {
     return yamlDocumentCache.get(key)
   }
 
   try {
     const content = await readFile(filePath, 'utf8')
     const doc = parseDocument(content)
-    yamlDocumentCache.set(key, doc)
+    if (key) {
+      yamlDocumentCache.set(key, doc)
+    }
     return doc
   } catch {
     const doc = parseDocument('')
-    yamlDocumentCache.set(key, doc)
+    if (key) {
+      yamlDocumentCache.set(key, doc)
+    }
     return doc
   }
 }
