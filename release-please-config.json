@@ -35,6 +35,10 @@
     "packages/react-native-lockdown": {
       "package-name": "@lavamoat/react-native-lockdown"
     },
+    "packages/run": {
+      "package-name": "@lavamoat/run",
+      "initial-version": "0.0.1"
+    },
     "packages/tofu": {
       "package-name": "lavamoat-tofu"
     },

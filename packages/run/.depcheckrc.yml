@@ -1,0 +1,6 @@
+ignores:
+  # test runner (resolved from monorepo root)
+  - 'ava'
+
+  # types-only
+  - 'type-fest'

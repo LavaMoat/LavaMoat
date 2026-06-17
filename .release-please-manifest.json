@@ -10,6 +10,7 @@
   "packages/node": "1.0.6",
   "packages/preinstall-always-fail": "3.0.0",
   "packages/react-native-lockdown": "1.0.0",
+  "packages/run": "0.0.0",
   "packages/tofu": "9.0.2",
   "packages/webpack": "2.2.3",
   "packages/types": "1.0.1"

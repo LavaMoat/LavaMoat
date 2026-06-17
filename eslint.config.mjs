@@ -309,6 +309,7 @@ export default defineConfig(
   ...typedPackageConfigs('laverna'),
   ...typedPackageConfigs('node'),
   ...typedPackageConfigs('react-native-lockdown'),
+  ...typedPackageConfigs('run'),
   ...typedPackageConfigs('tofu', { dirs: ['src'] }),
   ...typedPackageConfigs('types'),
   ...typedPackageConfigs('vog'),
