@@ -15,10 +15,12 @@ import { join } from 'node:path'
  *
  * @param {string} cwd
  * @param {PackageJsonEntry[]} entries
+ * @param {boolean} [dryRun=false] If true, does not actually write any files,
+ *   just returns the changes that would be made. Default is `false`
  * @returns {Promise<AppliedChange[]>} List of entries that were changed or
  *   added
  */
-export async function applyPackageJson(cwd, entries) {
+export async function applyPackageJson(cwd, entries, dryRun = false) {
   const filePath = join(cwd, 'package.json')
   let content
   try {
@@ -61,6 +63,8 @@ export async function applyPackageJson(cwd, entries) {
   const indentMatch = content.match(/^(\s+)"/m)
   const indent = indentMatch ? indentMatch[1].length : 2
 
-  await writeFile(filePath, JSON.stringify(pkg, null, indent) + '\n')
+  if (!dryRun) {
+    await writeFile(filePath, JSON.stringify(pkg, null, indent) + '\n')
+  }
   return changed
 }

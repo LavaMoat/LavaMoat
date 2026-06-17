@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from 'node:fs/promises'
+import { copyFile, mkdir, access } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -19,9 +19,11 @@ const templateDir = join(__dirname, '..', 'template', 'lavamoat')
  *
  * @param {string} cwd
  * @param {Change[]} entries
+ * @param {boolean} [dryRun=false] If true, does not actually write any files,
+ *   just returns the changes that would be made. Default is `false`
  * @returns {Promise<AppliedChange[]>}
  */
-export async function applyLavamoatFolder(cwd, entries) {
+export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
   const destDir = join(cwd, 'lavamoat')
   await mkdir(destDir, { recursive: true })
 
@@ -36,12 +38,22 @@ export async function applyLavamoatFolder(cwd, entries) {
     }
     const src = join(templateDir, entry.key)
     const dest = join(destDir, entry.key)
-    await mkdir(dirname(dest), { recursive: true })
-    try {
-      await copyFile(src, dest, constants.COPYFILE_EXCL)
-    } catch (err) {
-      if (/** @type {NodeJS.ErrnoException} */ (err).code === 'EEXIST') continue
-      throw err
+    if (dryRun) {
+      try {
+        await access(dest, constants.F_OK)
+        continue
+      } catch {
+        // file does not exist, proceed
+      }
+    } else {
+      await mkdir(dirname(dest), { recursive: true })
+      try {
+        await copyFile(src, dest, constants.COPYFILE_EXCL)
+      } catch (err) {
+        if (/** @type {NodeJS.ErrnoException} */ (err).code === 'EEXIST')
+          continue
+        throw err
+      }
     }
     applied.push({
       file: 'lavamoat/' + entry.key,

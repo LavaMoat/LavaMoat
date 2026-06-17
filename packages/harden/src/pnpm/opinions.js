@@ -30,6 +30,17 @@ const definedOpinions = [
         value: 'pnpm@11.0.0',
         ifNotExist: true,
       },
+      {
+        target: 'package.json',
+        key: 'devEngines',
+        value: {
+          packageManager: {
+            name: 'pnpm',
+            version: '>=11.0.0',
+            onFail: 'error',
+          },
+        },
+      },
     ],
     execute: async (changes, facts, decisions, print) => {
       try {

@@ -37,11 +37,13 @@
     "lint:deps": "depcheck",
     "test": "npm run test:run",
     "test:prep": "node test/prepare.js",
-    "test:run": "ava"
+    "test:run": "ava",
+    "test:wizard": "cd test/projects/npm && node ../../../src/cli.js wizard"
   },
   "dependencies": {
     "@yarnpkg/core": "4.8.0",
     "@yarnpkg/fslib": "3.1.5",
+    "consola": "3.4.2",
     "semver": "^7.7.2",
     "yaml": "^2.7.1"
   },

@@ -18,15 +18,20 @@ import { applyLavamoatFolder } from './lavamoat-folder.js'
 /**
  * @type {Record<
  *   ChangeTarget,
- *   (cwd: string, entries: Change[]) => Promise<AppliedChange[]>
+ *   (
+ *     cwd: string,
+ *     entries: Change[],
+ *     dryRun?: boolean
+ *   ) => Promise<AppliedChange[]>
  * >}
  */
 const configAppliers = {
   '.npmrc': applyNpmrc,
   '.yarnrc': applyLegacyYarnrc,
-  '.yarnrc.yml': (cwd, entries) => applyYamlConfig(cwd, '.yarnrc.yml', entries),
-  'pnpm-workspace.yaml': (cwd, entries) =>
-    applyYamlConfig(cwd, 'pnpm-workspace.yaml', entries),
+  '.yarnrc.yml': (cwd, entries, dryRun) =>
+    applyYamlConfig(cwd, '.yarnrc.yml', entries, dryRun),
+  'pnpm-workspace.yaml': (cwd, entries, dryRun) =>
+    applyYamlConfig(cwd, 'pnpm-workspace.yaml', entries, dryRun),
   'package.json': applyPackageJson,
   '/lavamoat': applyLavamoatFolder,
 }
@@ -34,14 +39,17 @@ const configAppliers = {
 /**
  * Applies a single change to the appropriate config file or package.json.
  *
- * @param {string} cwd
- * @param {Change} change
+ * @param {object} params
+ * @param {string} params.cwd
+ * @param {Change} params.change
+ * @param {boolean} [params.dryRun=false] If true, does not actually write any
+ *   files, just returns the changes that would be made. Default is `false`
  * @returns {Promise<AppliedChange[]>}
  */
-async function applyChange(cwd, change) {
+async function applyChange({ cwd, change, dryRun = false }) {
   const applier = configAppliers[change.target]
   if (!applier) throw new Error(`Unknown change target: ${change.target}`)
-  return applier(cwd, [change])
+  return applier(cwd, [change], dryRun)
 }
 
 /**
@@ -68,7 +76,31 @@ export async function applyOpinion(cwd, opinion, facts, decisions, print) {
 
   const result = []
   for (const change of changes) {
-    result.push(await applyChange(cwd, change))
+    result.push(await applyChange({ cwd, change }))
   }
   return result.flat()
+}
+
+/**
+ * Checks whether changes contained in an opinion are applied already. returns a
+ * number between 0 and 1 representing the ratio of applied changes to total
+ * changes.
+ *
+ * @param {string} cwd
+ * @param {ApplicableOpinion} opinion
+ * @param {Facts} facts
+ * @returns {Promise<number>}
+ */
+export async function verifyOpinion(cwd, opinion, facts) {
+  if (opinion.verify) {
+    return await opinion.verify(facts)
+  }
+  if (!opinion.changes) {
+    return 0 // if there are no changes or custom verifier, consider the opinion NOT applied
+  }
+  const result = []
+  for (const change of opinion.changes) {
+    result.push(...(await applyChange({ cwd, change, dryRun: true })))
+  }
+  return 1 - result.length / opinion.changes.length
 }

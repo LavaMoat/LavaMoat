@@ -9,19 +9,23 @@ A tool for applying security-hardening defaults to your project's package manage
 > - the CLI visuals and interactions to improve
 > - with the release of yarn6 new major changes are to be expected.
 
+## Install
+
+Get the `harden` CLI tool somehow:
+
+```sh
+npm i -g @lavamoat/harden
+npm i -D @lavamoat/harden
+npx @lavamoat/harden
+```
+
 ## Usage
 
 `@lavamoat/harden` writes opinionated security settings into your project's package manager config files (`.npmrc`, `.yarnrc.yml`, `pnpm-workspace.yaml`, `package.json`). It only modifies security-relevant keys and preserves everything else.
 
-```sh
-harden defaults
-```
+`harden defaults` - applies the hardening by level
 
-### Install
-
-```sh
-npm i -D @lavamoat/harden
-```
+`harden wizard` - interactively applies the hardening by asking questions
 
 ### Apply defaults
 
@@ -47,7 +51,7 @@ Override the detected package manager with `--package-manager` (`-p`):
 harden defaults -p yarn --level baseline
 ```
 
-### Options
+#### Options
 
 ```
 Options:
@@ -56,6 +60,14 @@ Options:
   -h, --help                  Show help
   -v, --version               Show version
 ```
+
+### Wizard
+
+```sh
+harden wizard
+```
+
+Assess your project and interactively apply hardening settings. The wizard will ask questions about your project and apply selected changes.
 
 ## Opinions
 

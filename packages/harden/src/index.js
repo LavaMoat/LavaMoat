@@ -1,6 +1,6 @@
 import { collectFacts, detectPackageManager, isYarnV1 } from './tools/detect.js'
 import { print as defaultPrint } from './tools/print.js'
-import { applyOpinions } from './tools/apply-opinions.js'
+import { applyOpinions, validateOpinions } from './tools/opinions-engine.js'
 
 import { opinions as npmOpinions } from './npm/opinions.js'
 import { opinions as yarnOpinions } from './yarn/opinions.js'
@@ -68,6 +68,35 @@ export async function hardenDefaults(options) {
       throw new Error(`Unsupported package manager: ${pmName}`)
   }
 
+  await validateOpinions(opinions, facts)
+
+  /** @type {Map<string, number[]>} */
+  const score = new Map()
+  const total = [0, 0]
+  for (const opinion of opinions) {
+    if (!score.has(opinion.level)) {
+      score.set(opinion.level, [])
+    }
+    // @ts-expect-error - I just checked...
+    score.get(opinion.level).push(opinion.detected ?? 0)
+  }
+  for (const [level, values] of score) {
+    const s = values.reduce((acc, x) => acc + x, 0)
+    score.set(level, [s, values.length])
+    total[0] += s
+    total[1] += values.length
+  }
+  score.set('total', total)
+  if (decisions.shouldStart) {
+    const shouldStart = await decisions.shouldStart(score)
+    if (!shouldStart) {
+      return {
+        result: [],
+        summary: 'Hardening skipped.',
+      }
+    }
+  }
+
   const result = await applyOpinions(opinions, facts, decisions, print)
 
   // sort results by file and key for consistent output
@@ -83,7 +112,14 @@ export async function hardenDefaults(options) {
     result.length === 0
       ? 'No changes needed — config already hardened.'
       : 'Applied hardening changes:\n' +
-        result.map((r) => `  ✓ ${r.file}: ${r.key}`).join('\n')
+        result
+          .map((r) => {
+            if (typeof r.value === 'object') {
+              return `  ✓ ${r.file}: ${r.key} created`
+            }
+            return `  ✓ ${r.file}: ${r.key} -> ${r.value}`
+          })
+          .join('\n')
 
   return { result, summary }
 }

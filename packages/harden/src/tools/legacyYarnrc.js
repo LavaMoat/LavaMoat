@@ -1,10 +1,12 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { escapeRegex } from './regex-escape.js'
-/** @import {
-  AppliedChange,
-  Change
-} from "./types.js" */
+/**
+ * @import {
+ *   AppliedChange,
+ *   Change
+ * } from "./types.js"
+ */
 
 /**
  * Reads an .npmrc file and returns its lines.
@@ -27,10 +29,12 @@ async function readLegacyYarnrc(cwd) {
  *
  * @param {string} cwd
  * @param {Change[]} entries
+ * @param {boolean} [dryRun=false] If true, does not actually write any files,
+ *   just returns the changes that would be made. Default is `false`
  * @returns {Promise<AppliedChange[]>} List of entries that were changed or
  *   added
  */
-export async function applyLegacyYarnrc(cwd, entries) {
+export async function applyLegacyYarnrc(cwd, entries, dryRun = false) {
   const lines = await readLegacyYarnrc(cwd)
 
   const changed = []
@@ -57,6 +61,8 @@ export async function applyLegacyYarnrc(cwd, entries) {
 
   // Ensure trailing newline
   const content = lines.join('\n').trimEnd() + '\n'
-  await writeFile(join(cwd, '.yarnrc'), content)
+  if (!dryRun) {
+    await writeFile(join(cwd, '.yarnrc'), content)
+  }
   return changed
 }

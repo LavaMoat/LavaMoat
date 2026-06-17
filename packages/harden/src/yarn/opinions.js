@@ -30,12 +30,24 @@ const definedOpinions = [
         value: 'yarn@4.15.0',
         ifNotExist: true,
       },
+      {
+        target: 'package.json',
+        key: 'devEngines',
+        value: {
+          packageManager: {
+            name: 'yarn',
+            version: '>=4.15.0',
+            onFail: 'error',
+          },
+        },
+      },
     ],
     execute: async (changes, facts, decisions, print) => {
       if (
         await decisions.askToHarden(
           {
             description: 'Force yarn to be at the latest stable version',
+            level: 'moderate',
           },
           facts
         )

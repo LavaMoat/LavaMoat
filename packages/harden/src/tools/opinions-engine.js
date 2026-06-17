@@ -1,6 +1,6 @@
 import { promisify } from 'node:util'
 import child_process from 'node:child_process'
-import { applyOpinion } from './apply-change.js'
+import { applyOpinion, verifyOpinion } from './apply-change.js'
 import { filterOpinions } from './filter-opinions.js'
 const exec = promisify(child_process.exec)
 /**
@@ -50,4 +50,32 @@ export async function applyOpinions(opinions, facts, decisions, print) {
   }
 
   return result.flat()
+}
+
+/**
+ * Recursively validates opinions by checking if their changes are already
+ * applied in the given facts. Decorates each opinion with a `detected` property
+ * that is set to the ratio of applied changes to total changes (a number
+ * between 0 and 1
+ *
+ * @param {readonly Opinion[]} opinions
+ * @param {Facts} facts
+ * @returns {Promise<void>}
+ */
+export async function validateOpinions(opinions, facts) {
+  // for each opinion and its alternatives, check if changes it contains are already applied in facts.
+  // - decorate each opinion with `detected` property that is set to applied/all changes number
+  for (const opinion of opinions) {
+    if (opinion.alternatives) {
+      await validateOpinions(opinion.alternatives, facts)
+      opinion.detected = Math.max(
+        ...opinion.alternatives.map((o) => o.detected ?? 0)
+      )
+    }
+    if (opinion.changes) {
+      await verifyOpinion(facts.cwd, opinion, facts).then((ratio) => {
+        opinion.detected = ratio
+      })
+    }
+  }
 }

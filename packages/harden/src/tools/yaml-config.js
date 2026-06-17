@@ -8,19 +8,30 @@ import { parseDocument } from 'yaml'
  * } from "./types.js"
  */
 
+const yamlDocumentCache = new Map()
 /**
  * Reads a YAML file and returns a parsed document. Returns an empty document if
- * the file does not exist.
+ * the file does not exist. memoized to avoid multiple reads of the same file
+ * during a run
  *
  * @param {string} filePath
+ * @param {string} key - Unique key to cache the document by
  * @returns {Promise<import('yaml').Document>}
  */
-export async function readYamlDocument(filePath) {
+export async function readYamlDocument(filePath, key) {
+  if (yamlDocumentCache.has(key)) {
+    return yamlDocumentCache.get(key)
+  }
+
   try {
     const content = await readFile(filePath, 'utf8')
-    return parseDocument(content)
+    const doc = parseDocument(content)
+    yamlDocumentCache.set(key, doc)
+    return doc
   } catch {
-    return parseDocument('')
+    const doc = parseDocument('')
+    yamlDocumentCache.set(key, doc)
+    return doc
   }
 }
 
@@ -49,12 +60,18 @@ export function readYamlArrayField(doc, fieldName) {
  * @param {string} cwd
  * @param {string} filename - E.g. '.yarnrc.yml' or 'pnpm-workspace.yaml'
  * @param {Change[]} entries
+ * @param {boolean} [dryRun=false] If true, does not actually write any files,.
+ *   Default is `false`
  * @returns {Promise<AppliedChange[]>} List of entries that were changed or
  *   added
  */
-export async function applyYamlConfig(cwd, filename, entries) {
+export async function applyYamlConfig(cwd, filename, entries, dryRun = false) {
   const filePath = join(cwd, filename)
-  const doc = await readYamlDocument(filePath)
+  const doc = await readYamlDocument(
+    filePath,
+    // forget changes from dryRun when actually running
+    `${filePath}${dryRun ? ':dryRun' : ''}`
+  )
 
   const changed = []
 
@@ -82,14 +99,15 @@ export async function applyYamlConfig(cwd, filename, entries) {
         if (typeof pair.key === 'string') {
           pair.key = doc.createNode(pair.key)
         }
-        /** @type {{ commentBefore?: string }} */ ;(pair.key).commentBefore =
-          ` ${entry.comment}`
+        /** @type {{ commentBefore?: string }} */ pair.key.commentBefore = ` ${entry.comment}`
       }
     }
 
     changed.push({ file: filename, key: entry.key, value: entry.value })
   }
 
-  await writeFile(filePath, doc.toString())
+  if (!dryRun) {
+    await writeFile(filePath, doc.toString())
+  }
   return changed
 }

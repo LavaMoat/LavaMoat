@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises'
 import { hardenDefaults } from './index.js'
 /** @import {Level} from "./tools/types.js" */
 import { createFallbackDecisions } from './tools/fallback-decisions.js'
+import { createWizard, wizardPrint } from './tools/wizard.js'
 import { print } from './tools/print.js'
 
 const { values, positionals } = parseArgs({
@@ -23,12 +24,19 @@ if (values.help) {
 
 Commands:
   defaults    Generate hardened config with reasonable defaults
+    Options:
+      -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
+      -l, --level <level>         Hardening level (baseline, moderate, paranoid) [default: moderate]
+     
 
-Options:
-  -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
-  -l, --level <level>         Hardening level (baseline, moderate, paranoid) [default: moderate]
+  wizard      Interactive wizard to generate hardened config
+    Options:
+      -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
+
+Options
   -h, --help                  Show this help
-  -v, --version               Show version`)
+  -v, --version               Show version
+      `)
   process.exit(0)
 }
 
@@ -41,37 +49,52 @@ if (values.version) {
 }
 
 const command = positionals[0]
+let decisions
+let customPrint = print
 
-if (command === 'defaults') {
-  const level = /** @type {Level} */ (values.level ?? 'moderate')
-  if (!['baseline', 'moderate', 'paranoid'].includes(level)) {
+switch (command) {
+  case 'defaults':
+    {
+      const level = /** @type {Level} */ (values.level ?? 'moderate')
+      if (!['baseline', 'moderate', 'paranoid'].includes(level)) {
+        print(
+          `Error: Invalid level "${level}". Use baseline, moderate, or paranoid.`
+        )
+        process.exit(1)
+      }
+
+      decisions = createFallbackDecisions({
+        level,
+        print,
+        packageManager: values['package-manager'],
+      })
+    }
+    break
+  case 'wizard':
+    {
+      decisions = createWizard({
+        packageManager: values['package-manager'],
+      })
+      customPrint = wizardPrint
+    }
+    break
+  default:
     print(
-      `Error: Invalid level "${level}". Use baseline, moderate, or paranoid.`
+      `Unknown command: ${command ?? '(none)'}. Run "harden --help" for usage.`
     )
     process.exit(1)
-  }
+}
 
-  try {
-    const decisions = createFallbackDecisions({
-      level,
-      print,
-      packageManager: values['package-manager'],
-    })
-    const { summary } = await hardenDefaults({
-      cwd: resolve('.'),
-      packageManager: values['package-manager'] || undefined,
-      decisions,
-      print,
-    })
+try {
+  const { summary } = await hardenDefaults({
+    cwd: resolve('.'),
+    packageManager: values['package-manager'] || undefined,
+    decisions,
+    print: customPrint,
+  })
 
-    print(summary)
-  } catch (err) {
-    print(err)
-    process.exit(1)
-  }
-} else {
-  print(
-    `Unknown command: ${command ?? '(none)'}. Run "harden --help" for usage.`
-  )
+  await decisions.showSummary(summary)
+} catch (err) {
+  print(err)
   process.exit(1)
 }

@@ -52,9 +52,10 @@ export interface AppliedChange extends ChangeResult {
  */
 export interface ApplicableOpinion {
   description: string
-  level?: Level
+  level: Level
   changes?: Change[]
   recommendCommands?: string[]
+  verify?: (facts: Facts) => Promise<number>
   execute?: (
     changes: Change[],
     facts: Facts,
@@ -62,6 +63,7 @@ export interface ApplicableOpinion {
     print: PrintApi
   ) => Promise<Change[] | undefined | void>
   alternatives?: never
+  detected?: number // ratio of applied changes to total changes, a number between 0 and 1
 }
 
 /**
@@ -70,10 +72,11 @@ export interface ApplicableOpinion {
  */
 export interface OpinionWithAlternatives {
   description: string
-  level?: Level
+  level: Level
   alternatives: ApplicableOpinion[]
   changes?: never
   execute?: never
+  detected?: number // ratio of applied changes to total changes, a number between 0 and 1
 }
 
 export type Opinion = ApplicableOpinion | OpinionWithAlternatives
@@ -93,6 +96,8 @@ export interface Decisions {
   packageManager: () => Promise<string | null>
   askToHarden: (opinion: Opinion, facts: Facts) => Promise<boolean | null>
   shouldFollowupCommand: (command: string, facts: Facts) => Promise<boolean>
+  shouldStart: (score: Map<string, number[]>) => Promise<boolean>
+  showSummary: (summary: string) => Promise<void>
 }
 
 export interface HardenDefaultsOptions {

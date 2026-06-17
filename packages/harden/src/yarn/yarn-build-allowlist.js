@@ -27,6 +27,7 @@ export async function buildAllowlistChanges(facts, decisions, print) {
     (await decisions.askToHarden(
       {
         description: "Don't approve existing install scripts. ",
+        level: 'paranoid',
       },
       facts
     ))

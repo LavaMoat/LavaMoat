@@ -29,7 +29,7 @@ const definedOpinions = [
     alternatives: [
       {
         description:
-          'Use the allowScripts field in package.json. Default to an empty allowScripts list.',
+          'Use the allowScripts field in package.json and approve install scripts later. (recommended)',
         level: 'baseline',
         changes: [
           {
@@ -123,6 +123,7 @@ const definedOpinions = [
         const shouldBlockAnyway = await decisions.askToHarden(
           {
             description: `Block git dependencies entirely instead of allowing 'root' despite direct git dependencies being present`,
+            level: 'paranoid',
           },
           facts
         )

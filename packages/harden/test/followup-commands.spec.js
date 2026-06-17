@@ -2,7 +2,7 @@ import test from 'ava'
 import { mkdtemp } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { applyOpinions } from '../src/tools/apply-opinions.js'
+import { applyOpinions } from '../src/tools/opinions-engine.js'
 
 /**
  * @param {string} cwd

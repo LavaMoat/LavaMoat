@@ -66,6 +66,15 @@ export function createFallbackDecisions({
   packageManager,
 }) {
   return {
+    async shouldStart(score) {
+      const total = score.get('total')
+      if (total && total[0] === total[1]) {
+        print(
+          'All opinions are already fully applied. No hardening should be needed.'
+        )
+      }
+      return true
+    },
     async packageManager() {
       return packageManager || null
     },
@@ -82,6 +91,11 @@ export function createFallbackDecisions({
     async shouldFollowupCommand(command, _facts) {
       print(`Recommended follow-up command: ${command}`)
       return false
+    },
+    async showSummary(summary) {
+      print('______________________________________________________\n')
+      print(summary)
+      print('______________________________________________________\n')
     },
   }
 }
