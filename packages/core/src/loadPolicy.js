@@ -10,6 +10,29 @@ module.exports = { loadPolicy, loadPolicyAndApplyOverrides, loadPoliciesSync }
  */
 
 /**
+ * Validates that the parsed policy matches the expected structure.
+ *
+ * @param {unknown} policy
+ * @returns {asserts policy is LavaMoatPolicy}
+ */
+function validatePolicy(policy) {
+  if (typeof policy !== 'object' || policy === null) {
+    throw new Error('Policy must be an object')
+  }
+  const policyObj = /** @type {Record<string, unknown>} */ (policy)
+  if (!('resources' in policyObj)) {
+    throw new Error('Policy missing "resources" property')
+  }
+  if (
+    typeof policyObj.resources !== 'object' ||
+    policyObj.resources === null ||
+    Array.isArray(policyObj.resources)
+  ) {
+    throw new Error('Policy "resources" property must be an object')
+  }
+}
+
+/**
  * Reads a policy file from disk, if present
  *
  * @param {PolicyOpts} opts
@@ -32,7 +55,9 @@ function readPolicyFileSync({ debugMode, policyPath }) {
     return
   }
   try {
-    return JSON.parse(rawPolicy)
+    const policy = JSON.parse(rawPolicy)
+    validatePolicy(policy)
+    return policy
   } catch (/** @type any */ error) {
     if (debugMode) {
       console.warn({
@@ -52,9 +77,6 @@ function readPolicyFileSync({ debugMode, policyPath }) {
  *
  * @param {PolicyOpts} opts
  * @returns {Promise<LavaMoatPolicy>}
- * @todo Because there is no validation taking place, the resulting value could
- *   be literally anything `JSON.parse()` could return. We do no validation
- *   here, and we should.
  */
 async function loadPolicy({ debugMode, policyPath }) {
   /** @type {LavaMoatPolicy} */
