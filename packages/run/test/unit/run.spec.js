@@ -84,15 +84,15 @@ test.serial(
     // install: lifecycle scripts disabled by default
     t.is(calls.install.length, 1)
     t.is(calls.install[0].spec, 'cowsay')
-    t.is(calls.install[0].options.allowScripts, false)
+    t.false(calls.install[0].options.allowScripts)
 
     // policy + run: untrusted root, prodOnly by default
     t.is(calls.generatePolicy.length, 1)
-    t.is(calls.generatePolicy[0].options.trustRoot, false)
-    t.is(calls.generatePolicy[0].options.prodOnly, true)
+    t.false(calls.generatePolicy[0].options.trustRoot)
+    t.true(calls.generatePolicy[0].options.prodOnly)
     t.is(calls.run.length, 1)
-    t.is(calls.run[0].options.trustRoot, false)
-    t.is(calls.run[0].options.prodOnly, true)
+    t.false(calls.run[0].options.trustRoot)
+    t.true(calls.run[0].options.prodOnly)
 
     // forwarded args are presented to the bin via process.argv
     t.deepEqual(calls.run[0].argv.slice(2), ['Hello!'])
@@ -108,7 +108,7 @@ test.serial(
 
     await lavax('cowsay', [], { ...options, cacheDir, allowScripts: true })
 
-    t.is(calls.install[0].options.allowScripts, true)
+    t.true(calls.install[0].options.allowScripts)
   }
 )
 
@@ -119,8 +119,8 @@ test.serial('lavax - prodOnly:false flows to policy and run', async (t) => {
 
   await lavax('cowsay', [], { ...options, cacheDir, prodOnly: false })
 
-  t.is(calls.generatePolicy[0].options.prodOnly, false)
-  t.is(calls.run[0].options.prodOnly, false)
+  t.false(calls.generatePolicy[0].options.prodOnly)
+  t.false(calls.run[0].options.prodOnly)
 })
 
 test.serial('lavax - reuses the cached install on a second run', async (t) => {

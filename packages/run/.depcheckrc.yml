@@ -4,3 +4,5 @@ ignores:
 
   # types-only
   - 'type-fest'
+  # types-only (referenced from JSDoc `@import`, which depcheck cannot see)
+  - '@lavamoat/types'
