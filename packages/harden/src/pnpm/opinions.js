@@ -113,7 +113,7 @@ const definedOpinions = [
     changes: [
       {
         target: '/lavamoat',
-        key: '.runner.js',
+        key: '.runner.cjs',
         value: null,
       },
       {
@@ -124,7 +124,7 @@ const definedOpinions = [
       {
         target: 'pnpm-workspace.yaml',
         key: 'scriptShell',
-        value: './lavamoat/.runner.js',
+        value: './lavamoat/.runner.cjs',
         comment: 'Protect the runtime of calls to pnpm run ',
       },
     ],

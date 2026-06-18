@@ -35,8 +35,6 @@ const customEnv = {
   NODE_OPTIONS: installNodeOptions(process.env?.NODE_OPTIONS, config.options),
 }
 
-console.log(customEnv)
-
 const result = spawnSync(fallbackShell, [...shellArgs, scriptPayload], {
   stdio: 'inherit',
   env: customEnv,
@@ -47,7 +45,11 @@ if (result.error) {
     `[LavaMoat wrapper failed to execute "${scriptName}"] ${result.error.message}`
   )
 }
-process.exit(result.status || 1)
+if (result && 'status' in result) {
+  process.exit(result.status)
+} else {
+  process.exit(1)
+}
 
 /**
  * Install Node.js options to load matching configuration
@@ -94,11 +96,22 @@ function filterEnv(env) {
     }
 
     const filteredEnv = {}
+    const bannedEnv = []
     banKeywords = banKeywords.map((keyword) => keyword.toLowerCase())
     for (const [key, value] of Object.entries(env)) {
-      if (!banKeywords.some((keyword) => key.toLowerCase().includes(keyword))) {
+      if (
+        !key.toLowerCase().startsWith('npm_config') &&
+        banKeywords.some((keyword) => key.toLowerCase().includes(keyword))
+      ) {
+        bannedEnv.push(key)
+      } else {
         filteredEnv[key] = value
       }
+    }
+    if (bannedEnv.length > 0) {
+      console.error(
+        `[LavaMoat] Warning: The following environment variables were banned: ${bannedEnv.join(', ')}`
+      )
     }
     return filteredEnv
   } else {

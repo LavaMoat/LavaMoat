@@ -32,9 +32,9 @@ import { resolveBinScript, resolveEntrypoint } from './resolve.js'
 import { toPath } from './util.js'
 
 /**
- * @import {PackageJson} from 'type-fest';
- * @import {LavaMoatScuttleOpts} from 'lavamoat-core';
- * @import {LavaMoatPolicy} from '@lavamoat/types';
+ * @import {LavaMoatPolicy} from "@lavamoat/types"
+ * @import {LavaMoatScuttleOpts} from "lavamoat-core"
+ * @import {PackageJson} from "type-fest"
  */
 
 /**

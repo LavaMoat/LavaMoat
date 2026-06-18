@@ -1,0 +1,2 @@
+# Protect the runtime of calls to pnpm run
+scriptShell: ./../../../src/template/lavamoat/.runner.cjs

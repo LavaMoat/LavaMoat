@@ -1,0 +1,9 @@
+{
+  "name": "test-npm-project",
+  "version": "1.0.0",
+  "scripts": {
+    "a": "echo Absolutely",
+    "b": "echo $BISFOR",
+    "test": "npm run a && npm run b && echo stealing: $TOKEN"
+  }
+}
