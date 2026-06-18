@@ -78,7 +78,7 @@ function installNodeOptions(existingOptions, configOptions) {
  */
 function filterEnv(env) {
   if (fs.existsSync(path.join(__dirname, '.env.ban.json'))) {
-    const banKeywords = []
+    let banKeywords = []
     try {
       const banConfig = readJsonFile(path.join(__dirname, '.env.ban.json'))
       if (Array.isArray(banConfig)) {

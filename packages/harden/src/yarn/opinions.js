@@ -27,7 +27,7 @@ const definedOpinions = [
       {
         target: 'package.json',
         key: 'packageManager',
-        value: 'yarn@4.15.0',
+        value: 'yarn@4.16.0',
         ifNotExist: true,
       },
       {
@@ -36,7 +36,7 @@ const definedOpinions = [
         value: {
           packageManager: {
             name: 'yarn',
-            version: '>=4.15.0',
+            version: '>=4.16.0',
             onFail: 'error',
           },
         },

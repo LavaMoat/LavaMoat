@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/harden",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "A tool for providing reasonable defaults and security hardening to your project",
   "repository": {
