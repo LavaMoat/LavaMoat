@@ -61,9 +61,7 @@ export const parseSpec = (rawSpec) => {
   // the install step (e.g. via the programmatic API), independent of the `--`
   // guard in buildNpmArgs.
   if (raw.startsWith('-')) {
-    throw new SpecParseError(
-      `Package spec must not start with "-": "${raw}"`
-    )
+    throw new SpecParseError(`Package spec must not start with "-": "${raw}"`)
   }
 
   // Scoped registry specs always begin with `@scope/`. Handle them before the

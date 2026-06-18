@@ -68,7 +68,8 @@ export const assertValidRegistry = (registry) => {
 }
 
 /**
- * Returns a copy of `env` with variables that could subvert the install removed.
+ * Returns a copy of `env` with variables that could subvert the install
+ * removed.
  *
  * @param {NodeJS.ProcessEnv} env Source environment
  * @returns {NodeJS.ProcessEnv}

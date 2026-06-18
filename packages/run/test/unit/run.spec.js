@@ -99,15 +99,18 @@ test.serial(
   }
 )
 
-test.serial('lavax - allowScripts flows through to the installer', async (t) => {
-  const cacheDir = await makeTmp()
-  t.teardown(() => rm(cacheDir, { recursive: true, force: true }))
-  const { calls, options } = makeFakes()
+test.serial(
+  'lavax - allowScripts flows through to the installer',
+  async (t) => {
+    const cacheDir = await makeTmp()
+    t.teardown(() => rm(cacheDir, { recursive: true, force: true }))
+    const { calls, options } = makeFakes()
 
-  await lavax('cowsay', [], { ...options, cacheDir, allowScripts: true })
+    await lavax('cowsay', [], { ...options, cacheDir, allowScripts: true })
 
-  t.is(calls.install[0].options.allowScripts, true)
-})
+    t.is(calls.install[0].options.allowScripts, true)
+  }
+)
 
 test.serial('lavax - prodOnly:false flows to policy and run', async (t) => {
   const cacheDir = await makeTmp()
