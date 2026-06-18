@@ -54,9 +54,20 @@ test('getInstalledPackageName - single dependency', async (t) => {
   t.is(await getInstalledPackageName('/sb', { readJson }), 'cowsay')
 })
 
-test('getInstalledPackageName - falls back to hint when not in deps', async (t) => {
+test('getInstalledPackageName - sole dependency wins over a non-matching hint', async (t) => {
+  const readJson = asReadJson({ dependencies: { cowsay: '^1' } })
+  t.is(
+    await getInstalledPackageName('/sb', { hint: 'not-installed', readJson }),
+    'cowsay'
+  )
+})
+
+test('getInstalledPackageName - throws on a hint absent from dependencies', async (t) => {
   const readJson = asReadJson({ dependencies: {} })
-  t.is(await getInstalledPackageName('/sb', { hint: 'x', readJson }), 'x')
+  await t.throwsAsync(getInstalledPackageName('/sb', { hint: 'x', readJson }), {
+    instanceOf: UnknownPackageError,
+    message: /"x" is not among its dependencies/,
+  })
 })
 
 test('getInstalledPackageName - throws when indeterminate', async (t) => {

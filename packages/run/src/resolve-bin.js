@@ -86,14 +86,17 @@ export const getInstalledPackageName = async (
   if (hint && keys.includes(hint)) {
     return hint
   }
+  // The sole installed dependency is authoritative. Prefer it even over a
+  // `hint` that npm did not actually record as a dependency.
   if (keys.length === 1) {
     return /** @type {string} */ (keys[0])
   }
-  if (hint) {
-    return hint
-  }
+  // We do NOT fall back to an unverified `hint` here: returning a name that npm
+  // never installed would point bin resolution at an arbitrary, attacker-
+  // influenced path. Surface the ambiguity instead.
   throw new UnknownPackageError(
-    `Could not determine the installed package name in ${sandboxDir}`
+    `Could not determine the installed package name in ${sandboxDir}` +
+      (hint ? ` ("${hint}" is not among its dependencies)` : '')
   )
 }
 

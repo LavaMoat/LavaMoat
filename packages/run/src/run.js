@@ -41,7 +41,11 @@ import { cacheDirFor, computeCacheBase, parseSpec } from './spec.js'
  * @returns {Promise<string>} Path to the sandbox `package.json`
  */
 const ensureSandbox = async (sandboxDir) => {
-  await mkdir(sandboxDir, { recursive: true })
+  // Restrict permissions: the cache holds fetched (untrusted) packages and the
+  // generated policy. `0o700` keeps other local users from pre-planting a
+  // `node_modules`/`policy.json` (the predictable per-spec path would otherwise
+  // be writable on a shared host or shared `LAVAMOAT_RUN_CACHE`).
+  await mkdir(sandboxDir, { recursive: true, mode: 0o700 })
   const pkgPath = path.join(sandboxDir, PACKAGE_JSON)
   if (!(await pathExists(pkgPath))) {
     await writeFile(
@@ -174,17 +178,26 @@ export const lavax = async (rawSpec, forwardedArgs = [], options = {}) => {
   }
 
   // Present `process.argv` to the executed bin as if it were run directly with
-  // `node`. Mutate in place to be safe under `lockdown()`.
+  // `node`. Mutate in place (rather than reassign) to be safe under
+  // `lockdown()`, and restore it afterwards so programmatic callers — for whom
+  // `lavax` is a normal async function — don't have their `process.argv`
+  // permanently clobbered, including when `run()` rejects.
+  const originalArgv = [...process.argv]
   process.argv.length = 0
   process.argv.push(process.execPath, binPath, ...forwardedArgs)
 
-  return /** @type {Promise<T>} */ (
-    run(binPath, {
-      policy,
-      policyPath,
-      projectRoot: sandboxDir,
-      prodOnly,
-      trustRoot: TRUST_ROOT,
-    })
-  )
+  try {
+    return await /** @type {Promise<T>} */ (
+      run(binPath, {
+        policy,
+        policyPath,
+        projectRoot: sandboxDir,
+        prodOnly,
+        trustRoot: TRUST_ROOT,
+      })
+    )
+  } finally {
+    process.argv.length = 0
+    process.argv.push(...originalArgv)
+  }
 }

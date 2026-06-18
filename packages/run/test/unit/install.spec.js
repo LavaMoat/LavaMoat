@@ -1,6 +1,11 @@
 import test from 'ava'
 import { EventEmitter } from 'node:events'
-import { buildNpmArgs, installPackage } from '../../src/install.js'
+import {
+  assertValidRegistry,
+  buildNpmArgs,
+  installPackage,
+  sanitizeNpmEnv,
+} from '../../src/install.js'
 import { InstallError } from '../../src/error.js'
 
 test('buildNpmArgs - disables scripts by default', (t) => {
@@ -8,6 +13,50 @@ test('buildNpmArgs - disables scripts by default', (t) => {
   t.true(args.includes('--ignore-scripts'))
   t.is(args[0], 'install')
   t.true(args.includes('cowsay'))
+})
+
+test('buildNpmArgs - spec is placed last, after a "--" guard', (t) => {
+  const args = buildNpmArgs('cowsay')
+  t.is(args[args.length - 1], 'cowsay')
+  t.is(args[args.length - 2], '--')
+  // A "-"-leading spec is therefore inert as an npm flag.
+  const evil = buildNpmArgs('--ignore-scripts=false')
+  t.is(evil[evil.length - 1], '--ignore-scripts=false')
+  t.is(evil[evil.length - 2], '--')
+})
+
+test('buildNpmArgs - rejects a non-http(s) registry', (t) => {
+  t.throws(() => buildNpmArgs('cowsay', { registry: 'file:///etc' }), {
+    instanceOf: InstallError,
+  })
+  t.throws(() => buildNpmArgs('cowsay', { registry: 'not a url' }), {
+    instanceOf: InstallError,
+  })
+})
+
+test('assertValidRegistry - accepts http(s), rejects others', (t) => {
+  t.notThrows(() => assertValidRegistry('https://r.example.com'))
+  t.notThrows(() => assertValidRegistry('http://localhost:4873'))
+  t.throws(() => assertValidRegistry('ftp://r.example.com'), {
+    instanceOf: InstallError,
+  })
+})
+
+test('sanitizeNpmEnv - strips script/code-injection vars, keeps the rest', (t) => {
+  const cleaned = sanitizeNpmEnv({
+    PATH: '/usr/bin',
+    NODE_OPTIONS: '--require /evil.js',
+    npm_config_ignore_scripts: 'false',
+    npm_config_node_options: '--require /evil.js',
+    npm_config_script_shell: '/bin/evil',
+    npm_config_registry: 'https://r.example.com',
+  })
+  t.is(cleaned.PATH, '/usr/bin')
+  t.is(cleaned.npm_config_registry, 'https://r.example.com')
+  t.is(cleaned.NODE_OPTIONS, undefined)
+  t.is(cleaned.npm_config_ignore_scripts, undefined)
+  t.is(cleaned.npm_config_node_options, undefined)
+  t.is(cleaned.npm_config_script_shell, undefined)
 })
 
 test('buildNpmArgs - omits --ignore-scripts when allowScripts', (t) => {

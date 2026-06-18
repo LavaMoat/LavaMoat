@@ -121,6 +121,14 @@ await lavax('cowsay', ['Hello!'], { quiet: true })
   disables a core protection — use only for packages you trust).
 - The policy is generated via static analysis ("trust on first use"); review it
   in the sandbox's `lavamoat/node/policy.json` before relying on it.
+- The bin is loaded as a JavaScript module under `@lavamoat/node`. Packages
+  whose bin is a non-JavaScript script (a shell script, Python, etc. — legal in
+  npm via the shebang) cannot be run this way.
+- A spec is **pinned on first use**: a mutable spec (`pkg@latest`, a git branch,
+  or a local path) reuses the first install and the first generated policy
+  until you re-fetch with `--force` (and `--regenerate` for the policy). This is
+  the trade-off of the cache; pin an exact version when you need freshness.
+- `--registry` must be an `http(s)` URL.
 
 ## License
 

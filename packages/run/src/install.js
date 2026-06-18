@@ -25,7 +25,68 @@ import { InstallError } from './error.js'
 const NPM_BIN = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 
 /**
+ * Environment variables that could re-enable lifecycle scripts or inject code
+ * into the `npm` child process, defeating the protections this module exists to
+ * provide. They are stripped from the install subprocess environment.
+ *
+ * - `npm_config_ignore_scripts` could flip the default if the CLI flag were ever
+ *   omitted (the CLI flag wins today, but defense-in-depth).
+ * - `NODE_OPTIONS` / `npm_config_node_options` can `--require` arbitrary modules
+ *   into the node process that runs `npm`, an arbitrary-code-execution vector.
+ * - `npm_config_script_shell` selects the shell used for any script that does
+ *   run.
+ */
+const STRIPPED_ENV_VARS = [
+  'npm_config_ignore_scripts',
+  'npm_config_node_options',
+  'npm_config_script_shell',
+  'NODE_OPTIONS',
+]
+
+/**
+ * Validates a registry URL, rejecting anything that is not `http(s):`.
+ *
+ * An unvalidated `--registry` value lets an attacker redirect the fetch (e.g.
+ * `file://` or a string `npm` interprets specially), defeating the entire
+ * fetch-trust chain.
+ *
+ * @param {string} registry Registry URL
+ * @returns {void}
+ */
+export const assertValidRegistry = (registry) => {
+  let url
+  try {
+    url = new URL(registry)
+  } catch {
+    throw new InstallError(`Invalid --registry URL: "${registry}"`)
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new InstallError(
+      `Invalid --registry URL "${registry}": only http(s) registries are allowed`
+    )
+  }
+}
+
+/**
+ * Returns a copy of `env` with variables that could subvert the install removed.
+ *
+ * @param {NodeJS.ProcessEnv} env Source environment
+ * @returns {NodeJS.ProcessEnv}
+ */
+export const sanitizeNpmEnv = (env) => {
+  const out = { ...env }
+  for (const key of STRIPPED_ENV_VARS) {
+    delete out[key]
+  }
+  return out
+}
+
+/**
  * Builds the argument vector passed to `npm`.
+ *
+ * The spec is placed last, after a literal `--`, so a spec beginning with `-`
+ * can never be interpreted as an `npm` flag (e.g. smuggling in
+ * `--ignore-scripts=false` or `--registry=…`).
  *
  * @param {string} spec Package spec to install
  * @param {Omit<InstallOptions, 'cwd' | 'spawn'>} [options] Options
@@ -35,14 +96,16 @@ export const buildNpmArgs = (
   spec,
   { allowScripts = false, registry, quiet = false } = {}
 ) => {
-  const args = ['install', spec, '--no-audit', '--no-fund']
+  const args = ['install', '--no-audit', '--no-fund']
   if (!allowScripts) {
     args.push('--ignore-scripts')
   }
   if (registry) {
+    assertValidRegistry(registry)
     args.push('--registry', registry)
   }
   args.push('--loglevel', quiet ? 'silent' : 'warn')
+  args.push('--', spec)
   return args
 }
 
@@ -66,6 +129,7 @@ export const installPackage = async (
       cwd,
       stdio: quiet ? ['ignore', 'ignore', 'inherit'] : 'inherit',
       shell: false,
+      env: sanitizeNpmEnv(process.env),
     })
     child.on('error', (err) => {
       reject(

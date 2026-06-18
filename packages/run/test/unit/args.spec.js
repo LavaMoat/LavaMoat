@@ -80,3 +80,32 @@ test('splitArgs - short value option', (t) => {
     forwardedArgs: ['arg'],
   })
 })
+
+test('splitArgs - value option immediately followed by another option', (t) => {
+  // `--cache` has no value here; `--force` is the next option and must not be
+  // consumed as `--cache`'s value.
+  t.deepEqual(splitArgs(['--cache', '--force', 'cowsay']), {
+    optionTokens: ['--cache', '--force'],
+    spec: 'cowsay',
+    forwardedArgs: [],
+  })
+})
+
+test('splitArgs - equals form for short alias', (t) => {
+  t.deepEqual(splitArgs(['-c=mybin', 'pkg']), {
+    optionTokens: ['-c=mybin'],
+    spec: 'pkg',
+    forwardedArgs: [],
+  })
+})
+
+test('splitArgs - separate-token registry and policy value options', (t) => {
+  t.deepEqual(
+    splitArgs(['--registry', 'https://r.example.com', '-p', 'pol.json', 'pkg']),
+    {
+      optionTokens: ['--registry', 'https://r.example.com', '-p', 'pol.json'],
+      spec: 'pkg',
+      forwardedArgs: [],
+    }
+  )
+})

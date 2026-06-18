@@ -92,6 +92,13 @@ test('parseSpec - throws on non-string', (t) => {
   t.throws(() => parseSpec(42), { instanceOf: SpecParseError })
 })
 
+test('parseSpec - rejects a spec starting with "-"', (t) => {
+  t.throws(() => parseSpec('-rf'), { instanceOf: SpecParseError })
+  t.throws(() => parseSpec('--ignore-scripts=false'), {
+    instanceOf: SpecParseError,
+  })
+})
+
 test('unscopedName - unscoped', (t) => {
   t.is(unscopedName('cowsay'), 'cowsay')
 })

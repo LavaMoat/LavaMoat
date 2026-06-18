@@ -18,7 +18,12 @@ export {
   slugifySpec,
   unscopedName,
 } from './spec.js'
-export { buildNpmArgs, installPackage } from './install.js'
+export {
+  assertValidRegistry,
+  buildNpmArgs,
+  installPackage,
+  sanitizeNpmEnv,
+} from './install.js'
 export {
   getInstalledPackageName,
   normalizeBin,

@@ -1,5 +1,8 @@
 import test from 'ava'
 import { execFile } from 'node:child_process'
+import { mkdtemp, rm } from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { readJsonFile } from '../../src/fs.js'
@@ -52,4 +55,18 @@ test('--version matches package descriptor', async (t) => {
 test('missing spec exits non-zero', async (t) => {
   const { code } = await runCLI([])
   t.is(code, 1)
+})
+
+test('rejects a non-http(s) registry without hitting the network', async (t) => {
+  const cache = await mkdtemp(path.join(os.tmpdir(), 'lavamoat-run-e2e-'))
+  t.teardown(() => rm(cache, { recursive: true, force: true }))
+  const { code, stderr } = await runCLI([
+    '--cache',
+    cache,
+    '--registry',
+    'ftp://evil.example.com',
+    'cowsay',
+  ])
+  t.is(code, 1)
+  t.regex(stderr, /registry/i)
 })

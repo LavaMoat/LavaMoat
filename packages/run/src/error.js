@@ -30,7 +30,7 @@ export class LavaMoatRunError extends Error {
   constructor(message, options) {
     super(message, options)
     this.name = 'LavaMoatRunError'
-    /** @type {string} */
+    /** @type {(typeof ErrorCodes)[keyof typeof ErrorCodes] | 'LMR_ERROR'} */
     this.code = 'LMR_ERROR'
   }
 }

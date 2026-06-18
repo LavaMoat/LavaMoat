@@ -56,6 +56,15 @@ export const parseSpec = (rawSpec) => {
   if (!raw) {
     throw new SpecParseError(`Package spec must not be empty`)
   }
+  // A spec beginning with `-` would be interpreted by `npm` as a flag rather
+  // than a package name. Reject it outright so it can never be smuggled into
+  // the install step (e.g. via the programmatic API), independent of the `--`
+  // guard in buildNpmArgs.
+  if (raw.startsWith('-')) {
+    throw new SpecParseError(
+      `Package spec must not start with "-": "${raw}"`
+    )
+  }
 
   // Scoped registry specs always begin with `@scope/`. Handle them before the
   // non-registry heuristic, which would otherwise mistake `@scope/pkg` for a
