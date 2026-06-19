@@ -90,10 +90,6 @@ function inspectGlobals(
           parents
         )
       )
-      // if nested API lookup begins with a globalRef, drop it
-      if (globalRefs.includes(keyPath[0])) {
-        keyPath.shift()
-      }
 
       // inspect globals passed to functions
       if (parent.type === 'CallExpression') {
@@ -104,6 +100,11 @@ function inspectGlobals(
           })
           return
         }
+      }
+
+      // if nested API lookup begins with a globalRef, drop it
+      if (globalRefs.includes(keyPath[0])) {
+        keyPath.shift()
       }
 
       // inspect for destructuring
