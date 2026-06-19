@@ -94,6 +94,18 @@ function inspectGlobals(
       if (globalRefs.includes(keyPath[0])) {
         keyPath.shift()
       }
+
+      // inspect globals passed to functions
+      if (parent.type === 'CallExpression') {
+        const narrowedUsages = inspectFunctionArgumentUsage(path, parent)
+        if (narrowedUsages) {
+          narrowedUsages.forEach(({ keys, use }) => {
+            maybeAddGlobalUsage([...keyPath, ...keys].join('.'), use)
+          })
+          return
+        }
+      }
+
       // inspect for destructuring
       let destructuredPaths
       if (
@@ -156,6 +168,39 @@ function inspectGlobals(
       ...getPathFromMemberExpressionChain(memberExpressions),
     ]
     return { identifierUse, path, parent: parentOfMembershipChain }
+  }
+
+  /**
+   * @param {import('@babel/traverse').NodePath<import('@babel/types').Identifier | import('@babel/types').ThisExpression>} path
+   * @param {import('@babel/types').CallExpression} callExpression
+   * @returns {{ keys: string[], use: GlobalPolicyValue }[] | null}
+   */
+  function inspectFunctionArgumentUsage(path, callExpression) {
+    const argIndex = callExpression.arguments.indexOf(path.node)
+    if (argIndex === -1 || callExpression.callee.type !== 'Identifier') {
+      return null
+    }
+    const functionPath = path.scope.getBinding(callExpression.callee.name)?.path
+    if (!functionPath?.isFunctionDeclaration()) {
+      return null
+    }
+    const param = functionPath?.node.params[argIndex]
+    // skip parameters that arent plain identifiers
+    if (param?.type !== 'Identifier') {
+      return null
+    }
+    const paramReferences = functionPath.scope.getBinding(param.name)?.referencePaths
+    if (!paramReferences || paramReferences.length === 0) {
+      return null
+    }
+    return paramReferences.map((ref) => {
+      const { path, identifierUse } = inspectIdentifierForDirectMembershipChain(
+        param.name,
+        /** @type {import('@babel/types').Identifier} */ (ref.node),
+        /** @type {import('./inspectPrimordialAssignments').MemberLikeExpression[]} */ (getParents(ref))
+      )
+      return { keys: path.slice(1), use: identifierUse }
+    })
   }
 
   /**

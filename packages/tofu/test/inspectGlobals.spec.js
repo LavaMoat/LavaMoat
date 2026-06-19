@@ -443,6 +443,98 @@ testInspect(
   {}
 )
 
+testInspect(
+  'passing global to function',
+  {},
+  () => {
+    function getHref(doc) {
+      return doc.location.href;
+    }
+
+    const href = getHref(document);
+
+    console.log(href);
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing global to different functions',
+  {},
+  () => {
+    function getHref(doc) {
+      return doc.location.href;
+    }
+    
+    function getElement(doc) {
+      return doc.activeElement;
+    }
+
+    const href = getHref(document);
+    const element = getElement(document);
+
+    console.log(element, href);
+  },
+  {
+    'console.log': 'read',
+    'document.activeElement': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing multiple globals to function',
+  {},
+  () => {
+    function logHref(console, doc) {
+      console.log(doc.location.href);
+    }
+
+    logHref(console, document);
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing global to function with redeclaration',
+  {},
+  () => {
+    function getElement(doc) {
+      let document = doc;
+      return document.activeElement;
+    }
+
+    const element = getElement(document);
+
+    console.log(element);
+  },
+  {
+    'console.log': 'read',
+    'document': 'read',
+  }
+)
+
+testInspect(
+  'passing global to function with write',
+  {},
+  () => {
+    function overwriteElement(doc) {
+      doc.activeElement = null;
+    }
+
+    overwriteElement(document);
+  },
+  {
+    'document.activeElement': 'write',
+  }
+)
+
 function testInspect(label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const src = fnToCodeBlock(fn)
