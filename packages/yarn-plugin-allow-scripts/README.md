@@ -12,4 +12,4 @@ yarn plugin import https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/pack
 
 ### Contributing
 
-Run `yarn build` after making any changes to the plugin source.
+Run `npm run build` after making any changes to the plugin source.
