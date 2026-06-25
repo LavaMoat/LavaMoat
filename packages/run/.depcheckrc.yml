@@ -1,0 +1,8 @@
+ignores:
+  # test runner (resolved from monorepo root)
+  - 'ava'
+
+  # types-only
+  - 'type-fest'
+  # types-only (referenced from JSDoc `@import`, which depcheck cannot see)
+  - '@lavamoat/types'

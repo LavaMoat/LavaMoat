@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "paths": {
+      "@lavamoat/node": ["../../node/types/src/index.d.ts"],
+      "@lavamoat/types": ["../../types"]
+    },
+    "preserveSymlinks": true,
+    "rootDir": "..",
+    "strict": true,
+    "target": "esnext",
+    "types": ["node"]
+  },
+  "exclude": ["unit/fixture", "e2e/fixture"],
+  "extends": "../../../.config/tsconfig.test.json",
+  "include": ["."],
+  "references": [{ "path": "../src/tsconfig.json" }]
+}

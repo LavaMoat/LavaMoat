@@ -35,6 +35,9 @@
       "path": "packages/node"
     },
     {
+      "path": "packages/run"
+    },
+    {
       "path": "packages/react-native-lockdown"
     }
   ]

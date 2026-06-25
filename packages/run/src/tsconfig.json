@@ -1,0 +1,22 @@
+{
+  "extends": "../../../.config/tsconfig.src.json",
+  "compilerOptions": {
+    "outDir": "../types",
+    "rootDir": "..",
+    "paths": {
+      "@lavamoat/node": ["../../node/types/src/index.d.ts"],
+      "@lavamoat/types": ["../../types"]
+    },
+    "target": "esnext",
+    "module": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "stripInternal": true,
+    "preserveSymlinks": true
+  },
+  "include": ["."],
+  "references": [
+    { "path": "../../node/tsconfig.json" },
+    { "path": "../../types/tsconfig.json" }
+  ]
+}

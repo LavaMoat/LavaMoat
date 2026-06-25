@@ -88,6 +88,7 @@ npm run --workspace=packages/tofu test
 
 - `packages/core/` - Core LavaMoat runtime and policy generation
 - `packages/node/` - Node.js CLI tool for policy generation and execution
+- `packages/run/` - Secure `npx` replacement (`lavax`): fetch & run a package's bin with install scripts disabled and a per-package SES policy enforced
 - `packages/lavamoat-node/` - Legacy Node.js runtime protection
 - `packages/allow-scripts/` - Dependency install script management
 - `packages/browserify/` - Browserify integration plugin

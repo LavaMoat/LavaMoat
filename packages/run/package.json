@@ -1,0 +1,65 @@
+{
+  "name": "@lavamoat/run",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "A secure npx replacement: fetch and run a package's bin under LavaMoat (install scripts disabled, per-package SES policy enforced)",
+  "repository": {
+    "directory": "packages/run",
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git"
+  },
+  "homepage": "https://lavamoat.github.io",
+  "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
+  "author": "LavaMoat Project",
+  "license": "MIT",
+  "engines": {
+    "node": "^20.19.0 || ^22.5.1 || ^24.0.0",
+    "npm": ">=9.0.0"
+  },
+  "bin": {
+    "lavax": "src/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./types/src/index.d.ts"
+    },
+    "./cli": {
+      "import": "./src/cli.js",
+      "types": "./types/src/cli.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src",
+    "types",
+    "!*.tsbuildinfo"
+  ],
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "npm run test:run",
+    "test:cover": "c8 --check-coverage ava",
+    "test:run": "ava"
+  },
+  "dependencies": {
+    "@lavamoat/node": "^1.0.6",
+    "@lavamoat/types": "^1.0.1",
+    "@types/node": "20.19.41",
+    "loggerr": "4.2.0",
+    "type-fest": "4.41.0",
+    "yargs": "17.7.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.spec.js"
+    ],
+    "timeout": "60s"
+  }
+}

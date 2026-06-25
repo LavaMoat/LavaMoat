@@ -19,6 +19,7 @@ In order to help mitigate the risk of such an attack we are building a suite of 
 1. disable/allow dependency lifecycle scripts (eg. "postinstall") via [@lavamoat/allow-scripts][LavamoatAllowScripts]
 2. run your server or build process in [lavamoat-node][LavamoatNode]
 3. build your ui with LavaMoat for [Browserify][LavamoatBrowserify]
+4. fetch and run one-off / untrusted packages safely (an `npx` replacement) with [@lavamoat/run][LavamoatRun]
 
 Even starting with adding just step 1 - the allow-scripts is a great improvement to your supply chain security.
 
@@ -111,3 +112,4 @@ Runs on [Agoric](https://github.com/agoric/)
 [LavamoatNode]: ./packages/lavamoat-node
 [LavamoatBrowserify]: ./packages/browserify
 [LavamoatAllowScripts]: ./packages/allow-scripts
+[LavamoatRun]: ./packages/run
