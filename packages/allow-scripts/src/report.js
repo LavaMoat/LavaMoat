@@ -164,7 +164,8 @@ function printPackagesByScriptConfiguration({
 }
 
 /**
- * @param {ScriptsConfig} param0
+ * @param {ScriptsConfig} params
+ * @param {boolean} [skipVersions]
  */
 function isScriptConfigurationClean(
   {

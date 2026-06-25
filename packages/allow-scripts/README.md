@@ -126,7 +126,7 @@ allow-scripts list
 
 ### Check
 
-Exits 1 if the allowlist needs maintenance. Useful for CI to avoid running all tests on an installation that's missing results of lifecycle scripts.
+`allow-scripts check` will exit with code `1` if the allowlist needs maintenance. This is useful to short-circuit CI on an installation that's missing results of lifecycle scripts.
 
 ```sh
 allow-scripts check
