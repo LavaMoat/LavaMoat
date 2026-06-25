@@ -1,15 +1,18 @@
 name: Auto Author Assign
 
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened]
+    branches: [main]
 
-permissions:
-  pull-requests: write
+permissions: {}
 
 jobs:
   assign-author:
+    if: github.repository == 'LavaMoat/LavaMoat'
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: toshimaru/auto-author-assign@16f0022cf3d7970c106d8d1105f75a1165edb516 # v2.1.1
+      - uses: toshimaru/auto-author-assign@5cd66f093de6691e0812ef186b7492589b0b7866 # v2.1.2
 

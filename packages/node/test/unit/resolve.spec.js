@@ -5,7 +5,8 @@ import { memfs } from 'memfs'
 import { ErrorCodes } from '../../src/error-code.js'
 import { resolveBinScript, resolveWorkspace } from '../../src/resolve.js'
 
-test('resolveBinScript - resolves real bin script path', (t) => {
+// TODO: https://github.com/streamich/memfs/issues/1252
+test.failing('resolveBinScript - resolves real bin script path', (t) => {
   const { vol, fs } = memfs()
   vol.fromJSON({
     '/workspace/package.json': JSON.stringify({ name: 'test-app' }),

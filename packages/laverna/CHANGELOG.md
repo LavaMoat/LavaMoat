@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/LavaMoat/LavaMoat/compare/laverna-v2.0.0...laverna-v2.1.0) (2026-04-15)
+
+
+### Features
+
+* **laverna:** support Yarn ([#1888](https://github.com/LavaMoat/LavaMoat/issues/1888)) ([04d2b80](https://github.com/LavaMoat/LavaMoat/commit/04d2b80ba6d0be262a638779ad83e80641777a5f)), closes [#1883](https://github.com/LavaMoat/LavaMoat/issues/1883)
+
 ## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/laverna-v1.2.6...laverna-v2.0.0) (2026-03-20)
 
 

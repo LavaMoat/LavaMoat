@@ -2,9 +2,6 @@
 /** @import {ProgressAPI} from './utils.js' */
 /** @typedef {import('webpack').sources.Source} Source */
 
-const {
-  sources: { ConcatSource },
-} = require('webpack')
 const { wrapper } = require('./wrapper.js')
 const diag = require('./diagnostics.js')
 
@@ -173,12 +170,8 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           module
         )
 
-        const { before, after, source, sourceChanged } = wrapper({
-          // There's probably a good reason why webpack stores source in those objects instead
-          // of strings. Turning it into a string here might mean we're loosing some caching.
-          // Wrapper checks if transforms changed the source and indicates it, so that we can
-          // decide if we want to keep the original object representing it.
-          source: originalGeneratedSource.source().toString(),
+        const { wrappedSource, sourceChanged } = wrapper({
+          source: originalGeneratedSource,
           id: packageId,
           runtimeKit,
           runChecks,
@@ -194,12 +187,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
 
         PROGRESS.report('generatorCalled')
 
-        // using this in webpack.config.ts complained about made up issues
-        if (sourceChanged) {
-          return new ConcatSource(before, source, after)
-        } else {
-          return new ConcatSource(before, originalGeneratedSource, after)
-        }
+        return wrappedSource
       }
       wrappedGeneratorInstances.add(generator)
       return generator

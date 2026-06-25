@@ -1,6 +1,5 @@
-import { memfs } from 'memfs'
-import { fromJsonSnapshot } from 'memfs/lib/snapshot/index.js'
-import { Volume } from 'memfs/lib/volume.js'
+import { fromJsonSnapshot } from '@jsonjoy.com/fs-snapshot'
+import { memfs, Volume } from 'memfs'
 import fs from 'node:fs'
 import { scheduler } from 'node:timers/promises'
 import { makeReadPowers } from '../../src/compartment/power.js'
@@ -9,8 +8,8 @@ import { isString } from '../../src/util.js'
 /**
  * @import {ReadNowPowers, FsInterface} from '@endo/compartment-mapper'
  * @import {DirectoryJSON} from 'memfs'
- * @import {SnapshotNode} from 'memfs/lib/snapshot/types.js'
- * @import {JsonUint8Array} from 'memfs/lib/snapshot/json.js'
+ * @import {SnapshotNode} from '@jsonjoy.com/fs-snapshot'
+ * @import {JsonUint8Array} from '@jsonjoy.com/fs-snapshot'
  */
 
 /**

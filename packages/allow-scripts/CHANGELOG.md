@@ -6,6 +6,45 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [5.0.2](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.1...allow-scripts-v5.0.2) (2026-05-13)
+
+
+### Bug Fixes
+
+* **allow-scripts:** fix issues with --skip-versions backward-compatibility ([#1969](https://github.com/LavaMoat/LavaMoat/issues/1969)) ([e68c877](https://github.com/LavaMoat/LavaMoat/commit/e68c877af251b81c4cd2be97d81226608d12fa60))
+
+## [5.0.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.0...allow-scripts-v5.0.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **allow-scripts:** fix migration logic for v5 ([62f17b4](https://github.com/LavaMoat/LavaMoat/commit/62f17b4e7c2a363cc11410b69c30708f97d320c1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.0 to ^5.0.1
+
+## [5.0.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v4.0.0...allow-scripts-v5.0.0) (2026-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **allow-scripts:** no longer matches lower version with the allowed
+* **allow-scripts:** defaults to pinning versions, requires an action to migrate
+
+### Features
+
+* **allow-scripts:** install scripts pinned to versions ([fcf80c5](https://github.com/LavaMoat/LavaMoat/commit/fcf80c50e484bdce38a0911736574b967d8c2960))
+
+
+### Bug Fixes
+
+* **allow-scripts:** usability improvements/fixes ([#1941](https://github.com/LavaMoat/LavaMoat/issues/1941)) ([0bd9805](https://github.com/LavaMoat/LavaMoat/commit/0bd98057ca5a54fc9d9ae679048e1e310d6cb8a7))
+* **deps:** update dependency @npmcli/run-script to v10.0.4 ([#1917](https://github.com/LavaMoat/LavaMoat/issues/1917)) ([8c834d7](https://github.com/LavaMoat/LavaMoat/commit/8c834d7f2d60b493a607ad692e2683b42551c62c))
+
 ## [4.0.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.4.3...allow-scripts-v4.0.0) (2026-03-20)
 
 

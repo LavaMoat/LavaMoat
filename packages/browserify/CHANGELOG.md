@@ -33,6 +33,70 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [20.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v20.0.4...lavamoat-browserify-v20.0.5) (2026-05-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^8.0.3 to ^8.0.4
+    * lavamoat-core bumped from ^18.0.3 to ^18.0.4
+  * devDependencies
+    * lavamoat bumped from 11.1.2 to 11.1.3
+
+## [20.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v20.0.3...lavamoat-browserify-v20.0.4) (2026-05-13)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^8.0.2 to ^8.0.3
+    * lavamoat-core bumped from ^18.0.2 to ^18.0.3
+  * devDependencies
+    * lavamoat bumped from 11.1.1 to 11.1.2
+
+## [20.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v20.0.2...lavamoat-browserify-v20.0.3) (2026-04-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.0 to ^5.0.1
+  * devDependencies
+    * lavamoat bumped from 11.1.0 to 11.1.1
+
+## [20.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v20.0.1...lavamoat-browserify-v20.0.2) (2026-04-15)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([#1680](https://github.com/LavaMoat/LavaMoat/issues/1680)) ([9739051](https://github.com/LavaMoat/LavaMoat/commit/973905160650c659b567088aeef9c44ec814fd7c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^8.0.1 to ^8.0.2
+    * lavamoat-core bumped from ^18.0.1 to ^18.0.2
+  * devDependencies
+    * lavamoat bumped from 11.0.1 to 11.1.0
+
+## [20.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v20.0.0...lavamoat-browserify-v20.0.1) (2026-04-02)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^8.0.0 to ^8.0.1
+    * lavamoat-core bumped from ^18.0.0 to ^18.0.1
+  * devDependencies
+    * lavamoat bumped from 11.0.0 to 11.0.1
+
 ## [20.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.8...lavamoat-browserify-v20.0.0) (2026-03-20)
 
 

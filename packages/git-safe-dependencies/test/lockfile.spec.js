@@ -60,14 +60,14 @@ test('validatePackages - valid - Yarn v4 (Berry) - patch', async (t) => {
 
 test('validatePackages - invalid: unacceptable git URL', async (t) => {
   const packages = {
-    'react-native-tcp@aprock/react-native-tcp#11/head': {
+    'react-native-tcp@PeelTechnologies/react-native-tcp#11/head': {
       version: '4.0.0',
       resolved:
-        'https://codeload.github.com/aprock/react-native-tcp/tar.gz/98fbc801f0586297f16730b2f4c75eef15dfabcd',
+        'https://codeload.github.com/PeelTechnologies/react-native-tcp/tar.gz/98fbc801f0586297f16730b2f4c75eef15dfabcd',
     },
   }
   const knownDirectDependencies = {
-    'react-native-tcp': 'aprock/react-native-tcp#11/head',
+    'react-native-tcp': 'PeelTechnologies/react-native-tcp#11/head',
   }
   const result = await validatePackages(packages, knownDirectDependencies)
   t.true(result.length > 0)

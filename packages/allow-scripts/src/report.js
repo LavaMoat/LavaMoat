@@ -3,19 +3,42 @@
  *
  * @module
  */
-const { loadAllPackageConfigurations } = require('./config.js')
+const { loadAllPackageConfigurations, applyMigrations } = require('./config.js')
 
 /**
- * @param {PrintPackagesListParams} params
+ * @param {object} params
+ * @param {string} params.rootDir
+ * @param {boolean} [params.skipVersions]
  * @returns {Promise<void>}
  */
-async function printPackagesList({ rootDir }) {
+async function printPackagesList({ rootDir, skipVersions = false }) {
   const {
     configs: { bin, lifecycle },
-  } = await loadAllPackageConfigurations({ rootDir })
+  } = await loadAllPackageConfigurations({ rootDir, skipVersions })
 
   printPackagesByBins(bin)
   printPackagesByScriptConfiguration(lifecycle)
+}
+
+/**
+ * @param {object} params
+ * @param {string} params.rootDir
+ * @param {boolean} [params.skipVersions]
+ * @returns {Promise<void>}
+ */
+async function checkPackagesList({ rootDir, skipVersions }) {
+  const {
+    configs: { lifecycle },
+  } = await loadAllPackageConfigurations({ rootDir, skipVersions })
+
+  if (isScriptConfigurationClean(lifecycle, skipVersions)) {
+    console.log('allow-scripts - allowlist OK')
+  } else {
+    console.log(
+      'allow-scripts - allowlist needs update. Run "allow-scripts auto" to automatically update the allowlist configuration or "allow-scripts list" for details.'
+    )
+    process.exitCode = 1
+  }
 }
 
 /**
@@ -40,13 +63,11 @@ function printMissingPoliciesIfAny({
  * @param {BinsConfig} param0
  */
 function printPackagesByBins({ allowedBins, excessPolicies }) {
-  console.log('\n# allowed packages with bin scripts')
   if (allowedBins.length) {
+    console.log('\n# allowed packages with bin scripts')
     allowedBins.forEach(({ canonicalName, bin }) => {
       console.log(`- ${canonicalName} [${bin}]`)
     })
-  } else {
-    console.log('  (none)')
   }
 
   if (excessPolicies.length) {
@@ -68,47 +89,122 @@ function printPackagesByScriptConfiguration({
   disallowedPatterns,
   missingPolicies,
   excessPolicies,
+  allowConfig,
 }) {
-  console.log('\n# allowed packages with lifecycle scripts')
+  /**
+   * @param {string} pattern
+   */
+  const markUnused = (pattern) => {
+    if (excessPolicies.includes(pattern)) {
+      return `${pattern} \t (!) no matching package with lifecycle scripts installed`
+    }
+    return pattern
+  }
+  console.log('\n# allowed packages')
   if (allowedPatterns.length) {
-    allowedPatterns.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+    console.log(`- ${allowedPatterns.map(markUnused).join('\n- ')}\n`)
   } else {
     console.log('  (none)')
   }
 
-  console.log('\n# disallowed packages with lifecycle scripts')
+  console.log('\n# disallowed packages')
   if (disallowedPatterns.length) {
-    disallowedPatterns.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
+    console.log(`- ${disallowedPatterns.map(markUnused).join('\n- ')}\n`)
+  } else {
+    console.log('  (none)')
+  }
+
+  console.log('\n# unconfigured packages')
+  if (missingPolicies.length) {
+    console.log(`- ${missingPolicies.join('\n- ')}\n`)
+  } else {
+    console.log('  (none)')
+  }
+
+  console.log(
+    `\n# packages on the allowlist that don't match any installed packages with lifecycle scripts`
+  )
+  if (excessPolicies.length) {
+    console.log(`- ${excessPolicies.join('\n- ')}\n`)
+  } else {
+    console.log('  (none)')
+  }
+
+  console.log(
+    '\n# all packages with lifecycle scripts found in dependencies (configured and unconfigured)'
+  )
+  if (packagesWithScripts.size) {
+    Array.from(packagesWithScripts.entries()).forEach(([pattern, pkgs]) => {
+      console.log(
+        `- ${pattern} \n\t${pkgs.map(({ path }) => path).join('\n\t')}`
+      )
     })
   } else {
     console.log('  (none)')
   }
 
-  if (missingPolicies.length) {
-    console.log('\n# unconfigured packages with lifecycle scripts')
-    missingPolicies.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
+  const lifecycleDeepCopy = {
+    packagesWithScripts: new Map(packagesWithScripts),
+    allowedPatterns: [...allowedPatterns],
+    disallowedPatterns: [...disallowedPatterns],
+    missingPolicies: [...missingPolicies],
+    excessPolicies: [...excessPolicies],
+    allowConfig: JSON.parse(JSON.stringify(allowConfig)),
   }
 
-  if (excessPolicies.length) {
+  const { changed, logs } = applyMigrations({
+    lifecycle: lifecycleDeepCopy,
+    skipVersions: false,
+  })
+  if (changed || logs.length > 0) {
     console.log(
-      '\n# packages with lifecycle scripts that no longer need configuration due to package or scripts removal'
+      '\n# in the current state, allow-scripts auto would apply the following migrations:',
+      logs
     )
-    excessPolicies.forEach((pattern) => {
-      const collection = packagesWithScripts.get(pattern) || []
-      console.log(`- ${pattern} [${collection.length} location(s)]`)
-    })
   }
+}
+
+/**
+ * @param {ScriptsConfig} params
+ * @param {boolean} [skipVersions]
+ */
+function isScriptConfigurationClean(
+  {
+    packagesWithScripts,
+    allowedPatterns,
+    disallowedPatterns,
+    missingPolicies,
+    excessPolicies,
+    allowConfig,
+  },
+  skipVersions = false
+) {
+  if (missingPolicies.length || excessPolicies.length) {
+    return false
+  }
+
+  const lifecycleDeepCopy = {
+    packagesWithScripts: new Map(packagesWithScripts),
+    allowedPatterns: [...allowedPatterns],
+    disallowedPatterns: [...disallowedPatterns],
+    missingPolicies: [...missingPolicies],
+    excessPolicies: [...excessPolicies],
+    allowConfig: JSON.parse(JSON.stringify(allowConfig)),
+  }
+
+  const { changed, logs } = applyMigrations({
+    lifecycle: lifecycleDeepCopy,
+    skipVersions,
+  })
+  if (changed || logs.length > 0) {
+    return false
+  }
+
+  return true
 }
 
 module.exports = {
   printPackagesList,
   printMissingPoliciesIfAny,
+  checkPackagesList,
 }

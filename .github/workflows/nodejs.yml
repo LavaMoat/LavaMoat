@@ -46,15 +46,18 @@ jobs:
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       # fetch-depth: 0 looks like it has a perf impact, so let's not do that if we don't have to.
       # see https://github.com/actions/checkout/blob/main/README.md#usage
       - name: Checkout (Push)
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0 # needed for dirty check
+          persist-credentials: false
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: ./.github/actions/prepare
@@ -71,7 +74,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
       - name: Use Node.js from .nvmrc
         uses: ./.github/actions/prepare
       # the same thing could be accomplished via `npm lint` but this is helpful for organizing job output

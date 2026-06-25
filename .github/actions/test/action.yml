@@ -13,11 +13,29 @@ inputs:
 
 runs:
   steps:
-    - name: Build & Test
-      shell: ${{ inputs.shell }}
+    # Two near-identical steps below: PowerShell does not expand POSIX `${VAR}`
+    # nor word-split string env vars across argv when calling native commands,
+    # so the pwsh variant splits + splats explicitly. Inputs flow through
+    # `env:` (never inlined into `run:`) to avoid script-injection risk.
+    - name: Build & Test (POSIX)
+      if: inputs.shell != 'pwsh'
+      shell: bash
+      env:
+        WORKSPACES: ${{ inputs.workspaces }}
       run: |
-        npm run --if-present ${{ inputs.workspaces }} build
+        npm run --if-present ${WORKSPACES} build
         npm run build:types
-        npm run --if-present ${{ inputs.workspaces }} test:prep
-        npm run --if-present ${{ inputs.workspaces }} test
+        npm run --if-present ${WORKSPACES} test:prep
+        npm run --if-present ${WORKSPACES} test
+    - name: Build & Test (PowerShell)
+      if: inputs.shell == 'pwsh'
+      shell: pwsh
+      env:
+        WORKSPACES: ${{ inputs.workspaces }}
+      run: |
+        $ws = ($env:WORKSPACES.Trim() -split '\s+') | Where-Object { $_ }
+        npm run --if-present @ws build
+        npm run build:types
+        npm run --if-present @ws test:prep
+        npm run --if-present @ws test
   using: composite

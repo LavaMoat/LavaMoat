@@ -40,6 +40,10 @@ module.exports = {
     '!packages/node/test/unit/**/*.spec.js',
     '!packages/node/test/unit/**/*-macros.js',
     // #endregion
+
+    // #region lavamoat-core files
+    'packages/core/src/mergePolicy.js',
+    // #endregion
   ],
   tests: [
     '!**/node_modules/**',
@@ -48,8 +52,12 @@ module.exports = {
     'packages/node/test/unit/**/*.spec.js',
     // we must treat macros as test files otherwise wallaby will be unable to map tests
     'packages/node/test/unit/**/*-macros.js',
+    // #endregion
+
+    // #region lavamoat-core tests
+    'packages/core/test/mergePolicy.spec.js',
+    // #endregion
   ],
-  // #endregion
 
   env: {
     type: 'node',
@@ -57,7 +65,7 @@ module.exports = {
       // --experimental-vm-modules required for AVA + ESM
       // --no-warnings needed to suppress stderr, which is evaluated during scenario execution
       runner: '--experimental-vm-modules --no-warnings',
-      env: 'LAVAMOAT_DEBUG=',
+      env: 'LAVAMOAT_DEBUG=;FORCE_COLOR=1',
     },
   },
   // required for hoisted dev deps, apparently

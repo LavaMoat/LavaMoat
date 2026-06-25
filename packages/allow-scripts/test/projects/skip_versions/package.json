@@ -1,0 +1,20 @@
+{
+  "name": "5",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "keywords": [],
+  "dependencies": {
+    "aaaa": "^1.0.0",
+    "bbbb": "^1.0.0"
+  },
+  "devDependencies": {},
+  "lavamoat": {
+    "allowScripts": {
+      "aaaa": true,
+      "bbbb": true
+    }
+  }
+}

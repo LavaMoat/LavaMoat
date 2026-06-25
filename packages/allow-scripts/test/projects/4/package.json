@@ -16,8 +16,8 @@
   "license": "ISC",
   "lavamoat": {
     "allowScripts": {
-      "disabled_native_dep": false,
-      "native_dep": true
+      "disabled_native_dep#1.0.0": false,
+      "native_dep#1.0.0": true
     }
   }
 }

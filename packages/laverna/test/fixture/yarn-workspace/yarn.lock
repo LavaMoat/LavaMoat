@@ -1,0 +1,2 @@
+# This file triggers yarn mode detection in laverna.
+# It does not need to be a valid yarn.lock file for detection purposes.

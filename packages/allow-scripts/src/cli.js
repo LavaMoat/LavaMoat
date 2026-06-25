@@ -3,7 +3,7 @@
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const runAllowedPackages = require('./runAllowedPackages.js')
-const { printPackagesList } = require('./report.js')
+const { printPackagesList, checkPackagesList } = require('./report.js')
 const { setDefaultConfiguration } = require('./config.js')
 const { editPackageJson, writeRcFile } = require('./setup.js')
 const { FEATURE } = require('./toggles.js')
@@ -19,21 +19,28 @@ async function start() {
   const parsedArgs = parseArgs()
   const command = String(parsedArgs.command || 'run')
   FEATURE.bins = parsedArgs.experimentalBins
+  const skipVersions = parsedArgs.skipVersions
 
   switch (command) {
     // (default) run scripts
     case 'run': {
-      await runAllowedPackages({ rootDir })
+      await runAllowedPackages({ rootDir, skipVersions })
       return
     }
     // automatically set configuration
     case 'auto': {
-      await setDefaultConfiguration({ rootDir })
+      await setDefaultConfiguration({ rootDir, skipVersions })
       return
     }
     // list packages
-    case 'list': {
-      await printPackagesList({ rootDir })
+    case 'list':
+    case 'debug': {
+      await printPackagesList({ rootDir, skipVersions })
+      return
+    }
+    // list packages
+    case 'check': {
+      await checkPackagesList({ rootDir, skipVersions })
       return
     }
     case 'setup': {
@@ -55,6 +62,12 @@ function parseArgs() {
     .command('run', 'run the allowed scripts')
     .command('auto', 'generate scripts policy in package.json')
     .command('setup', 'configure local repository to use allow-scripts')
+    .option('skip-versions', {
+      alias: 'sv',
+      describe: 'skip versions in allowlist entries',
+      type: 'boolean',
+      default: false,
+    })
     .option('experimental-bins', {
       alias: 'bin',
       describe:

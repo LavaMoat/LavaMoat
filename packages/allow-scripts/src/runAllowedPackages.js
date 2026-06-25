@@ -1,11 +1,14 @@
 /**
- * runAllowedPackages function
+ * RunAllowedPackages function
  *
  * @module
  */
 const path = require('node:path')
 const npmRunScript = require('@npmcli/run-script')
-const { loadAllPackageConfigurations } = require('./config.js')
+const {
+  loadAllPackageConfigurations,
+  versionAwareMatcher,
+} = require('./config.js')
 const { linkBinAbsolute, linkBinRelative } = require('./linker.js')
 const { printMissingPoliciesIfAny } = require('./report.js')
 const { FEATURE } = require('./toggles.js')
@@ -14,11 +17,11 @@ const { FEATURE } = require('./toggles.js')
  * @param {RunAllowedPackagesParams} params
  * @returns {Promise<void>}
  */
-async function runAllowedPackages({ rootDir }) {
+async function runAllowedPackages({ rootDir, skipVersions }) {
   const {
     configs: { lifecycle, bin },
     somePoliciesAreMissing,
-  } = await loadAllPackageConfigurations({ rootDir })
+  } = await loadAllPackageConfigurations({ rootDir, skipVersions })
 
   if (somePoliciesAreMissing) {
     console.log(
@@ -33,6 +36,8 @@ async function runAllowedPackages({ rootDir }) {
     // exit with error
     process.exit(1)
   }
+
+  const { isAllowed } = versionAwareMatcher(lifecycle.allowConfig, skipVersions)
 
   if (FEATURE.bins && bin.allowConfig) {
     // Consider: Might as well delete entire .bin and recreate in case it was left there
@@ -54,7 +59,7 @@ async function runAllowedPackages({ rootDir }) {
     const allowedPackagesWithScriptsLifecycleScripts = Array.from(
       lifecycle.packagesWithScripts.entries()
     )
-      .filter(([pattern]) => lifecycle.allowedPatterns.includes(pattern))
+      .filter(([pattern]) => isAllowed(pattern))
       .flatMap(([, packages]) => packages)
 
     console.log('running lifecycle scripts for event "preinstall"')
@@ -93,9 +98,9 @@ async function runAllowedPackages({ rootDir }) {
  * @param {PkgInfo[]} arg.packages
  */
 async function runAllScriptsForEvent({ event, packages }) {
-  for (const { canonicalName, path, scripts } of packages) {
+  for (const { pattern, path, scripts } of packages) {
     if (event in scripts) {
-      console.log(`- ${canonicalName}`)
+      console.log(`- ${pattern}`)
       await runScript({ path, event })
     }
   }

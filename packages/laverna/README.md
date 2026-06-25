@@ -16,6 +16,7 @@ If you're unfamiliar with it: **Laverna** publishes all workspacess wherein the 
 - Requires confirmation (by default)
 - Prints all output from `npm publish`, including the output of `npm pack`, to enable review prior to confirmation
 - Provides a "dry-run" mode
+- **Supports Yarn Berry workspaces** -- automatically detects `yarn.lock` and uses `yarn npm publish`, which resolves `workspace:` protocol specifiers (e.g. `workspace:^`) in-memory during packing
 
 **Laverna**'s scope is intentionally limited to the above use-case.
 
@@ -36,6 +37,7 @@ Perhaps more importantly, **Laverna**:
 
 - Node.js v20.19.0+
 - `npm` v8.19.3+
+- `yarn` v2+ (for Yarn Berry workspaces; detected automatically via `yarn.lock`)
 
 ## Install
 
@@ -79,6 +81,16 @@ If you're publishing a package in a new workspace, you might:
 1. Set the initial version of the new package (call it `foo`) in its `package.json`.
 2. Run `npm exec laverna -- --newPkg=foo` (or `npm exec laverna -- --newPkg=foo --dryRun` first)
 3. Profit
+
+### Using with Yarn Berry (workspace: protocol)
+
+If your monorepo uses Yarn Berry (v2+) and `workspace:` protocol specifiers (e.g. `workspace:^`), **Laverna** handles this automatically. When a `yarn.lock` file is detected in the workspace root, **Laverna** delegates to `yarn workspaces foreach ... npm publish` instead of `npm publish`.
+
+```shell
+# From a Yarn Berry workspace root (yarn.lock present):
+npx laverna --dryRun
+# Laverna detects yarn.lock and uses: yarn workspaces foreach -A --no-private --include <pkg> npm publish --dry-run
+```
 
 ### Automating Publishes
 

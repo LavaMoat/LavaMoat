@@ -1,0 +1,50 @@
+name: Workflow security audit
+
+# Static analysis of GitHub Actions workflows using zizmor
+# (https://docs.zizmor.sh/). Surfaces the workflow-level patterns that
+# enable supply-chain attacks like the TanStack May 2026 npm compromise:
+# `pull_request_target` "Pwn Request", template injection, excessive
+# permissions, OIDC token exposure, cache poisoning, and unpinned uses.
+#
+# Gate is `persona: pedantic` + `min-severity: low`. Pedantic surfaces
+# "code smell" findings beyond what `regular` catches — most notably
+# `excessive-permissions` at the workflow level when grants could live
+# on a single job, `template-injection` from `${{ }}` expansion in
+# `run:` blocks, and `undocumented-permissions`. To tighten further,
+# switch `persona:` to `auditor`, which adds defense-in-depth
+# recommendations like `secrets-outside-env` (wrap publish secrets in
+# a deployment environment with required reviewers).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        with:
+          persona: pedantic
+          min-severity: medium
+          # `advanced-security: true` would upload SARIF to GitHub Code
+          # Scanning, which requires Advanced Security to be enabled on the
+          # repository and `security-events: write` on this job. Until that
+          # is set up, emit inline PR annotations instead.
+          advanced-security: 'false'
+          annotations: 'true'

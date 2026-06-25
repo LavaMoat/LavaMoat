@@ -1,5 +1,8 @@
 const { readFileSync } = require('node:fs')
 const { parse } = require('@babel/parser')
+const stableStringify = require('json-stable-stringify')
+
+const { isArray } = Array
 
 /**
  * Webpack adds a multiline comment in front of every line of the runtime code.
@@ -84,7 +87,12 @@ const assembleRuntime = (KEY, runtimeModules) => {
       sourceString = rawSource
     }
     if (data) {
-      sourceString = JSON.stringify(data)
+      // shallow sort is not breaking any mappings. nested sorting needs to be done with more caution
+      if (isArray(data)) {
+        data.sort()
+      }
+      // This was not necessary for the bugfix, but seems prudent
+      sourceString = stableStringify(data)
     }
     if (json) {
       sourceString = `LAVAMOAT['${name}'] = (${sourceString});`

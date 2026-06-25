@@ -414,6 +414,13 @@ function inspectRequires(ast, packagesToInspect, deep = true) {
     // for each declared var, detect usage keyPath
     // eg:  const { ijk } = require("abc").xyz
     const identifierOrPattern = parentOfMembershipChain.id
+    // discard binding (e.g., `const void = require("abc")`) — module is
+    // consumed but no variables are declared
+    // see https://github.com/tc39/proposal-discard-binding
+    if (identifierOrPattern.type === 'VoidPattern') {
+      cjsImports.push(initialKeyPath)
+      return
+    }
     const declaredVars = inspectPatternElementForDeclarations(
       identifierOrPattern,
       initialKeyPath
@@ -459,7 +466,9 @@ function inspectRequires(ast, packagesToInspect, deep = true) {
  */
 
 /**
- * @param {import('@babel/types').LVal | import('@babel/types').Expression} node
+ * @param {import('@babel/types').LVal
+ *   | import('@babel/types').Expression
+ *   | import('@babel/types').VoidPattern} node
  * @param {string[]} keyPath
  * @returns {Declaration[]} }
  */
@@ -474,6 +483,9 @@ function inspectPatternElementForDeclarations(node, keyPath = []) {
   } else if (node.type === 'AssignmentPattern') {
     // AssignmentPattern is for provided a fallback value in a destructuring pattern
     return [{ node: node.left, keyPath }]
+  } else if (node.type === 'VoidPattern') {
+    // discard binding — value is explicitly ignored, no declarations produced
+    return []
   } else {
     throw new Error(
       `LavaMoat/tofu - inspectPatternElementForDeclarations - unable to parse element "${node.type}"`

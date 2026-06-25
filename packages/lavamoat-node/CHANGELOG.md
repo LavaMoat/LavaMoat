@@ -19,6 +19,83 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [11.1.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.1.2...lavamoat-v11.1.3) (2026-05-28)
+
+
+### Bug Fixes
+
+* **lavamoat-node:** fix old resolution bug where paths containing # were misinterpreted ([#1971](https://github.com/LavaMoat/LavaMoat/issues/1971)) ([494f852](https://github.com/LavaMoat/LavaMoat/commit/494f85238577bb3ced97ee1c08a412f0f9a13873))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.3 to ^18.0.4
+    * lavamoat-tofu bumped from ^9.0.1 to ^9.0.2
+
+## [11.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.1.1...lavamoat-v11.1.2) (2026-05-13)
+
+
+### Bug Fixes
+
+* **core:** move dependency execute after policy check ([#1974](https://github.com/LavaMoat/LavaMoat/issues/1974)) ([886e82f](https://github.com/LavaMoat/LavaMoat/commit/886e82fab62969d4fa45d974796dee45c1e37092))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.2 to ^18.0.3
+
+## [11.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.1.0...lavamoat-v11.1.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency resolve to v1.22.12 ([#1951](https://github.com/LavaMoat/LavaMoat/issues/1951)) ([4a06108](https://github.com/LavaMoat/LavaMoat/commit/4a06108834c81c3526385fc4578a44e19caab1cd))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.0 to ^5.0.1
+
+## [11.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.0.1...lavamoat-v11.1.0) (2026-04-15)
+
+
+### Features
+
+* **lavamoat-node:** modernize resolve in lavamoat classic, opt-in only ([#1928](https://github.com/LavaMoat/LavaMoat/issues/1928)) ([21f8d97](https://github.com/LavaMoat/LavaMoat/commit/21f8d97ad73a314f9034c7ec303067924ea0b91f))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([#1680](https://github.com/LavaMoat/LavaMoat/issues/1680)) ([9739051](https://github.com/LavaMoat/LavaMoat/commit/973905160650c659b567088aeef9c44ec814fd7c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.1 to ^18.0.2
+    * lavamoat-tofu bumped from ^9.0.0 to ^9.0.1
+
+## [11.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.0.0...lavamoat-v11.0.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency resolve to v1.22.11 ([#1920](https://github.com/LavaMoat/LavaMoat/issues/1920)) ([5ed6202](https://github.com/LavaMoat/LavaMoat/commit/5ed6202b61a0eb01694156ab9a291b7fcaa5044d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.0 to ^18.0.1
+
 ## [11.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.1.1...lavamoat-v11.0.0) (2026-03-20)
 
 

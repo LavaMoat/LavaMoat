@@ -1,4 +1,13 @@
-const { applySourceTransforms } = require('lavamoat-core')
+/** @typedef {import('webpack').sources.Source} Source */
+
+const {
+  sources: { ConcatSource },
+} = require('webpack')
+const {
+  needsTransform,
+  applyReplaceTransforms,
+  SES_TRANSFORMS,
+} = require('./sourceTransforms')
 const diag = require('./diagnostics')
 const fs = require('node:fs')
 const q = JSON.stringify
@@ -12,7 +21,7 @@ const q = JSON.stringify
  */
 /**
  * @typedef {object} WrappingInput
- * @property {string} source
+ * @property {Source} source
  * @property {string} id
  * @property {string[] | Set<string>} runtimeKit
  * @property {string} evalKitFunctionName
@@ -29,9 +38,7 @@ const {
 /**
  * @param {WrappingInput} params
  * @returns {{
- *   before: string
- *   after: string
- *   source: string
+ *   wrappedSource: Source
  *   sourceChanged: boolean
  * }}
  */
@@ -44,11 +51,19 @@ exports.wrapper = function wrapper({
   runtimeFlags = {},
 }) {
   const runtimeKitArray = Array.from(runtimeKit)
-  // validateSource(source);
 
-  // No AST used in these transforms, so string comparison should indicate if anything was changed.
-  const sesCompatibleSource = applySourceTransforms(source)
-  const sourceChanged = source !== sesCompatibleSource
+  const sourceString = source.source().toString()
+
+  let transformedSource = source
+  let sourceChanged = false
+  if (needsTransform(sourceString)) {
+    transformedSource = applyReplaceTransforms(
+      source,
+      sourceString,
+      SES_TRANSFORMS
+    )
+    sourceChanged = true
+  }
 
   // This adds support for mapping `this` to `exports` or `module.exports` if webpack detected it's necessary
   let optionalBinding = ''
@@ -85,12 +100,12 @@ exports.wrapper = function wrapper({
     ','
   )}}))${optionalBinding}()`
   if (runChecks) {
-    validateSource(sesCompatibleSource)
+    validateSource(
+      sourceChanged ? transformedSource.source().toString() : sourceString
+    )
   }
   return {
-    before,
-    after,
-    source: sesCompatibleSource,
+    wrappedSource: new ConcatSource(before, transformedSource, after),
     sourceChanged,
   }
 }

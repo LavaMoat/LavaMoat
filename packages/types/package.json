@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Common types for LavaMoat packages",
   "repository": {
     "directory": "packages/types",
@@ -31,7 +31,7 @@
     "lint:deps": "depcheck"
   },
   "dependencies": {
-    "@babel/types": "7.27.3"
+    "@babel/types": "7.29.7"
   },
   "publishConfig": {
     "access": "public"

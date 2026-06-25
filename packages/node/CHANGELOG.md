@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.0.6](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.5...node-v1.0.6) (2026-06-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/node to v20.19.41 ([#1983](https://github.com/LavaMoat/LavaMoat/issues/1983)) ([3fad831](https://github.com/LavaMoat/LavaMoat/commit/3fad831c95de9cdaed0307aebe710083c94bf5c4))
+
+## [1.0.5](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.4...node-v1.0.5) (2026-05-28)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([#1982](https://github.com/LavaMoat/LavaMoat/issues/1982)) ([5b375cb](https://github.com/LavaMoat/LavaMoat/commit/5b375cb85d85bc3e37962eae5836b67de9ed474c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.3 to ^18.0.4
+    * lavamoat-tofu bumped from ^9.0.1 to ^9.0.2
+
+## [1.0.4](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.3...node-v1.0.4) (2026-05-13)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.2 to ^18.0.3
+
+## [1.0.3](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.2...node-v1.0.3) (2026-04-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @endo/compartment-mapper to v2.1.0 ([#1962](https://github.com/LavaMoat/LavaMoat/issues/1962)) ([6bbdddd](https://github.com/LavaMoat/LavaMoat/commit/6bbdddd2ad8791184df2db030d6cdc5ec92bbaed))
+
+## [1.0.2](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.1...node-v1.0.2) (2026-04-15)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([#1680](https://github.com/LavaMoat/LavaMoat/issues/1680)) ([9739051](https://github.com/LavaMoat/LavaMoat/commit/973905160650c659b567088aeef9c44ec814fd7c))
+* **deps:** update dependency @types/node to v20.19.39 ([#1942](https://github.com/LavaMoat/LavaMoat/issues/1942)) ([6807d68](https://github.com/LavaMoat/LavaMoat/commit/6807d68c244b45f8b5bb53979d5d3f08fe188aec))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^1.0.0 to ^1.0.1
+    * lavamoat-core bumped from ^18.0.1 to ^18.0.2
+    * lavamoat-tofu bumped from ^9.0.0 to ^9.0.1
+
+## [1.0.1](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.0...node-v1.0.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/node to v20.19.37 ([#1919](https://github.com/LavaMoat/LavaMoat/issues/1919)) ([641ab36](https://github.com/LavaMoat/LavaMoat/commit/641ab3627a3064fbf4fdd1c1b446c7fca6ee9ff7))
+* **node:** fix SES policy violation summary formatting ([6b5b371](https://github.com/LavaMoat/LavaMoat/commit/6b5b3711ba48ec0710e00b122d70682ffe4e30f3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.0 to ^18.0.1
+
 ## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.11...node-v1.0.0) (2026-03-20)
 
 

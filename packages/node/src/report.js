@@ -227,10 +227,13 @@ export const reportSesViolations = (
     let typeMsg = ''
     if (hasStrictModeViolations) {
       typeMsg = bold('Strict-mode violations')
+      if (hasPrimordialMutationViolations) {
+        typeMsg += ` and ${bold('primordial mutations')}`
+      }
+    } else if (hasPrimordialMutationViolations) {
+      typeMsg = bold('Primordial mutations')
     }
-    if (hasPrimordialMutationViolations) {
-      typeMsg += ` and ${bold('primordial mutations')}`
-    }
+
     log.warning(
       `${typeMsg} will likely fail at runtime under LavaMoat; patching is advised.`
     )

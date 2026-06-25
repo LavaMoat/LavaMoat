@@ -17,9 +17,9 @@
   "license": "ISC",
   "lavamoat": {
     "allowScripts": {
-      "bbb>good_dep": true,
-      "evil_dep": false,
-      "bbb": true
+      "bbb#1.0.0": true,
+      "bbb>good_dep#1.0.0": true,
+      "evil_dep#1.0.0": false
     },
     "allowBins": {
       "good": "node_modules/aaa/shouldntrun.sh"

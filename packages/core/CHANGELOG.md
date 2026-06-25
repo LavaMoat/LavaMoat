@@ -6,6 +6,49 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [18.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.3...lavamoat-core-v18.0.4) (2026-05-28)
+
+
+### Bug Fixes
+
+* ensure internal sequence of specifier handling does not leak con… ([#1992](https://github.com/LavaMoat/LavaMoat/issues/1992)) ([6acf157](https://github.com/LavaMoat/LavaMoat/commit/6acf157cd43d2855d6d9250c507bda40225e5dab))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^9.0.1 to ^9.0.2
+
+## [18.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.2...lavamoat-core-v18.0.3) (2026-05-13)
+
+
+### Bug Fixes
+
+* **core:** move dependency execute after policy check ([#1974](https://github.com/LavaMoat/LavaMoat/issues/1974)) ([886e82f](https://github.com/LavaMoat/LavaMoat/commit/886e82fab62969d4fa45d974796dee45c1e37092))
+
+## [18.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.1...lavamoat-core-v18.0.2) (2026-04-15)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([#1680](https://github.com/LavaMoat/LavaMoat/issues/1680)) ([9739051](https://github.com/LavaMoat/LavaMoat/commit/973905160650c659b567088aeef9c44ec814fd7c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^1.0.0 to ^1.0.1
+    * lavamoat-tofu bumped from ^9.0.0 to ^9.0.1
+
+## [18.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.0...lavamoat-core-v18.0.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **core:** replace merge-deep with bespoke policy merge implementation ([#1909](https://github.com/LavaMoat/LavaMoat/issues/1909)) ([1eb97f6](https://github.com/LavaMoat/LavaMoat/commit/1eb97f6e92e55377d76aafcd8c9df47fbaa233a4))
+
 ## [18.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.3...lavamoat-core-v18.0.0) (2026-03-20)
 
 

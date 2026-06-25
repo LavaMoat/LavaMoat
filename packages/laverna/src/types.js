@@ -1,9 +1,16 @@
 /**
+ * @import {Dirent} from 'fs'
+ * @import {SpawnOptions} from 'node:child_process'
+ * @import {EventEmitter} from 'node:events'
+ * @import {GlobOptionsWithFileTypesTrue} from 'glob'
+ */
+
+/**
  * `Dirent`-like object returned by `glob`; adds a `fullpath()` method and
  * `parent` prop
  *
  * @defaultValue `Path` from `path-scurry`, which is resolved by `glob()` if the
- * @typedef {import('fs').Dirent & {
+ * @typedef {Dirent & {
  *   fullpath: () => string
  *   parent?: GlobDirent
  * }} GlobDirent
@@ -15,11 +22,7 @@
  * Returned `EventEmitter` _must_ emit `exit` and _may_ emit `error`.
  *
  * @defaultValue `childProcess.spawn`
- * @typedef {(
- *   cmd: string,
- *   args: string[],
- *   opts: import('node:child_process').SpawnOptions
- * ) => import('node:events').EventEmitter} SpawnFn
+ * @typedef {(cmd: string, args: string[], opts: SpawnOptions) => EventEmitter} SpawnFn
  */
 
 /**
@@ -41,7 +44,7 @@
  * @defaultValue `Glob.glob`
  * @typedef {(
  *   pattern: string | string[],
- *   opts: import('glob').GlobOptionsWithFileTypesTrue
+ *   opts: GlobOptionsWithFileTypesTrue
  * ) => Promise<GlobDirent[]>} GlobFn
  */
 
@@ -102,8 +105,9 @@
  * @property {MinimalConsole} console - Console to use for logging
  * @property {GetVersionsFactory} [getVersionsFactory] - Factory for
  *   {@link GetVersions}
- * @property {InvokePublishFactory} [invokePublishFactory] - Factory for
- *   {@link InvokePublish}
+ * @property {PublisherFactory} [publisherFactory] - Async factory that creates
+ *   a {@link Publisher}. Defaults to {@link createPublisher}, which detects the
+ *   package manager via lockfile.
  */
 /**
  * Capabilities for {@link Laverna}, allowing the user to override functionality.
@@ -131,23 +135,35 @@
  */
 
 /**
- * Factory for a {@link InvokePublish} function.
- *
- * @callback InvokePublishFactory
- * @param {LavernaOptions} opts
- * @param {LavernaCapabilities} caps
- * @returns {InvokePublish}
- */
-
-/**
  * Function which publishes a list of packages.
  *
  * Packages are expected to be workspaces in the current project.
  *
- * @callback InvokePublish
+ * @callback PublishFn
  * @param {string[]} pkgs
  * @returns {Promise<void>}
- * @this {Laverna}
+ */
+
+/**
+ * A publisher that knows how to invoke a specific package manager's publish
+ * command.
+ *
+ * @typedef Publisher
+ * @property {string} name - Identifier for this publisher (e.g. `'npm'` or
+ *   `'yarn'`)
+ * @property {PublishFn} publish - Publishes the given packages
+ */
+
+/**
+ * Async factory function that creates a {@link Publisher}.
+ *
+ * The default factory ({@link createPublisher}) checks for `yarn.lock` to decide
+ * between Yarn and npm.
+ *
+ * @callback PublisherFactory
+ * @param {AllLavernaOptions} opts
+ * @param {AllLavernaCapabilities} caps
+ * @returns {Promise<Publisher>}
  */
 
 module.exports = {}

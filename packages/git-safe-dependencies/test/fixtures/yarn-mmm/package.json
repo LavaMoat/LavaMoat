@@ -4,7 +4,6 @@
   "private": true,
   "packageManager": "yarn@1.22.22",
   "engines": {
-    "node": "^20.18.0",
     "yarn": "^1.22.22"
   },
   "browser": {
@@ -335,7 +334,7 @@
     "react-native-svg": "^15.3.0",
     "react-native-svg-charts": "^5.4.0",
     "react-native-swipe-gestures": "1.0.3",
-    "react-native-tcp": "aprock/react-native-tcp#98fbc801f0586297f16730b2f4c75eef15dfabcd",
+    "react-native-tcp": "PeelTechnologies/react-native-tcp#4cef5bbe17a674ea9ec73ef927dc7334f0c3c0d3",
     "react-native-url-polyfill": "^1.3.0",
     "react-native-vector-icons": "6.4.2",
     "react-native-video": "5.2.1",

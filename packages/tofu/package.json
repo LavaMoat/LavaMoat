@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-tofu",
-  "version": "9.0.0",
+  "version": "9.0.2",
   "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
   "repository": {
     "type": "git",
@@ -29,10 +29,10 @@
     "lavamoat-core": ">15.4.0"
   },
   "dependencies": {
-    "@babel/parser": "7.27.3",
-    "@babel/traverse": "7.27.3",
-    "@babel/types": "7.27.3",
-    "@lavamoat/types": "^1.0.0",
+    "@babel/parser": "7.29.7",
+    "@babel/traverse": "7.29.7",
+    "@babel/types": "7.29.7",
+    "@lavamoat/types": "^1.0.1",
     "@types/babel__traverse": "7.28.0",
     "type-fest": "4.41.0"
   },
