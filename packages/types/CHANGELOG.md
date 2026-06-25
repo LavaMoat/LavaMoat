@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/LavaMoat/LavaMoat/compare/types-v1.0.1...types-v1.0.2) (2026-06-25)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.29.7 ([#2010](https://github.com/LavaMoat/LavaMoat/issues/2010)) ([9627a86](https://github.com/LavaMoat/LavaMoat/commit/9627a86d477d9c70b387b860899a30fbbc0ad479))
+
 ## [1.0.1](https://github.com/LavaMoat/LavaMoat/compare/types-v1.0.0...types-v1.0.1) (2026-04-15)
 
 

@@ -6,6 +6,18 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [5.1.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.2...allow-scripts-v5.1.0) (2026-06-25)
+
+
+### Features
+
+* **allow-scripts:** add a check command to warn an update is needed in CI ([#1964](https://github.com/LavaMoat/LavaMoat/issues/1964)) ([e5f6573](https://github.com/LavaMoat/LavaMoat/commit/e5f657336c78e155c363a820acbe2a6e3588a2c0))
+
+
+### Bug Fixes
+
+* Bump yargs ([#2027](https://github.com/LavaMoat/LavaMoat/issues/2027)) ([affd672](https://github.com/LavaMoat/LavaMoat/commit/affd6727aa29111456676eda65e40303da621f62))
+
 ## [5.0.2](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.1...allow-scripts-v5.0.2) (2026-05-13)
 
 
