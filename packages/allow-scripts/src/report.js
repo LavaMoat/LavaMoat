@@ -8,6 +8,7 @@ const { loadAllPackageConfigurations, applyMigrations } = require('./config.js')
 /**
  * @param {object} params
  * @param {string} params.rootDir
+ * @param {boolean} [params.skipVersions]
  * @returns {Promise<void>}
  */
 async function printPackagesList({ rootDir, skipVersions = false }) {
