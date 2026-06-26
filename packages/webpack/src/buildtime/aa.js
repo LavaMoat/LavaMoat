@@ -47,8 +47,11 @@ const crossReference = (neededIds, policyIds) => {
 }
 
 /**
- * @import {LavaMoatPolicy, ResourcePolicy} from '@lavamoat/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
+ * @import {
+ *   LavaMoatPolicy,
+ *   ResourcePolicy
+ * } from '@lavamoat/types'
  */
 
 /**
@@ -214,8 +217,9 @@ exports.generateIdentifierLookup = ({
       if (readableResourceIds) {
         return stripMeta(policy)
       }
-      const { resources = Object.create(null) } = policy
+      const { resources = Object.create(null), use } = policy
       const translatedPolicy = {
+        ...(use ? { use } : {}),
         resources: Object.fromEntries(
           Object.entries(resources)
             .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used

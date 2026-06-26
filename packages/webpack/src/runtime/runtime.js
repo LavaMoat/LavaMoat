@@ -12,12 +12,25 @@ const warn = typeof console === 'object' ? console.warn : () => {}
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
 const LOCKDOWN_ON = typeof repairIntrinsics !== 'undefined'
+let registeredCapabilities
 if (LOCKDOWN_ON) {
   repairIntrinsics(LAVAMOAT.options.lockdown)
 
   LOCKDOWN_SHIMS.forEach((shim) => {
     shim()
   })
+
+  // Evaluate capability sources and run repair callbacks before hardening
+  if (LAVAMOAT.capabilitySources && LAVAMOAT.capabilitySources.length > 0) {
+    const theRealGlobalThis = globalThis
+    const { repairs, capabilities } =
+      LAVAMOAT.endowmentsToolkit.evaluateCapabilities({
+        sources: LAVAMOAT.capabilitySources,
+        globalRef: theRealGlobalThis,
+      })
+    repairs.forEach((repair) => repair())
+    registeredCapabilities = capabilities
+  }
 
   hardenIntrinsics()
 } else {
@@ -56,14 +69,12 @@ values(LAVAMOAT.policy.resources).forEach((resource) => {
   }
 })
 
-const {
-  getEndowmentsForConfig,
-  copyWrappedGlobals,
-  getBuiltinForConfig,
-} = LAVAMOAT.endowmentsToolkit({
-  handleGlobalWrite: true,
-  knownWritableFields,
-})
+const { getEndowmentsForConfig, copyWrappedGlobals, getBuiltinForConfig } =
+  LAVAMOAT.endowmentsToolkit({
+    handleGlobalWrite: true,
+    knownWritableFields,
+    capabilities: registeredCapabilities,
+  })
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
@@ -128,7 +139,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
           referrerPolicy.builtin
         )
       }
-    } 
+    }
     if (referrerPolicy.packages) {
       // if an external was automatically generate by webpack and is not recognized as builtin, but allowed as a package, we still need to pass it in.
       const requestedResourceId = findResourceId(externalName)
@@ -179,10 +190,12 @@ const repairsAvailable = keys(LAVAMOAT.repairs || {})
 const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
   if (resourceId === LAVAMOAT.root) {
     rootCompartmentGlobalThis = packageCompartmentGlobal
+    const rootPolicy = LAVAMOAT.policy.resources[resourceId] || {}
     copyWrappedGlobals(
       theRealGlobalThis,
       rootCompartmentGlobalThis,
-      globalAliases
+      globalAliases,
+      rootPolicy.capabilities
     )
     LAVAMOAT?.scuttling?.scuttle(
       theRealGlobalThis,
