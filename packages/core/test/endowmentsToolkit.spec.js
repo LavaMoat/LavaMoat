@@ -599,3 +599,145 @@ test('copyWrappedGlobals - static methods on wrapped functions', (t) => {
   t.is(typeof target.Array.from, 'function')
   t.is(typeof target.Uint8Array.from, 'function')
 })
+
+/**
+ * Creates a test-double for a capability definition. By default, `endow` stamps
+ * each option value as a key on the endowments object, so a single call can
+ * verify both that options were received and that endowments mutation works.
+ *
+ * E.g. options=['hello'] → endowments['hello'] = true
+ */
+function makeCapabilityMock(overrides = {}) {
+  const calls = []
+  const cap = {
+    ambient: false,
+    endow({ options, endowments }) {
+      calls.push({ options, endowments })
+      for (const opt of options) {
+        endowments[opt] = true
+      }
+    },
+    calls,
+    ...overrides,
+  }
+  return cap
+}
+
+test('capabilities - factory without capabilities preserves existing behavior', (t) => {
+  const { getEndowmentsForConfig } = endowmentsToolkit()
+  const sourceGlobal = { x: 1 }
+  const result = getEndowmentsForConfig(sourceGlobal, { globals: { x: true } })
+  t.is(result.x, 1)
+})
+
+test('capabilities - getEndowmentsForConfig calls endow for listed capability', (t) => {
+  const allArgs = []
+  const cap = makeCapabilityMock({
+    endow(args) {
+      allArgs.push(args)
+    },
+  })
+  const capabilities = new Map([['my-cap', cap]])
+  const { getEndowmentsForConfig } = endowmentsToolkit({ capabilities })
+
+  const sourceGlobal = {}
+  const compartmentGlobalThis = {}
+  getEndowmentsForConfig(
+    sourceGlobal,
+    { capabilities: { 'my-cap': ['opt1'] } },
+    {},
+    compartmentGlobalThis
+  )
+
+  t.is(allArgs.length, 1)
+  const call = allArgs[0]
+  t.deepEqual(call.options, ['opt1'])
+  t.is(call.compartmentGlobalThis, compartmentGlobalThis)
+  t.is(call.rootCompartmentGlobalThis, sourceGlobal)
+})
+
+test('capabilities - getEndowmentsForConfig throws for unknown capability', (t) => {
+  const { getEndowmentsForConfig } = endowmentsToolkit()
+  t.throws(
+    () => getEndowmentsForConfig({}, { capabilities: { 'unknown-cap': [] } }),
+    { message: /unknown capability "unknown-cap"/ }
+  )
+})
+
+test('capabilities - endow can mutate endowments and receives options', (t) => {
+  const cap = makeCapabilityMock()
+  const capabilities = new Map([['stamping-cap', cap]])
+  const { getEndowmentsForConfig } = endowmentsToolkit({ capabilities })
+
+  const result = getEndowmentsForConfig(
+    {},
+    { capabilities: { 'stamping-cap': ['hello', 'world'] } }
+  )
+
+  // options were received
+  t.deepEqual(cap.calls[0].options, ['hello', 'world'])
+  // mutation was visible in the returned endowments
+  t.true(result.hello)
+  t.true(result.world)
+})
+
+test('capabilities - multiple capabilities applied in listing order', (t) => {
+  const order = []
+  const capA = makeCapabilityMock({
+    endow() {
+      order.push('A')
+    },
+  })
+  const capB = makeCapabilityMock({
+    endow() {
+      order.push('B')
+    },
+  })
+  const capabilities = new Map([
+    ['cap-a', capA],
+    ['cap-b', capB],
+  ])
+  const { getEndowmentsForConfig } = endowmentsToolkit({ capabilities })
+
+  getEndowmentsForConfig({}, { capabilities: { 'cap-a': [], 'cap-b': [] } })
+
+  t.deepEqual(order, ['A', 'B'])
+})
+
+test('capabilities - copyWrappedGlobals applies root capabilities', (t) => {
+  const allArgs = []
+  const cap = makeCapabilityMock({
+    endow(args) {
+      allArgs.push(args)
+    },
+  })
+  const capabilities = new Map([['root-cap', cap]])
+  const { copyWrappedGlobals } = endowmentsToolkit({ capabilities })
+
+  const source = { x: 1 }
+  const target = Object.create(null)
+  copyWrappedGlobals(source, target, ['globalThis'], { 'root-cap': ['opt'] })
+
+  t.is(allArgs.length, 1)
+  const call = allArgs[0]
+  t.is(call.endowments, target)
+  t.is(call.compartmentGlobalThis, target)
+  t.is(call.rootCompartmentGlobalThis, target)
+  t.deepEqual(call.options, ['opt'])
+})
+
+test('capabilities - ambient capabilities separated but not invoked', (t) => {
+  const ambientCap = makeCapabilityMock({ ambient: true })
+  const localCap = makeCapabilityMock({ ambient: false })
+  const capabilities = new Map([
+    ['ambient-cap', ambientCap],
+    ['local-cap', localCap],
+  ])
+  const { getEndowmentsForConfig } = endowmentsToolkit({ capabilities })
+
+  // Only local-cap is listed in policy; ambient-cap should not be called
+  getEndowmentsForConfig({}, { capabilities: { 'local-cap': [] } })
+
+  t.is(localCap.calls.length, 1)
+  t.is(ambientCap.calls.length, 0)
+})
