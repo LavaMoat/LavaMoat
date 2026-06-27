@@ -10,9 +10,12 @@ import nodeUrl from 'node:url'
 import { assertAbsolutePath } from './fs.js'
 
 /**
- * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
- * @import {RequiredReadNowPowers} from './internal.js'
+ * @import {
+ *   FileURLToPathFn,
+ *   ReadNowPowers
+ * } from '@endo/compartment-mapper'
  * @import {SetNonNullable} from 'type-fest'
+ * @import {RequiredReadNowPowers} from './internal.js'
  * @import {FileUrlString} from './types.js'
  */
 const { isArray: isArray_ } = Array
@@ -234,7 +237,7 @@ export const toAbsolutePath = (pathLike, assertionMessage) => {
 const INT_STRING_REGEXP = /^(?:0|[1-9][0-9]*)$/
 
 /**
- * Anything matching this will need to be in
+ * Anything matching this will need to be in dot notation.
  */
 const DOT_NOTATION_ALLOWED = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/
 

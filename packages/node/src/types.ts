@@ -473,6 +473,7 @@ export type {
   Resources,
   RootPolicy,
 } from '@lavamoat/types'
+
 export type * from './errors.js'
 
 /**
@@ -565,3 +566,50 @@ export type MergedLavaMoatPolicy = LavaMoatPolicy & {
 export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
   [MERGED_POLICY_FIELD]?: never
 }
+
+/**
+ * A single structured violation with location information
+ */
+export interface StructuredViolation {
+  /** The file path where the violation occurred */
+  path: string
+  /** The line number */
+  line: number
+  /** The column number */
+  column: number
+  /** The violation type */
+  type: string
+}
+
+/**
+ * Result of structured violations inspection
+ */
+
+export interface StructuredViolationsResult {
+  /** Primordial mutation violations */
+  primordialMutations: StructuredViolation[]
+  /** Strict mode violations */
+  strictModeViolations: StructuredViolation[]
+  /** Dynamic require violations */
+  dynamicRequires: StructuredViolation[]
+}
+
+/**
+ * Options for `reportInvalidOverrides()`
+ */
+
+export type ReportInvalidOverridesOptions = ComposeOptions<
+  [
+    WithPolicy,
+    /**
+     * `policyOverridePath` is used only for display purposes; we do not
+     * actually attempt to read the policy override file
+     */
+    WithPolicyPath,
+    WithLog,
+    {
+      maxSuggestions?: number
+      what?: 'policy' | 'policy overrides'
+    },
+  ]
+>

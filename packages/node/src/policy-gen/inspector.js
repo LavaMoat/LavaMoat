@@ -19,10 +19,21 @@
  */
 
 /**
- * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue} from '@lavamoat/types'
  * @import {ParseResult} from '@babel/parser'
- * @import {InspectMessage, InspectionResultsMessage, ErrorMessage, StructuredViolationsResult} from '../internal.js'
- * @import {SourceType} from '../types.js'
+ * @import {
+ *   BuiltinPolicy,
+ *   GlobalPolicy,
+ *   GlobalPolicyValue
+ * } from '@lavamoat/types'
+ * @import {
+ *   ErrorMessage,
+ *   InspectionResultsMessage,
+ *   InspectMessage
+ * } from '../internal.js'
+ * @import {
+ *   SourceType,
+ *   StructuredViolationsResult
+ * } from '../types.js'
  */
 
 import { parse } from '@babel/parser'

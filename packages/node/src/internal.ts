@@ -18,6 +18,7 @@ import type {
   LavaMoatPolicy,
   Resources,
 } from '@lavamoat/types'
+import { type WriteStream } from 'node:tty'
 import type { PackageJson, ValueOf } from 'type-fest'
 import type { MessageTypes, SES_VIOLATION_TYPES } from './constants.js'
 import type {
@@ -25,11 +26,13 @@ import type {
   FileUrlString,
   MergedLavaMoatPolicy,
   SourceType,
+  StructuredViolationsResult,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
   WithPolicyOverrideOnly,
+  WithPolicyOverridePath,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
@@ -61,6 +64,8 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
     WithReadPowersAndTrust,
     WithPolicyOverride,
     WithProjectRoot,
+    WithPolicyPath,
+    WithPolicyOverridePath,
   ]
 >
 
@@ -161,32 +166,20 @@ export type RequiredReadNowPowers = ReadonlyArray<
 >
 
 /**
- * Options for `reportInvalidOverrides()`
- *
- * @internal
- */
-export type ReportInvalidOverridesOptions = ComposeOptions<
-  [
-    WithPolicy,
-    /**
-     * `policyOverridePath` is used only for display purposes; we do not
-     * actually attempt to read the policy override file
-     */
-    WithPolicyPath,
-    WithLog,
-    {
-      maxSuggestions?: number
-      what?: 'policy' | 'policy overrides'
-    },
-  ]
->
-
-/**
  * Options for `reportSesViolations()`
  *
  * @internal
  */
 export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
+
+/**
+ * Options for `reportRedundantPreloads()`
+ *
+ * @internal
+ */
+export type ReportRedundantPreloadsOptions = ComposeOptions<
+  [WithLog, WithPolicyOverridePath, WithPolicyPath]
+>
 
 /**
  * Result of `loadCompartmentMap()`
@@ -308,36 +301,6 @@ export interface InspectMessage {
 }
 
 /**
- * A single structured violation with location information
- *
- * @internal
- */
-export interface StructuredViolation {
-  /** The file path where the violation occurred */
-  path: string
-  /** The line number */
-  line: number
-  /** The column number */
-  column: number
-  /** The violation type */
-  type: string
-}
-
-/**
- * Result of structured violations inspection
- *
- * @internal
- */
-export interface StructuredViolationsResult {
-  /** Primordial mutation violations */
-  primordialMutations: StructuredViolation[]
-  /** Strict mode violations */
-  strictModeViolations: StructuredViolation[]
-  /** Dynamic require violations */
-  dynamicRequires: StructuredViolation[]
-}
-
-/**
  * Message type for responding with global policy
  *
  * @internal
@@ -378,6 +341,7 @@ export interface ErrorMessage {
  * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
  *   be inspected
  * @returns {number} The new message count
+ * @internal
  */
 export type ReportModuleInspectionProgressFn = (
   messageCount: number,
@@ -392,6 +356,7 @@ export type ReportModuleInspectionProgressFn = (
  *   inspected so far
  * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
  *   be inspected
+ * @internal
  */
 export type ReportModuleInspectionProgressEndFn = (
   inspectedModules: Set<FileUrlString>,
@@ -400,8 +365,36 @@ export type ReportModuleInspectionProgressEndFn = (
 
 /**
  * Object returned by `createModuleInspectionProgressReporter`
+ *
+ * @internal
  */
 export interface ModuleInspectionProgressReporter {
+  /**
+   * Reports progress of the module inspection process to the console.
+   */
   reportModuleInspectionProgress: ReportModuleInspectionProgressFn
+  /**
+   * Reports the end of the module inspection process to the console.
+   */
   reportModuleInspectionProgressEnd: ReportModuleInspectionProgressEndFn
+}
+
+/**
+ * Options for `createModuleInspectionProgressReporter()`
+ *
+ * @internal
+ */
+export interface CreateModuleInspectionProgressReporterOptions {
+  /**
+   * If `true`, the reporter will not report progress
+   *
+   * @defaultValue `false`
+   */
+  disabled?: boolean
+  /**
+   * The stream to write the progress to
+   *
+   * @defaultValue `process.stderr`
+   */
+  stream?: WriteStream
 }
