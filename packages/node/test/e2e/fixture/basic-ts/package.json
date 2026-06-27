@@ -1,0 +1,10 @@
+{
+  "name": "basic-ts",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "simple-dep": "^1.0.0"
+  }
+}

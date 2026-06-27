@@ -56,6 +56,12 @@ export const createCLIMacros = (test) => {
           stderr.trim().replace(/^Debugger attached\.(?:\r?\n)+/, '')
         )
 
+        if (typeof expected !== 'object' || !expected.stderr) {
+          t.log(
+            `Warning: test for command "${command}" is not expected to produce errors, but it did:\n${trimmedStderr}`
+          )
+        }
+
         switch (typeof expected) {
           case 'string':
             t.plan(1)

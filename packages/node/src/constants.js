@@ -167,6 +167,16 @@ export const NATIVE_PARSER_FILE_EXT = 'node'
 export const NATIVE_PARSER_NAME = 'native'
 
 /**
+ * Extension for TypeScript modules
+ */
+export const MTS_PARSER_FILE_EXT = 'ts'
+
+/**
+ * Name of the TypeScript (type-stripped) parser language
+ */
+export const MTS_PARSER_NAME = 'mts'
+
+/**
  * Whether we should trust the root compartment _by default_
  */
 export const DEFAULT_TRUST_ROOT_COMPARTMENT = true
