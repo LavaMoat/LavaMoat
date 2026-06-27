@@ -10,7 +10,7 @@
     "packages/*"
   ],
   "engines": {
-    "node": "^20.19.0 || ^22.5.1 || ^24.0.0",
+    "node": "^22.22.2 || ^24.15.0",
     "npm": ">=7.0.0"
   },
   "scripts": {
@@ -42,9 +42,9 @@
     "@commitlint/config-conventional": "19.8.1",
     "@endo/compartment-mapper": "2.1.0",
     "@eslint/js": "10.0.1",
-    "@tsconfig/node20": "20.1.9",
+    "@tsconfig/node22": "22.0.5",
     "@types/lint-staged": "13.3.0",
-    "@types/node": "20.19.41",
+    "@types/node": "22.19.21",
     "@types/semver": "7.7.1",
     "@types/wallabyjs": "0.0.15",
     "@types/yargs": "17.0.35",
