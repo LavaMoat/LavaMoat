@@ -248,3 +248,8 @@ export const ALL_BUILTIN_MODULES = freeze(
     )
   )
 )
+
+/**
+ * Default entry for item in `CaptureFromMapOptions['_preload']` array
+ */
+export const DEFAULT_PRELOAD_ENTRY = '.'
