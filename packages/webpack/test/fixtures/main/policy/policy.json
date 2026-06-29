@@ -1,5 +1,15 @@
 {
   "resources": {
+    "$lop1": {
+      "packages": {
+        "commonjs-package": true
+      }
+    },
+    "$lop2": {
+      "packages": {
+        "commonjs-package": true
+      }
+    },
     "commonjs-package": {
       "packages": {
         "umd-package": true
