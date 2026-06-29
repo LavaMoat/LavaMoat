@@ -169,4 +169,18 @@ test(
   {}
 )
 
+test(
+  'import.meta.resolve - builtin and meta.url',
+  testExec,
+  new URL('../fixture/import-meta-resolve/app.js', import.meta.url),
+  {
+    resolvedBuiltin: true,
+    resolvedSelf: true,
+    nestedMetaUrlCorrect: true,
+    // TODO: nested relative resolution is broken because Node.js
+    // import.meta.resolve() ignores the second (parent) argument
+    resolvedFromNested: true,
+  }
+)
+
 // test('"default" exported from exit modules', testExec)
