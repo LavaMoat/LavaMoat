@@ -11,6 +11,7 @@ export interface LavaMoatChunkRuntimeConfiguration {
 export interface CompleteLavaMoatPluginOptions {
   generatePolicy?: boolean
   generatePolicyOnly?: boolean
+  overwritePolicyWithOverrides?: boolean;
   rootDir?: string
   policyLocation: string
   emitPolicySnapshot?: boolean
