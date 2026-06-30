@@ -369,7 +369,7 @@ class LavaMoatPlugin {
                     connections:
                       compilation.moduleGraph.getOutgoingConnections(module),
                   })),
-                  overwritePolicyWithOverride: STORE.options.overwritePolicyWithOverrides,
+                  overwritePolicyWithOverride: STORE.options.generatePolicyIncludeOverrides,
                 })
               : loadPolicy({
                   policyFromOptions: STORE.options.policy,
