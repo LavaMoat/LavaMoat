@@ -12,15 +12,17 @@ import { log as defaultLog } from './log.js'
 import { isObjectyObject, pluralize, toKeypath } from './util.js'
 
 /**
- * @import {ReportInvalidOverridesOptions,
- * ReportModuleInspectionProgressFn,
- * ModuleInspectionProgressReporter,
- * ReportModuleInspectionProgressEndFn,
- * ReportSesViolationsOptions,
- * StructuredViolation,
- * StructuredViolationsResult} from './internal.js'
  * @import {CanonicalName} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {
+ *   ModuleInspectionProgressReporter,
+ *   ReportInvalidOverridesOptions,
+ *   ReportModuleInspectionProgressEndFn,
+ *   ReportModuleInspectionProgressFn,
+ *   ReportSesViolationsOptions,
+ *   StructuredViolation,
+ *   StructuredViolationsResult
+ * } from './internal.js'
  */
 
 /**
@@ -78,7 +80,6 @@ const findCanonicalNameKeypath = (policy, canonicalName) => {
  *   found in the compartment map
  * @param {ReportInvalidOverridesOptions} options
  * @returns {void}
- * @internal
  */
 export const reportInvalidCanonicalNames = (
   unknownCanonicalNames,
@@ -158,7 +159,6 @@ export const reportInvalidCanonicalNames = (
  *   Map of canonical names to structured violations
  * @param {ReportSesViolationsOptions} [options]
  * @returns {void}
- * @internal
  */
 export const reportSesViolations = (
   violationsForPackage,
@@ -169,7 +169,6 @@ export const reportSesViolations = (
    *
    * @param {StructuredViolation} violation
    * @returns {string}
-   * @internal
    */
   const formatViolation = (violation) => {
     const { path, line, column, type } = violation
