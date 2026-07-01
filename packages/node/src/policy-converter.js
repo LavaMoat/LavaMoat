@@ -33,24 +33,26 @@ import { isArray, isBoolean } from './util.js'
 const { create, entries, fromEntries } = Object
 
 /**
- * @import {GlobalPolicy,
+ * @import {
+ *   GlobalPolicy,
+ *   LavaMoatPolicy,
  *   PackagePolicy,
- *   ResourcePolicy,
- *   LavaMoatPolicy} from '@lavamoat/types'
- * @import {LavaMoatEndoPackagePolicy,
+ *   ResourcePolicy
+ * } from '@lavamoat/types'
+ * @import {
+ *   LavaMoatEndoPackagePolicy,
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
- *   ToEndoPolicyOptions,
- *   Resources,
  *   MergedLavaMoatPolicy,
+ *   Resources,
+ *   ToEndoPolicyOptions,
  *   ToEndoPolicyOptionsWithoutPolicyOverride,
- *   UnmergedLavaMoatPolicy} from './types.js'
+ *   UnmergedLavaMoatPolicy
+ * } from './types.js'
  */
 
 /**
  * Boilerplate for Endo policies.
- *
- * @internal
  */
 export const ENDO_POLICY_BOILERPLATE = Object.freeze(
   /**
@@ -66,8 +68,6 @@ export const ENDO_POLICY_BOILERPLATE = Object.freeze(
 /**
  * The contents of {@link LavaMoatEndoPolicy.entry} when the entry is trusted
  * (`all`)
- *
- * @internal
  */
 export const ENDO_POLICY_ENTRY_TRUSTED = Object.freeze(
   /**

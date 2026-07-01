@@ -2,14 +2,16 @@
  * Generic worker pool for managing worker threads
  *
  * @packageDocumentation
- * @internal
  */
 
 import { availableParallelism } from 'node:os'
 import { Worker } from 'node:worker_threads'
 
 /**
- * @import {BaseMessage, WorkerPoolOptions} from './internal.js'
+ * @import {
+ *   BaseMessage,
+ *   WorkerPoolOptions
+ * } from './internal.js'
  */
 
 /**

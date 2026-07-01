@@ -10,9 +10,12 @@ import nodeUrl from 'node:url'
 import { assertAbsolutePath } from './fs.js'
 
 /**
- * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
- * @import {RequiredReadNowPowers} from './internal.js'
+ * @import {
+ *   FileURLToPathFn,
+ *   ReadNowPowers
+ * } from '@endo/compartment-mapper'
  * @import {SetNonNullable} from 'type-fest'
+ * @import {RequiredReadNowPowers} from './internal.js'
  * @import {FileUrlString} from './types.js'
  */
 const { isArray: isArray_ } = Array
@@ -28,7 +31,6 @@ const { freeze, keys } = Object
  * This is the format that `@endo/compartment-mapper` often expects.
  * @param {URL | string} url URL or path
  * @returns {FileUrlString} URL-like string
- * @internal
  */
 export const toFileURLString = (url) =>
   /** @type {FileUrlString} */ (
@@ -46,7 +48,6 @@ export const toFileURLString = (url) =>
  *
  * @param {unknown} value
  * @returns {value is object}
- * @internal
  */
 export const isObject = (value) => Object(value) === value
 
@@ -55,7 +56,6 @@ export const isObject = (value) => Object(value) === value
  *
  * @param {unknown} value
  * @returns {value is object & {length?: never}}
- * @internal
  */
 export const isObjectyObject = (value) => isObject(value) && !isArray(value)
 
@@ -64,7 +64,6 @@ export const isObjectyObject = (value) => isObject(value) && !isArray(value)
  *
  * @param {unknown} value
  * @returns {value is string}
- * @internal
  */
 export const isString = (value) => typeof value === 'string'
 
@@ -76,7 +75,6 @@ export const isString = (value) => typeof value === 'string'
  * `Array`.
  * @param {unknown} value
  * @returns {value is any[]}
- * @internal
  */
 export const isArray = (value) => isArray_(value)
 
@@ -85,7 +83,6 @@ export const isArray = (value) => isArray_(value)
  *
  * @param {unknown} value
  * @returns {value is boolean}
- * @internal
  */
 export const isBoolean = (value) => typeof value === 'boolean'
 
@@ -104,7 +101,6 @@ export const isBoolean = (value) => typeof value === 'boolean'
  * @param {T} obj Some object
  * @param {K} prop Some property which might be in `obj`
  * @returns {obj is Omit<T, K> & {[key in K]: SetNonNullable<T, K>}}
- * @internal
  * @see {@link https://github.com/microsoft/TypeScript/issues/44253}
  */
 export const hasValue = (obj, prop) => {
@@ -129,7 +125,6 @@ export const hasValue = (obj, prop) => {
  *
  * @param {boolean} [prodOnly=false] Default is `false`
  * @returns {Set<string>}
- * @internal
  */
 export const prodOnlyToConditions = (prodOnly) =>
   prodOnly ? new Set() : new Set(['development'])
@@ -138,7 +133,6 @@ export const prodOnlyToConditions = (prodOnly) =>
  * Ordered array of every property in {@link ReadNowPowers} which is _required_.
  *
  * @satisfies {RequiredReadNowPowers}
- * @internal
  */
 const REQUIRED_READ_NOW_POWERS = freeze(
   /** @type {const} */ (['fileURLToPath', 'isAbsolute', 'maybeReadNow'])
@@ -149,7 +143,6 @@ const REQUIRED_READ_NOW_POWERS = freeze(
  *
  * @param {unknown} value
  * @returns {value is ReadNowPowers}
- * @internal
  */
 export const isReadNowPowers = (value) =>
   isObjectyObject(value) &&
@@ -163,7 +156,6 @@ export const isReadNowPowers = (value) =>
  * @param {object} [value] Object value to get keys of
  * @param {string[]} [defaultKeys=[]] Default is `[]`
  * @returns {string[]}
- * @internal
  */
 export const keysOr = (value, defaultKeys = []) =>
   value ? keys(value) : defaultKeys
@@ -175,7 +167,6 @@ export const keysOr = (value, defaultKeys = []) =>
  *
  * @param {unknown} value
  * @returns {value is (...args: any[]) => any}
- * @internal
  */
 export const isFunction = (value) => typeof value === 'function'
 
@@ -184,7 +175,6 @@ export const isFunction = (value) => typeof value === 'function'
  *
  * @param {unknown} value
  * @returns {value is string | URL}
- * @internal
  */
 export const isPathLike = (value) => isString(value) || value instanceof URL
 
@@ -195,7 +185,6 @@ export const isPathLike = (value) => isString(value) || value instanceof URL
  *   `file://` scheme
  * @param {FileURLToPathFn} [fileURLToPath] `fileURLToPath` implementation
  * @returns {string} A filepath
- * @internal
  */
 export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
   return value instanceof URL || value.startsWith('file://')
@@ -211,7 +200,6 @@ export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
  *   path.
  * @param {string} [assertionMessage] Custom assertion message
  * @returns {string} Absolute path
- * @internal
  */
 export const toAbsolutePath = (pathLike, assertionMessage) => {
   const path = toPath(pathLike)
@@ -292,7 +280,6 @@ export const toKeypath = (path) => {
  * @param {string} singular The singular form of the word
  * @param {string} [plural] The plural form (defaults to `singular + 's'`)
  * @returns {string} The appropriate form of the word
- * @internal
  */
 export const pluralize = (count, singular, plural = `${singular}s`) =>
   count === 1 ? singular : plural

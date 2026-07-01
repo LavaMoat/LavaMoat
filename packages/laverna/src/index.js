@@ -1,7 +1,14 @@
 /**
- * @import {LavernaOptions, LavernaCapabilities, PublishFn, Publisher, GetVersions, GlobDirent} from './types'
  * @import {ExecFileException} from 'node:child_process'
  * @import {PackageJson} from 'type-fest'
+ * @import {
+ *   GetVersions,
+ *   GlobDirent,
+ *   LavernaCapabilities,
+ *   LavernaOptions,
+ *   Publisher,
+ *   PublishFn
+ * } from './types'
  */
 
 const path = require('node:path')
@@ -429,7 +436,6 @@ exports.Laverna = class Laverna {
    * @param {string} name
    * @param {string} [version]
    * @returns {string}
-   * @internal
    */
   static pkgToString(name, version) {
     return version ? `${bold(name)}${gray('@')}${version}` : bold(name)
