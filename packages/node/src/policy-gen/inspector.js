@@ -19,9 +19,18 @@
  */
 
 /**
- * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue} from '@lavamoat/types'
  * @import {ParseResult} from '@babel/parser'
- * @import {InspectMessage, InspectionResultsMessage, ErrorMessage, StructuredViolationsResult} from '../internal.js'
+ * @import {
+ *   BuiltinPolicy,
+ *   GlobalPolicy,
+ *   GlobalPolicyValue
+ * } from '@lavamoat/types'
+ * @import {
+ *   ErrorMessage,
+ *   InspectionResultsMessage,
+ *   InspectMessage,
+ *   StructuredViolationsResult
+ * } from '../internal.js'
  * @import {SourceType} from '../types.js'
  */
 
@@ -120,7 +129,6 @@ const isInspectMessage = (value) => {
  * @param {Map<string, GlobalPolicyValue>} globalMap Map from
  *   {@link inspectGlobals}
  * @returns {GlobalPolicy | null} The resulting global policy
- * @internal
  */
 const globalMapToGlobalPolicy = (globalMap) => {
   if (!globalMap.size) {

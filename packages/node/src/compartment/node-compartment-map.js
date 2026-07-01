@@ -3,7 +3,6 @@
  * descriptor generated from a `node_modules` directory.
  *
  * @packageDocumentation
- * @internal
  */
 
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
@@ -14,14 +13,22 @@ import { DEFAULT_ENDO_OPTIONS } from './options.js'
 import { defaultReadPowers } from './power.js'
 
 /**
- * @import {CanonicalName,
- *  CompartmentMapDescriptor,
- *  PackageCompartmentMapDescriptor,
- *  PackageCompartmentDescriptorName,
- * MapNodeModulesOptions} from '@endo/compartment-mapper'
- * @import {MakeNodeCompartmentMapOptions, MakeNodeCompartmentMapResult} from '../internal.js'
- * @import {Entries, PackageJson} from 'type-fest';
- * @import {Loggerr} from 'loggerr';
+ * @import {
+ *   CanonicalName,
+ *   CompartmentMapDescriptor,
+ *   MapNodeModulesOptions,
+ *   PackageCompartmentDescriptorName,
+ *   PackageCompartmentMapDescriptor
+ * } from '@endo/compartment-mapper'
+ * @import {Loggerr} from 'loggerr'
+ * @import {
+ *   Entries,
+ *   PackageJson
+ * } from 'type-fest'
+ * @import {
+ *   MakeNodeCompartmentMapOptions,
+ *   MakeNodeCompartmentMapResult
+ * } from '../internal.js'
  */
 
 const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])
@@ -80,7 +87,6 @@ const createPackageJsonMap = (
  * @param {string | URL} entrypointPath
  * @param {MakeNodeCompartmentMapOptions} [options]
  * @returns {Promise<MakeNodeCompartmentMapResult>}
- * @internal
  */
 export const makeNodeCompartmentMap = async (
   entrypointPath,

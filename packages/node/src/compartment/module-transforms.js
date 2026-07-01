@@ -3,7 +3,6 @@
  * transforms provided to `@endo/compartment-mapper`.
  *
  * @packageDocumentation
- * @internal
  */
 
 import { evadeCensorSync } from '@endo/evasive-transform'
@@ -14,7 +13,10 @@ const encoder = new TextEncoder()
 const { URL } = globalThis
 
 /**
- * @import {SyncModuleTransform, Language} from '@endo/compartment-mapper'
+ * @import {
+ *   Language,
+ *   SyncModuleTransform
+ * } from '@endo/compartment-mapper'
  */
 
 /**
@@ -80,8 +82,6 @@ const createModuleTransform = (parser) => {
 
 /**
  * Standard set of module transforms for our purposes
- *
- * @internal
  */
 export const syncModuleTransforms = /** @type {const} */ ({
   cjs: createModuleTransform('cjs'),

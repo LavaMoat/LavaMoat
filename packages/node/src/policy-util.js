@@ -32,11 +32,19 @@ import {
 } from './util.js'
 
 /**
- * @import {RootPolicy, LavaMoatPolicy} from '@lavamoat/types'
- * @import {MergedLavaMoatPolicy,
- *  LoadPoliciesOptions,
- *  WritableFsInterface} from './types.js'
- * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
+ * @import {
+ *   LavaMoatPolicy,
+ *   RootPolicy
+ * } from '@lavamoat/types'
+ * @import {
+ *   ReadPolicyOptions,
+ *   ReadPolicyOverrideOptions
+ * } from './internal.js'
+ * @import {
+ *   LoadPoliciesOptions,
+ *   MergedLavaMoatPolicy,
+ *   WritableFsInterface
+ * } from './types.js'
  */
 
 /**
@@ -45,7 +53,6 @@ import {
  * @param {string | URL} policyPath Path to policy
  * @param {ReadPolicyOptions} [options] Options
  * @returns {Promise<LavaMoatPolicy>}
- * @internal
  */
 export const readPolicy = async (
   policyPath,
@@ -430,7 +437,6 @@ export const mergePolicies = (policyA, policyB) => ({
  * @param {string | URL} [options.policyPath] Path to the policy file
  * @param {string | URL} [options.projectRoot]
  * @returns {string}
- * @internal
  */
 const makeDefaultPath = (
   defaultDir,
@@ -469,7 +475,6 @@ const makeDefaultPath = (
  * @param {string | URL} [options.policyPath] Path to the policy file
  * @param {string | URL} [options.projectRoot]
  * @returns {string}
- * @internal
  */
 export const makeDefaultPolicyOverridePath = ({ policyPath, projectRoot }) => {
   const path = makeDefaultPath(
@@ -488,7 +493,6 @@ export const makeDefaultPolicyOverridePath = ({ policyPath, projectRoot }) => {
  * @param {string | URL} [projectRoot=process.cwd()] Project root directory.
  *   Default is `process.cwd()`
  * @returns {string}
- * @internal
  */
 export const makeDefaultPolicyPath = (projectRoot = process.cwd()) => {
   const path = makeDefaultPath(DEFAULT_POLICY_DIR, DEFAULT_POLICY_FILENAME, {

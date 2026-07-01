@@ -16,10 +16,19 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions, TestPolicyForFixtureOptions} from './types.js'
- * @import {SourceType} from '../../../src/types.js'
- * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {
+ *   MacroDeclarationOptions,
+ *   TestFn
+ * } from 'ava'
+ * @import {SourceType} from '../../../src/types.js'
+ * @import {
+ *   ScaffoldFixtureOptions,
+ *   ScaffoldFixtureResult,
+ *   TestPolicyForFixtureOptions,
+ *   TestPolicyForJSONOptions,
+ *   TestPolicyMacroOptions
+ * } from './types.js'
  */
 
 const fixture = fixtureFinder(new URL('..', import.meta.url))
@@ -34,7 +43,6 @@ const fixture = fixtureFinder(new URL('..', import.meta.url))
  * @template [Ctx=unknown] Custom execution context, if any. Default is
  *   `unknown`
  * @param {TestFn<Ctx>} test - AVA test function
- * @internal
  */
 export function createGeneratePolicyMacros(test) {
   /**
