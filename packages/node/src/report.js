@@ -37,7 +37,7 @@ import { fileURLToPath } from 'node:url'
  * @import {WriteStream} from 'node:tty'
  * @import {
  *   ModuleInspectionProgressReporter,
- *   ReportInvalidCanonicalNames,
+ *   ReportInvalidCanonicalNamesOptions,
  *   ReportModuleInspectionProgressEndFn,
  *   ReportModuleInspectionProgressFn,
  *   ReportSesViolationsOptions,
@@ -63,7 +63,7 @@ const DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS = 3
  *   that were referenced in policy but not found
  * @param {Set<CanonicalName>} knownCanonicalNames - Set of all canonical names
  *   found in the compartment map
- * @param {ReportInvalidCanonicalNames} options
+ * @param {ReportInvalidCanonicalNamesOptions} options
  * @returns {void}
  */
 export const reportInvalidCanonicalNames = (
@@ -150,6 +150,9 @@ export const reportSesViolations = (
   violationsForPackage,
   { log = defaultLog } = {}
 ) => {
+  if (violationsForPackage.size === 0) {
+    return
+  }
   /**
    * Formats a structured violation into a warning message
    *

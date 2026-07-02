@@ -2,7 +2,6 @@
  * Internal types used by `@lavamoat/node`.
  *
  * @packageDocumentation
- * @internal
  */
 
 import type {
@@ -23,6 +22,7 @@ import type { PackageJson, ValueOf } from 'type-fest'
 import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
+  FileUrlString,
   MergedLavaMoatPolicy,
   WithFs,
   WithLoadForMapOptions,
@@ -44,14 +44,11 @@ import type {
  * (not shown) should be called with a provided context (also not shown).
  *
  * @param context Usually a `globalThis`
- * @internal
  */
 export type ContextTestFn = (context: object) => boolean
 
 /**
  * Options bucket containing a `compact` prop
- *
- * @internal
  */
 export interface WithCompact {
   /**
@@ -64,8 +61,6 @@ export interface WithCompact {
 
 /**
  * Options for `loadCompartmentMapForPolicy()`
- *
- * @internal
  */
 export type LoadAndGeneratePolicyOptions = ComposeOptions<
   [
@@ -83,36 +78,26 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
  * This is basically just an object with anything in it, since we cannot be sure
  * that any given global property is present (or what its type is) in the
  * current compartment at any given time.
- *
- * @internal
  */
 export type SomeGlobalThis = Record<PropertyKey, unknown>
 
 /**
  * Options for `readPolicy()`
- *
- * @internal
  */
 export type ReadPolicyOptions = ComposeOptions<[WithReadFile]>
 
 /**
  * Options for `readPolicyOverride()`
- *
- * @internal
  */
 export type ReadPolicyOverrideOptions = ComposeOptions<[WithReadFile]>
 
 /**
  * Options for `resolveBinScript()`
- *
- * @internal
  */
 export type ResolveBinScriptOptions = ComposeOptions<[WithFs, WithFrom]>
 
 /**
  * Options containing a `from` property; used for path resolution
- *
- * @internal
  */
 export interface WithFrom {
   /**
@@ -128,15 +113,11 @@ export type ResolveEntrypointOptions = ComposeOptions<[WithFrom]>
 
 /**
  * Options for `resolveWorkspace()`
- *
- * @internal
  */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
 
 /**
  * N array of required properties for {@link ReadNowPowers}
- *
- * @internal
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
@@ -147,10 +128,8 @@ export type RequiredReadNowPowers = ReadonlyArray<
 
 /**
  * Options for {@link reportInvalidCanonicalNames}
- *
- * @internal
  */
-export type ReportInvalidCanonicalNames = ComposeOptions<
+export type ReportInvalidCanonicalNamesOptions = ComposeOptions<
   [
     WithPolicy,
     /**
@@ -179,15 +158,11 @@ export type ReportInvalidCanonicalNames = ComposeOptions<
 
 /**
  * Options for `reportSesViolations()`
- *
- * @internal
  */
 export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
 
 /**
  * Result of `loadAndGeneratePolicy()`
- *
- * @internal
  */
 export interface LoadAndGeneratePolicyResult {
   policy: MergedLavaMoatPolicy
@@ -209,8 +184,6 @@ export interface LoadAndGeneratePolicyResult {
  * Notably, this allows consumers to provide their own `packageDependenciesHook`
  * — used by the policy-generation path to seed override-listed dependencies
  * into the dependency graph.
- *
- * @internal
  */
 export type ConsumerMapNodeModulesOptions = Omit<
   MapNodeModulesOptions,
@@ -225,8 +198,6 @@ export type ConsumerMapNodeModulesOptions = Omit<
 
 /**
  * Options bucket containing a `mapNodeModulesOptions` prop
- *
- * @internal
  */
 export interface WithMapNodeModulesOptions {
   /**
@@ -240,11 +211,10 @@ export interface WithMapNodeModulesOptions {
 
 /**
  * Options for `makeNodeCompartmentMap()`
- *
- * @internal
  */
 export type MakeNodeCompartmentMapOptions = ComposeOptions<
   [
+    WithPolicyOverride,
     WithLog,
     WithReadPowersAndTrustAndEndoPolicy,
     WithProdOnly,
@@ -254,28 +224,44 @@ export type MakeNodeCompartmentMapOptions = ComposeOptions<
 
 /**
  * Result of `makeNodeCompartmentMap()`
- *
- * @internal
  */
 export interface MakeNodeCompartmentMapResult {
+  /**
+   * Map of canonical names to package JSON objects
+   */
   packageJsonMap: Map<CanonicalName, PackageJson>
+  /**
+   * The initial compartment map
+   */
   packageCompartmentMap: PackageCompartmentMapDescriptor
+  /**
+   * Set of canonical names from policy which were not found in
+   * {@link packageCompartmentMap}
+   */
   unknownCanonicalNames: Set<CanonicalName>
+  /**
+   * Set of canonical names that were found in {@link packageCompartmentMap}
+   */
   knownCanonicalNames: Set<CanonicalName>
+  /**
+   * The policy to use for the root compartment
+   *
+   * Should only be populated if the root compartment is untrusted.
+   */
   rootUsePolicy?: CanonicalName
+  /**
+   * Deferred warnings
+   */
+  warnings?: string[]
 }
 
 /**
  * Proper names of SES violation types
- *
- * @internal
  */
 export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
 
 /**
  * Options for `makeGlobalsAttenuator()`
- *
- * @internal
  */
 export type MakeGlobalsAttenuatorOptions = ComposeOptions<
   [WithPolicy, WithScuttleGlobalThis, WithTrustRoot]
@@ -285,7 +271,6 @@ export type MakeGlobalsAttenuatorOptions = ComposeOptions<
  * Options containing a `policy` prop
  *
  * @template T The type of the resources in the policy
- * @internal
  */
 export interface WithPolicy<T extends Resources = Resources> {
   policy?: LavaMoatPolicy<T>
@@ -297,12 +282,10 @@ export interface WithPolicyPath {
 
 /**
  * A single structured violation with location information
- *
- * @internal
  */
 export interface StructuredViolation {
   /** The file path where the violation occurred */
-  path: string
+  path: FileUrlString
   /** The line number */
   line: number
   /** The column number */
@@ -313,8 +296,6 @@ export interface StructuredViolation {
 
 /**
  * Result of structured violations inspection
- *
- * @internal
  */
 export interface StructuredViolationsResult {
   /** Primordial mutation violations */
@@ -327,8 +308,6 @@ export interface StructuredViolationsResult {
 
 /**
  * Per-module inspection results collected during the composed parse pipeline.
- *
- * @internal
  */
 export interface ModuleInspectionResult {
   globalPolicy: GlobalPolicy | null
@@ -342,7 +321,6 @@ export interface ModuleInspectionResult {
  * @param inspectedModules The modules that have been inspected so far
  * @param modulesToInspect The modules that still need to be inspected
  * @returns The new message count
- * @internal
  */
 export type ReportModuleInspectionProgressFn = (
   inspectedModules: Set<string>,
@@ -354,7 +332,6 @@ export type ReportModuleInspectionProgressFn = (
  *
  * @param inspectedModules The modules that have been inspected so far
  * @param modulesToInspect The modules that still need to be inspected
- * @internal
  */
 export type ReportModuleInspectionProgressEndFn = (
   inspectedModules: Set<string>,
@@ -363,8 +340,6 @@ export type ReportModuleInspectionProgressEndFn = (
 
 /**
  * Object returned by `createModuleInspectionProgressReporter`
- *
- * @internal
  */
 export interface ModuleInspectionProgressReporter {
   reportModuleInspectionProgress: ReportModuleInspectionProgressFn
@@ -373,8 +348,6 @@ export interface ModuleInspectionProgressReporter {
 
 /**
  * Worker data passed to the policy-generation worker thread.
- *
- * @internal
  */
 export interface PolicyGenWorkerData {
   /**
@@ -403,8 +376,6 @@ export interface PolicyGenWorkerData {
  * All three logical analyses (globals, builtins, violations) are performed in a
  * single Babel traversal and returned as named fields to avoid positional tuple
  * fragility.
- *
- * @internal
  */
 export interface PolicyGenAnalysisResults {
   /** Map of global name to policy value. */
@@ -432,8 +403,6 @@ export interface ModuleInspectionProgressReporterOptions {
 
 /**
  * Options for {@link createPolicyGenWorkerParsers}
- *
- * @internal
  */
 export type CreatePolicyGenWorkerParsersOptions =
   | (WithLog & ModuleInspectionProgressReporterOptions)

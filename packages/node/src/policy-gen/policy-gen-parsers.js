@@ -47,6 +47,7 @@ import {
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
+import { toFileURLString } from '../util.js'
 
 const {
   getOwnPropertyNames,
@@ -106,7 +107,7 @@ const builtinsToPolicy = (builtins) => {
 
 /**
  * @param {ViolationsAnalyzerResults | null} violations
- * @param {string} id
+ * @param {FileUrlString} id
  * @returns {StructuredViolationsResult | null}
  */
 const formatViolations = (violations, id) => {
@@ -203,11 +204,12 @@ export const createPolicyGenParsers = (inspectionResults, reporterOptions) => {
     location,
     visitorResults: [{ globals, builtins, violations: violationsResult }],
   }) => {
+    const url = toFileURLString(location)
     inspectedModules.add(location)
     const globalPolicy = globalMapToGlobalPolicy(globals)
     const builtinPolicy = builtinsToPolicy(builtins)
-    const violations = formatViolations(violationsResult, location)
-    inspectionResults.set(/** @type {FileUrlString} */ (location), {
+    const violations = formatViolations(violationsResult, url)
+    inspectionResults.set(url, {
       globalPolicy,
       builtinPolicy,
       violations,

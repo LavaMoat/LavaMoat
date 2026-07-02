@@ -12,7 +12,6 @@
         "../../tofu/types/inspectSesCompat.d.ts"
       ]
     },
-    "preserveSymlinks": true,
     "rootDir": ".",
     "strict": true,
     "stripInternal": true,
