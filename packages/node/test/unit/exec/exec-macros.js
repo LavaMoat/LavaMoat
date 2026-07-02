@@ -3,6 +3,11 @@ import '../../../src/preamble.js'
 import chalk from 'chalk'
 import { run } from '../../../src/exec/run.js'
 import {
+  policyInput as makePolicyInput,
+  policyOverrideNone,
+  policySourceFromInline,
+} from '../../../src/policy-input.js'
+import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
   JSON_FIXTURE_DIR_URL,
   loadJSONFixture,
@@ -68,7 +73,13 @@ export const createExecMacros = (test) => {
           new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
         )
         try {
-          const result = await run(jsonEntrypoint, { policy, readPowers })
+          const result = await run(jsonEntrypoint, {
+            policies: makePolicyInput({
+              policy: policySourceFromInline(policy),
+              override: policyOverrideNone(),
+            }),
+            readPowers,
+          })
           t.deepEqual(
             { .../** @type {any} */ (result) },
             expected,
@@ -100,7 +111,12 @@ export const createExecMacros = (test) => {
         expected,
         { policy = DEFAULT_POLICY } = {}
       ) => {
-        const result = await run(entrypoint, { policy })
+        const result = await run(entrypoint, {
+          policies: makePolicyInput({
+            policy: policySourceFromInline(policy),
+            override: policyOverrideNone(),
+          }),
+        })
         t.deepEqual({ .../** @type {any} */ (result) }, expected)
       },
       title: (title) =>

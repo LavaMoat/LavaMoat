@@ -28,13 +28,20 @@ import { action, hrPath, seconds, success } from './format.js'
 import { readJsonFile } from './fs.js'
 import { disableWarnings, log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
+import {
+  policyInput as buildPolicyInput,
+  policyOverrideAuto,
+  policyOverrideNone,
+  policyOverrideSourceFromFile,
+  policySourceFromFile,
+  policySourceFromInline,
+} from './policy-input.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
 import { toPath } from './util.js'
 import { stripVTControlCharacters } from 'node:util'
-import { writePolicy } from './policy-util.js'
+import { writePolicy, unwrapMerged } from './policy-util.js'
 
 /**
- * @import {LavaMoatPolicy} from '@lavamoat/types'
  * @import {LavaMoatScuttleOpts} from 'lavamoat-core'
  * @import {PackageJson} from 'type-fest'
  */
@@ -460,39 +467,45 @@ const main = async (args = hideBin(process.argv)) => {
           )
         }
 
-        /**
-         * This will be the policy merged with overrides, if present
-         *
-         * @type {LavaMoatPolicy | undefined}
-         */
-        let policy
+        const input = buildPolicyInput({
+          policy: policySourceFromFile(policyPath),
+          override: policyOverridePath
+            ? policyOverrideSourceFromFile(policyOverridePath)
+            : policyOverrideAuto(projectRoot),
+        })
+
+        let runInput = input
 
         if (generate) {
           // let this reject since the failure mode could be any number of
           // terrible things
-          ;({ policy } = await generatePolicy(entrypoint, {
-            policyPath,
-            policyOverridePath,
+          const { policy } = await generatePolicy(entrypoint, {
+            policies: input,
             prodOnly,
             trustRoot,
             projectRoot,
-          }))
+          })
 
           if (write) {
-            await writePolicy(policyPath, policy)
+            await writePolicy(policyPath, unwrapMerged(policy))
           }
+
+          // The generated policy is already merged; run directly from the
+          // in-memory result to avoid a redundant disk round-trip.
+          runInput = buildPolicyInput({
+            policy: policySourceFromInline(unwrapMerged(policy)),
+            override: policyOverrideNone(),
+          })
         }
 
         stripProcessArgv(entrypoint)
 
         await run(entrypoint, {
-          policyOverridePath,
+          policies: runInput,
           trustRoot,
           prodOnly,
           projectRoot,
           scuttleGlobalThis,
-          policy,
-          policyPath,
         })
       }
     )
@@ -551,6 +564,7 @@ const main = async (args = hideBin(process.argv)) => {
         policy: policyPath,
         'policy-override': policyOverridePathArg,
         'prod-only': prodOnly,
+        'project-root': projectRoot,
         'treat-warnings-as-errors': treatWarningsAsErrors,
         write: shouldWrite,
         'compact-overrides': compactOverrides,
@@ -563,14 +577,20 @@ const main = async (args = hideBin(process.argv)) => {
           )
         }
 
+        const input = buildPolicyInput({
+          policy: policySourceFromFile(policyPath),
+          override: policyOverridePathArg
+            ? policyOverrideSourceFromFile(policyOverridePathArg)
+            : policyOverrideAuto(projectRoot),
+        })
+
         const {
           policy,
           hasWarnings,
           compactedPolicyOverride,
           policyOverridePath,
         } = await generatePolicy(entrypoint, {
-          policyPath,
-          policyOverridePath: policyOverridePathArg,
+          policies: input,
           prodOnly,
           trustRoot,
           compact: compactOverrides,
@@ -586,15 +606,17 @@ const main = async (args = hideBin(process.argv)) => {
           return
         }
 
+        const rawPolicy = unwrapMerged(policy)
+
         if (shouldWrite) {
-          await writePolicy(policyPath, policy)
+          await writePolicy(policyPath, rawPolicy)
           log.info(
             `${success} ${action('Wrote')} policy to ${hrPath(policyPath)}`
           )
         } else {
           // console used here since the logger only uses stderr
           // eslint-disable-next-line no-console
-          console.log(jsonStringifySortedPolicy(policy))
+          console.log(jsonStringifySortedPolicy(rawPolicy))
         }
 
         if (compactOverrides) {

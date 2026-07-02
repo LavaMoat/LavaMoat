@@ -11,7 +11,7 @@ import parseNative from './parse-native.js'
 
 /**
  * @import {CaptureLiteOptions} from '@endo/compartment-mapper'
- * @import {ExecuteOptions} from '../types.js'
+ * @import {LoadOptions} from '../types.js'
  */
 
 const { freeze } = Object
@@ -19,7 +19,7 @@ const { freeze } = Object
 /**
  * Common options for `@endo/compartment-mapper` functions
  *
- * @satisfies {CaptureLiteOptions | ExecuteOptions}
+ * @satisfies {CaptureLiteOptions | LoadOptions}
  * @internal
  */
 export const DEFAULT_ENDO_OPTIONS = freeze(

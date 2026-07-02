@@ -23,7 +23,7 @@ import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
   FileUrlString,
-  MergedLavaMoatPolicy,
+  Merged,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
@@ -90,6 +90,35 @@ export type ReadPolicyOptions = ComposeOptions<[WithReadFile]>
  * Options for `readPolicyOverride()`
  */
 export type ReadPolicyOverrideOptions = ComposeOptions<[WithReadFile]>
+
+/**
+ * The primary half of {@link ResolvedPolicySources}: exactly one of `policyPath`
+ * or `policy` is set.
+ */
+export type ResolvedPrimarySource =
+  | { policyPath: string; policy?: never }
+  | { policyPath?: never; policy: LavaMoatPolicy }
+
+/**
+ * The override half of {@link ResolvedPolicySources}: at most one of
+ * `overridePath` or `overridePolicy` is set. Both are absent when the override
+ * source is `{ kind: 'none' }`.
+ */
+export type ResolvedOverrideSource =
+  | { overridePath: string; overridePolicy?: never }
+  | { overridePath?: never; overridePolicy: LavaMoatPolicy }
+  | { overridePath?: never; overridePolicy?: never }
+
+/**
+ * Concrete paths and/or inline values resolved from a {@link PolicyInput}.
+ *
+ * Produced by `resolvePolicySources`. Modelled as the intersection of two
+ * discriminated XOR pairs so consumers can narrow `policy` vs `policyPath` (and
+ * `overridePolicy` vs `overridePath`) via property access on the resolved
+ * object.
+ */
+export type ResolvedPolicySources = ResolvedPrimarySource &
+  ResolvedOverrideSource
 
 /**
  * Options for `resolveBinScript()`
@@ -165,7 +194,7 @@ export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
  * Result of `loadAndGeneratePolicy()`
  */
 export interface LoadAndGeneratePolicyResult {
-  policy: MergedLavaMoatPolicy
+  policy: Merged<LavaMoatPolicy>
   packageJsonMap: Map<string, PackageJson>
   hasWarnings: boolean
   /**

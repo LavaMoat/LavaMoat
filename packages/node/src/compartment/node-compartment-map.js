@@ -16,7 +16,6 @@ import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
 
 /**
  * @import {
- *   CanonicalName,
  *   CompartmentMapDescriptor,
  *   MapNodeModulesOptions,
  *   PackageCompartmentDescriptorName,
@@ -31,6 +30,7 @@ import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
  *   MakeNodeCompartmentMapOptions,
  *   MakeNodeCompartmentMapResult
  * } from '../internal.js'
+ * @import {CanonicalName} from '../types.js'
  */
 
 const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])

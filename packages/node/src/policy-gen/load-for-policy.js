@@ -20,8 +20,9 @@ import {
   ROOT_COMPARTMENT,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { action, hrCode, hrLabel, seconds, success } from '../format.js'
+import { action, hrCode, hrLabel, hrPath, seconds, success } from '../format.js'
 import { log as defaultLog, Loggerr } from '../log.js'
+import { wrapMerged } from '../policy-util.js'
 import { mergePolicies } from '../policy-util.js'
 import {
   createModuleInspectionProgressReporter,
@@ -33,7 +34,6 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
 
 /**
  * @import {
- *   CanonicalName,
  *   ModuleSourceHook,
  *   PackageCompartmentMapDescriptor,
  *   PackageConnectionsHook
@@ -52,7 +52,10 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
  *   ModuleInspectionResult,
  *   StructuredViolationsResult
  * } from '../internal.js'
- * @import {FileUrlString} from '../types.js'
+ * @import {
+ *   CanonicalName,
+ *   FileUrlString
+ * } from '../types.js'
  */
 
 const { keys } = Object
@@ -159,7 +162,7 @@ export const loadAndGeneratePolicy = async (
     }))
   } catch (err) {
     throw new GenerationError(
-      `Failed to crawl packages for ${entrypointPath}: ${err}`,
+      `Failed to crawl packages for ${hrPath(entrypointPath)}: ${err}`,
       { cause: err }
     )
   }
@@ -294,10 +297,11 @@ export const loadAndGeneratePolicy = async (
     packagePoliciesMap,
     rootUsePolicy
   )
+  const mergedPolicy = mergePolicies(unmergedPolicy, policyOverride)
   /**
    * This is the final generated policy
    */
-  const policy = mergePolicies(unmergedPolicy, policyOverride)
+  const policy = wrapMerged(mergedPolicy)
 
   // #region emit warnings
 
