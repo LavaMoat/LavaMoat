@@ -22,7 +22,10 @@ import { toAbsolutePath } from '../util.js'
 import { loadAndGeneratePolicy } from './load-for-policy.js'
 
 /**
- * @import {GeneratePolicyOptions, MergedLavaMoatPolicy} from '../types.js'
+ * @import {
+ *   GeneratePolicyOptions,
+ *   MergedLavaMoatPolicy
+ * } from '../types.js'
  */
 
 /**
@@ -112,6 +115,8 @@ export const generatePolicy = async (
     readPowers,
     policyOverride,
     projectRoot,
+    policyPath,
+    policyOverridePath,
   })
 
   if (shouldWrite) {
