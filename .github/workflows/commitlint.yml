@@ -12,5 +12,12 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - name: Run commitlint
-        uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
+          fetch-depth: 0
+      - uses: ./.github/actions/prepare
+        with:
+          node-version: 24.x
+      - name: Validate PR commits with commitlint
+        env:
+          FROM_SHA: ${{ github.event.pull_request.base.sha }}
+          TO_SHA: ${{ github.event.pull_request.head.sha }}
+        run: npx commitlint --from "${FROM_SHA}" --to "${TO_SHA}" --verbose
