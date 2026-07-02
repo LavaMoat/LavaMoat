@@ -1,12 +1,13 @@
 /**
  * The obligatory junk drawer of utilities.
  *
- * @remraks
+ * @remarks
  * This is an anti-pattern. Or so I've heard.
- *
  * @packageDocumentation
  */
+import path from 'node:path'
 import nodeUrl from 'node:url'
+import { hrPath } from './format.js'
 import { assertAbsolutePath } from './fs.js'
 
 /**
@@ -14,7 +15,11 @@ import { assertAbsolutePath } from './fs.js'
  *   FileURLToPathFn,
  *   ReadNowPowers
  * } from '@endo/compartment-mapper'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {
+ *   IncludeEntryByLocation,
+ *   IncludeEntryByName,
+ *   LavaMoatPolicy
+ * } from '@lavamoat/types'
  * @import {
  *   PackageJson,
  *   SetNonNullable
@@ -67,7 +72,7 @@ export const isObject = (value) => Object(value) === value
  * @returns {value is object & {length?: never}}
  * @internal
  */
-export const isObjectyObject = (value) => isObject(value) && !isArray(value)
+export const isNonArrayObject = (value) => isObject(value) && !isArray(value)
 
 /**
  * Type guard for a string
@@ -77,6 +82,15 @@ export const isObjectyObject = (value) => isObject(value) && !isArray(value)
  * @internal
  */
 export const isString = (value) => typeof value === 'string'
+
+/**
+ * Type guard for a non-empty string
+ *
+ * @param {unknown} value
+ * @returns {value is string}
+ * @internal
+ */
+export const isNonEmptyString = (value) => isString(value) && value.length > 0
 
 /**
  * Type guard for an array
@@ -117,22 +131,19 @@ export const isBoolean = (value) => typeof value === 'boolean'
  * @internal
  * @see {@link https://github.com/microsoft/TypeScript/issues/44253}
  */
-export const hasValue = (obj, prop) => {
-  return (
-    prop in obj &&
-    /**
-     * @privateRemarks
-     * I'm not sure exactly why this is needed. `prop in obj` does not imply
-     * `obj[prop]` here, so you'd get a "`K` cannot be used to index `T`" error.
-     * There's no relationship between type args `T` and `K`, but it's
-     * surprising to me that `prop in obj` does not establish the relationship.
-     * `obj[prop]` can be `undefined` even if `prop in obj` is `true`, which
-     * might be the reason?
-     * @type {any}
-     */ (obj)[prop] !== undefined &&
-    obj[prop] !== null
-  )
-}
+export const hasValue = (obj, prop) =>
+  prop in obj &&
+  /**
+   * @privateRemarks
+   * I'm not sure exactly why this is needed. `prop in obj` does not imply
+   * `obj[prop]` here, so you'd get a "`K` cannot be used to index `T`" error.
+   * There's no relationship between type args `T` and `K`, but it's surprising
+   * to me that `prop in obj` does not establish the relationship. `obj[prop]`
+   * can be `undefined` even if `prop in obj` is `true`, which might be the
+   * reason?
+   * @type {any}
+   */ (obj)[prop] !== undefined &&
+  obj[prop] !== null
 
 /**
  * Converts a boolean `prodOnly` to a set of conditions (Endo option)
@@ -162,7 +173,7 @@ const REQUIRED_READ_NOW_POWERS = freeze(
  * @internal
  */
 export const isReadNowPowers = (value) =>
-  isObjectyObject(value) &&
+  isNonArrayObject(value) &&
   REQUIRED_READ_NOW_POWERS.every(
     (prop) => hasValue(value, prop) && isFunction(value[prop])
   )
@@ -265,8 +276,10 @@ const isIntegerLike = (key) => INT_STRING_REGEXP.test(key)
 /**
  * Converts a "keypath" array to a string using dots or braces as appropriate
  *
+ * An empty {@link path} will return an empty string.
+ *
  * @template {readonly string[]} const T Array of strings
- * @param {T} path "keypath" array
+ * @param {T} [path] "keypath" array
  * @returns {string}
  */
 export const toKeypath = (path) => {
@@ -328,6 +341,55 @@ export const isOptionalDependency = (packageJson, dependency) =>
 export const noop = () => {}
 
 /**
+ * Decoder for converting `Uint8Array` bytes returned by `readPowers.read()`
+ * into text.
+ */
+const textDecoder = new TextDecoder()
+
+/**
+ * Walks up the directory tree from `entrypoint`, reads the nearest
+ * `package.json`, and returns its parsed contents.
+ *
+ * Mirrors the walk-up logic in `@endo/compartment-mapper`'s internal `search()`
+ * function, which is not part of the public export surface.
+ *
+ * @param {ReadNowPowers} readPowers
+ * @param {string | URL} entrypoint Path or URL of the entry module
+ * @returns {Promise<PackageJson>} Parsed package descriptor
+ * @throws If no `package.json` is found before the filesystem root
+ * @internal
+ */
+export const readEntryPackageDescriptor = async ({ read }, entrypoint) => {
+  const location = toFileURLString(entrypoint)
+
+  let directory = new URL('./', location).href
+  while (true) {
+    const pkgUrl = new URL('package.json', directory).href
+    let bytes
+    try {
+      bytes = await read(pkgUrl)
+    } catch {
+      const parent = new URL('../', directory).href
+      if (parent === directory) {
+        throw new Error(
+          `Cannot find ${hrPath('package.json')} along path to ${hrPath(location)}`
+        )
+      }
+      directory = parent
+      continue
+    }
+    try {
+      return /** @type {PackageJson} */ (JSON.parse(textDecoder.decode(bytes)))
+    } catch (err) {
+      throw new Error(
+        `Invalid ${hrPath('package.json')} at ${hrPath(pkgUrl)}; failed to parse JSON`,
+        { cause: err }
+      )
+    }
+  }
+}
+
+/**
  * Gets the keypath for a canonical name within a LavaMoat policy object
  *
  * @param {LavaMoatPolicy} policy
@@ -350,15 +412,53 @@ export const findCanonicalNameKeypath = (policy, canonicalName) => {
     }
   }
 
-  // Check include array
-  for (const include of policy.include ?? []) {
-    if (isObjectyObject(include) && include.name === canonicalName) {
-      return toKeypath(['include', include.name])
+  // Check include. Note: we do not consider IncludeEntryByLocation here
+  // because, well, it ain't a canonical name
+  for (const [index, include] of (policy.include ?? []).entries()) {
+    if (isIncludeEntryByName(include) && include.name === canonicalName) {
+      return toKeypath(['include', `${index}`, include.name])
     }
     if (canonicalName === include) {
-      return toKeypath(['include', canonicalName])
+      return toKeypath(['include', `${index}`, canonicalName])
     }
   }
 
   return undefined
 }
+
+/**
+ * Returns `true` if the {@link value} is an {@link IncludeEntryByLocation}.
+ *
+ * @param {unknown} value
+ * @returns {value is IncludeEntryByLocation}
+ * @internal
+ */
+export const isIncludeEntryByLocation = (value) =>
+  isNonArrayObject(value) &&
+  'location' in value &&
+  isNonEmptyString(value.location) &&
+  !path.isAbsolute(value.location) &&
+  ('modules' in value
+    ? isArray(value.modules) &&
+      value.modules.every(
+        (value) => isNonEmptyString(value) && !path.isAbsolute(value)
+      )
+    : true)
+
+/**
+ * Returns `true` if the {@link value} is an {@link IncludeEntryByName}.
+ *
+ * @param {unknown} value
+ * @returns {value is IncludeEntryByName}
+ * @internal
+ */
+export const isIncludeEntryByName = (value) =>
+  isNonArrayObject(value) &&
+  'name' in value &&
+  isNonEmptyString(value.name) &&
+  ('modules' in value
+    ? isArray(value.modules) &&
+      value.modules.every(
+        (value) => isNonEmptyString(value) && !path.isAbsolute(value)
+      )
+    : true)

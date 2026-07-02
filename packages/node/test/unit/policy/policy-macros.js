@@ -389,6 +389,7 @@ export function createGeneratePolicyMacros(test) {
         t.plan(options?.policyOverride ? 2 : 1)
 
         if (isPolicy(expected)) {
+          delete (/** @type {any} */ (actualPolicy)[MERGED_POLICY_FIELD])
           t.deepEqual(
             actualPolicy,
             expected,

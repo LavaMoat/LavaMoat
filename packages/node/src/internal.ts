@@ -16,23 +16,25 @@ import type {
   GlobalPolicy,
   GlobalPolicyValue,
   LavaMoatPolicy,
-  Resources,
 } from '@lavamoat/types'
-import type { PackageJson, ValueOf } from 'type-fest'
+import type { Except, PackageJson, ValueOf } from 'type-fest'
 import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
+  ConsumerCaptureFromMapOptions,
   FileUrlString,
   MergedLavaMoatPolicy,
+  WithCompact,
   WithFs,
-  WithLoadForMapOptions,
+  WithLavaMoatEndoPolicy,
   WithLog,
+  WithPolicy,
   WithPolicyOverride,
+  WithPolicyPath,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
-  WithReadPowersAndTrust,
-  WithReadPowersAndTrustAndEndoPolicy,
+  WithReadPowers,
   WithScuttleGlobalThis,
   WithTrustRoot,
 } from './types.js'
@@ -48,24 +50,15 @@ import type {
 export type ContextTestFn = (context: object) => boolean
 
 /**
- * Options bucket containing a `compact` prop
- */
-export interface WithCompact {
-  /**
-   * When `true`, compute a compacted policy override (see
-   * `compactPolicyOverride`) and return it as `compactedPolicyOverride` on the
-   * result. Has no effect when no `policyOverride` was provided.
-   */
-  compact?: boolean
-}
-
-/**
  * Options for `loadCompartmentMapForPolicy()`
  */
 export type LoadAndGeneratePolicyOptions = ComposeOptions<
   [
-    WithLoadForMapOptions,
-    WithReadPowersAndTrust,
+    WithLog,
+    WithProdOnly,
+    ConsumerCaptureFromMapOptions,
+    WithReadPowers,
+    WithTrustRoot,
     WithPolicyOverride,
     WithProjectRoot,
     WithCompact,
@@ -84,12 +77,12 @@ export type SomeGlobalThis = Record<PropertyKey, unknown>
 /**
  * Options for `readPolicy()`
  */
-export type ReadPolicyOptions = ComposeOptions<[WithReadFile]>
+export type ReadPolicyOptions = WithReadFile
 
 /**
  * Options for `readPolicyOverride()`
  */
-export type ReadPolicyOverrideOptions = ComposeOptions<[WithReadFile]>
+export type ReadPolicyOverrideOptions = WithReadFile
 
 /**
  * Options for `resolveBinScript()`
@@ -109,7 +102,7 @@ export interface WithFrom {
 /**
  * Options for `resolveEntrypoint()`
  */
-export type ResolveEntrypointOptions = ComposeOptions<[WithFrom]>
+export type ResolveEntrypointOptions = WithFrom
 
 /**
  * Options for `resolveWorkspace()`
@@ -132,10 +125,6 @@ export type RequiredReadNowPowers = ReadonlyArray<
 export type ReportInvalidCanonicalNamesOptions = ComposeOptions<
   [
     WithPolicy,
-    /**
-     * `policyOverridePath` is used only for display purposes; we do not
-     * actually attempt to read the policy override file
-     */
     WithPolicyPath,
     WithLog,
     {
@@ -185,7 +174,7 @@ export interface LoadAndGeneratePolicyResult {
  * — used by the policy-generation path to seed override-listed dependencies
  * into the dependency graph.
  */
-export type ConsumerMapNodeModulesOptions = Omit<
+export type ConsumerMapNodeModulesOptions = Except<
   MapNodeModulesOptions,
   | 'conditions'
   | 'dev'
@@ -214,11 +203,21 @@ export interface WithMapNodeModulesOptions {
  */
 export type MakeNodeCompartmentMapOptions = ComposeOptions<
   [
+    WithTrustRoot,
     WithPolicyOverride,
     WithLog,
-    WithReadPowersAndTrustAndEndoPolicy,
+    WithLavaMoatEndoPolicy,
+    WithReadPowers,
     WithProdOnly,
-    WithMapNodeModulesOptions,
+    {
+      /**
+       * Pass-through subset of {@link MapNodeModulesOptions} forwarded to
+       * `mapNodeModules`. Use this to inject hooks (e.g.
+       * `packageDependenciesHook`) without coupling
+       * {@link makeNodeCompartmentMap} to consumer-specific concerns.
+       */
+      mapNodeModulesOptions?: ConsumerMapNodeModulesOptions
+    },
   ]
 >
 
@@ -266,19 +265,6 @@ export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
 export type MakeGlobalsAttenuatorOptions = ComposeOptions<
   [WithPolicy, WithScuttleGlobalThis, WithTrustRoot]
 >
-
-/**
- * Options containing a `policy` prop
- *
- * @template T The type of the resources in the policy
- */
-export interface WithPolicy<T extends Resources = Resources> {
-  policy?: LavaMoatPolicy<T>
-}
-
-export interface WithPolicyPath {
-  policyPath?: string | URL
-}
 
 /**
  * A single structured violation with location information

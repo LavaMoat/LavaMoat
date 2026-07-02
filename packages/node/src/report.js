@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { ROOT_COMPARTMENT } from './constants.js'
 import { InvalidArgumentsError } from './error.js'
 import {
   action,
@@ -65,7 +66,6 @@ const DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS = 3
  *   found in the compartment map
  * @param {ReportInvalidCanonicalNamesOptions} options
  * @returns {void}
- * @internal
  */
 export const reportInvalidCanonicalNames = (
   unknownCanonicalNames,
@@ -91,6 +91,9 @@ export const reportInvalidCanonicalNames = (
   // representations
   const unknownCanonicalNameMap = [...unknownCanonicalNames].map(
     (canonicalName) => {
+      if (canonicalName === ROOT_COMPARTMENT && policy?.root?.usePolicy) {
+        canonicalName = policy.root.usePolicy
+      }
       const keypath = findCanonicalNameKeypath(policy, canonicalName)
       return {
         name: canonicalName,
@@ -146,7 +149,6 @@ export const reportInvalidCanonicalNames = (
  *   Map of canonical names to structured violations
  * @param {ReportSesViolationsOptions} [options]
  * @returns {void}
- * @internal
  */
 export const reportSesViolations = (
   violationsForPackage,
@@ -160,7 +162,6 @@ export const reportSesViolations = (
    *
    * @param {StructuredViolation} violation
    * @returns {string}
-   * @internal
    */
   const formatViolation = (violation) => {
     const { path, line, column, type } = violation
