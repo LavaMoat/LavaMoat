@@ -40,7 +40,7 @@
     "@babel/types": "7.29.7",
     "@commitlint/cli": "21.1.0",
     "@commitlint/config-conventional": "21.1.0",
-    "@endo/compartment-mapper": "2.1.0",
+    "@endo/compartment-mapper": "2.3.0",
     "@eslint/js": "10.0.1",
     "@tsconfig/node22": "22.0.5",
     "@types/lint-staged": "13.3.0",
@@ -69,7 +69,7 @@
     "prettier-plugin-jsdoc": "1.8.1",
     "prettier-plugin-pkg": "0.22.1",
     "semver": "7.8.5",
-    "ses": "1.15.0",
+    "ses": "2.2.0",
     "type-fest": "4.41.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.61.1"

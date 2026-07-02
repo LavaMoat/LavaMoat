@@ -33,18 +33,22 @@ import { isArray, isBoolean } from './util.js'
 const { create, entries, fromEntries } = Object
 
 /**
- * @import {GlobalPolicy,
+ * @import {
+ *   GlobalPolicy,
+ *   LavaMoatPolicy,
  *   PackagePolicy,
- *   ResourcePolicy,
- *   LavaMoatPolicy} from '@lavamoat/types'
- * @import {LavaMoatEndoPackagePolicy,
+ *   ResourcePolicy
+ * } from '@lavamoat/types'
+ * @import {
+ *   LavaMoatEndoPackagePolicy,
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
- *   ToEndoPolicyOptions,
- *   Resources,
  *   MergedLavaMoatPolicy,
+ *   Resources,
+ *   ToEndoPolicyOptions,
  *   ToEndoPolicyOptionsWithoutPolicyOverride,
- *   UnmergedLavaMoatPolicy} from './types.js'
+ *   UnmergedLavaMoatPolicy
+ * } from './types.js'
  */
 
 /**

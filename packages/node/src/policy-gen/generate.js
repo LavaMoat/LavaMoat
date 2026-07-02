@@ -5,24 +5,25 @@
  *
  * @packageDocumentation
  */
-import chalk from 'chalk'
 import nodeFs from 'node:fs'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { InvalidArgumentsError } from '../error.js'
-import { hrCode, hrPath } from '../format.js'
+import { action, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import {
   makeDefaultPolicyOverridePath,
   makeDefaultPolicyPath,
   maybeReadPolicyOverride,
-  writePolicy,
 } from '../policy-util.js'
 import { toAbsolutePath } from '../util.js'
 import { loadAndGeneratePolicy } from './load-for-policy.js'
 
 /**
- * @import {GeneratePolicyOptions, MergedLavaMoatPolicy} from '../types.js'
+ * @import {
+ *   GeneratePolicyOptions,
+ *   GeneratePolicyResult
+ * } from '../types.js'
  */
 
 /**
@@ -31,7 +32,7 @@ import { loadAndGeneratePolicy } from './load-for-policy.js'
  *
  * @param {string | URL} entrypoint
  * @param {GeneratePolicyOptions} [opts]
- * @returns {Promise<MergedLavaMoatPolicy>}
+ * @returns {Promise<GeneratePolicyResult>}
  * @public
  */
 export const generatePolicy = async (
@@ -40,13 +41,12 @@ export const generatePolicy = async (
     policyPath: rawPolicyPath,
     policyOverridePath: rawPolicyOverridePath,
     policyOverride,
-    writableFs = nodeFs,
     readPowers = defaultReadPowers,
-    write: shouldWrite = false,
     readFile = nodeFs.promises.readFile,
     log = defaultLog,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     projectRoot: rawProjectRootPath = process.cwd(),
+    compact,
     ...generateOpts
   } = {}
 ) => {
@@ -54,11 +54,11 @@ export const generatePolicy = async (
 
   const entrypointPath = toAbsolutePath(
     entrypoint,
-    `Entrypoint must be an absolute path; got ${hrCode(entrypoint)}`
+    `Entrypoint must be an absolute path; got ${hrPath(entrypoint)}`
   )
   const projectRoot = toAbsolutePath(
     rawProjectRootPath,
-    `Project root must be an absolute path; got ${hrCode(rawProjectRootPath)}`
+    `Project root must be an absolute path; got ${hrPath(rawProjectRootPath)}`
   )
 
   /** @type {string} */
@@ -66,25 +66,31 @@ export const generatePolicy = async (
   if (rawPolicyPath) {
     policyPath = toAbsolutePath(
       rawPolicyPath,
-      `Policy path must be an absolute path; got ${hrCode(rawPolicyPath)}`
+      `Policy path must be an absolute path; got ${hrPath(rawPolicyPath)}`
     )
-    log.debug(`Resolved provided policy path: ${hrCode(policyPath)}`)
+    log.debug(`Resolved provided policy path: ${hrPath(policyPath)}`)
   } else {
     policyPath = makeDefaultPolicyPath(projectRoot)
   }
 
   /** @type {string | undefined} */
   let policyOverridePath
+  /**
+   * Whether the policy override was loaded from disk by this function (as
+   * opposed to being passed in by the caller as an object). Only when it was
+   * loaded here do we honour `compact` and propagate `policyOverridePath`.
+   */
+  let overrideLoadedFromDisk = false
   // the user may specify a policy override or a path to a policy override.
   // in this case, we handle the path.
   if (!policyOverride) {
     if (rawPolicyOverridePath) {
       policyOverridePath = toAbsolutePath(
         rawPolicyOverridePath,
-        `Policy override path must be an absolute path; got ${hrCode(rawPolicyOverridePath)}`
+        `Policy override path must be an absolute path; got ${hrPath(rawPolicyOverridePath)}`
       )
       log.debug(
-        `Resolved provided policy override path: ${hrCode(policyOverridePath)}`
+        `Resolved provided policy override path: ${hrPath(policyOverridePath)}`
       )
     } else {
       policyOverridePath = makeDefaultPolicyOverridePath({
@@ -95,6 +101,12 @@ export const generatePolicy = async (
     policyOverride = await maybeReadPolicyOverride(policyOverridePath, {
       readFile,
     })
+    overrideLoadedFromDisk = policyOverride !== undefined
+    if (overrideLoadedFromDisk && !rawPolicyOverridePath) {
+      log.info(
+        `Discovered policy override file at ${hrPath(policyOverridePath)}`
+      )
+    }
   } else if (rawPolicyOverridePath) {
     throw new InvalidArgumentsError(
       `Ignoring user-provided policy override path ${hrPath(rawPolicyOverridePath)} because a policy override object was provided`
@@ -104,22 +116,22 @@ export const generatePolicy = async (
   const niceEntrypointPath = hrPath(entrypointPath)
 
   log.info(
-    `${chalk.bold('Generating')} LavaMoat policy from ${niceEntrypointPath}…`
+    `${action('Generating')} LavaMoat policy from ${niceEntrypointPath}…`
   )
-  const { policy } = await loadAndGeneratePolicy(entrypointPath, {
-    ...generateOpts,
-    trustRoot,
-    readPowers,
-    policyOverride,
-    projectRoot,
-  })
+  const { policy, hasWarnings, compactedPolicyOverride } =
+    await loadAndGeneratePolicy(entrypointPath, {
+      ...generateOpts,
+      trustRoot,
+      readPowers,
+      policyOverride,
+      projectRoot,
+      compact: overrideLoadedFromDisk ? compact : undefined,
+    })
 
-  if (shouldWrite) {
-    await writePolicy(policyPath, policy, { fs: writableFs })
-    log.info(
-      `${chalk.greenBright('✓')} ${chalk.bold('Wrote policy')} ${chalk.white('to')} ${hrPath(policyPath)}`
-    )
+  return {
+    policy,
+    hasWarnings,
+    compactedPolicyOverride,
+    policyOverridePath: overrideLoadedFromDisk ? policyOverridePath : undefined,
   }
-
-  return policy
 }

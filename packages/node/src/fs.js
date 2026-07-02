@@ -10,7 +10,10 @@ import nodePath from 'node:path'
 
 /**
  * @import {PathLike} from 'node:fs'
- * @import {WithFs, WithReadFile} from './types.js'
+ * @import {
+ *   WithFs,
+ *   WithReadFile
+ * } from './types.js'
  */
 
 /**

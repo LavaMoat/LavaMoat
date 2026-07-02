@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Internal types used by `@lavamoat/node`.
  *
  * @packageDocumentation
- * @internal
  */
 
 import type {
+  MapNodeModulesOptions,
   PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
@@ -15,21 +14,20 @@ import type { CanonicalName } from '@endo/compartment-mapper/import.js'
 import type {
   BuiltinPolicy,
   GlobalPolicy,
+  GlobalPolicyValue,
   LavaMoatPolicy,
   Resources,
 } from '@lavamoat/types'
 import type { PackageJson, ValueOf } from 'type-fest'
-import type { MessageTypes, SES_VIOLATION_TYPES } from './constants.js'
+import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
   FileUrlString,
   MergedLavaMoatPolicy,
-  SourceType,
   WithFs,
   WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
-  WithPolicyOverrideOnly,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
@@ -46,14 +44,23 @@ import type {
  * (not shown) should be called with a provided context (also not shown).
  *
  * @param context Usually a `globalThis`
- * @internal
  */
 export type ContextTestFn = (context: object) => boolean
 
 /**
+ * Options bucket containing a `compact` prop
+ */
+export interface WithCompact {
+  /**
+   * When `true`, compute a compacted policy override (see
+   * `compactPolicyOverride`) and return it as `compactedPolicyOverride` on the
+   * result. Has no effect when no `policyOverride` was provided.
+   */
+  compact?: boolean
+}
+
+/**
  * Options for `loadCompartmentMapForPolicy()`
- *
- * @internal
  */
 export type LoadAndGeneratePolicyOptions = ComposeOptions<
   [
@@ -61,22 +68,9 @@ export type LoadAndGeneratePolicyOptions = ComposeOptions<
     WithReadPowersAndTrust,
     WithPolicyOverride,
     WithProjectRoot,
+    WithCompact,
   ]
 >
-
-/**
- * A function _or_ a constructor.
- *
- * @privateRemarks
- * I'm not entirely sure why `Function` does not satify one of the first two
- * union members, but it has to be here.
- * @internal
- */
-export type SomeFunction =
-  | (new (...args: any[]) => any)
-  | ((...args: any[]) => any)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  | Function
 
 /**
  * A `globalThis` object with unknown properties.
@@ -84,50 +78,26 @@ export type SomeFunction =
  * This is basically just an object with anything in it, since we cannot be sure
  * that any given global property is present (or what its type is) in the
  * current compartment at any given time.
- *
- * @internal
  */
 export type SomeGlobalThis = Record<PropertyKey, unknown>
 
 /**
- * The parameters of a {@link SomeFunction}
- *
- * @template T Function or constructor
- * @internal
- */
-export type SomeParameters<T extends SomeFunction> = T extends new (
-  ...args: any[]
-) => any
-  ? ConstructorParameters<T>
-  : T extends (...args: any[]) => any
-    ? Parameters<T>
-    : never
-
-/**
  * Options for `readPolicy()`
- *
- * @internal
  */
 export type ReadPolicyOptions = ComposeOptions<[WithReadFile]>
 
 /**
  * Options for `readPolicyOverride()`
- *
- * @internal
  */
 export type ReadPolicyOverrideOptions = ComposeOptions<[WithReadFile]>
 
 /**
  * Options for `resolveBinScript()`
- *
- * @internal
  */
 export type ResolveBinScriptOptions = ComposeOptions<[WithFs, WithFrom]>
 
 /**
  * Options containing a `from` property; used for path resolution
- *
- * @internal
  */
 export interface WithFrom {
   /**
@@ -143,15 +113,11 @@ export type ResolveEntrypointOptions = ComposeOptions<[WithFrom]>
 
 /**
  * Options for `resolveWorkspace()`
- *
- * @internal
  */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
 
 /**
  * N array of required properties for {@link ReadNowPowers}
- *
- * @internal
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
@@ -161,11 +127,9 @@ export type RequiredReadNowPowers = ReadonlyArray<
 >
 
 /**
- * Options for `reportInvalidOverrides()`
- *
- * @internal
+ * Options for {@link reportInvalidCanonicalNames}
  */
-export type ReportInvalidOverridesOptions = ComposeOptions<
+export type ReportInvalidCanonicalNamesOptions = ComposeOptions<
   [
     WithPolicy,
     /**
@@ -175,7 +139,18 @@ export type ReportInvalidOverridesOptions = ComposeOptions<
     WithPolicyPath,
     WithLog,
     {
+      /**
+       * Maximum number of suggestions to make when reporting invalid canonical
+       * names
+       *
+       * @defaultValue 3
+       */
       maxSuggestions?: number
+      /**
+       * Description of the policy type being reported
+       *
+       * @defaultValue 'policy'
+       */
       what?: 'policy' | 'policy overrides'
     },
   ]
@@ -183,59 +158,110 @@ export type ReportInvalidOverridesOptions = ComposeOptions<
 
 /**
  * Options for `reportSesViolations()`
- *
- * @internal
  */
 export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
 
 /**
- * Result of `loadCompartmentMap()`
- *
- * @internal
+ * Result of `loadAndGeneratePolicy()`
  */
-export interface LoadCompartmentMapResult {
+export interface LoadAndGeneratePolicyResult {
   policy: MergedLavaMoatPolicy
   packageJsonMap: Map<string, PackageJson>
+  hasWarnings: boolean
+  /**
+   * Present only when `compact: true` was passed in options **and** a
+   * `policyOverride` was provided. Contains the policy override with all
+   * entries already covered by the generated policy removed.
+   */
+  compactedPolicyOverride?: LavaMoatPolicy
+}
+
+/**
+ * Subset of {@link MapNodeModulesOptions} that consumers of
+ * {@link makeNodeCompartmentMap} may pass through. The fields
+ * {@link makeNodeCompartmentMap} controls itself are excluded.
+ *
+ * Notably, this allows consumers to provide their own `packageDependenciesHook`
+ * — used by the policy-generation path to seed override-listed dependencies
+ * into the dependency graph.
+ */
+export type ConsumerMapNodeModulesOptions = Omit<
+  MapNodeModulesOptions,
+  | 'conditions'
+  | 'dev'
+  | 'languageForExtension'
+  | 'policy'
+  | 'log'
+  | 'packageDataHook'
+  | 'unknownCanonicalNameHook'
+>
+
+/**
+ * Options bucket containing a `mapNodeModulesOptions` prop
+ */
+export interface WithMapNodeModulesOptions {
+  /**
+   * Pass-through subset of {@link MapNodeModulesOptions} forwarded to
+   * `mapNodeModules`. Use this to inject hooks (e.g. `packageDependenciesHook`)
+   * without coupling {@link makeNodeCompartmentMap} to consumer-specific
+   * concerns.
+   */
+  mapNodeModulesOptions?: ConsumerMapNodeModulesOptions
 }
 
 /**
  * Options for `makeNodeCompartmentMap()`
- *
- * @internal
  */
 export type MakeNodeCompartmentMapOptions = ComposeOptions<
   [
+    WithPolicyOverride,
     WithLog,
     WithReadPowersAndTrustAndEndoPolicy,
     WithProdOnly,
-    WithPolicyOverrideOnly,
+    WithMapNodeModulesOptions,
   ]
 >
 
 /**
  * Result of `makeNodeCompartmentMap()`
- *
- * @internal
  */
 export interface MakeNodeCompartmentMapResult {
+  /**
+   * Map of canonical names to package JSON objects
+   */
   packageJsonMap: Map<CanonicalName, PackageJson>
+  /**
+   * The initial compartment map
+   */
   packageCompartmentMap: PackageCompartmentMapDescriptor
+  /**
+   * Set of canonical names from policy which were not found in
+   * {@link packageCompartmentMap}
+   */
   unknownCanonicalNames: Set<CanonicalName>
+  /**
+   * Set of canonical names that were found in {@link packageCompartmentMap}
+   */
   knownCanonicalNames: Set<CanonicalName>
+  /**
+   * The policy to use for the root compartment
+   *
+   * Should only be populated if the root compartment is untrusted.
+   */
   rootUsePolicy?: CanonicalName
+  /**
+   * Deferred warnings
+   */
+  warnings?: string[]
 }
 
 /**
  * Proper names of SES violation types
- *
- * @internal
  */
 export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
 
 /**
  * Options for `makeGlobalsAttenuator()`
- *
- * @internal
  */
 export type MakeGlobalsAttenuatorOptions = ComposeOptions<
   [WithPolicy, WithScuttleGlobalThis, WithTrustRoot]
@@ -245,7 +271,6 @@ export type MakeGlobalsAttenuatorOptions = ComposeOptions<
  * Options containing a `policy` prop
  *
  * @template T The type of the resources in the policy
- * @internal
  */
 export interface WithPolicy<T extends Resources = Resources> {
   policy?: LavaMoatPolicy<T>
@@ -256,65 +281,11 @@ export interface WithPolicyPath {
 }
 
 /**
- * Base message type with required type property and id
- *
- * @internal
- */
-export interface BaseMessage {
-  /** Message type discriminant */
-  type: string
-  /** Task identifier */
-  id: string
-}
-
-/**
- * Options for {@link WorkerPool} constructor
- *
- * @template _TMessage Message type that extends BaseMessage
- * @template _TResponse Response type that extends BaseMessage
- * @internal
- */
-export interface WorkerPoolOptions<
-  _TMessage extends BaseMessage = BaseMessage,
-  _TResponse extends BaseMessage = BaseMessage,
-> {
-  /** How long workers can be idle before termination (ms) */
-  idleTimeout?: number
-
-  /**
-   * Maximum number of concurrent workers.
-   *
-   * Defaults to `os.availableParallelism() - 1` (minimum 1). Tasks submitted
-   * when all workers are busy will queue and dispatch as workers become
-   * available.
-   */
-  maxWorkers?: number
-}
-
-/**
- * Message type for requesting inspection
- *
- * @internal
- */
-export interface InspectMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['Inspect']
-  /** Source bytes */
-  source: Uint8Array
-  /** Type of source */
-  sourceType: SourceType
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
-}
-
-/**
  * A single structured violation with location information
- *
- * @internal
  */
 export interface StructuredViolation {
   /** The file path where the violation occurred */
-  path: string
+  path: FileUrlString
   /** The line number */
   line: number
   /** The column number */
@@ -325,8 +296,6 @@ export interface StructuredViolation {
 
 /**
  * Result of structured violations inspection
- *
- * @internal
  */
 export interface StructuredViolationsResult {
   /** Primordial mutation violations */
@@ -338,64 +307,35 @@ export interface StructuredViolationsResult {
 }
 
 /**
- * Message type for responding with global policy
- *
- * @internal
+ * Per-module inspection results collected during the composed parse pipeline.
  */
-export interface InspectionResultsMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['InspectionResults']
-  /** The resulting global policy */
+export interface ModuleInspectionResult {
   globalPolicy: GlobalPolicy | null
-  /** The resulting builtin policy */
   builtinPolicy: BuiltinPolicy | null
-  /** The resulting SES compatibility violations */
-  violations?: StructuredViolationsResult | null
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
-}
-
-/**
- * Message type for responding with an error
- *
- * @internal
- */
-export interface ErrorMessage {
-  /** Message type (discriminant) */
-  type: (typeof MessageTypes)['Error']
-  /** Error message */
-  error: string
-  /** Identifier for the source (file:// URL) */
-  id: FileUrlString
+  violations: StructuredViolationsResult | null
 }
 
 /**
  * Callback used to report the progress of the module inspection process
  *
- * @param {number} messageCount The number of messages inspected so far
- * @param {Set<FileUrlString>} inspectedModules The modules that have been
- *   inspected so far
- * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
- *   be inspected
- * @returns {number} The new message count
+ * @param inspectedModules The modules that have been inspected so far
+ * @param modulesToInspect The modules that still need to be inspected
+ * @returns The new message count
  */
 export type ReportModuleInspectionProgressFn = (
-  messageCount: number,
-  inspectedModules: Set<FileUrlString>,
-  modulesToInspect: Set<FileUrlString>
-) => number
+  inspectedModules: Set<string>,
+  modulesToInspect: Set<string>
+) => void
 
 /**
  * Callback used to report the end of the module inspection process
  *
- * @param {Set<FileUrlString>} inspectedModules The modules that have been
- *   inspected so far
- * @param {Set<FileUrlString>} modulesToInspect The modules that still need to
- *   be inspected
+ * @param inspectedModules The modules that have been inspected so far
+ * @param modulesToInspect The modules that still need to be inspected
  */
 export type ReportModuleInspectionProgressEndFn = (
-  inspectedModules: Set<FileUrlString>,
-  modulesToInspect: Set<FileUrlString>
+  inspectedModules: Set<string>,
+  modulesToInspect: Set<string>
 ) => void
 
 /**
@@ -405,3 +345,95 @@ export interface ModuleInspectionProgressReporter {
   reportModuleInspectionProgress: ReportModuleInspectionProgressFn
   reportModuleInspectionProgressEnd: ReportModuleInspectionProgressEndFn
 }
+
+/**
+ * Worker data passed to the policy-generation worker thread.
+ */
+export interface PolicyGenWorkerData {
+  /**
+   * List of symbols referencing `globalThis`
+   */
+  globalRefs: readonly string[]
+  /**
+   * Per-language overrides for globals options. When present and the worker
+   * receives a message with a matching `language`, these options are merged
+   * with `globalsOptions`, with per-language values taking precedence.
+   */
+  globalsOptionsByLanguage?: Record<
+    string,
+    { ignoredRefs?: readonly string[]; globalRefs?: readonly string[] }
+  >
+
+  /**
+   * List of builtin modules
+   */
+  builtinModules: readonly string[]
+}
+
+/**
+ * Combined result returned by `createPolicyGenAnalyzerPass`.
+ *
+ * All three logical analyses (globals, builtins, violations) are performed in a
+ * single Babel traversal and returned as named fields to avoid positional tuple
+ * fragility.
+ */
+export interface PolicyGenAnalysisResults {
+  /** Map of global name to policy value. */
+  globals: GlobalsAnalyzerResults
+  /** Set of builtin module names referenced by the module. */
+  builtins: BuiltinsAnalyzerResults
+  /** Serialized SES-compatibility violations, or `null` if none. */
+  violations: ViolationsAnalyzerResults
+}
+
+export interface ModuleInspectionProgressReporterOptions {
+  /**
+   * Reporter to use to report the progress of the module inspection process
+   */
+  reporter: ModuleInspectionProgressReporter
+  /**
+   * Modules to inspect
+   */
+  modulesToInspect: Set<string>
+  /**
+   * Modules that have been inspected
+   */
+  inspectedModules: Set<string>
+}
+
+/**
+ * Options for {@link createPolicyGenWorkerParsers}
+ */
+export type CreatePolicyGenWorkerParsersOptions =
+  | (WithLog & ModuleInspectionProgressReporterOptions)
+  | WithLog
+
+/**
+ * Options for {@link createMjsExecParser} and {@link createCjsExecParser}
+ */
+export type ExecParserFactoryOptions = WithLog
+
+export type GlobalsAnalyzerResults = Map<string, GlobalPolicyValue>
+
+export type BuiltinsAnalyzerResults = Set<string>
+
+/**
+ * A structured-clone-safe snapshot of a single violation location.
+ */
+export interface ViolationLocation {
+  line: number
+  column: number
+}
+
+/**
+ * Serialized violations result suitable for transfer via `postMessage`.
+ *
+ * Unlike the raw `InspectSesCompatResult` from `lavamoat-tofu`, this type
+ * contains only plain numeric location data (no Babel path / AST node objects),
+ * making it safe to transfer with the structured clone algorithm.
+ */
+export type ViolationsAnalyzerResults = {
+  primordialMutations: ViolationLocation[]
+  strictModeViolations: ViolationLocation[]
+  dynamicRequires: ViolationLocation[]
+} | null
