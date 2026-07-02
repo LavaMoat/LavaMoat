@@ -60,12 +60,12 @@ jobs:
           persist-credentials: false
       - name: Use Node.js from .nvmrc
         uses: ./.github/actions/prepare
-      # the same thing could be accomplished via `npm lint` but this is helpful for organizing job output
-      - name: Setup
-        run: npm run setup
-      - name: Lint Sources
-        run: npm run lint:eslint
-      - name: Lint Dependencies
-        run: npm run lint:deps
-      - name: Lint Lockfile
-        run: npm run lint:lockfile
+      - name: Build
+        run: npm run build
+      - parallel:
+          - name: Lint Sources
+            run: npm run lint:eslint
+          - name: Lint Dependencies
+            run: npm run lint:deps
+          - name: Lint Lockfile
+            run: npm run lint:lockfile
