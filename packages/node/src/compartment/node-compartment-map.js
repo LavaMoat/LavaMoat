@@ -21,7 +21,7 @@ import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
  *   PackageCompartmentDescriptorName,
  *   PackageCompartmentMapDescriptor
  * } from '@endo/compartment-mapper'
- * @import {Loggerr} from 'loggerr'
+ * @import {Logger} from '@lavamoat/vog/log.js'
  * @import {
  *   Entries,
  *   PackageJson
@@ -43,7 +43,7 @@ const { entries } = Object
  *
  * @param {PackageCompartmentMapDescriptor} packageCompartmentMap
  * @param {Map<PackageCompartmentDescriptorName, PackageJson>} packageJsonsByLocation
- * @param {Loggerr} log
+ * @param {Logger} log
  * @returns {Map<CanonicalName, PackageJson>}
  */
 const createPackageJsonMap = (
@@ -68,7 +68,7 @@ const createPackageJsonMap = (
     if (packageJson) {
       packageJsonMap.set(canonicalName, packageJson)
     } else {
-      log.warning(
+      log.warn(
         `No package.json found for compartment descriptor "${canonicalName}" at ${compartmentName}"`
       )
     }

@@ -4,16 +4,23 @@
  * @packageDocumentation
  */
 
-import chalk from 'chalk'
+import { colors, stripAnsi } from '@lavamoat/vog'
 import nodePath from 'node:path'
-import { stripVTControlCharacters as stripAnsi } from 'node:util'
 import { toPath } from './util.js'
 
 export { stripAnsi }
 
 /**
- * @import {ChalkFunction} from 'chalk'
+ * Composes a list of color/transform functions right-to-left, so that the
+ * leftmost function is applied last (outermost wrap).
+ *
+ * @param {...((s: string) => string)} fns
+ * @returns {(s: string) => string}
  */
+const compose =
+  (...fns) =>
+  (s) =>
+    fns.reduceRight((acc, fn) => fn(acc), String(s))
 
 /**
  * Colorizes a string based on a delimiter.
@@ -23,8 +30,8 @@ export { stripAnsi }
  * @param {string} value
  * @param {{
  *   delimiter?: string
- *   color?: ChalkFunction
- *   delimiterColor?: ChalkFunction
+ *   color?: (s: string) => string
+ *   delimiterColor?: (s: string) => string
  * }} [options]
  * @returns {string} Colorized string
  * @internal
@@ -34,8 +41,8 @@ export const colorSplit = (
   value,
   {
     delimiter = '>',
-    color = chalk.whiteBright,
-    delimiterColor = chalk.gray,
+    color = colors.whiteBright,
+    delimiterColor = colors.gray,
   } = {}
 ) =>
   stripAnsi(value)
@@ -81,10 +88,10 @@ export const hrPath = (filepath, colorOnly) => {
   return colorSplit(
     colorSplit(filepath, {
       delimiter: nodePath.sep,
-      color: chalk.greenBright,
-      delimiterColor: chalk.green,
+      color: colors.greenBright,
+      delimiterColor: colors.green,
     }),
-    { delimiter: ':', color: chalk.greenBright, delimiterColor: chalk.green }
+    { delimiter: ':', color: colors.greenBright, delimiterColor: colors.green }
   )
 }
 
@@ -98,18 +105,29 @@ export const hrPath = (filepath, colorOnly) => {
 export const hrLabel = (name, dim = false) =>
   colorSplit(name, {
     delimiter: '>',
-    color: dim ? chalk.magentaBright.dim : chalk.magentaBright,
-    delimiterColor: dim ? chalk.magenta.dim : chalk.magenta,
+    color: dim
+      ? compose(colors.dim, colors.magentaBright)
+      : colors.magentaBright,
+    delimiterColor: dim ? compose(colors.dim, colors.magenta) : colors.magenta,
   })
 
 /**
  * Formats "code"; use when referring to code or configuration
  *
- * @param {string} value
+ * @param {string | number} value
  * @returns {string}
  * @internal
  */
-export const hrCode = chalk.cyan.bold
+export const hrCode = compose(colors.bold, colors.cyan)
+
+/**
+ * Formats "code" in a dimmed style.
+ *
+ * @param {string | number} value
+ * @returns {string}
+ * @internal
+ */
+export const hrCodeDim = compose(colors.dim, colors.bold, colors.cyan)
 
 /**
  * Formats a success symbol.
@@ -118,7 +136,7 @@ export const hrCode = chalk.cyan.bold
  * @internal
  */
 
-export const success = chalk.greenBright.bold('✓')
+export const success = compose(colors.bold, colors.greenBright)('✓')
 
 /**
  * Formats an "action" message.
@@ -126,21 +144,21 @@ export const success = chalk.greenBright.bold('✓')
  * @returns {string}
  * @internal
  */
-export const action = chalk.bold
+export const action = colors.bold
 
 /**
  * Formats a string for emphasis.
  *
  * @internal
  */
-export const emphasis = chalk.italic
+export const emphasis = colors.italic
 
 /**
  * Formats a string for deemphasis.
  *
  * @internal
  */
-export const deemphasis = chalk.dim
+export const deemphasis = colors.dim
 
 /**
  * Array of spinner characters.
@@ -150,12 +168,12 @@ export const deemphasis = chalk.dim
 export const spinnerChars = ['◰', '◳', '◲', '◱']
 
 /**
- * Formats a spinner.
+ * Formats a spinner character string.
  *
  * @returns {string}
  * @internal
  */
-export const spinner = chalk.magentaBright.bold
+export const spinner = compose(colors.bold, colors.magentaBright)
 
 /**
  * Formats a hazard symbol.
@@ -163,7 +181,7 @@ export const spinner = chalk.magentaBright.bold
  * @returns {string}
  * @internal
  */
-export const hazard = chalk.yellowBright.bold('⚠')
+export const hazard = compose(colors.bold, colors.yellowBright)('⚠')
 
 /**
  * Formats a chevron symbol.
@@ -171,7 +189,7 @@ export const hazard = chalk.yellowBright.bold('⚠')
  * @returns {string}
  * @internal
  */
-export const chevron = chalk.blackBright('›')
+export const chevron = colors.blackBright('›')
 
 /**
  * Clears the current line.
