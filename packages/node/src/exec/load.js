@@ -76,16 +76,16 @@ export const load = async (
         trustRoot,
         endoPolicy,
       }))
-    if (policy) {
-      reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
-        policy,
-        log,
-        what: 'policy',
-      })
-    }
+    // note: for execution, warnings are likely disabled by default, and this
+    // function only prints warnings.
+    reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
+      policy,
+      log,
+      what: 'policy',
+    })
   } catch (err) {
     throw new ExecutionError(
-      `Failed to create compartment map for ${entrypointPath}: ${err}`,
+      `Failed to crawl packages for ${entrypointPath}: ${err}`,
       { cause: err }
     )
   }

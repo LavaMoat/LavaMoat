@@ -6,7 +6,6 @@
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
-import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
 import { utils as tofuUtils } from 'lavamoat-tofu'
 import { compactPolicyOverride } from 'lavamoat-core'
 import { nullImportHook as importHook } from '../compartment/import-hook.js'
@@ -35,6 +34,7 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
  * @import {
  *   CanonicalName,
  *   ModuleSourceHook,
+ *   PackageCompartmentMapDescriptor,
  *   PackageConnectionsHook
  * } from '@endo/compartment-mapper'
  * @import {
@@ -130,18 +130,44 @@ export const loadAndGeneratePolicy = async (
       }
     : {}
 
-  const {
-    packageJsonMap,
-    packageCompartmentMap,
-    knownCanonicalNames,
-    rootUsePolicy,
-  } = await makeNodeCompartmentMap(entrypointPath, {
-    readPowers,
-    prodOnly,
-    log,
-    trustRoot,
-    mapNodeModulesOptions,
-  })
+  /** @type {Map<CanonicalName, PackageJson>} */
+  let packageJsonMap
+  /** @type {PackageCompartmentMapDescriptor} */
+  let packageCompartmentMap
+  /** @type {Set<CanonicalName>} */
+  let unknownCanonicalNames
+  /** @type {Set<CanonicalName>} */
+  let knownCanonicalNames
+  /** @type {CanonicalName | undefined} */
+  let rootUsePolicy
+
+  try {
+    ;({
+      packageJsonMap,
+      packageCompartmentMap,
+      knownCanonicalNames,
+      unknownCanonicalNames,
+      rootUsePolicy,
+    } = await makeNodeCompartmentMap(entrypointPath, {
+      readPowers,
+      prodOnly,
+      log,
+      trustRoot,
+      mapNodeModulesOptions,
+    }))
+  } catch (err) {
+    throw new GenerationError(
+      `Failed to crawl packages for ${entrypointPath}: ${err}`,
+      { cause: err }
+    )
+  }
+
+  /* c8 ignore next */
+  if (!trustRoot && !rootUsePolicy) {
+    throw new GenerationError(
+      `Root compartment is not trusted, but could not determine the resource to be used as the entry policy`
+    )
+  }
 
   const duration = (Date.now() - startTime) / 1000
   const { size: totalPackageCount } = packageJsonMap
@@ -149,13 +175,6 @@ export const loadAndGeneratePolicy = async (
   log.info(
     `${success} Found ${hrCode(totalPackageCount)} ${pluralize(totalPackageCount, 'package')} in ${seconds(duration)}s`
   )
-
-  /* c8 ignore next */
-  if (!trustRoot && !rootUsePolicy) {
-    throw new GenerationError(
-      `Root compartment is not trusted, but no data for ${hrCode('root.usePolicy')} exists`
-    )
-  }
 
   /** @type {Map<CanonicalName, GlobalPolicy>} */
   const globalsForPackage = new Map()
@@ -197,20 +216,13 @@ export const loadAndGeneratePolicy = async (
   const inspectedModules = new Set()
 
   /**
-   * Set of canonical names that are unknown to the policy.
-   *
-   * @type {Set<string>}
-   */
-  let unknownCanonicalNames = new Set()
-
-  /**
    * Deferred warnings to be reported after inspection is complete.
    *
    * Populated by {@link moduleSourceHook}
    *
    * @type {string[]}
    */
-  const warnings = []
+  const moduleSourceHookWarnings = []
 
   const reporter = createModuleInspectionProgressReporter({
     log,
@@ -231,7 +243,7 @@ export const loadAndGeneratePolicy = async (
 
   const moduleSourceHook = createModuleSourceHook({
     packageJsonMap,
-    warnings,
+    warnings: moduleSourceHookWarnings,
     log,
     rootUsePolicy,
     inspectionResults,
@@ -240,88 +252,107 @@ export const loadAndGeneratePolicy = async (
     violationsForPackage,
   })
 
-  await captureFromMap(readPowers, packageCompartmentMap, {
-    ...DEFAULT_ENDO_OPTIONS,
-    parserForLanguage: {
-      ...DEFAULT_ENDO_OPTIONS.parserForLanguage,
-      ...createPolicyGenParsers(inspectionResults, {
-        reporter,
-        modulesToInspect,
-        inspectedModules,
-        log,
-      }),
-    },
-    importHook,
-    log: log.debug.bind(log),
-    _preload,
-    packageConnectionsHook,
-    moduleSourceHook,
-    ...options,
-  })
-  reporter.reportModuleInspectionProgressEnd(inspectedModules, modulesToInspect)
+  try {
+    await captureFromMap(readPowers, packageCompartmentMap, {
+      ...DEFAULT_ENDO_OPTIONS,
+      parserForLanguage: {
+        ...DEFAULT_ENDO_OPTIONS.parserForLanguage,
+        ...createPolicyGenParsers(inspectionResults, {
+          reporter,
+          modulesToInspect,
+          inspectedModules,
+          log,
+        }),
+      },
+      importHook,
+      log: log.debug.bind(log),
+      _preload,
+      packageConnectionsHook,
+      moduleSourceHook,
+      ...options,
+    })
+  } catch (err) {
+    throw new GenerationError(
+      `Failed to inspect modules for ${entrypointPath}: ${err}`,
+      { cause: err }
+    )
+  } finally {
+    reporter.reportModuleInspectionProgressEnd(
+      inspectedModules,
+      modulesToInspect
+    )
+  }
 
+  /**
+   * This is the policy before overrides are merged into it
+   */
   const unmergedPolicy = compilePolicy(
     globalsForPackage,
     builtinsForPackage,
     packagePoliciesMap,
     rootUsePolicy
   )
+  /**
+   * This is the final generated policy
+   */
+  const policy = mergePolicies(unmergedPolicy, policyOverride)
 
+  // #region emit warnings
+
+  // printing of these warnings is deferred until after inspection is complete
+  for (const moduleSourceHookWarning of moduleSourceHookWarnings) {
+    log.warning(moduleSourceHookWarning)
+  }
+
+  reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
+    policy: policyOverride,
+    log,
+    what: 'policy overrides',
+  })
+  reportSesViolations(violationsForPackage, { log })
+
+  const hasWarnings = !!(
+    moduleSourceHookWarnings.length +
+    unknownCanonicalNames.size +
+    violationsForPackage.size
+  )
+  // #endregion
+
+  // #region compaction
   /**
    * When compaction is requested and an override was provided, compute the
    * compacted override against the un-merged generated policy so it contains
    * only what the generator missed.
    */
-  const { policy: compactedPolicyOverride, compacted = false } = policyOverride
+  const { policy: compactedPolicy, compacted = false } = policyOverride
     ? compactPolicyOverride(policyOverride, unmergedPolicy)
     : { policy: undefined }
-
-  const policy = mergePolicies(unmergedPolicy, policyOverride)
-
-  // #region emit warnings
-  for (const warning of warnings) {
-    log.warning(warning)
-  }
-
-  if (policyOverride) {
-    unknownCanonicalNames = findUnknownCanonicalNames(
-      knownCanonicalNames,
-      policyOverride
-    )
-    reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
-      policy: policyOverride,
-      log,
-      what: 'policy overrides',
-    })
-  }
-
-  const hasWarnings =
-    unknownCanonicalNames.size > 0 || violationsForPackage.size > 0
-
-  if (violationsForPackage.size > 0) {
-    reportSesViolations(violationsForPackage, { log })
-  }
-
+  const compactedPolicyOverride = compactedPolicy ? compactedPolicy : undefined
   if (!compact && compacted) {
     log.info(
       `❕ Policy override contains redundant entries and may be compacted; try running again with --compact`
     )
   }
   // #endregion
+
   return {
     policy,
     packageJsonMap,
     hasWarnings,
-    compactedPolicyOverride: compact ? compactedPolicyOverride : undefined,
+    compactedPolicyOverride,
   }
 }
 
 /**
+ * Called by the {@link module source hook | createModuleSourceHook} to apply
+ * inspection results to the globals map, builtins map, and violations map.
+ *
  * @param {CanonicalName} canonicalName
  * @param {ModuleInspectionResult} result
  * @param {Map<CanonicalName, GlobalPolicy>} globalsForPackage
  * @param {Map<CanonicalName, BuiltinPolicy>} builtinsForPackage
  * @param {Map<CanonicalName, StructuredViolationsResult>} violationsForPackage
+ * @returns {void}
  */
 const applyInspectionResults = (
   canonicalName,

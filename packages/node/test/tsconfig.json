@@ -4,15 +4,13 @@
     "paths": {
       "lavamoat-core": ["../../core/types/src/types.d.ts"]
     },
-    "preserveSymlinks": true,
     "rootDir": "..",
     "strict": true,
-    "target": "esnext",
-    "types": ["node", "ses"]
+    "target": "esnext"
   },
   "exclude": ["unit/fixture", "e2e/fixture"],
   "extends": "../../../.config/tsconfig.test.json",
-  "include": ["."],
+  "include": ["**/*.js", "**/*.ts", "stubs.d.ts"],
   "references": [
     {
       "path": "../src/tsconfig.json"
