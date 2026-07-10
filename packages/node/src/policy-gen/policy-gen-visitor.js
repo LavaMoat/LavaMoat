@@ -111,9 +111,10 @@ export const createPolicyGenVisitor = (options = {}) => {
       },
     },
     done() {
+      /* c8 ignore next 5 */
       if (!capturedAst) {
-        throw new Error(
-          'PolicyGen analyzer: AST was not captured during traversal'
+        throw new ReferenceError(
+          `AST traversal did not visit Program Node; this is a bug (somewhere)`
         )
       }
 
