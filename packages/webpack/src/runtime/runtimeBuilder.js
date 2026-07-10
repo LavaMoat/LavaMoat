@@ -47,12 +47,12 @@ class VirtualRuntimeModule extends RuntimeModule {
  * @import {
  *   LavaMoatChunkRuntimeConfiguration,
  *   LavaMoatPluginOptions
- * } from "../buildtime/types"
+ * } from '../buildtime/types'
  */
-/** @import {LavaMoatPolicy} from "@lavamoat/types" */
-/** @import {RuntimeFragment} from "./assemble.js" */
-/** @import {Chunk} from "webpack" */
-/** @import {ProgressAPI} from "../buildtime/utils.js" */
+/** @import {LavaMoatPolicy} from '@lavamoat/types' */
+/** @import {RuntimeFragment} from './assemble.js' */
+/** @import {Chunk} from 'webpack' */
+/** @import {ProgressAPI} from '../buildtime/utils.js' */
 
 /**
  * @typedef {Object} LavaMoatRuntimeIdentifiers
@@ -88,7 +88,8 @@ module.exports = {
         'clearTimeout', // LoadScriptRuntimeModule.js
         'document', // LoadScriptRuntimeModule.js, AutoPublicPathRuntimeModule.js
         'trustedTypes', // GetTrustedTypesPolicyRuntimeModule.js
-        'self',
+        'self', // webpacks own code references it
+        'importScripts', // chunk loading in workers
       ]
       return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};
 const LOCKDOWN_SHIMS = [];`
