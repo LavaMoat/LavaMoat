@@ -32,6 +32,7 @@ import { resolveBinScript, resolveEntrypoint } from './resolve.js'
 import { toPath } from './util.js'
 import { stripVTControlCharacters } from 'node:util'
 import { writePolicy } from './policy-util.js'
+import { NoPolicyError } from './error.js'
 
 /**
  * @import {LavaMoatPolicy} from '@lavamoat/types'
@@ -330,7 +331,7 @@ const main = async (args = hideBin(process.argv)) => {
             await fs.promises.access(policyOverridePath, fs.constants.R_OK)
             argv['policy-override'] = policyOverridePath
           } catch (err) {
-            throw new Error(
+            throw new NoPolicyError(
               `Cannot read specified policy override file at path ${hrPath(policyOverridePath)}`,
               { cause: err }
             )
