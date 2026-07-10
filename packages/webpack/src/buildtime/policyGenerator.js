@@ -72,9 +72,10 @@ module.exports = {
    * @param {string} opts.location
    * @param {IsBuiltinFn} opts.isBuiltin
    * @param {ModuleWithConnections[]} opts.modulesToInspect
+   * @param {boolean | undefined} opts.overwritePolicyWithOverride
    * @returns {LavaMoatPolicy}
    */
-  generatePolicy({ canonicalNameMap, location, isBuiltin, modulesToInspect }) {
+  generatePolicy({ canonicalNameMap, location, isBuiltin, modulesToInspect, overwritePolicyWithOverride }) {
     const { applyOverride } = loadPoliciesSync({
       policyPath: path.join(location, 'policy.json'),
       policyOverridePath: path.join(location, 'policy-override.json'),
@@ -205,12 +206,13 @@ module.exports = {
       }
       policy.resources[packageName].meta = packageMeta
     })
+    const overriddenPolicy = applyOverride(policy);
     mkdirSync(location, { recursive: true })
     writeFileSync(
       path.join(location, 'policy.json'),
-      jsonStringifySortedPolicy(policy),
+      jsonStringifySortedPolicy(overwritePolicyWithOverride ? overriddenPolicy : policy),
       'utf8'
     )
-    return applyOverride(policy)
+    return overriddenPolicy
   },
 }
