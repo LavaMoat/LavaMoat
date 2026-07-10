@@ -9,7 +9,7 @@ import nodeFs from 'node:fs'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { InvalidArgumentsError } from '../error.js'
-import { action, hrPath } from '../format.js'
+import { action, hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import {
   makeDefaultPolicyOverridePath,
@@ -127,6 +127,12 @@ export const generatePolicy = async (
       projectRoot,
       compact: overrideLoadedFromDisk ? compact : undefined,
     })
+
+  if (policyOverridePath && compactedPolicyOverride && !compact) {
+    log.info(
+      `ℹ Policy override at ${hrPath(policyOverridePath)} contains redundant entries and may be compacted; try running again with ${hrCode('--compact-overrides')}`
+    )
+  }
 
   return {
     policy,

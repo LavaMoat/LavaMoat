@@ -327,12 +327,8 @@ export const loadAndGeneratePolicy = async (
   const { policy: compactedPolicy, compacted = false } = policyOverride
     ? compactPolicyOverride(policyOverride, unmergedPolicy)
     : { policy: undefined }
-  const compactedPolicyOverride = compactedPolicy ? compactedPolicy : undefined
-  if (!compact && compacted) {
-    log.info(
-      `❕ Policy override contains redundant entries and may be compacted; try running again with --compact`
-    )
-  }
+  const compactedPolicyOverride =
+    compactedPolicy && compacted ? compactedPolicy : undefined
   // #endregion
 
   return {
