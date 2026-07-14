@@ -1,5 +1,6 @@
 /** @import {Opinion} from "../tools/types.js" */
 import { buildAllowlistChanges } from './build-allowlist.js'
+import { bundleRunner } from '../runner/runnerBundler.js'
 
 /** @type {readonly Opinion[]} */
 const definedOpinions = [
@@ -161,13 +162,16 @@ const definedOpinions = [
     changes: [
       {
         target: '/lavamoat',
-        key: '.runner.npm.cjs',
-        value: null,
+        key: '.runner.cjs',
+        value: bundleRunner({
+          packageManager: 'npm',
+          fileName: 'runner.cjs',
+        }),
       },
       {
         target: '.npmrc',
         key: 'script-shell',
-        value: './lavamoat/.runner.npm.cjs',
+        value: './lavamoat/.runner.cjs',
         comment: 'Protect the runtime of calls to "npm run" scripts.',
       },
     ],

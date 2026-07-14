@@ -34,7 +34,7 @@
     "!tsconfig.json"
   ],
   "scripts": {
-    "build": "node src/runner/buildRunners.js",
+    "build": "node src/runner/bundleRunner.js",
     "lint:deps": "depcheck",
     "test": "npm run test:run",
     "test:prep": "node test/prepare.js",

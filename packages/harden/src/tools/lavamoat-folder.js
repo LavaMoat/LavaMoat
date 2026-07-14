@@ -1,4 +1,4 @@
-import { copyFile, mkdir, access } from 'node:fs/promises'
+import { copyFile, mkdir, access, writeFile, chmod } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,9 +13,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const templateDir = join(__dirname, '..', 'template', 'lavamoat')
 
 /**
- * Ensures the ./lavamoat folder exists and copies template files into it.
- *
- * TODO: support templating the files with an object in value
+ * Ensures the ./lavamoat folder exists and writes/copies requested files into
+ * it.
  *
  * @param {string} cwd
  * @param {Change[]} entries
@@ -36,7 +35,6 @@ export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
         'lavamoat folder entries must have string keys representing file paths'
       )
     }
-    const src = join(templateDir, entry.key)
     const dest = join(destDir, entry.key)
     const overwrite = entry.ifNotExist === true ? false : true
     if (dryRun) {
@@ -48,16 +46,35 @@ export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
       }
     } else {
       await mkdir(dirname(dest), { recursive: true })
-      try {
-        if (overwrite) {
-          await copyFile(src, dest)
-        } else {
-          await copyFile(src, dest, constants.COPYFILE_EXCL)
+      if (typeof entry.value === 'string') {
+        try {
+          await writeFile(dest, entry.value, {
+            encoding: 'utf-8',
+            flag: overwrite ? 'w' : 'wx',
+          })
+          // String-based entries are generated scripts/plugins and should be
+          // executable when materialized on disk. Noop on windows.
+          await chmod(dest, 0o755)
+        } catch (err) {
+          if (/** @type {NodeJS.ErrnoException} */ (err).code === 'EEXIST') {
+            continue
+          }
+          throw err
         }
-      } catch (err) {
-        if (/** @type {NodeJS.ErrnoException} */ (err).code === 'EEXIST')
-          continue
-        throw err
+      } else {
+        const src = join(templateDir, entry.key)
+        try {
+          if (overwrite) {
+            await copyFile(src, dest)
+          } else {
+            await copyFile(src, dest, constants.COPYFILE_EXCL)
+          }
+        } catch (err) {
+          if (/** @type {NodeJS.ErrnoException} */ (err).code === 'EEXIST') {
+            continue
+          }
+          throw err
+        }
       }
     }
     applied.push({

@@ -4,8 +4,7 @@
  * @module
  */
 
-// NOTE: makeRunScriptWrapper is inlined in build
-const makeRunScriptWrapper = require('../runScriptWrapper.cjs')
+/* global makeRunScriptWrapper */
 
 /**
  * Yarn 4 plugin factory for wrapScriptExecution hook.

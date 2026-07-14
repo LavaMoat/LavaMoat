@@ -1,5 +1,6 @@
 import { applyLatestVersion } from '../tools/versions.js'
 import { buildAllowlistChanges } from './build-allowlist.js'
+import { bundleRunner } from '../runner/runnerBundler.js'
 /** @import {Opinion} from "../tools/types.js" */
 
 /** @type {readonly Opinion[]} */
@@ -113,13 +114,16 @@ const definedOpinions = [
     changes: [
       {
         target: '/lavamoat',
-        key: '.runner.npm.cjs',
-        value: null,
+        key: '.runner.cjs',
+        value: bundleRunner({
+          packageManager: 'npm', // currently reusing the npm one
+          fileName: 'runner.cjs',
+        }),
       },
       {
         target: 'pnpm-workspace.yaml',
         key: 'scriptShell',
-        value: './lavamoat/.runner.npm.cjs',
+        value: './lavamoat/.runner.cjs',
         comment: 'Protect the runtime of calls to "pnpm run" scripts.',
       },
     ],

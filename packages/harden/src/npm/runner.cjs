@@ -1,6 +1,7 @@
 #! /usr/bin/env node
+/// <reference path="../runner/makeRunScriptWrapper.global.d.ts" />
 
-const makeRunScriptWrapper = require('../runScriptWrapper.cjs')
+/* global makeRunScriptWrapper */
 
 const { spawnSync } = require('node:child_process')
 const fs = require('node:fs')

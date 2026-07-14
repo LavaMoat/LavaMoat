@@ -469,7 +469,7 @@ export default defineConfig(
   },
   // --- packages/harden ---
   {
-    files: ['packages/harden/src/**/.runner*'],
+    files: ['packages/harden/src/**/runner.cjs'],
     rules: {
       'n/hashbang': 'off',
     },

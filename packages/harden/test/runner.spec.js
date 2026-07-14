@@ -11,7 +11,7 @@ const execFileAsync = promisify(execFile)
 
 const DEBUG = false
 
-const PKGMGR_LIST = ['npm', 'pnpm'] // no yarn yet
+const PKGMGR_LIST = ['npm', 'pnpm', 'yarn']
 const PROJECTS_DIR = new URL('./projects/', import.meta.url).pathname
 
 /**
@@ -41,6 +41,11 @@ for (const pm of PKGMGR_LIST) {
         print: () => {},
       }),
       print: () => {},
+    })
+
+    // call yarn install in the temp dir to ensure .runner.cjs is used
+    await execFileAsync(pm, ['install'], {
+      cwd,
     })
 
     const result = await execFileAsync(pm, ['test'], {

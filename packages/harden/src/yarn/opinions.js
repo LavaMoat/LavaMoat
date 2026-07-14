@@ -2,6 +2,7 @@
 import { applyLatestVersion } from '../tools/versions.js'
 import { buildAllowlistChanges } from './yarn-build-allowlist.js'
 import { buildAllowlistChanges as buildLmAllowlistChanges } from './lm-build-allowlist.js'
+import { bundleRunner } from '../runner/runnerBundler.js'
 
 /** @type {readonly Opinion[]} */
 const definedOpinions = [
@@ -170,6 +171,88 @@ const definedOpinions = [
         comment: 'Disable global cache to avoid cross-project poisoning.',
       },
     ],
+  },
+
+  {
+    description:
+      'Take over yarn run and remove bin scripts confusion possibility and configure other limitations.',
+    level: 'paranoid',
+    changes: [
+      {
+        target: '/lavamoat',
+        key: '.runner-plugin.js',
+        value: bundleRunner({
+          packageManager: 'yarn',
+          fileName: 'runner-plugin.js',
+        }),
+      },
+    ],
+    execute: async (changes, facts, decisions) => {
+      const plugins = /** @type {{ path: string; spec?: string }[]} */ (
+        facts.yarnConfig?.plugins || []
+      )
+
+      if (
+        plugins.length === 0 ||
+        !JSON.stringify(plugins).includes('lavamoat/.runner-plugin.js')
+      ) {
+        changes.push({
+          target: '.yarnrc.yml',
+          key: 'plugins',
+          value: [...plugins, { path: './lavamoat/.runner-plugin.js' }],
+          comment:
+            'Protect the runtime of calls to "yarn run" scripts using a local plugin.',
+        })
+      }
+
+      const filterEnv = await decisions.askToHarden(
+        {
+          description:
+            'Limit environment variables exposure to the shell running the scripts.',
+          level: 'paranoid',
+        },
+        facts
+      )
+
+      if (filterEnv) {
+        changes.push({
+          ifNotExist: true,
+          target: '/lavamoat',
+          key: '.env.ban.json',
+          value: null,
+        })
+      }
+
+      const hardenScripts = await decisions.askToHarden(
+        {
+          description:
+            'Limit permissions of node programs in "yarn run" scripts to prevent unexpected access to the environment.',
+          level: 'paranoid',
+        },
+        facts
+      )
+
+      if (hardenScripts) {
+        changes.push({
+          target: '/lavamoat',
+          key: 'scripts.strict.json',
+          value: null,
+        })
+        changes.push({
+          target: '/lavamoat',
+          key: 'scripts.loose.json',
+          value: null,
+        })
+        changes.push({
+          target: 'package.json',
+          key: 'scriptsConfig',
+          ifNotExist: true,
+          value: {
+            '#default': 'lavamoat/scripts.loose.json',
+          },
+        })
+      }
+    },
   },
 
   {
