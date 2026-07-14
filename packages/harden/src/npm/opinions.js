@@ -82,29 +82,6 @@ const definedOpinions = [
       },
     ],
   },
-  {
-    description:
-      'Take over npm run and remove bin scripts confusion possibility and limit env variables exposure to the shell running the scripts.',
-    level: 'paranoid',
-    changes: [
-      {
-        target: '/lavamoat',
-        key: '.runner.cjs',
-        value: null,
-      },
-      {
-        target: '/lavamoat',
-        key: '.env.ban.json',
-        value: null,
-      },
-      {
-        target: '.npmrc',
-        key: 'script-shell',
-        value: './lavamoat/.runner.cjs',
-        comment: 'Protect the runtime of calls to npm run ',
-      },
-    ],
-  },
 
   {
     description:
@@ -175,6 +152,73 @@ const definedOpinions = [
           'Pin allowed scripts to exact versions of dependencies to prevent unexpected script execution.',
       },
     ],
+  },
+
+  {
+    description:
+      'Take over npm run and remove bin scripts confusion possibility and configure other limitations.',
+    level: 'paranoid',
+    changes: [
+      {
+        target: '/lavamoat',
+        key: '.runner.npm.cjs',
+        value: null,
+      },
+      {
+        target: '.npmrc',
+        key: 'script-shell',
+        value: './lavamoat/.runner.cjs',
+        comment: 'Protect the runtime of calls to "npm run" scripts.',
+      },
+    ],
+    execute: async (changes, facts, decisions) => {
+      const filterEnv = await decisions.askToHarden(
+        {
+          description:
+            'Limit environment variables exposure to the shell running the scripts.',
+          level: 'paranoid',
+        },
+        facts
+      )
+
+      if (filterEnv) {
+        changes.push({
+          ifNotExist: true,
+          target: '/lavamoat',
+          key: '.env.ban.json',
+          value: null,
+        })
+      }
+
+      const hardenScripts = await decisions.askToHarden(
+        {
+          description:
+            'Limit permissions of node programs in "npm run" scripts to prevent unexpected access to the environment.',
+          level: 'paranoid',
+        },
+        facts
+      )
+
+      if (hardenScripts) {
+        changes.push({
+          target: '/lavamoat',
+          key: 'scripts.strict.json',
+          value: null,
+        })
+        changes.push({
+          target: '/lavamoat',
+          key: 'scripts.loose.json',
+          value: null,
+        })
+        changes.push({
+          target: 'package.json',
+          key: 'scriptsConfig',
+          value: {
+            '#default': 'lavamoat/scripts.strict.json',
+          },
+        })
+      }
+    },
   },
 ]
 

@@ -38,6 +38,7 @@ export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
     }
     const src = join(templateDir, entry.key)
     const dest = join(destDir, entry.key)
+    const overwrite = entry.ifNotExist === true ? false : true
     if (dryRun) {
       try {
         await access(dest, constants.F_OK)
@@ -48,7 +49,11 @@ export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
     } else {
       await mkdir(dirname(dest), { recursive: true })
       try {
-        await copyFile(src, dest, constants.COPYFILE_EXCL)
+        if (overwrite) {
+          await copyFile(src, dest)
+        } else {
+          await copyFile(src, dest, constants.COPYFILE_EXCL)
+        }
       } catch (err) {
         if (/** @type {NodeJS.ErrnoException} */ (err).code === 'EEXIST')
           continue

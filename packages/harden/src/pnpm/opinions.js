@@ -108,26 +108,69 @@ const definedOpinions = [
 
   {
     description:
-      'Take over pnpm run and remove bin scripts confusion possibility and limit env variables exposure to the shell running the scripts.',
+      'Take over pnpm run and remove bin scripts confusion possibility and configure other limitations.',
     level: 'paranoid',
     changes: [
       {
         target: '/lavamoat',
-        key: '.runner.cjs',
-        value: null,
-      },
-      {
-        target: '/lavamoat',
-        key: '.env.ban.json',
+        key: '.runner.npm.cjs',
         value: null,
       },
       {
         target: 'pnpm-workspace.yaml',
         key: 'scriptShell',
-        value: './lavamoat/.runner.cjs',
-        comment: 'Protect the runtime of calls to pnpm run ',
+        value: './lavamoat/.runner.npm.cjs',
+        comment: 'Protect the runtime of calls to "pnpm run" scripts.',
       },
     ],
+    execute: async (changes, facts, decisions) => {
+      const filterEnv = await decisions.askToHarden(
+        {
+          description:
+            'Limit environment variables exposure to the shell running the scripts.',
+          level: 'paranoid',
+        },
+        facts
+      )
+
+      if (filterEnv) {
+        changes.push({
+          ifNotExist: true,
+          target: '/lavamoat',
+          key: '.env.ban.json',
+          value: null,
+        })
+      }
+
+      const hardenScripts = await decisions.askToHarden(
+        {
+          description:
+            'Limit permissions of node programs in "pnpm run" scripts to prevent unexpected access to the environment.',
+          level: 'paranoid',
+        },
+        facts
+      )
+
+      if (hardenScripts) {
+        changes.push({
+          target: '/lavamoat',
+          key: 'scripts.strict.json',
+          value: null,
+        })
+        changes.push({
+          target: '/lavamoat',
+          key: 'scripts.loose.json',
+          value: null,
+        })
+        changes.push({
+          target: 'package.json',
+          key: 'scriptsConfig',
+          value: {
+            '#default': 'lavamoat/scripts.strict.json',
+          },
+        })
+      }
+    },
   },
 
   {

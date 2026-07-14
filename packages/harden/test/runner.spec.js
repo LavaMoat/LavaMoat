@@ -15,6 +15,7 @@ for (const pm of PKGMGR_LIST) {
       cwd,
       env: { ...process.env, TOKEN: 'SECRET', BISFOR: 'Bananas' },
     })
+    t.log(result.stderr)
     t.regex(result.stdout, /^Absolutely$/gm, 'Expected output not found')
     t.regex(result.stdout, /^Bananas$/gm, 'Expected output not found')
     t.notRegex(
@@ -22,6 +23,5 @@ for (const pm of PKGMGR_LIST) {
       /SECRET/gm,
       'Expected no secret leakage, but SECRET is present'
     )
-    // t.log(result)
   })
 }

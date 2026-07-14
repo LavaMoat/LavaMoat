@@ -469,7 +469,7 @@ export default defineConfig(
   },
   // --- packages/harden ---
   {
-    files: ['packages/harden/src/template/lavamoat/.runner.cjs'],
+    files: ['packages/harden/src/**/.runner*'],
     rules: {
       'n/hashbang': 'off',
     },
