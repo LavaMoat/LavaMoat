@@ -31,10 +31,6 @@ const wrapper = makeRunScriptWrapper(
     readScriptsConfig: () => {
       try {
         const pkgData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
-        process._rawDebug({
-          scriptName,
-          pkgData,
-        })
         return pkgData.scriptsConfig
       } catch {
         return undefined
@@ -82,7 +78,6 @@ function addMandatoryReads(configOptions, env) {
   if (!configOptions['--allow-fs-read']) {
     configOptions['--allow-fs-read'] = []
   }
-
   configOptions['--allow-fs-read'].push(env['npm_config_prefix'])
   configOptions['--allow-fs-read'].push(env['npm_config_userconfig'])
 }

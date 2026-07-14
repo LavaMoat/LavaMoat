@@ -31,10 +31,6 @@ const wrapper = makeRunScriptWrapper(
     readScriptsConfig: () => {
       try {
         const pkgData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
-        process._rawDebug({
-          scriptName,
-          pkgData,
-        })
         return pkgData.scriptsConfig
       } catch {
         return undefined
@@ -49,8 +45,6 @@ const wrapper = makeRunScriptWrapper(
 )
 
 const customEnv = wrapper.processEnv(process.env)
-
-process._rawDebug(customEnv.NODE_OPTIONS)
 
 // Note: spawnSync is used here instead of process.execve because execve is
 // not available on Windows. Leaving this here to switch to execve in case other reasons to
@@ -84,7 +78,6 @@ function addMandatoryReads(configOptions, env) {
   if (!configOptions['--allow-fs-read']) {
     configOptions['--allow-fs-read'] = []
   }
-
   configOptions['--allow-fs-read'].push(env['npm_config_prefix'])
   configOptions['--allow-fs-read'].push(env['npm_config_userconfig'])
 }
@@ -176,7 +169,7 @@ function makeRunScriptWrapper(
    */
   function installNodeOptions(existingOptions, configOptions, env) {
     if (!configOptions) {
-      return existingOptions
+      return existingOptions || ''
     }
 
     customizePermissionsConfig(configOptions, env)
@@ -249,24 +242,18 @@ function makeRunScriptWrapper(
 
     /** @type {string[]} */
     const filteredFragments = []
-    /** @type {string | undefined} */
-    let nodeModulesBinPath
+    /** @type {string[]} */
+    const nodeModulesBinFragments = []
 
     for (const fragment of pathFragments) {
       if (pathBinMatcher(fragment)) {
-        if (nodeModulesBinPath) {
-          console.error(
-            `[LavaMoat] Warning: Found multiple node_modules/.bin paths in PATH. This is unexpected and may cause issues. ${PATH}`
-          )
-        }
-        nodeModulesBinPath = fragment
+        nodeModulesBinFragments.push(fragment)
       } else {
         filteredFragments.push(fragment)
       }
     }
-    if (nodeModulesBinPath !== undefined) {
-      filteredFragments.push(nodeModulesBinPath)
-    }
+    // Why would there be multiple bin fragments? In a npm workspace, local bin and workspace root bin is added
+    filteredFragments.push(...nodeModulesBinFragments)
     return filteredFragments.join(pathDelimiter)
   }
 
@@ -276,13 +263,6 @@ function makeRunScriptWrapper(
       const config = readConfig({
         scriptsConfig,
         scriptName,
-        projectRoot,
-      })
-
-      process._rawDebug({
-        scriptName,
-        config,
-        scriptsConfig,
         projectRoot,
       })
 

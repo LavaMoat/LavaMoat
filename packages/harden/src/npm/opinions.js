@@ -167,7 +167,7 @@ const definedOpinions = [
       {
         target: '.npmrc',
         key: 'script-shell',
-        value: './lavamoat/.runner.cjs',
+        value: './lavamoat/.runner.npm.cjs',
         comment: 'Protect the runtime of calls to "npm run" scripts.',
       },
     ],
@@ -213,8 +213,9 @@ const definedOpinions = [
         changes.push({
           target: 'package.json',
           key: 'scriptsConfig',
+          ifNotExist: true,
           value: {
-            '#default': 'lavamoat/scripts.strict.json',
+            '#default': 'lavamoat/scripts.loose.json',
           },
         })
       }

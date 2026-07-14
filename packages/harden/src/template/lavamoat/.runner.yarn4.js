@@ -4,9 +4,6 @@
  * @module
  */
 
-const path = require('node:path')
-const fs = require('node:fs')
-
 // NOTE: makeRunScriptWrapper is inlined in build
 
 
@@ -44,6 +41,8 @@ module.exports = {
           scriptName,
           extra
         ) => {
+          const path = require('node:path')
+          const fs = require('node:fs')
           const workspace = project.tryWorkspaceByLocator(locator)
 
           process._rawDebug('wrapScriptExecution', {
@@ -202,7 +201,7 @@ function makeRunScriptWrapper(
    */
   function installNodeOptions(existingOptions, configOptions, env) {
     if (!configOptions) {
-      return existingOptions
+      return existingOptions || ''
     }
 
     customizePermissionsConfig(configOptions, env)
@@ -275,24 +274,18 @@ function makeRunScriptWrapper(
 
     /** @type {string[]} */
     const filteredFragments = []
-    /** @type {string | undefined} */
-    let nodeModulesBinPath
+    /** @type {string[]} */
+    const nodeModulesBinFragments = []
 
     for (const fragment of pathFragments) {
       if (pathBinMatcher(fragment)) {
-        if (nodeModulesBinPath) {
-          console.error(
-            `[LavaMoat] Warning: Found multiple node_modules/.bin paths in PATH. This is unexpected and may cause issues. ${PATH}`
-          )
-        }
-        nodeModulesBinPath = fragment
+        nodeModulesBinFragments.push(fragment)
       } else {
         filteredFragments.push(fragment)
       }
     }
-    if (nodeModulesBinPath !== undefined) {
-      filteredFragments.push(nodeModulesBinPath)
-    }
+    // Why would there be multiple bin fragments? In a npm workspace, local bin and workspace root bin is added
+    filteredFragments.push(...nodeModulesBinFragments)
     return filteredFragments.join(pathDelimiter)
   }
 
@@ -302,13 +295,6 @@ function makeRunScriptWrapper(
       const config = readConfig({
         scriptsConfig,
         scriptName,
-        projectRoot,
-      })
-
-      process._rawDebug({
-        scriptName,
-        config,
-        scriptsConfig,
         projectRoot,
       })
 

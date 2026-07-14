@@ -5,5 +5,8 @@
     "a": "echo Absolutely",
     "b": "echo $BISFOR",
     "test": "pnpm run a && pnpm run b && echo stealing: $TOKEN"
+  },
+  "scriptsConfig": {
+    "b": "lavamoat/scripts.strict.json"
   }
 }

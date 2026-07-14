@@ -165,8 +165,13 @@ const definedOpinions = [
         changes.push({
           target: 'package.json',
           key: 'scriptsConfig',
+          ifNotExist: true,
           value: {
-            '#default': 'lavamoat/scripts.strict.json',
+            // '#default': 'lavamoat/scripts.loose.json',
+            // even enabling policy makes pnpm 11.13 fail with
+            //     path_1.default.upath = exports2.upath;
+            //             ^
+            //  TypeError: Cannot add property upath, object is not extensible
           },
         })
       }
