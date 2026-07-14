@@ -4,6 +4,8 @@
  * @module
  */
 
+/** @typedef {NonNullable<import('@yarnpkg/core').Hooks['wrapScriptExecution']>} WrapScriptExecutionHook */
+
 /* global makeRunScriptWrapper */
 
 /**
@@ -14,25 +16,10 @@
  */
 module.exports = {
   name: '@yarnpkg/plugin-runner',
-  factory: function (require) {
+  factory: function (/** @type {NodeJS.Require} */ require) {
     return {
       hooks: {
-        /**
-         * @param {() => Promise<number>} executor
-         * @param {object} project
-         * @param {object} locator
-         * @param {string} scriptName
-         * @param {{
-         *   script: string
-         *   args: string[]
-         *   cwd: string
-         *   env: NodeJS.ProcessEnv
-         *   stdin: import('stream').Readable | null
-         *   stdout: import('stream').Writable
-         *   stderr: import('stream').Writable
-         * }} extra
-         * @returns {Promise<() => Promise<number>>}
-         */
+        /** @type {WrapScriptExecutionHook} */
         wrapScriptExecution: async (
           executor,
           project,
@@ -43,12 +30,6 @@ module.exports = {
           const path = require('node:path')
           const fs = require('node:fs')
           const workspace = project.tryWorkspaceByLocator(locator)
-
-          process._rawDebug('wrapScriptExecution', {
-            scriptName,
-            extra,
-            pkgj: workspace?.manifest?.raw,
-          })
 
           if (!workspace) {
             // a script is being executed outside of a workspace context, so we can't apply any custom logic
@@ -67,6 +48,7 @@ module.exports = {
           const wrapper = makeRunScriptWrapper(
             {
               scriptName,
+              scriptPayload: extra.script,
               projectRoot: extra.cwd,
               pathBinMatcher: (fragment) => {
                 return fragment.endsWith(binFolder)
@@ -93,16 +75,16 @@ module.exports = {
 
 /**
  * @param {Record<string, boolean | string | string[]>} configOptions
- * @param {NodeJS.ProcessEnv} env
+ * @param {NodeJS.ProcessEnv} _env
  */
-function addMandatoryReads(configOptions, env) {
+function addMandatoryReads(configOptions, _env) {
   if (!configOptions['--permission']) {
     return
   }
-  if (!configOptions['--allow-fs-read']) {
+  if (!Array.isArray(configOptions['--allow-fs-read'])) {
     configOptions['--allow-fs-read'] = []
   }
-  if (!configOptions['--allow-fs-write']) {
+  if (!Array.isArray(configOptions['--allow-fs-write'])) {
     configOptions['--allow-fs-write'] = []
   }
 

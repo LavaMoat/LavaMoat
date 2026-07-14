@@ -43,10 +43,12 @@ for (const pm of PKGMGR_LIST) {
       print: () => {},
     })
 
-    // call yarn install in the temp dir to ensure .runner.cjs is used
-    await execFileAsync(pm, ['install'], {
-      cwd,
-    })
+    if (pm === 'yarn') {
+      // call yarn install in the temp dir to ensure .runner.cjs is used
+      await execFileAsync(pm, ['install'], {
+        cwd,
+      })
+    }
 
     const result = await execFileAsync(pm, ['test'], {
       cwd,

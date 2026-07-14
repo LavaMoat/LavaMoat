@@ -1,17 +1,18 @@
+/// <reference path="./makeRunScriptWrapper.global.d.ts" />
+
 /**
  * @typedef {Record<string, boolean | string | string[]>} ConfigOptions
  */
 
 /**
- * @param {any} param0
- * @param {any} param1
- * @returns {{
- *   processEnv: (existingEnv: NodeJS.ProcessEnv) => NodeJS.ProcessEnv
- * }}
+ * @param {MakeRunScriptWrapperOptions} param0
+ * @param {MakeRunScriptWrapperIO} param1
+ * @returns {MakeRunScriptWrapper}
  */
 function makeRunScriptWrapper(
   {
     scriptName,
+    scriptPayload: _scriptPayload, // might be useful to read in the future
     projectRoot,
     pathBinMatcher,
     customizePermissionsConfig,
@@ -29,10 +30,14 @@ function makeRunScriptWrapper(
   /**
    * @param {object} opts
    * @param {Record<string, string> | undefined} opts.scriptsConfig
-   * @param {string} opts.scriptName
+   * @param {string} [opts.scriptName]
    * @param {string} opts.projectRoot
    */
-  function readConfig({ scriptsConfig, scriptName, projectRoot }) {
+  function readConfig({
+    scriptsConfig,
+    scriptName = DEFAULT_PERMISSION_KEY,
+    projectRoot,
+  }) {
     if (!scriptsConfig) {
       return {}
     }
@@ -51,8 +56,9 @@ function makeRunScriptWrapper(
         throw Error(`Expected an object, got ${typeof conf}`)
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
       throw Error(
-        `[LavaMoat] Error loading script config file "${configPath}": ${err.message}`,
+        `[LavaMoat] Error loading script config file "${configPath}": ${message}`,
         { cause: err }
       )
     }
@@ -108,8 +114,9 @@ function makeRunScriptWrapper(
     try {
       banConfig = readJsonFile(banFilePath)
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
       console.error(
-        `[LavaMoat] Warning: Failed to read .env.ban.json: ${err.message}.`
+        `[LavaMoat] Warning: Failed to read .env.ban.json: ${message}.`
       )
       return env
     }
@@ -121,8 +128,9 @@ function makeRunScriptWrapper(
         throw Error(`Expected .env.ban.json to contain an array of keywords`)
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
       console.error(
-        `[LavaMoat] Warning: Failed to read .env.ban.json: ${err.message}.`
+        `[LavaMoat] Warning: Failed to read .env.ban.json: ${message}.`
       )
       return env
     }

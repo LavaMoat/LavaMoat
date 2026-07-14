@@ -17,6 +17,12 @@ if (!pkgJsonPath) {
   )
 }
 
+if (!scriptName) {
+  console.error(
+    `[LavaMoat] Warning: 'npm_lifecycle_event' environment variable is missing.`
+  )
+}
+
 const pkgJsonFolder = path.dirname(pkgJsonPath)
 const fallbackShell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh'
 const shellArgs = process.platform === 'win32' ? ['/d', '/s', '/c'] : ['-c']
@@ -26,6 +32,7 @@ const pathBinMatcherString = `node_modules${path.sep}.bin`
 const wrapper = makeRunScriptWrapper(
   {
     scriptName,
+    scriptPayload,
     projectRoot: pkgJsonFolder,
     pathBinMatcher: (fragment) => fragment.endsWith(pathBinMatcherString),
     customizePermissionsConfig: addMandatoryReads,
@@ -79,6 +86,11 @@ function addMandatoryReads(configOptions, env) {
   if (!configOptions['--allow-fs-read']) {
     configOptions['--allow-fs-read'] = []
   }
-  configOptions['--allow-fs-read'].push(env['npm_config_prefix'])
-  configOptions['--allow-fs-read'].push(env['npm_config_userconfig'])
+  if (Array.isArray(configOptions['--allow-fs-read'])) {
+    configOptions['--allow-fs-read'].push(
+      // @ts-ignore it has to exist
+      env['npm_config_prefix'],
+      env['npm_config_userconfig']
+    )
+  }
 }
