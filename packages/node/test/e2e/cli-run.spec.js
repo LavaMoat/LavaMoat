@@ -20,6 +20,7 @@ const devDeptree = fixture('deptree', {
 const missingFromDisk = fixture('missing-from-disk')
 const missingFromDescriptors = fixture('missing-from-descriptors')
 const circularRootDep = fixture('circular-root-dep')
+const basicTs = fixture('basic-ts', { entrypointFilename: 'index.ts' })
 
 const { testCLI } = createCLIMacros(test)
 
@@ -42,6 +43,13 @@ test(
   testCLI,
   ['run', basic.entrypoint, '--project-root', basic.dir],
   'hello world'
+)
+
+test(
+  'basic ts',
+  testCLI,
+  ['run', basicTs.entrypoint, '--project-root', basicTs.dir],
+  'My apologies folks'
 )
 
 test(
