@@ -4,7 +4,7 @@ import { bundleRunner } from '../src/runner/runnerBundler.js'
 test('bundleRunner inlines wrapper into npm adapter', (t) => {
   const bundled = bundleRunner({
     packageManager: 'npm',
-    fileName: '.runner.cjs',
+    fileName: 'runner.cjs',
   })
 
   t.true(bundled.includes('/* global makeRunScriptWrapper */'))

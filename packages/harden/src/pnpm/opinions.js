@@ -158,11 +158,13 @@ const definedOpinions = [
       if (hardenScripts) {
         changes.push({
           target: '/lavamoat',
+          ifNotExist: true,
           key: 'scripts.strict.json',
           value: null,
         })
         changes.push({
           target: '/lavamoat',
+          ifNotExist: true,
           key: 'scripts.loose.json',
           value: null,
         })

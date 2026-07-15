@@ -1,4 +1,11 @@
-import { copyFile, mkdir, access, writeFile, chmod } from 'node:fs/promises'
+import {
+  copyFile,
+  mkdir,
+  access,
+  readFile,
+  writeFile,
+  chmod,
+} from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,6 +20,27 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const templateDir = join(__dirname, '..', 'template', 'lavamoat')
 
 /**
+ * Returns true when writing the given string entry would be a no-op.
+ *
+ * @param {string} dest
+ * @param {string} value
+ * @param {boolean} overwrite
+ * @returns {Promise<boolean>}
+ */
+async function shouldSkipStringEntry(dest, value, overwrite) {
+  try {
+    const existing = await readFile(dest, 'utf-8')
+    if (existing === value) {
+      return true
+    }
+    return overwrite ? false : true
+  } catch {
+    // file does not exist yet, proceed to write
+    return false
+  }
+}
+
+/**
  * Ensures the ./lavamoat folder exists and writes/copies requested files into
  * it.
  *
@@ -24,7 +52,6 @@ const templateDir = join(__dirname, '..', 'template', 'lavamoat')
  */
 export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
   const destDir = join(cwd, 'lavamoat')
-  await mkdir(destDir, { recursive: true })
 
   /** @type {AppliedChange[]} */
   const applied = []
@@ -38,15 +65,26 @@ export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
     const dest = join(destDir, entry.key)
     const overwrite = entry.ifNotExist === true ? false : true
     if (dryRun) {
-      try {
-        await access(dest, constants.F_OK)
-        continue
-      } catch {
-        // file does not exist, proceed
+      if (typeof entry.value === 'string') {
+        if (await shouldSkipStringEntry(dest, entry.value, overwrite)) {
+          continue
+        }
+      } else {
+        try {
+          await access(dest, constants.F_OK)
+          if (!overwrite) {
+            continue
+          }
+        } catch {
+          // file does not exist, proceed
+        }
       }
     } else {
       await mkdir(dirname(dest), { recursive: true })
       if (typeof entry.value === 'string') {
+        if (await shouldSkipStringEntry(dest, entry.value, overwrite)) {
+          continue
+        }
         try {
           await writeFile(dest, entry.value, {
             encoding: 'utf-8',

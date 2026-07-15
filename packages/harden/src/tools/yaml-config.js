@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
 import { parseDocument } from 'yaml'
 /**
  * @import {
@@ -48,6 +49,10 @@ export async function readYamlDocument(filePath, key) {
  */
 export function readYamlArrayField(doc, fieldName) {
   const value = doc.get(fieldName)
+  if (Array.isArray(value)) {
+    return value
+  }
+
   const yamlValue = /** @type {{ toJSON?: () => unknown } | null} */ (value)
 
   if (!yamlValue || typeof yamlValue.toJSON !== 'function') {
@@ -56,6 +61,35 @@ export function readYamlArrayField(doc, fieldName) {
 
   const arrayValue = yamlValue.toJSON()
   return Array.isArray(arrayValue) ? arrayValue : []
+}
+
+/**
+ * @param {unknown} yamlValue
+ * @returns {unknown}
+ */
+function toComparableValue(yamlValue) {
+  const maybeYamlValue = /** @type {{ toJSON?: () => unknown } | null} */ (
+    yamlValue
+  )
+  if (maybeYamlValue && typeof maybeYamlValue.toJSON === 'function') {
+    return maybeYamlValue.toJSON()
+  }
+  return yamlValue
+}
+
+/**
+ * @param {unknown[]} existingItems
+ * @param {unknown[]} newItems
+ * @returns {unknown[]}
+ */
+function mergeArrayItems(existingItems, newItems) {
+  const merged = [...existingItems]
+  for (const item of newItems) {
+    if (!merged.some((existing) => isDeepStrictEqual(existing, item))) {
+      merged.push(item)
+    }
+  }
+  return merged
 }
 
 /**
@@ -81,11 +115,31 @@ export async function applyYamlConfig(cwd, filename, entries, dryRun = false) {
 
   for (const entry of entries) {
     const existing = doc.get(entry.key)
-    const valueToSet = entry.value
+    let valueToSet = entry.value
+
+    if (entry.addToExisting) {
+      if (typeof entry.key !== 'string') {
+        throw new Error(
+          `addToExisting requires a string key for ${filename}.${String(entry.key)}`
+        )
+      }
+      if (!Array.isArray(entry.value)) {
+        throw new Error(
+          `addToExisting requires an array value for ${filename}.${entry.key}`
+        )
+      }
+      const merged = mergeArrayItems(
+        readYamlArrayField(doc, entry.key),
+        entry.value
+      )
+      valueToSet = /** @type {Change['value']} */ (merged)
+    }
+
+    const comparableExisting = toComparableValue(existing)
 
     if (
       existing !== undefined &&
-      JSON.stringify(existing) === JSON.stringify(valueToSet)
+      JSON.stringify(comparableExisting) === JSON.stringify(valueToSet)
     ) {
       continue // already correct
     }
@@ -107,7 +161,7 @@ export async function applyYamlConfig(cwd, filename, entries, dryRun = false) {
       }
     }
 
-    changed.push({ file: filename, key: entry.key, value: entry.value })
+    changed.push({ file: filename, key: entry.key, value: valueToSet })
   }
 
   if (!dryRun) {

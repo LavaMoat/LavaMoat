@@ -2,7 +2,8 @@ import semver from 'semver'
 /**
  * @import {
  *   Change,
- *   Facts
+ *   Facts,
+ *   SerializableObject
  * } from "./types.js"
  */
 
@@ -20,6 +21,9 @@ export function applyLatestVersion(changes, facts, latestVersion) {
     (c) => c.target === 'package.json' && c.key === 'packageManager'
   )
   if (!entry) return
+
+  /** @type {string | undefined} */
+  let targetVersion
   const [pmPrefix, minimum] = String(entry.value).split('@')
   if (facts.packageJson?.packageManager) {
     if (typeof facts.packageJson.packageManager !== 'string') {
@@ -28,10 +32,41 @@ export function applyLatestVersion(changes, facts, latestVersion) {
       )
     }
     const currentVersion = facts.packageJson.packageManager.split('@')[1]
-    if (currentVersion && semver.gte(currentVersion, minimum)) {
-      return // already meets minimum, no change needed
+    if (
+      currentVersion &&
+      semver.valid(currentVersion) &&
+      semver.valid(minimum) &&
+      semver.gte(currentVersion, minimum)
+    ) {
+      // Keep already-stronger configuration rather than falling back to baseline.
+      targetVersion = currentVersion
     }
   }
-  entry.value = `${pmPrefix}@${latestVersion}`
+
+  if (!targetVersion) {
+    targetVersion = latestVersion
+    entry.value = `${pmPrefix}@${targetVersion}`
+    delete entry.ifNotExist
+  }
+
+  const devEnginesEntry = changes.find(
+    (c) => c.target === 'package.json' && c.key === 'devEngines'
+  )
+  const devEnginesValue = /** @type {SerializableObject | null} */ (
+    devEnginesEntry?.value
+  )
+  if (devEnginesEntry && devEnginesValue?.packageManager) {
+    const pm = /** @type {SerializableObject} */ (
+      devEnginesValue.packageManager
+    )
+    devEnginesEntry.value = {
+      ...devEnginesValue,
+      packageManager: {
+        ...pm,
+        version: `>=${targetVersion}`,
+      },
+    }
+  }
+
   return changes
 }

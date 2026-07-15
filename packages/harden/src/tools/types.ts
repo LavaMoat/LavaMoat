@@ -1,12 +1,14 @@
 export type Level = 'baseline' | 'moderate' | 'paranoid'
 
+export type SerializableObject = { [key: string]: SerializableValue }
+
 type SerializableValue =
   | string
   | number
   | boolean
   | null
   | SerializableValue[]
-  | { [key: string]: SerializableValue }
+  | SerializableObject
 
 export interface Facts {
   cwd: string
@@ -38,6 +40,7 @@ export interface Change {
   value: SerializableValue
   comment?: string
   ifNotExist?: boolean
+  addToExisting?: boolean
 }
 
 export type ChangeResult = Pick<Change, 'key' | 'value'>

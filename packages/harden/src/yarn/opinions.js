@@ -188,22 +188,14 @@ const definedOpinions = [
       },
     ],
     execute: async (changes, facts, decisions) => {
-      const plugins = /** @type {{ path: string; spec?: string }[]} */ (
-        facts.yarnConfig?.plugins || []
-      )
-
-      if (
-        plugins.length === 0 ||
-        !JSON.stringify(plugins).includes('lavamoat/.runner-plugin.js')
-      ) {
-        changes.push({
-          target: '.yarnrc.yml',
-          key: 'plugins',
-          value: [...plugins, { path: './lavamoat/.runner-plugin.js' }],
-          comment:
-            'Protect the runtime of calls to "yarn run" scripts using a local plugin.',
-        })
-      }
+      changes.push({
+        target: '.yarnrc.yml',
+        key: 'plugins',
+        addToExisting: true,
+        value: [{ path: './lavamoat/.runner-plugin.js' }],
+        comment:
+          'Protect the runtime of calls to "yarn run" scripts using a local plugin.',
+      })
 
       const filterEnv = await decisions.askToHarden(
         {
@@ -235,11 +227,13 @@ const definedOpinions = [
       if (hardenScripts) {
         changes.push({
           target: '/lavamoat',
+          ifNotExist: true,
           key: 'scripts.strict.json',
           value: null,
         })
         changes.push({
           target: '/lavamoat',
+          ifNotExist: true,
           key: 'scripts.loose.json',
           value: null,
         })

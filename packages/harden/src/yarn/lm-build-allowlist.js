@@ -34,30 +34,22 @@ export async function buildAllowlistChanges(facts, _decisions, _print) {
     })
   }
 
-  const plugins = /** @type {{ path: string; spec?: string }[]} */ (
-    facts.yarnConfig?.plugins || []
+  changes.push(
+    {
+      target: '.yarnrc.yml',
+      key: 'plugins',
+      addToExisting: true,
+      value: [{ path: './lavamoat/plugin-allow-scripts.js' }],
+      comment:
+        '@lavamoat/allow-scripts uses a plugin to execute allowed scripts after install.',
+    },
+    {
+      target: '/lavamoat',
+      ifNotExist: true,
+      key: 'plugin-allow-scripts.js',
+      value: null,
+    }
   )
-
-  if (
-    plugins.length === 0 ||
-    !JSON.stringify(plugins).includes('lavamoat/plugin-allow-scripts.js')
-  ) {
-    plugins.push({ path: './lavamoat/plugin-allow-scripts.js' })
-    changes.push(
-      {
-        target: '.yarnrc.yml',
-        key: 'plugins',
-        value: plugins,
-        comment:
-          '@lavamoat/allow-scripts uses a plugin to execute allowed scripts after install.',
-      },
-      {
-        target: '/lavamoat',
-        key: 'plugin-allow-scripts.js',
-        value: null,
-      }
-    )
-  }
 
   changes.push(
     {

@@ -151,9 +151,15 @@ for (const pm of PKGMGR_LIST) {
     const cwd = await copyProject(t, pm)
     const { print, log } = logPrint()
 
-    await execFileAsync(pm, ['add', '@lavamoat/preinstall-always-fail@3.0.0'], {
-      cwd,
-    }).catch(() => {})
+    await execFileAsync(
+      pm,
+      ['add', '@lavamoat/preinstall-always-fail@3.0.0', '-D'],
+      {
+        cwd,
+      }
+    ).catch((_e) => {
+      // t.log(`> ${pm} add\n`, _e.stdout, _e.stderr)
+    })
 
     const { result } = await hardenDefaults({
       cwd,
