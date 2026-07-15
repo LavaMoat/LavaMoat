@@ -19,7 +19,7 @@ const state = {
 test.before(async () => {
   state.cwd = await mkdtemp(join(tmpdir(), 'harden-yaml-config-'))
   state.filePath = join(state.cwd, '.yarnrc.yml')
-  state.cacheKey = `${state.filePath}:yaml-config-spec`
+  state.cacheKey = `${state.filePath}:dryRun`
   state.initialContent = [
     'plugins:',
     '  - path: ./existing.js',
