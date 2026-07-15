@@ -4,6 +4,6 @@
   "scripts": {
     "a": "echo Absolutely",
     "b": "echo $BISFOR",
-    "test": "npm run a && npm run b && echo stealing: $TOKEN"
+    "test": "npm run a && npm run b && echo stealing: ${TOKEN:-}"
   }
 }

@@ -117,7 +117,7 @@ export async function hardenDefaults(options) {
             if (typeof r.value === 'object') {
               return `  ✓ ${r.file}: ${r.key} created`
             }
-            return `  ✓ ${r.file}: ${r.key} -> ${r.value}`
+            return `  ✓ ${r.file}: ${r.key} -> ${r.value.toString().substring(0, 50)}`
           })
           .join('\n')
 

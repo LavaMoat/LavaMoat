@@ -44,7 +44,7 @@ for (const pm of PKGMGR_LIST) {
     })
 
     if (pm === 'yarn') {
-      // call yarn install in the temp dir to ensure .runner.cjs is used
+      // call yarn install in the temp dir because it complains otherwise
       await execFileAsync(pm, ['install'], {
         cwd,
       })

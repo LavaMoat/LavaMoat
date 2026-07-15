@@ -53,7 +53,7 @@ export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
             flag: overwrite ? 'w' : 'wx',
           })
           // String-based entries are generated scripts/plugins and should be
-          // executable when materialized on disk. Noop on windows.
+          // executable when materialized on disk. No-op on windows.
           await chmod(dest, 0o755)
         } catch (err) {
           if (/** @type {NodeJS.ErrnoException} */ (err).code === 'EEXIST') {
@@ -80,7 +80,10 @@ export async function applyLavamoatFolder(cwd, entries, dryRun = false) {
     applied.push({
       file: 'lavamoat/' + entry.key,
       key: entry.key,
-      value: entry.value,
+      value:
+        typeof entry.value === 'string'
+          ? entry.value.substring(0, 50)
+          : entry.value,
     })
   }
 

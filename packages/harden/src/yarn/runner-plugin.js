@@ -65,7 +65,11 @@ module.exports = {
             }
           )
 
-          extra.env = wrapper.processEnv(extra.env)
+          const newEnv = wrapper.processEnv(extra.env)
+          for (const key of Object.keys(extra.env)) {
+            delete extra.env[key]
+          }
+          Object.assign(extra.env, newEnv)
           return executor
         },
       },
@@ -89,7 +93,11 @@ function addMandatoryReads(configOptions, _env) {
   }
 
   // figure out the /tmp dir for the current platform
-  const tmpdir = process.platform === 'win32' ? process.env.TEMP : '/tmp'
+
+  const tmpdir =
+    process.platform === 'win32'
+      ? process.env.TEMP || '' // make typescript shut up
+      : '/tmp'
   // yarn script execution makes heavy use of temporary dirs
   configOptions['--allow-fs-read'].push(tmpdir)
   configOptions['--allow-fs-write'].push(tmpdir)
