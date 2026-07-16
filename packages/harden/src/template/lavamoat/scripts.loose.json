@@ -1,15 +1,16 @@
 {
-  "notes": "Should prevent basic malicious behavior of writing to locations outside the project and sending network requests, but not break any of the advanced packages in use. Everything below the net permission can be used to bypass the restrictions by a more sophisticated attacker.",
+  "notes": "Should prevent basic malicious behavior of writing to locations outside the project and sending network requests, but not break any of the advanced packages in use. Everything below the net permission can be used to bypass the restrictions by a more sophisticated attacker. The warnings are suppressed. You should strive to deny as many native capabilities as possible and limit the fs-read to not have access to your entire home folder.",
   "nodeOptions": {
     "--permission": true,
-    "--allow-fs-read": ["/"],
+    "--allow-fs-read": ["/", "$npm_config_prefix", "$npm_config_userconfig"],
     "--allow-fs-write": ["./"],
+    "--allow-fs-tmp": true,
     "--allow-net": false,
     "--allow-child-process": true,
     "--allow-worker": true,
     "--allow-addons": true,
-    "--allow-ffi": true,
     "--allow-wasi": true,
-    "--allow-inspector": false
+    "--allow-inspector": false,
+    "--disable-warning": "SecurityWarning"
   }
 }

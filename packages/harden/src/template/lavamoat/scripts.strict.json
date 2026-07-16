@@ -8,7 +8,6 @@
     "--allow-net": false,
     "--allow-worker": false,
     "--allow-addons": false,
-    "--allow-ffi": false,
     "--allow-wasi": false,
     "--allow-inspector": false
   }

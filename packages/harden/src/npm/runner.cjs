@@ -6,6 +6,7 @@
 const { spawnSync } = require('node:child_process')
 const fs = require('node:fs')
 const path = require('node:path')
+const { tmpdir } = require('node:os')
 const scriptName = process.env.npm_lifecycle_event
 const scriptPayload = process.argv[3]
 
@@ -49,6 +50,7 @@ const wrapper = makeRunScriptWrapper(
     readFileSync: fs.readFileSync,
     pathJoin: path.join,
     pathDelimiter: path.delimiter,
+    tmpdir,
   }
 )
 
@@ -88,9 +90,8 @@ function addMandatoryReads(configOptions, env) {
   }
   if (Array.isArray(configOptions['--allow-fs-read'])) {
     configOptions['--allow-fs-read'].push(
-      // @ts-ignore it has to exist
-      env['npm_config_prefix'],
-      env['npm_config_userconfig']
+      '$npm_config_prefix',
+      '$npm_config_userconfig'
     )
   }
 }

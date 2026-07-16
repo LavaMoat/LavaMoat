@@ -17,6 +17,7 @@
 module.exports = {
   name: '@yarnpkg/plugin-runner',
   factory: function (/** @type {NodeJS.Require} */ require) {
+    const { tmpdir } = require('node:os')
     return {
       hooks: {
         /** @type {WrapScriptExecutionHook} */
@@ -62,6 +63,7 @@ module.exports = {
               readFileSync: fs.readFileSync,
               pathJoin: path.join,
               pathDelimiter: path.delimiter,
+              tmpdir,
             }
           )
 
@@ -85,20 +87,5 @@ function addMandatoryReads(configOptions, _env) {
   if (!configOptions['--permission']) {
     return
   }
-  if (!Array.isArray(configOptions['--allow-fs-read'])) {
-    configOptions['--allow-fs-read'] = []
-  }
-  if (!Array.isArray(configOptions['--allow-fs-write'])) {
-    configOptions['--allow-fs-write'] = []
-  }
-
-  // figure out the /tmp dir for the current platform
-
-  const tmpdir =
-    process.platform === 'win32'
-      ? process.env.TEMP || '' // make typescript shut up
-      : '/tmp'
-  // yarn script execution makes heavy use of temporary dirs
-  configOptions['--allow-fs-read'].push(tmpdir)
-  configOptions['--allow-fs-write'].push(tmpdir)
+  configOptions['--allow-fs-tmp'] = true // yarn always uses tmp dirs.
 }

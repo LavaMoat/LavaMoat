@@ -18,7 +18,7 @@ function makeRunScriptWrapper(
     customizePermissionsConfig,
     readScriptsConfig,
   },
-  { readFileSync, pathJoin, pathDelimiter }
+  { readFileSync, pathJoin, pathDelimiter, tmpdir }
 ) {
   const DEFAULT_PERMISSION_KEY = '#default'
 
@@ -65,6 +65,62 @@ function makeRunScriptWrapper(
     return conf
   }
 
+  /**
+   * Adds features we'd want in Node.js permissions model and intend to
+   * eventually upstream
+   *
+   * @param {ConfigOptions} configOptions
+   * @param {NodeJS.ProcessEnv} env
+   * @returns {void}
+   */
+  function permissionsModelCompatibilityExtensions(configOptions, env) {
+    // 1. support env variables as values in allow-fs-*
+    /**
+     * @param {string} value
+     * @returns {string}
+     */
+    const replaceEnvVar = (value) => {
+      const envVarMatch = value.match(/^\$([A-Z_][A-Z0-9_]*)$/i)
+      if (envVarMatch) {
+        const envVarName = envVarMatch[1]
+        if (env[envVarName] !== undefined) {
+          return env[envVarName]
+        } else {
+          throw Error(
+            `[LavaMoat] Environment variable "${envVarName}" referenced in config but not found in environment`
+          )
+        }
+      }
+      return value
+    }
+
+    for (const key of ['--allow-fs-read', '--allow-fs-write']) {
+      if (Array.isArray(configOptions[key])) {
+        configOptions[key] = configOptions[key].map(replaceEnvVar)
+      }
+    }
+
+    // 2. tmp write - crossplatform
+    if (configOptions['--allow-fs-tmp'] === true) {
+      delete configOptions['--allow-fs-tmp']
+      if (configOptions['--allow-fs-write']) {
+        if (typeof configOptions['--allow-fs-write'] === 'string') {
+          configOptions['--allow-fs-write'] = [
+            configOptions['--allow-fs-write'],
+          ]
+        }
+        if (configOptions['--allow-fs-write'] === true) {
+          return // none of this matters
+        }
+      } else {
+        // do this for both undefined and false
+        configOptions['--allow-fs-write'] = []
+      }
+
+      configOptions['--allow-fs-write'].push(tmpdir())
+    }
+  }
+
   /** @param {ConfigOptions} configOptions */
   function makeFlagsFromConfig(configOptions) {
     return Object.entries(configOptions)
@@ -94,6 +150,8 @@ function makeRunScriptWrapper(
     }
 
     customizePermissionsConfig(configOptions, env)
+
+    permissionsModelCompatibilityExtensions(configOptions, env)
 
     const confOption = makeFlagsFromConfig(configOptions)
 

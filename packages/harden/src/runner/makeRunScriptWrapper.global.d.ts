@@ -22,6 +22,7 @@ declare global {
     readFileSync: (path: string, encoding: 'utf8') => string
     pathJoin: (...segments: string[]) => string
     pathDelimiter: string
+    tmpdir: () => string
   }
 
   type MakeRunScriptWrapper = {
