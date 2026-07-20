@@ -6,6 +6,7 @@ import { bundleRunner } from '../runner/runnerBundler.js'
 /** @type {readonly Opinion[]} */
 const definedOpinions = [
   {
+    id: 'p_age',
     description:
       'Set a minimum release age to avoid installing recently-published (potentially malicious) packages.',
     level: 'moderate',
@@ -21,6 +22,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'p_engines',
     description:
       'Enforce minimum pnpm version via packageManager field in package.json.',
     level: 'baseline',
@@ -59,6 +61,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'p_exotic',
     description:
       'Disable exotic subdeps in older pnpm versions in case someone failed to update.',
     level: 'paranoid',
@@ -73,6 +76,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'p_scripts',
     description:
       'Allow running lifecycle scripts only for explicitly allowlisted packages, and ask the user to approve the existing ones if any.',
     level: 'baseline',
@@ -88,6 +92,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'p_nonpm',
     description:
       'Prevent npm from being used in case someone accidentally runs an old version of it.',
     level: 'paranoid',
@@ -108,6 +113,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'p_runner',
     description:
       'Take over pnpm run and remove bin scripts confusion possibility and configure other limitations.',
     level: 'paranoid',
@@ -130,6 +136,7 @@ const definedOpinions = [
     execute: async (changes, facts, decisions) => {
       const filterEnv = await decisions.askToHarden(
         {
+          id: 'p_filterenv',
           description:
             'Limit environment variables exposure to the shell running the scripts.',
           level: 'paranoid',
@@ -148,6 +155,7 @@ const definedOpinions = [
 
       const hardenScripts = await decisions.askToHarden(
         {
+          id: 'p_hardenrun',
           description:
             'Limit permissions of node programs in "pnpm run" scripts to prevent unexpected access to the environment.',
           level: 'paranoid',
@@ -185,6 +193,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'p_no_downgrade',
     description: 'Enable trust policy in pnpm to detect provenance downgrades.',
     level: 'moderate',
     changes: [

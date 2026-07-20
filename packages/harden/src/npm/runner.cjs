@@ -51,6 +51,7 @@ const wrapper = makeRunScriptWrapper(
     pathJoin: path.join,
     pathDelimiter: path.delimiter,
     tmpdir,
+    realpathSync: fs.realpathSync,
   }
 )
 

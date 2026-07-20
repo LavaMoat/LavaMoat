@@ -7,6 +7,7 @@ import { bundleRunner } from '../runner/runnerBundler.js'
 /** @type {readonly Opinion[]} */
 const definedOpinions = [
   {
+    id: 'y_scripts',
     description:
       'Disable lifecycle scripts by default to prevent malicious code execution on install.',
     level: 'baseline',
@@ -21,6 +22,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_engines',
     description:
       'Enforce minimum yarn version via packageManager field in package.json.',
     level: 'baseline',
@@ -47,6 +49,7 @@ const definedOpinions = [
       if (
         await decisions.askToHarden(
           {
+            id: 'y_latest',
             description: 'Force yarn to be at the latest stable version',
             level: 'moderate',
           },
@@ -69,10 +72,12 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_allowlist',
     description: `Choose whether to use yarn's built-in handling of dependenciesMeta to allow specific lifecycle scripts without the ability to control versions and duplicates of the same name, or to use @lavamoat/allow-scripts to manage script permissions.`,
     level: 'baseline',
     alternatives: [
       {
+        id: 'y_meta',
         description:
           'Use dependenciesMeta in package.json. This is simpler but less flexible and may cause issues with duplicates and version mismatches.',
         level: 'baseline',
@@ -100,6 +105,7 @@ const definedOpinions = [
         recommendCommands: ['yarn install'],
       },
       {
+        id: 'y_lavamoat',
         description:
           'Use @lavamoat/allow-scripts to manage script permissions. This is more complex but allows precise control over which scripts are allowed to run.',
         level: 'paranoid',
@@ -122,6 +128,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_age',
     description:
       'Set a minimum release age to avoid installing recently-published (potentially malicious) packages.',
     level: 'moderate',
@@ -137,6 +144,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_git',
     description:
       'Block git dependencies which can bypass release age and script controls.',
     level: 'baseline',
@@ -160,6 +168,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_nocache',
     description:
       'Disable global cache in yarn to avoid cross-project cache poisoning.',
     level: 'paranoid',
@@ -174,6 +183,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_runner',
     description:
       'Take over yarn run and remove bin scripts confusion possibility and configure other limitations.',
     level: 'paranoid',
@@ -199,6 +209,7 @@ const definedOpinions = [
 
       const filterEnv = await decisions.askToHarden(
         {
+          id: 'y_filterenv',
           description:
             'Limit environment variables exposure to the shell running the scripts.',
           level: 'paranoid',
@@ -217,6 +228,7 @@ const definedOpinions = [
 
       const hardenScripts = await decisions.askToHarden(
         {
+          id: 'y_hardenrun',
           description:
             'Limit permissions of node programs in "yarn run" scripts to prevent unexpected access to the environment.',
           level: 'paranoid',
@@ -250,6 +262,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_nonpm',
     description:
       'Prevent npm from being used in case someone accidentally runs an old version of it.',
     level: 'paranoid',
@@ -270,6 +283,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'y_ignore_scr',
     description:
       'Prevent yarn1 from running scripts in case someone accidentally uses it before setting up.',
     level: 'paranoid',

@@ -5,6 +5,7 @@ import { bundleRunner } from '../runner/runnerBundler.js'
 /** @type {readonly Opinion[]} */
 const definedOpinions = [
   {
+    id: 'n_engines',
     description:
       'Enforce minimum npm version via devEngines in package.json to ensure security features are available.',
     level: 'baseline',
@@ -25,10 +26,12 @@ const definedOpinions = [
   },
 
   {
+    id: 'n_scripts',
     description: 'Choose whether to disable all install scripts or allow some',
     level: 'baseline',
     alternatives: [
       {
+        id: 'n_allowscripts',
         description:
           'Use the allowScripts field in package.json and approve install scripts later (recommended).',
         level: 'baseline',
@@ -55,6 +58,7 @@ const definedOpinions = [
         },
       },
       {
+        id: 'n_noscripts',
         description:
           'Disable lifecycle scripts permanently to prevent malicious code execution on install, with no exceptions.',
         level: 'paranoid',
@@ -71,6 +75,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'n_age',
     description:
       'Set a minimum release age to avoid installing recently-published (potentially malicious) packages.',
     level: 'moderate',
@@ -85,6 +90,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'n_git',
     description:
       'Block git dependencies which can bypass release age and script controls.',
     level: 'baseline',
@@ -100,6 +106,7 @@ const definedOpinions = [
       if (facts.directGitDeps.length > 0) {
         const shouldBlockAnyway = await decisions.askToHarden(
           {
+            id: 'n_strictgit',
             description: `Block git dependencies entirely instead of allowing 'root' despite direct git dependencies being present`,
             level: 'paranoid',
           },
@@ -120,6 +127,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'n_nogit',
     description:
       'Disable git command entirely in npm to prevent git dependency resolution in older npm versions.',
     level: 'paranoid',
@@ -142,6 +150,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'n_pin_allowed',
     description: 'Pin versions when adding items to allowScripts.',
     level: 'moderate',
     changes: [
@@ -156,6 +165,7 @@ const definedOpinions = [
   },
 
   {
+    id: 'n_runner',
     description:
       'Take over npm run and remove bin scripts confusion possibility and configure other limitations.',
     level: 'paranoid',
@@ -178,6 +188,7 @@ const definedOpinions = [
     execute: async (changes, facts, decisions) => {
       const filterEnv = await decisions.askToHarden(
         {
+          id: 'n_filterenv',
           description:
             'Limit environment variables exposure to the shell running the scripts.',
           level: 'paranoid',
@@ -196,6 +207,7 @@ const definedOpinions = [
 
       const hardenScripts = await decisions.askToHarden(
         {
+          id: 'n_hardenrun',
           description:
             'Limit permissions of node programs in "npm run" scripts to prevent unexpected access to the environment.',
           level: 'paranoid',

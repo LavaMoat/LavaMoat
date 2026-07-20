@@ -18,7 +18,7 @@ function makeRunScriptWrapper(
     customizePermissionsConfig,
     readScriptsConfig,
   },
-  { readFileSync, pathJoin, pathDelimiter, tmpdir }
+  { readFileSync, pathJoin, pathDelimiter, tmpdir, realpathSync }
 ) {
   const DEFAULT_PERMISSION_KEY = '#default'
 
@@ -116,8 +116,13 @@ function makeRunScriptWrapper(
         // do this for both undefined and false
         configOptions['--allow-fs-write'] = []
       }
-
-      configOptions['--allow-fs-write'].push(tmpdir())
+      const tmp = tmpdir()
+      configOptions['--allow-fs-write'].push(tmp)
+      // because macos is being weird
+      const tmpRealPath = realpathSync(tmp)
+      if (tmpRealPath !== tmp) {
+        configOptions['--allow-fs-write'].push(tmpRealPath)
+      }
     }
   }
 

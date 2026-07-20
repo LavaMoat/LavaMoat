@@ -64,6 +64,7 @@ module.exports = {
               pathJoin: path.join,
               pathDelimiter: path.delimiter,
               tmpdir,
+              realpathSync: fs.realpathSync,
             }
           )
 

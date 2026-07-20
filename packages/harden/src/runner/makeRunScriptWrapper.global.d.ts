@@ -23,6 +23,7 @@ declare global {
     pathJoin: (...segments: string[]) => string
     pathDelimiter: string
     tmpdir: () => string
+    realpathSync: (path: string) => string
   }
 
   type MakeRunScriptWrapper = {

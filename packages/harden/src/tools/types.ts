@@ -54,6 +54,7 @@ export interface AppliedChange extends ChangeResult {
  * alternatives).
  */
 export interface ApplicableOpinion {
+  id: string
   description: string
   level: Level
   changes?: Change[]
@@ -74,6 +75,7 @@ export interface ApplicableOpinion {
  * execute.
  */
 export interface OpinionWithAlternatives {
+  id: string
   description: string
   level: Level
   alternatives: ApplicableOpinion[]
