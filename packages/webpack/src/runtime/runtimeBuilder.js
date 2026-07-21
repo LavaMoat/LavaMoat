@@ -4,6 +4,8 @@ const { assembleRuntime, prepareSource } = require('./assemble.js')
 const { adjustScuttleConfig } = require('./scuttlingConf.js')
 const path = require('node:path')
 
+const { isArray } = Array
+
 const { RuntimeModule } = require('webpack')
 
 class VirtualRuntimeModule extends RuntimeModule {
@@ -41,11 +43,16 @@ class VirtualRuntimeModule extends RuntimeModule {
   }
 }
 
-/** @import {LavaMoatPluginOptions, LavaMoatChunkRuntimeConfiguration} from '../buildtime/types' */
-/** @import {LavaMoatPolicy} from '@lavamoat/types' */
-/** @import {RuntimeFragment} from './assemble.js' */
-/** @import {Chunk} from 'webpack' */
-/** @import {ProgressAPI} from '../buildtime/utils.js' */
+/**
+ * @import {
+ *   LavaMoatChunkRuntimeConfiguration,
+ *   LavaMoatPluginOptions
+ * } from "../buildtime/types"
+ */
+/** @import {LavaMoatPolicy} from "@lavamoat/types" */
+/** @import {RuntimeFragment} from "./assemble.js" */
+/** @import {Chunk} from "webpack" */
+/** @import {ProgressAPI} from "../buildtime/utils.js" */
 
 /**
  * @typedef {Object} LavaMoatRuntimeIdentifiers
@@ -177,6 +184,16 @@ const LOCKDOWN_SHIMS = [];`
           policyData,
           options.skipRepairs
         )
+      }
+
+      // stabilize order of identifiersForModuleIds values without disrupting the mapping
+      // TODO: consider turning all unordered lists into Sets and sort them exclusively at stringify time.
+      if (isArray(identifiersForModuleIds)) {
+        for (const pair of identifiersForModuleIds) {
+          if (isArray(pair[1])) {
+            pair[1].sort()
+          }
+        }
       }
 
       /** @satisfies {readonly RuntimeFragment[]} */
@@ -396,7 +413,7 @@ const LOCKDOWN_SHIMS = [];`
 
         if (
           runtimeConfiguration.staticShims &&
-          Array.isArray(runtimeConfiguration.staticShims)
+          isArray(runtimeConfiguration.staticShims)
         ) {
           const staticShimsWrapped = getStaticShims(
             runtimeConfiguration.staticShims

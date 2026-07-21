@@ -1,7 +1,12 @@
 const diag = require('./diagnostics.js')
 const { WebpackError } = require('webpack')
 
-/** @import {Module, NormalModule, ExternalModule, Parser} from 'webpack' */
+/** @import {
+  ExternalModule,
+  Module,
+  NormalModule,
+  Parser
+} from 'webpack' */
 /** @import {InspectableWebpackModule} from './policyGenerator.js' */
 
 // TODO: move into an enum file along with the other
@@ -22,8 +27,8 @@ const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const isIgnoredModule = (m) => {
   return Boolean(
     m.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
-      // @ts-expect-error BAD TYPES
-      m.identifierStr?.startsWith('ignored')
+    // @ts-expect-error BAD TYPES
+    m.identifierStr?.startsWith('ignored')
   )
 }
 
@@ -170,8 +175,7 @@ exports.analyzeModules = ({
       isAmbientAsset(module) &&
       (module?.resourceResolveData?.context &&
       'issuer' in module.resourceResolveData.context
-        ? // @ts-expect-error - webpack shipped a type for context that's just `object` which is useless
-          module.resourceResolveData.context.issuer.includes('node_modules') // resourceResolveData.context.issuer is the module that requested the asset to be present (eg. contained a `new URL(asset)`)
+        ? module.resourceResolveData.context.issuer.includes('node_modules') // resourceResolveData.context.issuer is the module that requested the asset to be present (eg. contained a `new URL(asset)`)
         : typeof module.resource === 'string' &&
           module.resource.includes('node_modules'))
       // FIXME: would be better to use canonicalName lookup and match with root

@@ -16,7 +16,10 @@ import { hrLabel } from '../format.js'
 const { freeze, keys } = Object
 
 /**
- * @import {ParseFn, ParserImplementation} from '@endo/compartment-mapper'
+ * @import {
+ *   ParseFn,
+ *   ParserImplementation
+ * } from '@endo/compartment-mapper'
  * @import {ThirdPartyStaticModuleInterface} from 'ses'
  * @import {LavaMoatEndoPackagePolicy} from '../types.js'
  */
@@ -80,7 +83,6 @@ const parseNative = (
  * Parser for native Node.js modules
  *
  * @type {ParserImplementation}
- * @internal
  */
 export default {
   parse: parseNative,

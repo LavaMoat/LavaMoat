@@ -3,7 +3,6 @@
  * descriptor for a given entrypoint.
  *
  * @packageDocumentation
- * @internal
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
@@ -38,16 +37,30 @@ import { pluralize } from '../util.js'
 import { WorkerPool } from '../worker-pool.js'
 
 /**
- * @import {LoadAndGeneratePolicyOptions,
- *   LoadCompartmentMapResult,
- *   InspectMessage,
- *   InspectionResultsMessage,
+ * @import {
+ *   CanonicalName,
+ *   ModuleSourceHookModuleSource
+ * } from '@endo/compartment-mapper'
+ * @import {
+ *   BuiltinPolicy,
+ *   GlobalPolicy,
+ *   LavaMoatPolicy,
+ *   PackagePolicy
+ * } from '@lavamoat/types'
+ * @import {
  *   ErrorMessage,
- *   StructuredViolationsResult,
- *   ReportModuleInspectionProgressFn} from '../internal.js'
- * @import {CanonicalName, ModuleSourceHookModuleSource} from '@endo/compartment-mapper'
- * @import {BuiltinPolicy, GlobalPolicy, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
- * @import {MergedLavaMoatPolicy, FileUrlString, SourceType} from '../types.js'
+ *   InspectionResultsMessage,
+ *   InspectMessage,
+ *   LoadAndGeneratePolicyOptions,
+ *   LoadCompartmentMapResult,
+ *   ReportModuleInspectionProgressFn,
+ *   StructuredViolationsResult
+ * } from '../internal.js'
+ * @import {
+ *   FileUrlString,
+ *   MergedLavaMoatPolicy,
+ *   SourceType
+ * } from '../types.js'
  */
 
 const inspectorPath = fileURLToPath(new URL('./inspector.js', import.meta.url))
@@ -64,7 +77,6 @@ const { keys } = Object
  * @param {string | URL} entrypointPath
  * @param {LoadAndGeneratePolicyOptions} options
  * @returns {Promise<LoadCompartmentMapResult>}
- * @internal
  */
 export const loadAndGeneratePolicy = async (
   entrypointPath,

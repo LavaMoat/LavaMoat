@@ -2,7 +2,6 @@
  * Provides exit module hooks for Node.js builtins
  *
  * @packageDocumentation
- * @internal
  */
 
 import { Module } from 'node:module'
@@ -12,7 +11,10 @@ import { isObject } from '../util.js'
 const { freeze, keys, assign } = Object
 
 /**
- * @import {ExitModuleImportHook, ExitModuleImportNowHook} from '@endo/compartment-mapper'
+ * @import {
+ *   ExitModuleImportHook,
+ *   ExitModuleImportNowHook
+ * } from '@endo/compartment-mapper'
  * @import {ThirdPartyStaticModuleInterface} from 'ses'
  */
 
@@ -44,7 +46,6 @@ const makeStaticModuleInterface = (ns) => {
  * Import hook for exit modules, which are typically Node.js builtins
  *
  * @type {ExitModuleImportHook}
- * @internal
  */
 export const importHook = async (specifier) => {
   /** @type {unknown} */
@@ -57,7 +58,6 @@ export const importHook = async (specifier) => {
  * Import "now" hook for exit modules, which are typically Node.js builtins.
  *
  * @type {ExitModuleImportNowHook}
- * @internal
  */
 export const importNowHook = (specifier, packageLocation) => {
   const require = Module.createRequire(fileURLToPath(packageLocation))
@@ -75,7 +75,6 @@ export const importNowHook = (specifier, packageLocation) => {
  * `@endo/compartment-mapper`)
  *
  * @type {ExitModuleImportHook}
- * @internal
  */
 export const nullImportHook = async () => {
   return freeze({

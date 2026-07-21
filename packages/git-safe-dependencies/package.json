@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/git-safe-dependencies",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Opinionated dependency linter for your git/github dependencies",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   "author": "naugtur",
   "license": "MIT",
   "engines": {
-    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
+    "node": "^22.5.1 || ^24.0.0"
   },
   "bin": {
     "git-safe-dependencies": "src/cli.js",
@@ -44,7 +44,7 @@
   "dependencies": {
     "glob": "11.1.0",
     "hosted-git-info": "8.1.0",
-    "js-yaml": "4.1.1",
+    "js-yaml": "4.3.0",
     "lockfile-lint-api": "5.9.2"
   },
   "publishConfig": {

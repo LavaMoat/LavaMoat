@@ -11,7 +11,7 @@
     'workarounds:typesNodeVersioning', // tracks node versions from engines field in package.json for @types/node,
     'helpers:disableTypesNodeMajor', // disable major updates for @types/node. TODO: we will need to do this manually when dropping v18
   ],
-  "schedule": "* 0-6 * * *", // run things only during 0-6am UTC
+  schedule: '* 0-6 * * *', // run things only during 0-6am UTC
   // providing this overrides `:ignoreModulesAndTests` which comes in thru `config:js-app` via `config:recommended`
   ignorePaths: [
     'packages/perf/trials/**/*',
@@ -65,6 +65,22 @@
     {
       matchPackageNames: ['@endo/*', 'ses'],
       groupName: 'endo',
+    },
+    {
+      matchManagers: ['github-actions'],
+      matchPackageNames: [
+        'zizmorcore/zizmor-action',
+        'ghcr.io/zizmorcore/zizmor',
+      ],
+      groupName: 'zizmor',
+    },
+    {
+      // this causes updates to the zizmor docker tag (version) to wait for 3
+      // days. updating the docker tag _before_ the action is updated makes the
+      // action fail because it doesn't yet know about the tag.
+      matchManagers: ['github-actions'],
+      matchPackageNames: ['ghcr.io/zizmorcore/zizmor'],
+      minimumReleaseAge: '3 days',
     },
   ],
 }

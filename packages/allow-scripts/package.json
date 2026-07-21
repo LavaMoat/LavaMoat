@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "5.0.2",
+  "version": "5.1.0",
   "description": "A tool for running only the dependency lifecycle hooks specified in an allowlist.",
   "repository": {
     "type": "git",
@@ -11,7 +11,7 @@
   "author": "LavaMoat Team",
   "license": "MIT",
   "engines": {
-    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
+    "node": "^22.9.0 || ^24.0.0"
   },
   "bin": {
     "allow-scripts": "src/cli.js"
@@ -44,7 +44,7 @@
     "bin-links": "4.0.4",
     "npm-normalize-package-bin": "3.0.1",
     "type-fest": "4.41.0",
-    "yargs": "17.7.2"
+    "yargs": "17.7.3"
   },
   "devDependencies": {
     "@types/npmcli__promise-spawn": "6.0.3"

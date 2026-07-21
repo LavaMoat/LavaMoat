@@ -24,29 +24,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - node-version: 20.x
-            workspaces: >-
-              --workspace=packages/aa
-              --workspace=packages/allow-scripts
-              --workspace=packages/browserify
-              --workspace=packages/core
-              --workspace=packages/git-safe-dependencies
-              --workspace=packages/lavamoat-node
-              --workspace=packages/lavapack
-              --workspace=packages/laverna
-              --workspace=packages/node
-              --workspace=packages/preinstall-always-fail
-              --workspace=packages/react-native-lockdown
-              --workspace=packages/tofu
-              --workspace=packages/types
-              --workspace=packages/webpack
-              --workspace=packages/yarn-plugin-allow-scripts
-          - node-version: 22.x
-          - node-version: 24.x
+          - node-version: '^22.22.0'
+          - node-version: '^24.15.0'
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
@@ -54,7 +37,7 @@ jobs:
       # see https://github.com/actions/checkout/blob/main/README.md#usage
       - name: Checkout (Push)
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0 # needed for dirty check
           persist-credentials: false
@@ -65,8 +48,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Build & Test
         uses: ./.github/actions/test
-        with:
-          workspaces: ${{ matrix.workspaces }}
       - name: Dirty Check
         run: node ./scripts/dirty-check.js
 
@@ -74,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Use Node.js from .nvmrc

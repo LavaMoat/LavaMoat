@@ -1,7 +1,7 @@
 const { readFileSync } = require('node:fs')
 const { repairs } = require('./repairs/index')
 
-/** @import {LavaMoatPolicy} from '@lavamoat/types' */
+/** @import {LavaMoatPolicy} from "@lavamoat/types" */
 
 /**
  * Combines the sources of only the repairs that are needed based on the policy
@@ -35,6 +35,8 @@ exports.buildRepairs = (policy, skipRepairs) => {
   )
 
   return repairsToInclude
-    .map(({ file }) => readFileSync(file, 'utf8'))
+    .map((repair) => repair.file)
+    .sort() // ensure deterministic output
+    .map((file) => readFileSync(file, 'utf8'))
     .join(';\n;')
 }

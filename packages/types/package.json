@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/types",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Common types for LavaMoat packages",
   "repository": {
     "directory": "packages/types",
@@ -14,7 +14,7 @@
   "author": "boneskull",
   "license": "MIT",
   "engines": {
-    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
+    "node": "^22.5.1 || ^24.0.0"
   },
   "exports": {
     ".": {
@@ -31,7 +31,7 @@
     "lint:deps": "depcheck"
   },
   "dependencies": {
-    "@babel/types": "7.29.0"
+    "@babel/types": "7.29.7"
   },
   "publishConfig": {
     "access": "public"

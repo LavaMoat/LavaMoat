@@ -1,6 +1,6 @@
 {
   "name": "lavamoat",
-  "version": "11.1.3",
+  "version": "11.1.4",
   "description": "",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   "author": "kumavis",
   "license": "MIT",
   "engines": {
-    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
+    "node": "^22.5.1 || ^24.0.0"
   },
   "bin": {
     "lavamoat": "src/cli.js",
@@ -34,22 +34,21 @@
     "lint:deps": "depcheck",
     "test": "npm run test:npm; npm run test:yarn1; npm run test:resolve",
     "test:npm": "npm run test:prepare && ava",
-    "test:resolve": "cross-env LAVAMOAT_RESOLVE_NATIVE=1 npm run test:npm",
     "test:prepare": "node ./test/prepare.js",
+    "test:resolve": "cross-env LAVAMOAT_RESOLVE_NATIVE=1 npm run test:npm",
     "test:yarn1": "cross-env COREPACK_ENABLE_PROJECT_SPEC=0 LAVAMOAT_PM=yarn@1 npm run test:prepare && cross-env COREPACK_ENABLE_PROJECT_SPEC=0 ava"
   },
   "dependencies": {
-    "@babel/code-frame": "7.29.0",
+    "@babel/code-frame": "7.29.7",
     "@babel/highlight": "7.25.9",
     "@lavamoat/aa": "^5.0.1",
     "bindings": "1.5.0",
-    "corepack": "0.34.6",
     "htmlescape": "1.1.1",
-    "lavamoat-core": "^18.0.4",
-    "lavamoat-tofu": "^9.0.2",
+    "lavamoat-core": "^18.0.5",
+    "lavamoat-tofu": "^9.0.3",
     "node-gyp-build": "4.8.4",
     "resolve": "1.22.12",
-    "yargs": "17.7.2"
+    "yargs": "17.7.3"
   },
   "ava": {
     "files": [

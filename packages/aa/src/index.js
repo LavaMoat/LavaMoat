@@ -388,7 +388,6 @@ function comparePackageLogicalPaths(aPath, bPath) {
  * @property {boolean} [includeDevDeps]
  * @property {Set<string>} [visited]
  * @property {Resolver} [resolve]
- * @internal
  */
 
 /**

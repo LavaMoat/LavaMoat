@@ -239,6 +239,26 @@ export default defineConfig(
   },
 
   // ---------------------------------------------------------------------------
+  // 2b. Ban `@internal` in JS comments
+  //     `stripInternal` only honors `@internal` in TSDoc (`.ts`) declarations.
+  //     In JSDoc (`.js`) the tag is silently ignored, so the declaration is
+  //     NOT stripped from the emitted `.d.ts` — a false sense of privacy. Put
+  //     internal type definitions (and their `@internal` tags) in `.ts` files.
+  //
+  //    `no-restricted-syntax` cannot see comment text (esquery matches AST
+  //    nodes, not comments), so `no-warning-comments` is the correct tool.
+  // ---------------------------------------------------------------------------
+  {
+    files: ['**/*.js'],
+    rules: {
+      'no-warning-comments': [
+        'error',
+        { terms: ['@internal'], location: 'anywhere' },
+      ],
+    },
+  },
+
+  // ---------------------------------------------------------------------------
   // 3. Test file overrides
   //    Test file overrides (eslint-plugin-ava + browser globals).
   // ---------------------------------------------------------------------------

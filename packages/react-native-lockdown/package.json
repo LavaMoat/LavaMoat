@@ -14,7 +14,7 @@
   "author": "LavaMoat Team",
   "license": "MIT",
   "engines": {
-    "node": "^20.19.0 || ^22.5.1 || ^24.0.0"
+    "node": "^22.13.1 || ^24.3.0 || ^26.0.0"
   },
   "main": "./src/index.js",
   "exports": {
@@ -46,7 +46,7 @@
     "ses": "1.15.0"
   },
   "devDependencies": {
-    "@react-native/js-polyfills": "0.81.1"
+    "@react-native/js-polyfills": "0.86.0"
   },
   "publishConfig": {
     "access": "public"
