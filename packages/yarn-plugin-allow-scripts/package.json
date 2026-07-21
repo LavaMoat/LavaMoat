@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@yarnpkg/builder": "4.2.3",
-    "@yarnpkg/cli": "4.16.0",
-    "@yarnpkg/core": "4.8.0",
+    "@yarnpkg/cli": "4.17.1",
+    "@yarnpkg/core": "4.9.0",
     "clipanion": "3.2.1"
   }
 }
