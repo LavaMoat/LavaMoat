@@ -3,6 +3,10 @@ import { join } from 'node:path'
 import { parseDocument } from 'yaml'
 
 /**
+ * @import {PackageJson} from "type-fest"
+ */
+
+/**
  * @import {
  *   DetectedPM,
  *   Facts
@@ -67,7 +71,7 @@ export async function collectFacts(cwd) {
 const GIT_DEP_PATTERN = /^(git\+|git:|github:)/
 
 /**
- * @param {Record<string, any> | null} packageJson
+ * @param {PackageJson | null} packageJson
  * @returns {string[]}
  */
 function findDirectGitDeps(packageJson) {
@@ -77,7 +81,10 @@ function findDirectGitDeps(packageJson) {
     ...Object.values(packageJson.devDependencies || {}),
     ...Object.values(packageJson.optionalDependencies || {}),
   ]
-  return allDeps.filter((v) => typeof v === 'string' && GIT_DEP_PATTERN.test(v))
+  const gitDeps = allDeps.filter(
+    (v) => typeof v === 'string' && GIT_DEP_PATTERN.test(v)
+  )
+  return /** @type {string[]} */ (gitDeps)
 }
 
 /**

@@ -1,14 +1,10 @@
 import { execSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join, normalize } from 'node:path'
+import { join, normalize } from 'node:path'
 import { portableExecPath } from './utils.js'
 
 // Execute allow-scripts command inside each test project directory
-const baseDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../test/projects/'
-)
+const baseDir = join(import.meta.dirname, '../test/projects/')
 readdirSync(baseDir, { withFileTypes: true })
   .filter(
     (p) => p.isDirectory() && existsSync(join(baseDir, p.name, 'package.json'))

@@ -8,7 +8,6 @@ import {
 } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
 /**
  * @import {
  *   AppliedChange,
@@ -16,7 +15,7 @@ import { fileURLToPath } from 'node:url'
  * } from "./types.js"
  */
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = import.meta.dirname
 const templateDir = join(__dirname, '..', 'template', 'lavamoat')
 
 /**

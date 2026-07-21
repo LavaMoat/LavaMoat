@@ -1,3 +1,5 @@
+import type { PackageJson } from 'type-fest'
+
 export type Level = 'baseline' | 'moderate' | 'paranoid'
 
 export type SerializableObject = { [key: string]: SerializableValue }
@@ -12,7 +14,7 @@ type SerializableValue =
 
 export interface Facts {
   cwd: string
-  packageJson: Record<string, SerializableValue> | null
+  packageJson: PackageJson | null
   packageManagerField: string | null
   hasPackageLock: boolean
   lockfileVersion: number | null
