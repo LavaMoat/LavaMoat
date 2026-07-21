@@ -6,13 +6,9 @@ const execFile = promisify(child_process.execFile)
  *   Change,
  *   Decisions,
  *   Facts,
+ *   NpmApproveOutput,
  *   PrintApi
  * } from "../tools/types.js"
- */
-
-/**
- * @typedef {Object} NpmApproveOutput
- * @property {{ name: string; changes: { key: string }[] }[]} allowScripts
  */
 
 /**

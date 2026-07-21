@@ -3,7 +3,10 @@ import { join } from 'node:path'
 import { parseDocument } from 'yaml'
 
 /**
- * @import {Facts} from "./types.js"
+ * @import {
+ *   DetectedPM,
+ *   Facts
+ * } from "./types.js"
  */
 
 /**
@@ -78,10 +81,6 @@ function findDirectGitDeps(packageJson) {
 }
 
 /**
- * @typedef {{ name: 'npm' | 'yarn' | 'pnpm'; version: string | null }} DetectedPM
- */
-
-/**
  * @param {Facts} facts
  * @returns {DetectedPM | null}
  */
@@ -91,7 +90,7 @@ export function detectPackageManager(facts) {
     const match = facts.packageManagerField.match(/^(npm|yarn|pnpm)@(.+)$/)
     if (match) {
       return {
-        name: /** @type {'npm' | 'yarn' | 'pnpm'} */ (match[1]),
+        name: /** @type {DetectedPM['name']} */ (match[1]),
         version: match[2],
       }
     }

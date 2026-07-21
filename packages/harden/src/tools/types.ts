@@ -116,3 +116,15 @@ export interface HardenResult {
   result: AppliedChange[]
   summary: string
 }
+
+export type DetectedPM = {
+  name: 'npm' | 'yarn' | 'pnpm'
+  version: string | null
+}
+
+export interface NpmApproveOutput {
+  allowScripts: {
+    name: string
+    changes: { key: string }[]
+  }[]
+}

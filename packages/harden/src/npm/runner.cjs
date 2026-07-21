@@ -80,9 +80,9 @@ if (result && 'status' in result) {
 
 /**
  * @param {Record<string, boolean | string | string[]>} configOptions
- * @param {NodeJS.ProcessEnv} env
+ * @param {NodeJS.ProcessEnv} _env
  */
-function addMandatoryReads(configOptions, env) {
+function addMandatoryReads(configOptions, _env) {
   if (!configOptions['--permission']) {
     return
   }

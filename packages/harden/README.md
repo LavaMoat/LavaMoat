@@ -45,7 +45,7 @@ Detects the package manager in use and writes hardening config at the **moderate
 harden defaults --level paranoid
 ```
 
-Override the detected package manager with `--package-manager` (`-p`):
+Choose the package manager with `--package-manager` (`-p`) instead of guessing:
 
 ```sh
 harden defaults -p yarn --level baseline
@@ -77,3 +77,11 @@ This package comes with opinions about:
 - what's allowed to install and run at install time
 - lesser known security-relevant settings
 - cutting-edge tools to prevent certain classes of supply chain attacks
+
+### Running scripts
+
+One of the more advanced capabilities this package brings to the project is the hardening of the environment in which the `package.json->scripts` run. It offers the following controls:
+
+- `lavamoat/.env.ban.json` file to configure censoring env variables that match given strings
+- rearranges `$PATH` to make [bin confusion](https://socket.dev/blog/npm-bin-script-confusion) impossible
+- adds `package.json->scriptsConfig` where files with [Node.js Permissions](https://nodejs.org/api/permissions.html) options can be selected for each script individually with a fallback to `#default`. Example configurations are provided, but it's recommended you customize them to allow the minimal access necessary.

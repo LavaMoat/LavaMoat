@@ -4,6 +4,8 @@ declare global {
     boolean | string | string[]
   >
 
+  type ConfigOptions = MakeRunScriptWrapperConfigOptions
+
   type MakeRunScriptWrapperOptions = {
     scriptName?: string
     scriptPayload?: string

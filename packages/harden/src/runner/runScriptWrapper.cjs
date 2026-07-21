@@ -1,10 +1,6 @@
 /// <reference path="./makeRunScriptWrapper.global.d.ts" />
 
 /**
- * @typedef {Record<string, boolean | string | string[]>} ConfigOptions
- */
-
-/**
  * @param {MakeRunScriptWrapperOptions} param0
  * @param {MakeRunScriptWrapperIO} param1
  * @returns {MakeRunScriptWrapper}
