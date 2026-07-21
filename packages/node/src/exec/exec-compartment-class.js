@@ -9,8 +9,11 @@ import { endowmentsToolkit } from 'lavamoat-core'
 const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper
 
 /**
- * @import {SomeGlobalThis, ContextTestFn} from '../internal.js'
  * @import {CompartmentOptions} from 'ses'
+ * @import {
+ *   ContextTestFn,
+ *   SomeGlobalThis
+ * } from '../internal.js'
  */
 
 /**
@@ -23,7 +26,6 @@ const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper
  * @param {SomeGlobalThis} originalGlobalThis Needed to provide a real
  *   {@link Math} and {@link Date}
  * @returns {typeof Compartment}
- * @internal
  */
 export const makeExecutionCompartment = (originalGlobalThis) => {
   return class ExecutionCompartment extends Compartment {

@@ -52,7 +52,6 @@ const colorSplit = (
  *
  * @param {string | URL} filepath Path to display
  * @returns {string} Human-readable path
- * @internal
  */
 export const hrPath = (filepath) => {
   filepath = toPath(filepath)
@@ -85,7 +84,6 @@ export const hrPath = (filepath) => {
  *
  * @param {string} name
  * @returns {string}
- * @internal
  */
 export const hrLabel = (name, dim = false) =>
   colorSplit(name, {
@@ -99,6 +97,5 @@ export const hrLabel = (name, dim = false) =>
  *
  * @param {string} value
  * @returns {string}
- * @internal
  */
 export const hrCode = chalk.cyan.bold

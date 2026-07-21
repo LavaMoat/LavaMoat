@@ -9,9 +9,15 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
- * @import {TestExecForJSONMacroOptions, TestExecMacroOptions} from '../../types.js'
+ * @import {
+ *   MacroDeclarationOptions,
+ *   TestFn
+ * } from 'ava'
+ * @import {
+ *   TestExecForJSONMacroOptions,
+ *   TestExecMacroOptions
+ * } from '../../types.js'
  */
 
 /**
@@ -31,7 +37,6 @@ const DEFAULT_POLICY = Object.freeze({
  * @template [Ctx=unknown] Custom execution context, if any. Default is
  *   `unknown`
  * @param {TestFn<Ctx>} test - AVA test function
- * @internal
  */
 export const createExecMacros = (test) => {
   /**

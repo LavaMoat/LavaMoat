@@ -2,7 +2,6 @@
  * Provides the default global and module attenuator
  *
  * @packageDocumentation
- * @internal
  */
 
 import { endowmentsToolkit } from 'lavamoat-core'
@@ -17,8 +16,11 @@ import { AttenuationError } from '../error.js'
 import { isObjectyObject } from '../util.js'
 
 /**
+ * @import {
+ *   GlobalAttenuatorFn,
+ *   ModuleAttenuatorFn
+ * } from '@endo/compartment-mapper'
  * @import {MakeGlobalsAttenuatorOptions} from '../internal.js'
- * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {GlobalAttenuatorParams} from '../types.js'
  */
 
@@ -44,7 +46,6 @@ const {
  *     Record<string, unknown>
  *   >
  * }}
- * @internal
  */
 export const makeAttenuators = ({
   policy: { resources } = { resources: {} },
