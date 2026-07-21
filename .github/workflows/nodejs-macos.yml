@@ -16,7 +16,7 @@ concurrency:
 jobs:
   compatibility-test-macos:
     name: Test macOS compatibility
-    runs-on: macos-15
+    runs-on: macos-26
     env:
       FORCE_COLOR: '1'
     steps:
