@@ -26,7 +26,6 @@ function parseAllowScripts(stdout) {
     /** @type {NpmApproveOutput} */
     const parsed = JSON.parse(stdout)
     if (
-      parsed.allowScripts &&
       Array.isArray(parsed.allowScripts) &&
       parsed.allowScripts.length > 0
     ) {

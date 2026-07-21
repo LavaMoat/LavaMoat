@@ -60,6 +60,7 @@ export async function collectFacts(cwd) {
   }
 }
 
+// TODO: improve coverage for https://docs.npmjs.com/cli/v11/configuring-npm/package-json#github-urls
 const GIT_DEP_PATTERN = /^(git\+|git:|github:)/
 
 /**

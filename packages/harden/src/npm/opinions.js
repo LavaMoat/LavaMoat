@@ -30,7 +30,7 @@ const definedOpinions = [
     alternatives: [
       {
         description:
-          'Use the allowScripts field in package.json and approve install scripts later. (recommended)',
+          'Use the allowScripts field in package.json and approve install scripts later (recommended).',
         level: 'baseline',
         changes: [
           {
