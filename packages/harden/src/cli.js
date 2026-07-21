@@ -8,6 +8,7 @@ import { hardenDefaults } from './index.js'
 import { createFallbackDecisions } from './tools/fallback-decisions.js'
 import { createWizard, wizardPrint } from './tools/wizard.js'
 import { print } from './tools/print.js'
+import { createVerifier } from './tools/verifier.js'
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -33,6 +34,11 @@ Commands:
     Options:
       -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
 
+  verify      Verify current config against a hardening level (exit 1 if not satisfied)
+    Options:
+      -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
+      -l, --level <level>         Hardening level (baseline, moderate, paranoid) [default: moderate]
+
 Options
   -h, --help                  Show this help
   -v, --version               Show version
@@ -52,17 +58,15 @@ const command = positionals[0]
 let decisions
 let customPrint = print
 
+const level = /** @type {Level} */ (values.level ?? 'moderate')
+if (!['baseline', 'moderate', 'paranoid'].includes(level)) {
+  print(`Error: Invalid level "${level}". Use baseline, moderate, or paranoid.`)
+  process.exit(1)
+}
+
 switch (command) {
   case 'defaults':
     {
-      const level = /** @type {Level} */ (values.level ?? 'moderate')
-      if (!['baseline', 'moderate', 'paranoid'].includes(level)) {
-        print(
-          `Error: Invalid level "${level}". Use baseline, moderate, or paranoid.`
-        )
-        process.exit(1)
-      }
-
       decisions = createFallbackDecisions({
         level,
         print,
@@ -76,6 +80,15 @@ switch (command) {
         packageManager: values['package-manager'],
       })
       customPrint = wizardPrint
+    }
+    break
+  case 'verify':
+    {
+      decisions = createVerifier({
+        level,
+        print,
+        packageManager: values['package-manager'],
+      })
     }
     break
   default:
@@ -93,7 +106,8 @@ try {
     print: customPrint,
   })
 
-  await decisions.showSummary(summary)
+  const { exitCode } = await decisions.showSummary(summary)
+  process.exitCode = exitCode
 } catch (err) {
   print(err)
   process.exit(1)

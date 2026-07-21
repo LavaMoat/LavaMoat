@@ -1,5 +1,5 @@
 /** @import {Opinion} from "../tools/types.js" */
-import { applyLatestVersion } from '../tools/versions.js'
+import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
 import { buildAllowlistChanges } from './yarn-build-allowlist.js'
 import { buildAllowlistChanges as buildLmAllowlistChanges } from './lm-build-allowlist.js'
 import { bundleRunner } from '../runner/runnerBundler.js'
@@ -51,13 +51,12 @@ const definedOpinions = [
           {
             id: 'y_latest',
             description: 'Force yarn to be at the latest stable version',
-            level: 'moderate',
+            level: 'paranoid',
           },
           facts
         )
       ) {
         try {
-          // eslint-disable-next-line n/no-unsupported-features/node-builtins
           const response = await fetch(`https://repo.yarnpkg.com/tags`)
 
           const tags = /** @type {{ latest: { stable: string } }} */ (
@@ -69,6 +68,11 @@ const definedOpinions = [
         }
       }
     },
+    verify: async (changes, _results, facts) =>
+      assertDevEngines({
+        actual: /** @type {any} */ (facts.packageJson)?.devEngines,
+        expected: changes[1].value,
+      }),
   },
 
   {
@@ -90,6 +94,10 @@ const definedOpinions = [
               'List of packages with lifecycle scripts that are allowed to run.',
           },
         ],
+        verify: async (changes, results, facts) => {
+          // check if package.json has dependenciesMeta set at all
+          return facts.packageJson?.dependenciesMeta !== undefined
+        },
         execute: async (changes, facts, decisions, print) => {
           const allowlistChanges = await buildAllowlistChanges(
             facts,
@@ -112,12 +120,20 @@ const definedOpinions = [
         changes: [
           {
             target: 'package.json',
-            key: 'allowScripts',
+            key: ['lavamoat', 'allowScripts'],
             value: {},
             comment:
               'List of lifecycle scripts that are allowed to run, managed by @lavamoat/allow-scripts.',
           },
         ],
+        verify: async (changes, results, facts) => {
+          // check if package.json has allowScripts set at all
+          return (
+            results.length === 0 &&
+            facts.packageJson?.devDependencies?.['@lavamoat/allow-scripts'] !==
+              undefined
+          )
+        },
         execute: async (changes, facts, decisions, print) => {
           const result = await buildLmAllowlistChanges(facts, decisions, print)
           return result.length > 0 ? result : changes
@@ -165,6 +181,9 @@ const definedOpinions = [
         changes[0].value = facts.directGitDeps
       }
     },
+    verify: async (changes, results, _facts) => {
+      return results.length === 0
+    },
   },
 
   {
@@ -197,6 +216,10 @@ const definedOpinions = [
         }),
       },
     ],
+    verify: async (changes, results, _facts) => {
+      // not verifying any of the customizations
+      return results.length === 0
+    },
     execute: async (changes, facts, decisions) => {
       changes.push({
         target: '.yarnrc.yml',

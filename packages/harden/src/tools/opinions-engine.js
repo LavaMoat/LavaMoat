@@ -8,10 +8,36 @@ const exec = promisify(child_process.exec)
  *   AppliedChange,
  *   Decisions,
  *   Facts,
+ *   Level,
  *   Opinion,
  *   PrintApi
  * } from "./types.js"
  */
+
+const LEVEL_ORDER = /** @type {const} */ (['baseline', 'moderate', 'paranoid'])
+
+/**
+ * Returns true when `opinionLevel` is at or below `selected` in LEVEL_ORDER. An
+ * absent `opinionLevel` always matches.
+ *
+ * @param {Level} selected
+ * @param {Level} [opinionLevel]
+ */
+export function matchLevel(selected, opinionLevel) {
+  if (!opinionLevel) {
+    return true
+  }
+  return LEVEL_ORDER.indexOf(opinionLevel) <= LEVEL_ORDER.indexOf(selected)
+}
+
+/**
+ * Rank of a level within LEVEL_ORDER. An absent level ranks as 0 (baseline).
+ *
+ * @param {Level} [opinionLevel]
+ */
+export function levelRank(opinionLevel) {
+  return opinionLevel ? LEVEL_ORDER.indexOf(opinionLevel) : 0
+}
 
 /**
  * Apply the selected opinions and optionally run recommended follow-up
@@ -71,8 +97,7 @@ export async function validateOpinions(opinions, facts) {
       opinion.detected = Math.max(
         ...opinion.alternatives.map((o) => o.detected ?? 0)
       )
-    }
-    if (opinion.changes) {
+    } else if (opinion.changes || opinion.verify) {
       await verifyOpinion(facts.cwd, opinion, facts).then((ratio) => {
         opinion.detected = ratio
       })

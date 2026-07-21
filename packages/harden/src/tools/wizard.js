@@ -110,6 +110,7 @@ ${[...scores.entries()]
           borderStyle: 'double-single-rounded',
         },
       })
+      return { exitCode: 0 }
     },
   }
 }

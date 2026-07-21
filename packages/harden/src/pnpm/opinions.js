@@ -1,6 +1,7 @@
-import { applyLatestVersion } from '../tools/versions.js'
+import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
 import { buildAllowlistChanges } from './build-allowlist.js'
 import { bundleRunner } from '../runner/runnerBundler.js'
+
 /** @import {Opinion} from "../tools/types.js" */
 
 /** @type {readonly Opinion[]} */
@@ -47,7 +48,6 @@ const definedOpinions = [
     ],
     execute: async (changes, facts, decisions, print) => {
       try {
-        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         const response = await fetch(`https://registry.npmjs.org/pnpm/latest`)
 
         const packument = /** @type {{ version: string }} */ (
@@ -58,6 +58,11 @@ const definedOpinions = [
         print(Error(`    Failed to fetch latest pnpm version: ${err}`))
       }
     },
+    verify: async (changes, _results, facts) =>
+      assertDevEngines({
+        actual: /** @type {any} */ (facts.packageJson)?.devEngines,
+        expected: changes[1].value,
+      }),
   },
 
   {
@@ -89,6 +94,10 @@ const definedOpinions = [
       return [...allowlistChanges]
     },
     recommendCommands: ['pnpm approve-scripts'],
+    verify: async (changes, results, facts) => {
+      // check if pnpm_workspace.yml has allowBuilds set at all
+      return facts.pnpmWorkspace?.allowBuilds !== undefined
+    },
   },
 
   {
@@ -133,6 +142,10 @@ const definedOpinions = [
         comment: 'Protect the runtime of calls to "pnpm run" scripts.',
       },
     ],
+    verify: async (changes, results, _facts) => {
+      // not verifying any of the customizations
+      return results.length === 0
+    },
     execute: async (changes, facts, decisions) => {
       const filterEnv = await decisions.askToHarden(
         {

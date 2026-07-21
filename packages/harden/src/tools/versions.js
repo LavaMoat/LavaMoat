@@ -70,3 +70,31 @@ export function applyLatestVersion(changes, facts, latestVersion) {
 
   return changes
 }
+
+/**
+ * Asserts that an actual `devEngines.packageManager` entry (from
+ * `package.json`) matches the expected name and satisfies the expected version
+ * range.
+ *
+ * @param {object} params
+ * @param {unknown} params.actual - The devEngines value read from
+ *   `facts.packageJson`.
+ * @param {unknown} params.expected - The devEngines value from the intended
+ *   change.
+ * @returns {boolean}
+ */
+export function assertDevEngines({ actual, expected }) {
+  const actualPm =
+    /** @type {{ packageManager?: { name?: string; version?: string } }
+  | null
+  | undefined} */ (actual)?.packageManager
+  const expectedPm =
+    /** @type {{ packageManager?: { name?: string; version?: string } }
+  | null
+  | undefined} */ (expected)?.packageManager
+  if (!actualPm || !expectedPm) return false
+  if (!expectedPm.name || !expectedPm.version) return false
+  if (actualPm.name !== expectedPm.name) return false
+  if (!actualPm.version) return false
+  return semver.subset(actualPm.version, expectedPm.version)
+}

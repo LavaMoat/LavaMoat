@@ -88,7 +88,7 @@ export async function hardenDefaults(options) {
   }
   score.set('total', total)
   if (decisions.shouldStart) {
-    const shouldStart = await decisions.shouldStart(score)
+    const shouldStart = await decisions.shouldStart(score, opinions, facts)
     if (!shouldStart) {
       return {
         result: [],

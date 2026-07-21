@@ -27,6 +27,8 @@ npx @lavamoat/harden
 
 `harden wizard` - interactively applies the hardening by asking questions
 
+`harden verify` - checks the current config against a level and reports what's missing
+
 ### Apply defaults
 
 ```sh
@@ -68,6 +70,31 @@ harden wizard
 ```
 
 Assess your project and interactively apply hardening settings. The wizard will ask questions about your project and apply selected changes.
+
+### Verify
+
+```sh
+harden verify
+```
+
+Checks your project's current package manager configuration against a hardening level without making any changes. Prints a checklist of which opinions at the selected level are already satisfied (`✔`) and which are not (`✖`), along with a summary of scores per package manager config source.
+
+Exits with code `0` when everything at the selected level is satisfied, and `1` otherwise — useful in CI to enforce that a project stays hardened.
+
+```sh
+harden verify --level moderate
+harden verify -p yarn -l paranoid
+```
+
+#### Options
+
+```
+Options:
+  -p, --package-manager <pm>  Package manager to verify against (npm, yarn, pnpm)
+  -l, --level <level>         Hardening level: baseline, moderate, paranoid  [default: moderate]
+  -h, --help                  Show help
+  -v, --version               Show version
+```
 
 ## Opinions
 

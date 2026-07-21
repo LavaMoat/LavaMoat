@@ -26,6 +26,7 @@ export interface Facts {
   hasYarnState: boolean
   hasPnpmLock: boolean
   hasPnpmWorkspace: boolean
+  pnpmWorkspace: Record<string, SerializableValue> | null
   directGitDeps: string[]
 }
 
@@ -54,20 +55,38 @@ export interface AppliedChange extends ChangeResult {
 /**
  * An opinion that can be applied directly (has changes and/or execute, no
  * alternatives).
+ *
+ * Note: `execute` and `verify` are paired — either both are provided or
+ * neither. `execute` performs side effects and `verify` checks the results;
+ * neither makes sense without the other.
  */
-export interface ApplicableOpinion {
+export type ApplicableOpinion = ApplicableOpinionBase &
+  (
+    | {
+        execute: (
+          changes: Change[],
+          facts: Facts,
+          decisions: Decisions,
+          print: PrintApi
+        ) => Promise<Change[] | undefined | void>
+        verify: (
+          changes: Change[],
+          results: AppliedChange[],
+          facts: Facts
+        ) => Promise<boolean>
+      }
+    | {
+        execute?: never
+        verify?: never
+      }
+  )
+
+interface ApplicableOpinionBase {
   id: string
   description: string
   level: Level
   changes?: Change[]
   recommendCommands?: string[]
-  verify?: (facts: Facts) => Promise<number>
-  execute?: (
-    changes: Change[],
-    facts: Facts,
-    decisions: Decisions,
-    print: PrintApi
-  ) => Promise<Change[] | undefined | void>
   alternatives?: never
   detected?: number // ratio of applied changes to total changes, a number between 0 and 1
 }
@@ -101,10 +120,17 @@ export interface Decisions {
     facts: Facts
   ) => Promise<ApplicableOpinion | null>
   packageManager: () => Promise<string | null>
-  askToHarden: (opinion: Opinion, facts: Facts) => Promise<boolean | null>
+  askToHarden: (
+    opinion: ApplicableOpinion,
+    facts: Facts
+  ) => Promise<boolean | null>
   shouldFollowupCommand: (command: string, facts: Facts) => Promise<boolean>
-  shouldStart: (score: Map<string, number[]>) => Promise<boolean>
-  showSummary: (summary: string) => Promise<void>
+  shouldStart: (
+    score: Map<string, number[]>,
+    opinions: readonly Opinion[],
+    facts: Facts
+  ) => Promise<boolean>
+  showSummary: (summary: string) => Promise<{ exitCode: number }>
 }
 
 export interface HardenDefaultsOptions {

@@ -56,6 +56,10 @@ const definedOpinions = [
             return changes
           }
         },
+        verify: async (changes, results, facts) => {
+          // check if package.json has allowScripts set at all
+          return facts.packageJson?.allowScripts !== undefined
+        },
       },
       {
         id: 'n_noscripts',
@@ -124,6 +128,18 @@ const definedOpinions = [
         }
       }
     },
+    verify: async (changes, results, _facts) => {
+      if (results.length === 0) {
+        return true
+      }
+      if (results.length === 1) {
+        const result = results[0]
+        if (result.key === 'allow-git') {
+          return true // any value present is acceptable, since we may have changed it to 'root' if direct git deps were present
+        }
+      }
+      return false
+    },
   },
 
   {
@@ -146,6 +162,9 @@ const definedOpinions = [
           `Found git dependencies in package.json. They won't work with git disabled and you chose paranoid level. Consider removing them or moving to a safer source if possible.`
         )
       }
+    },
+    verify: async (changes, results, _facts) => {
+      return results.length === 0
     },
   },
 
@@ -185,6 +204,10 @@ const definedOpinions = [
         comment: 'Protect the runtime of calls to "npm run" scripts.',
       },
     ],
+    verify: async (changes, results, _facts) => {
+      // not verifying any of the customizations
+      return results.length === 0
+    },
     execute: async (changes, facts, decisions) => {
       const filterEnv = await decisions.askToHarden(
         {

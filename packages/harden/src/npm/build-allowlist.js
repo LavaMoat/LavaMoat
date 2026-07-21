@@ -21,10 +21,7 @@ function parseAllowScripts(stdout) {
   try {
     /** @type {NpmApproveOutput} */
     const parsed = JSON.parse(stdout)
-    if (
-      Array.isArray(parsed.allowScripts) &&
-      parsed.allowScripts.length > 0
-    ) {
+    if (Array.isArray(parsed.allowScripts) && parsed.allowScripts.length > 0) {
       return parsed.allowScripts.map((entry) => entry.changes[0].key)
     }
   } catch {
@@ -74,6 +71,7 @@ async function discoverPendingScripts(cwd, print) {
 export async function buildAllowlistChanges(facts, decisions, print) {
   const denyAll = await decisions.askToHarden(
     {
+      id: 'n_deny_existing_lifecycle',
       description: "Don't approve existing install scripts. ",
       level: 'paranoid',
     },

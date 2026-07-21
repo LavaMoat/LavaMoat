@@ -45,6 +45,15 @@ export async function collectFacts(cwd) {
       return null
     }
   }
+  const readPnpmWorkspace = async () => {
+    try {
+      const content = await readFile(join(cwd, 'pnpm-workspace.yaml'), 'utf8')
+      const doc = parseDocument(content)
+      return doc.toJSON()
+    } catch {
+      return null
+    }
+  }
 
   const packageJson = await readJson('package.json')
   const packageLock = await readJson('package-lock.json')
@@ -63,6 +72,7 @@ export async function collectFacts(cwd) {
     hasYarnState: await exists('.yarn/install-state.gz'),
     hasPnpmLock: await exists('pnpm-lock.yaml'),
     hasPnpmWorkspace: await exists('pnpm-workspace.yaml'),
+    pnpmWorkspace: await readPnpmWorkspace(),
     directGitDeps: findDirectGitDeps(packageJson),
   }
 }

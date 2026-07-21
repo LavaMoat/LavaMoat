@@ -7,20 +7,8 @@
  *   PrintApi
  * } from "./types.js"
  */
+import { levelRank, matchLevel } from './opinions-engine.js'
 import { print as defaultPrint } from './print.js'
-
-const LEVEL_ORDER = /** @type {const} */ (['baseline', 'moderate', 'paranoid'])
-
-/**
- * @param {Level} selected
- * @param {Level} [opinionLevel]
- */
-function levelIncludes(selected, opinionLevel) {
-  if (!opinionLevel) {
-    return true
-  }
-  return LEVEL_ORDER.indexOf(opinionLevel) <= LEVEL_ORDER.indexOf(selected)
-}
 
 /**
  * Default non-interactive chooseOpinion:
@@ -34,14 +22,14 @@ function levelIncludes(selected, opinionLevel) {
  * @returns {ApplicableOpinion | null}
  */
 function defaultChooseOpinion(selected, opinion) {
-  if (!levelIncludes(selected, opinion.level)) {
+  if (!matchLevel(selected, opinion.level)) {
     return null
   }
   let best = /** @type {ApplicableOpinion | null} */ (null)
   let bestRank = -1
   for (const alt of opinion.alternatives) {
-    if (levelIncludes(selected, alt.level)) {
-      const rank = alt.level ? LEVEL_ORDER.indexOf(alt.level) : 0
+    if (matchLevel(selected, alt.level)) {
+      const rank = levelRank(alt.level)
       if (rank >= bestRank) {
         bestRank = rank
         best = alt
@@ -79,7 +67,7 @@ export function createFallbackDecisions({
       return packageManager || null
     },
     async shouldApplyOpinion(opinion, _facts) {
-      return levelIncludes(level, opinion.level)
+      return matchLevel(level, opinion.level)
     },
     async chooseOpinion(opinion, _facts) {
       return defaultChooseOpinion(level, opinion)
@@ -96,6 +84,7 @@ export function createFallbackDecisions({
       print('______________________________________________________\n')
       print(summary)
       print('______________________________________________________\n')
+      return { exitCode: 0 }
     },
   }
 }
