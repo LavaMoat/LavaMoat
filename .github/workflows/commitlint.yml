@@ -20,4 +20,4 @@ jobs:
         env:
           FROM_SHA: ${{ github.event.pull_request.base.sha }}
           TO_SHA: ${{ github.event.pull_request.head.sha }}
-        run: npx commitlint --from "${FROM_SHA}" --to "${TO_SHA}" --verbose
+        run: npx --offline commitlint --from "${FROM_SHA}" --to "${TO_SHA}" --verbose
