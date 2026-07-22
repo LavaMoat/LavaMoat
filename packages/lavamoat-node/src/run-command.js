@@ -2,7 +2,8 @@
 
 const path = require('node:path')
 const fs = require('node:fs')
-const yargs = require('yargs')
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
 const yargsFlags = require('./yargsFlags')
 const { runLava } = require('./index')
 
@@ -15,7 +16,7 @@ runLava(parseArgs()).catch((err) => {
 })
 
 function parseArgs() {
-  const argsParser = yargs
+  const argsParser = yargs(hideBin(process.argv))
     .usage(
       '$0',
       'lavamoat-run-command [flags for lavamoat] -- command [args for the command]',

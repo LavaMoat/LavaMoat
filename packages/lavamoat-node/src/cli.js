@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs')
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
 const yargsFlags = require('./yargsFlags')
 const { runLava } = require('./index')
 
@@ -13,7 +14,7 @@ runLava(parseArgs()).catch((err) => {
 })
 
 function parseArgs() {
-  const argsParser = yargs
+  const argsParser = yargs(hideBin(process.argv))
     .usage('$0 <entryPath>', 'start the application', (yargs) => {
       // the entry file to run (or parse)
       yargs.positional('entryPath', {
