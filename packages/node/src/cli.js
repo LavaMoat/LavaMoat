@@ -24,17 +24,20 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
 import { run } from './exec/run.js'
-import { hrPath } from './format.js'
+import { action, hrPath, seconds, success } from './format.js'
 import { readJsonFile } from './fs.js'
-import { log } from './log.js'
+import { disableWarnings, log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
 import { toPath } from './util.js'
+import { stripVTControlCharacters } from 'node:util'
+import { writePolicy } from './policy-util.js'
+import { NoPolicyError } from './error.js'
 
 /**
- * @import {PackageJson} from 'type-fest';
- * @import {LavaMoatScuttleOpts} from 'lavamoat-core';
- * @import {LavaMoatPolicy} from '@lavamoat/types';
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {LavaMoatScuttleOpts} from 'lavamoat-core'
+ * @import {PackageJson} from 'type-fest'
  */
 
 /**
@@ -153,10 +156,25 @@ const main = async (args = hideBin(process.argv)) => {
     const niceOriginalEntrypoint = hrPath(entrypoint)
     const niceResolvedEntrypoint = hrPath(resolvedEntrypoint)
     argv.entrypoint = resolvedEntrypoint
-    if (niceResolvedEntrypoint !== niceOriginalEntrypoint) {
+    if (
+      path.normalize(stripVTControlCharacters(niceResolvedEntrypoint)) !==
+      path.normalize(stripVTControlCharacters(niceOriginalEntrypoint))
+    ) {
       log.warning(
-        `Resolved ${niceOriginalEntrypoint} → ${niceResolvedEntrypoint}`
+        `Resolved entrypoint ${niceOriginalEntrypoint} → ${niceResolvedEntrypoint}`
       )
+    }
+  }
+
+  /**
+   * Middleware to disable warnings if the `warnings` flag is falsy.
+   *
+   * @param {{ warnings?: boolean }} argv
+   * @returns {void}
+   */
+  const disableWarningsMiddleware = ({ warnings }) => {
+    if (!warnings) {
+      disableWarnings(log)
     }
   }
 
@@ -313,7 +331,7 @@ const main = async (args = hideBin(process.argv)) => {
             await fs.promises.access(policyOverridePath, fs.constants.R_OK)
             argv['policy-override'] = policyOverridePath
           } catch (err) {
-            throw new Error(
+            throw new NoPolicyError(
               `Cannot read specified policy override file at path ${hrPath(policyOverridePath)}`,
               { cause: err }
             )
@@ -361,6 +379,7 @@ const main = async (args = hideBin(process.argv)) => {
               hidden: true,
               describe: 'Force trusting root compartment [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
+              coerce: Boolean,
             },
             /**
              * @experimental
@@ -370,8 +389,8 @@ const main = async (args = hideBin(process.argv)) => {
               describe:
                 'Generate & write a policy file on-the-fly [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
-              default: false,
               hidden: true,
+              coerce: Boolean,
             },
             /**
              * @experimental
@@ -382,6 +401,7 @@ const main = async (args = hideBin(process.argv)) => {
               group: BEHAVIOR_GROUP,
               implies: 'generate-recklessly',
               hidden: true,
+              coerce: Boolean,
             },
             scuttle: {
               type: 'boolean',
@@ -397,11 +417,19 @@ const main = async (args = hideBin(process.argv)) => {
                  */
                 (value) => (value ? { enabled: true } : { enabled: false }),
             },
+            warnings: {
+              describe: 'Enable warnings',
+              type: 'boolean',
+              group: BEHAVIOR_GROUP,
+              coerce: Boolean,
+            },
           })
+          .conflicts('quiet', 'warnings')
           /**
            * Resolve entrypoint from `project-root`
            */
-          .middleware(processEntrypointMiddleware),
+          .middleware(processEntrypointMiddleware)
+          .middleware(disableWarningsMiddleware),
       /**
        * Default command handler.
        *
@@ -443,14 +471,17 @@ const main = async (args = hideBin(process.argv)) => {
         if (generate) {
           // let this reject since the failure mode could be any number of
           // terrible things
-          policy = await generatePolicy(entrypoint, {
+          ;({ policy } = await generatePolicy(entrypoint, {
             policyPath,
             policyOverridePath,
-            write,
             prodOnly,
             trustRoot,
             projectRoot,
-          })
+          }))
+
+          if (write) {
+            await writePolicy(policyPath, policy)
+          }
         }
 
         stripProcessArgv(entrypoint)
@@ -480,20 +511,52 @@ const main = async (args = hideBin(process.argv)) => {
               default: true,
               group: BEHAVIOR_GROUP,
             },
+            'treat-warnings-as-errors': {
+              describe:
+                'Fail without emitting policy when warnings are present',
+              type: 'boolean',
+              coerce: Boolean,
+              group: BEHAVIOR_GROUP,
+            },
+            warnings: {
+              describe: 'Enable warnings',
+              type: 'boolean',
+              coerce: Boolean,
+              group: BEHAVIOR_GROUP,
+              hidden: true,
+              default: true,
+            },
+            'no-warnings': {
+              describe: 'Suppress warnings',
+              type: 'boolean',
+              coerce: Boolean,
+              group: BEHAVIOR_GROUP,
+            },
+            'compact-overrides': {
+              describe:
+                'Remove redundant entries from existing policy override file & overwrite it',
+              type: 'boolean',
+              coerce: Boolean,
+              group: BEHAVIOR_GROUP,
+            },
           })
           .positional('entrypoint', {
             demandOption: true,
             describe: 'Application entry point',
             type: 'string',
           })
+          .middleware(disableWarningsMiddleware)
           .middleware(processEntrypointMiddleware),
       async ({
         entrypoint,
         policy: policyPath,
-        'policy-override': policyOverridePath,
+        'policy-override': policyOverridePathArg,
         'prod-only': prodOnly,
-        write,
+        'treat-warnings-as-errors': treatWarningsAsErrors,
+        write: shouldWrite,
+        'compact-overrides': compactOverrides,
       }) => {
+        const startTime = Date.now()
         const trustRoot = shouldTrustRoot(entrypoint)
         if (!trustRoot) {
           log.info(
@@ -501,18 +564,53 @@ const main = async (args = hideBin(process.argv)) => {
           )
         }
 
-        const policy = await generatePolicy(entrypoint, {
-          write,
-          policyPath,
+        const {
+          policy,
+          hasWarnings,
+          compactedPolicyOverride,
           policyOverridePath,
+        } = await generatePolicy(entrypoint, {
+          policyPath,
+          policyOverridePath: policyOverridePathArg,
           prodOnly,
           trustRoot,
+          compact: compactOverrides,
         })
 
-        if (!write) {
+        const duration = (Date.now() - startTime) / 1000
+        log.info(
+          `${success} Policy for ${hrPath(entrypoint)} ${action('generated')} in ${seconds(duration)}s`
+        )
+
+        if (hasWarnings && treatWarningsAsErrors) {
+          process.exitCode = 1
+          return
+        }
+
+        if (shouldWrite) {
+          await writePolicy(policyPath, policy)
+          log.info(
+            `${success} ${action('Wrote')} policy to ${hrPath(policyPath)}`
+          )
+        } else {
           // console used here since the logger only uses stderr
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))
+        }
+
+        if (compactOverrides) {
+          if (compactedPolicyOverride && policyOverridePath) {
+            await writePolicy(policyOverridePath, compactedPolicyOverride, {
+              what: 'policy override',
+            })
+            log.info(
+              `${success} ${action('Wrote')} compacted policy override to ${hrPath(policyOverridePath)}`
+            )
+          } else {
+            log.warning(
+              `No policy override file to compact; skipping compaction`
+            )
+          }
         }
       }
     )

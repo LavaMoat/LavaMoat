@@ -11,6 +11,7 @@ import { log as defaultLog } from '../log.js'
 import { toFileURLString } from '../util.js'
 import { DEFAULT_ENDO_OPTIONS } from './options.js'
 import { defaultReadPowers } from './power.js'
+import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
 
 /**
  * @import {
@@ -33,7 +34,7 @@ import { defaultReadPowers } from './power.js'
 
 const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])
 
-const { entries, keys } = Object
+const { entries } = Object
 
 /**
  * Creates a map of canonical names to their corresponding `package.json`
@@ -95,8 +96,9 @@ export const makeNodeCompartmentMap = async (
     prodOnly,
     log = defaultLog,
     endoPolicy,
-    policyOverride,
     trustRoot,
+    mapNodeModulesOptions = {},
+    policyOverride,
   } = {}
 ) => {
   log.debug(
@@ -113,18 +115,33 @@ export const makeNodeCompartmentMap = async (
   /**
    * @type {Set<CanonicalName>}
    */
-  const unknownCanonicalNames = new Set()
+  let unknownCanonicalNames = new Set()
 
   /**
    * @type {Set<CanonicalName>}
    */
   const knownCanonicalNames = new Set()
 
+  /**
+   * Deferred warnings
+   *
+   * @type {string[]}
+   */
+  const warnings = []
+
   /** @type {CanonicalName | undefined} */
   let rootUsePolicy
 
-  /** @type {MapNodeModulesOptions} */
-  const mapNodeModulesOptions = {
+  /**
+   * Order matters: consumer-provided options come first so the controlled
+   * fields below take precedence. The {@link ConsumerMapNodeModulesOptions} type
+   * already excludes the controlled keys, but spreading them last is
+   * belt-and-braces against the runtime case where the type is bypassed.
+   *
+   * @type {MapNodeModulesOptions}
+   */
+  const mergedMapNodeModulesOptions = {
+    ...mapNodeModulesOptions,
     conditions: new Set(DEFAULT_CONDITIONS),
     dev: !prodOnly,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
@@ -137,14 +154,11 @@ export const makeNodeCompartmentMap = async (
      * will require post-processing.
      */
     packageDataHook: ({ packageData }) => {
-      for (const {
-        packageDescriptor,
-        location,
-        canonicalName,
-        name,
-      } of packageData.values()) {
-        // @ts-expect-error - https://github.com/endojs/endo/pull/3111
-        if (!trustRoot && canonicalName === ROOT_COMPARTMENT) {
+      for (const [
+        label,
+        { packageDescriptor, location, canonicalName, name },
+      ] of packageData.entries()) {
+        if (!trustRoot && label === ROOT_COMPARTMENT) {
           rootUsePolicy = name
         }
         knownCanonicalNames.add(canonicalName)
@@ -154,42 +168,25 @@ export const makeNodeCompartmentMap = async (
         )
       }
     },
+  }
+
+  // The unknownCanonicalNameHook will only be called if we provided mapNodeModules with a policy.
+  if (endoPolicy) {
     /**
      * Collects unknown canonical names referenced in policy but not found in
      * the compartment map
      */
-    unknownCanonicalNameHook: ({ canonicalName }) => {
-      unknownCanonicalNames.add(canonicalName)
-    },
-  }
-
-  if (policyOverride) {
-    /**
-     * Adds any missing dependencies from `policyOverride` to the list of
-     * dependencies for a package
-     */
-    mapNodeModulesOptions.packageDependenciesHook = ({
+    mergedMapNodeModulesOptions.unknownCanonicalNameHook = ({
       canonicalName,
-      dependencies,
     }) => {
-      if (policyOverride) {
-        const { resources } = policyOverride
-        if (canonicalName in resources) {
-          for (const dependencyCanonicalName of keys(
-            resources[canonicalName].packages ?? {}
-          )) {
-            dependencies.add(dependencyCanonicalName)
-          }
-        }
-      }
-      return { dependencies }
+      unknownCanonicalNames.add(canonicalName)
     }
   }
 
   const packageCompartmentMap = await mapNodeModules(
     readPowers,
     entrypoint,
-    mapNodeModulesOptions
+    mergedMapNodeModulesOptions
   )
 
   /**
@@ -201,11 +198,22 @@ export const makeNodeCompartmentMap = async (
     log
   )
 
+  // if we have no policy but we do have policy overrides (policy generation
+  // use-case), we must gather the unknown canonical names after-the-fact using
+  // the overrides
+  if (policyOverride && !endoPolicy) {
+    unknownCanonicalNames = findUnknownCanonicalNames(
+      knownCanonicalNames,
+      policyOverride
+    )
+  }
+
   return {
     packageCompartmentMap,
     packageJsonMap,
     unknownCanonicalNames,
     knownCanonicalNames,
     rootUsePolicy,
+    warnings,
   }
 }

@@ -210,31 +210,6 @@ export interface WritableFsInterface {
 }
 
 /**
- * Options available when writing a policy
- */
-export interface WithWritePolicyOptions {
-  /**
-   * Path to a {@link LavaMoatPolicy} file
-   */
-  policyPath?: string | URL
-
-  /**
-   * `fs` interface to write policy to disk.
-   *
-   * This is _only_ used to read and write policy to disk and does not affect
-   * runtime operation.
-   */
-  writableFs?: WritableFsInterface
-
-  /**
-   * Whether or not to actually perform the write operation.
-   *
-   * @defaultValue false
-   */
-  write?: boolean
-}
-
-/**
  * Powers necessary to write a policy to disk
  */
 export interface WritePowers {
@@ -287,6 +262,18 @@ export interface WithLavaMoatEndoPolicy {
 }
 
 /**
+ * Options bucket containing a `compact` prop
+ */
+export interface WithCompact {
+  /**
+   * When `true`, compute a compacted policy override and include it in the
+   * result as `compactedPolicyOverride`. Has no effect when no policy override
+   * was loaded from disk.
+   */
+  compact?: boolean
+}
+
+/**
  * Options for `generatePolicy()`
  *
  * @remarks
@@ -298,11 +285,30 @@ export type GeneratePolicyOptions = ComposeOptions<
     WithReadPowersAndTrust,
     WithIsBuiltin,
     WithLoadForMapOptions,
-    WithWritePolicyOptions,
     WithScuttleGlobalThis,
     LoadPoliciesOptions,
+    WithCompact,
   ]
 >
+
+/**
+ * Result of `generatePolicy()`
+ */
+export type GeneratePolicyResult = {
+  policy: MergedLavaMoatPolicy
+  hasWarnings: boolean
+  /**
+   * Present only when `compact: true` was passed and a policy override was
+   * loaded from disk. Contains the override with redundant entries removed.
+   */
+  compactedPolicyOverride?: LavaMoatPolicy
+  /**
+   * The absolute path to the policy override file that was loaded from disk.
+   * Only set when a policy override was actually read from disk (not when
+   * `policyOverride` was passed as an object).
+   */
+  policyOverridePath?: string
+}
 
 /**
  * Params to LavaMoat's global attenuator
