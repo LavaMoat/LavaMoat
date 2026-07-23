@@ -1,0 +1,8 @@
+{
+  "name": "test-yarn-project",
+  "version": "1.0.0",
+  "packageManager": "yarn@4.15.0",
+  "optionalDependencies": {
+    "@lavamoat/not-really-a-package": "github:lavamoat/not-really-a-package"
+  }
+}

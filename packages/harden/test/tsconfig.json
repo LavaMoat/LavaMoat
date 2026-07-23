@@ -1,0 +1,12 @@
+{
+  "extends": "../../../.config/tsconfig.test.json",
+  "compilerOptions": {
+    "checkJs": false
+  },
+  "include": ["**/*.js"],
+  "references": [
+    {
+      "path": "../src/tsconfig.json"
+    }
+  ]
+}
