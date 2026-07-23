@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.8](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.7...node-v1.0.8) (2026-07-23)
+
+
+### Bug Fixes
+
+* **deps:** update definitelytyped ([#2073](https://github.com/LavaMoat/LavaMoat/issues/2073)) ([b7aae4f](https://github.com/LavaMoat/LavaMoat/commit/b7aae4fad24829323cd52c14ed5f45acd5748ae4))
+* **deps:** update dependency @types/node to v22.20.0 ([#2039](https://github.com/LavaMoat/LavaMoat/issues/2039)) ([fc95da2](https://github.com/LavaMoat/LavaMoat/commit/fc95da29f26fbe4fa8ea06645ba53c43b7963a7b))
+
 ## [1.0.7](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.6...node-v1.0.7) (2026-06-25)
 
 
