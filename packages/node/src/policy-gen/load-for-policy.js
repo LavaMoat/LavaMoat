@@ -20,7 +20,7 @@ import {
 } from '../constants.js'
 import { GenerationError } from '../error.js'
 import { action, hrCode, hrLabel, hrPath, seconds, success } from '../format.js'
-import { log as defaultLog, Loggerr } from '../log.js'
+import { log as defaultLog, LogLevels } from '../log.js'
 import { wrapMerged } from '../policy-util.js'
 import { mergePolicies } from '../policy-util.js'
 import {
@@ -43,6 +43,7 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
  *   LavaMoatPolicy,
  *   PackagePolicy
  * } from '@lavamoat/types'
+ * @import {Logger} from '@lavamoat/vog/log.js'
  * @import {PackageJson} from 'type-fest'
  * @import {
  *   ConsumerMapNodeModulesOptions,
@@ -176,7 +177,7 @@ export const loadAndGeneratePolicy = async (
   const { size: totalPackageCount } = packageJsonMap
 
   log.info(
-    `${success} Found ${hrCode(totalPackageCount)} ${pluralize(totalPackageCount, 'package')} in ${seconds(duration)}s`
+    `${success} Found ${hrCode(`${totalPackageCount}`)} ${pluralize(totalPackageCount, 'package')} in ${seconds(duration)}s`
   )
 
   /** @type {Map<CanonicalName, GlobalPolicy>} */
@@ -229,7 +230,7 @@ export const loadAndGeneratePolicy = async (
 
   const reporter = createModuleInspectionProgressReporter({
     log,
-    disabled: log.level > Loggerr.INFO,
+    disabled: log.level > LogLevels.info,
   })
 
   const _preload = policyOverride?.include?.map((include) =>
@@ -305,7 +306,7 @@ export const loadAndGeneratePolicy = async (
 
   // printing of these warnings is deferred until after inspection is complete
   for (const moduleSourceHookWarning of moduleSourceHookWarnings) {
-    log.warning(moduleSourceHookWarning)
+    log.warn(moduleSourceHookWarning)
   }
 
   reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
@@ -508,7 +509,7 @@ const createPackageConnectionsHook =
  * @param {Object} params
  * @param {Map<CanonicalName, PackageJson>} params.packageJsonMap
  * @param {string[]} params.warnings
- * @param {Loggerr} params.log
+ * @param {Logger} params.log
  * @param {CanonicalName | undefined} params.rootUsePolicy
  * @param {Map<FileUrlString, ModuleInspectionResult>} params.inspectionResults
  * @param {Map<CanonicalName, GlobalPolicy>} params.globalsForPackage
