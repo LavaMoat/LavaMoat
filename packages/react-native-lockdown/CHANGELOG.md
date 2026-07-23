@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v1.0.0...react-native-lockdown-v2.0.0) (2026-07-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **react-native-lockdown:** The minimum supported Node.js version range is now `^22.13.1 || ^24.3.0 || ^26.0.0`.
+
+### Bug Fixes
+
+* **react-native-lockdown:** update engines ([89ca28f](https://github.com/LavaMoat/LavaMoat/commit/89ca28f02462284f67f0bf40fa3ad2a28572647a))
+
 ## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v0.1.0...react-native-lockdown-v1.0.0) (2026-03-20)
 
 

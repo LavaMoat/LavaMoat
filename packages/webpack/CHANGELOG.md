@@ -18,6 +18,13 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [2.3.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.4...webpack-v2.3.0) (2026-07-23)
+
+
+### Features
+
+* Add opt-in flag to overwrite policy.json with overrides ([#2061](https://github.com/LavaMoat/LavaMoat/issues/2061)) ([c4760e6](https://github.com/LavaMoat/LavaMoat/commit/c4760e62f60b36cbd5a47e4895498a6abf1eb669))
+
 ## [2.2.4](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.3...webpack-v2.2.4) (2026-06-25)
 
 
