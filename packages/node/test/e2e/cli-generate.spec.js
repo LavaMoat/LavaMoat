@@ -19,6 +19,10 @@ const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
 const basic = fixture('basic')
 const deptree = fixture('deptree')
 const dev = fixture('dev')
+const webpackish = fixture('webpackish', {
+  entrypoint: 'pantspack',
+  policyOverridePath: './lavamoat/node/policy-override.json',
+})
 
 /**
  * @typedef E2EGenerateTestContext
@@ -48,6 +52,30 @@ test('basic policy generation', async (t) => {
     ['generate', basic.entrypoint, '--policy', policyPath],
     t,
     { cwd: basic.dir }
+  )
+  t.is(code, undefined)
+  t.snapshot(await readPolicy(policyPath))
+})
+
+test('additionalLocations support', async (t) => {
+  const policyPath = t.context.tempdir.join(
+    `additional-locations-${DEFAULT_POLICY_FILENAME}`
+  )
+
+  const { code } = await runCLI(
+    [
+      'generate',
+      '--bin',
+      webpackish.entrypoint,
+      '--policy',
+      policyPath,
+      '--policy-override',
+      webpackish.policyOverridePath,
+    ],
+    t,
+    {
+      cwd: webpackish.dir,
+    }
   )
   t.is(code, undefined)
   t.snapshot(await readPolicy(policyPath))

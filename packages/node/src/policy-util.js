@@ -24,9 +24,12 @@ import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import {
   hasValue,
-  isObjectyObject,
+  isArray,
+  isIncludeEntryByLocation,
+  isIncludeEntryByName,
+  isNonEmptyString,
+  isNonArrayObject,
   isPathLike,
-  isString,
   toAbsolutePath,
   toPath,
 } from './util.js'
@@ -386,21 +389,19 @@ export const writePolicy = async (
  * @returns {value is LavaMoatPolicy} Whether the value is a `LavaMoatPolicy`
  * @public
  */
-export const isPolicy = (value) => {
-  return (
-    isObjectyObject(value) &&
-    hasValue(value, 'resources') &&
-    isObjectyObject(value.resources) &&
-    (!('root' in value) || isObjectyObject(value.root)) &&
-    (!('include' in value) ||
-      (Array.isArray(value.include) &&
-        value.include.every(
-          (item) =>
-            isString(item) ||
-            (isObjectyObject(item) && 'name' in item && 'entry' in item)
-        )))
-  )
-}
+export const isPolicy = (value) =>
+  isNonArrayObject(value) &&
+  hasValue(value, 'resources') &&
+  isNonArrayObject(value.resources) &&
+  (!('root' in value) || isNonArrayObject(value.root)) &&
+  (!('include' in value) ||
+    (isArray(value.include) &&
+      value.include.every(
+        (item) =>
+          isNonEmptyString(item) ||
+          isIncludeEntryByName(item) ||
+          isIncludeEntryByLocation(item)
+      )))
 
 /**
  * Returns `true` if there is no such
