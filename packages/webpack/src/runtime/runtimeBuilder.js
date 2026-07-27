@@ -320,7 +320,19 @@ const LOCKDOWN_SHIMS = [];`
           new VirtualRuntimeModule({
             name: 'LavaMoat/defensive',
             source: getDefensiveCodingPreamble(),
-            stage: RuntimeModule.STAGE_NORMAL, // before all other runtime modules
+            // STAGE_NORMAL is the earliest stage, but other runtime modules
+            // could be registered for this stage also. Webpack uses numerical
+            // sorting to order the runtime modules, so we can register to be
+            // before any module that is not trying equally hard to be first.
+            // While the defensive preamble should not be required before
+            // scuttling occurs, it defines variables that will be hoisted and
+            // if it's not first, it'll overshadow the globals with undefined.
+            // In practice it was never problematic with webpack internal plugins,
+            // but if it happened to interfere with a different plugin or an
+            // unlucky key was added to the defensive preamble list, it'd
+            // be really hard to debug. So we use the shady -1 trick to avoid
+            // possible but unlikely issues.
+            stage: RuntimeModule.STAGE_NORMAL - 1,
             withoutClosure: true, // run in the scope of the runtime closure
           }),
         ]
@@ -433,4 +445,5 @@ const LOCKDOWN_SHIMS = [];`
       },
     }
   },
+  VirtualRuntimeModule,
 }
