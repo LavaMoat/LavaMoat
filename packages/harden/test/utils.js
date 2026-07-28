@@ -1,4 +1,3 @@
-/* eslint-disable n/no-unsupported-features/node-builtins */
 import { execFile } from 'node:child_process'
 import { rmSync } from 'node:fs'
 import { cp, mkdtemp, readdir } from 'node:fs/promises'
@@ -61,12 +60,11 @@ export async function copyProject(t, name) {
 export async function diffDirs(originalDir, modifiedDir) {
   let stdout
   try {
-    ;({ stdout } = await execFileAsync('diff', [
-      '-u',
-      '-N',
-      originalDir,
-      modifiedDir,
-    ]))
+    ;({ stdout } = await execFileAsync(
+      'diff',
+      ['-u', '-N', originalDir, modifiedDir],
+      { env: { ...process.env, LC_ALL: 'C' } }
+    ))
   } catch (err) {
     if (err && typeof err === 'object' && /** @type {any} */ (err).code === 1) {
       stdout = /** @type {any} */ (err).stdout
