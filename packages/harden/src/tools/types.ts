@@ -1,6 +1,6 @@
 import type { PackageJson } from 'type-fest'
 
-export type Level = 'baseline' | 'moderate' | 'strict'
+export type Level = 'baseline' | 'moderate' | 'strict' | 'ask-to-opt-in'
 
 export type SerializableObject = { [key: string]: SerializableValue }
 
@@ -52,26 +52,29 @@ export interface AppliedChange extends ChangeResult {
  * neither. `execute` performs side effects and `verify` checks the results;
  * neither makes sense without the other.
  */
-export type ApplicableOpinion = ApplicableOpinionBase &
-  (
-    | {
-        execute: (
-          changes: Change[],
-          facts: Facts,
-          decisions: Decisions,
-          print: PrintApi
-        ) => Promise<Change[] | undefined | void>
-        verify: (
-          changes: Change[],
-          results: AppliedChange[],
-          facts: Facts
-        ) => Promise<boolean>
-      }
-    | {
-        execute?: never
-        verify?: never
-      }
-  )
+type ApplicableOpinionWithExecution = ApplicableOpinionBase & {
+  execute: (
+    this: ApplicableOpinionWithExecution,
+    changes: Change[],
+    facts: Facts,
+    decisions: Decisions,
+    print: PrintApi
+  ) => Promise<Change[] | undefined | void>
+  verify: (
+    this: ApplicableOpinionWithExecution,
+    changes: Change[],
+    results: AppliedChange[],
+    facts: Facts
+  ) => Promise<boolean>
+}
+
+type ApplicableOpinionWithoutExecution = ApplicableOpinionBase & {
+  execute?: never
+  verify?: never
+}
+
+export type ApplicableOpinion =
+  ApplicableOpinionWithExecution | ApplicableOpinionWithoutExecution
 
 interface ApplicableOpinionBase {
   id: string

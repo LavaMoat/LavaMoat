@@ -82,7 +82,7 @@ function makeRunScriptWrapper(
         if (env[envVarName] !== undefined) {
           return env[envVarName]
         } else {
-          throw Error(
+          console.error(
             `[LavaMoat] Environment variable "${envVarName}" referenced in config but not found in environment`
           )
         }

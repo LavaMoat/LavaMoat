@@ -51,7 +51,7 @@ const definedOpinions = [
           {
             id: 'y_latest',
             description: 'Force yarn to be at the latest stable version',
-            level: 'strict',
+            level: 'ask-to-opt-in',
           },
           facts
         )

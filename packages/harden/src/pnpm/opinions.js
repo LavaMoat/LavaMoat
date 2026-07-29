@@ -1,4 +1,8 @@
-import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
+import {
+  applyLatestVersion,
+  assertDevEngines,
+  assertPackageManager,
+} from '../tools/versions.js'
 import { buildAllowlistChanges } from './build-allowlist.js'
 import { bundleRunner } from '../runner/runnerBundler.js'
 
@@ -34,35 +38,56 @@ const definedOpinions = [
         value: 'pnpm@11.0.0',
         ifNotExist: true,
       },
-      {
-        target: 'package.json',
-        key: 'devEngines',
-        value: {
-          packageManager: {
-            name: 'pnpm',
-            version: '>=11.0.0',
-            onFail: 'error',
-          },
-        },
-      },
+      // NOTE: pnpm doesn't allow both devEngines and packageManager to be set
     ],
-    execute: async (changes, facts, decisions, print) => {
-      try {
-        const response = await fetch(`https://registry.npmjs.org/pnpm/latest`)
-
-        const packument = /** @type {{ version: string }} */ (
-          await response.json()
+    async execute(changes, facts, decisions, print) {
+      if (
+        await decisions.askToHarden(
+          {
+            id: 'p_engines_latest',
+            description:
+              'Update packageManager field in package.json to the latest pnpm version.',
+            level: 'ask-to-opt-in',
+          },
+          facts
         )
-        return applyLatestVersion(changes, facts, packument.version)
-      } catch (err) {
-        print(Error(`    Failed to fetch latest pnpm version: ${err}`))
+      ) {
+        try {
+          const response = await fetch(`https://registry.npmjs.org/pnpm/latest`)
+
+          const packument = /** @type {{ version: string }} */ (
+            await response.json()
+          )
+          return applyLatestVersion(changes, facts, packument.version)
+        } catch (err) {
+          print(Error(`    Failed to fetch latest pnpm version: ${err}`))
+        }
       }
+      if (await this.verify(changes, [], facts)) {
+        return []
+      }
+      return changes
     },
-    verify: async (changes, _results, facts) =>
-      assertDevEngines({
-        actual: /** @type {any} */ (facts.packageJson)?.devEngines,
-        expected: changes[1].value,
-      }),
+    async verify(_changes, _results, facts) {
+      if (facts.packageJson?.packageManager) {
+        return assertPackageManager({
+          actual: facts.packageJson?.packageManager,
+          expected: 'pnpm@>=11.0.0',
+        })
+        // @ts-expect-error: incomplete PackageJson type
+      } else if (facts.packageJson?.devEngines?.packageManager?.version) {
+        return assertDevEngines({
+          actual: facts.packageJson?.devEngines,
+          expected: {
+            packageManager: {
+              name: 'pnpm',
+              version: '>=11.0.0',
+            },
+          },
+        })
+      }
+      return false
+    },
   },
 
   {

@@ -72,10 +72,13 @@ export function createFallbackDecisions({
     async chooseOpinion(opinion, _facts) {
       return defaultChooseOpinion(level, opinion)
     },
-    askToHarden:
-      level === 'strict'
-        ? async (_opinion, _facts) => true
-        : async (_opinion, _facts) => false,
+    async askToHarden(opinion, _facts) {
+      const result = matchLevel(level, opinion.level)
+      if (opinion.level === 'ask-to-opt-in' && !result) {
+        print(`Skipped in non-interactive mode: ${opinion.description}`)
+      }
+      return result
+    },
     async shouldFollowupCommand(command, _facts) {
       print(`Recommended follow-up command: ${command}`)
       return false
