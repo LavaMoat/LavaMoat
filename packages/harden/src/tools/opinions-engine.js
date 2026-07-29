@@ -14,7 +14,12 @@ const exec = promisify(child_process.exec)
  * } from './types.js'
  */
 
-const LEVEL_ORDER = /** @type {const} */ (['baseline', 'moderate', 'strict'])
+const LEVEL_ORDER = /** @type {const} */ ([
+  'baseline',
+  'moderate',
+  'strict',
+  'ask-to-opt-in',
+])
 
 /**
  * Returns true when `opinionLevel` is at or below `selected` in LEVEL_ORDER. An
@@ -53,7 +58,7 @@ export async function applyOpinions(opinions, facts, decisions, print) {
   const result = []
   const recommendedCommands = new Set()
 
-  for (const opinion of await filterOpinions(opinions, decisions, facts)) {
+  for await (const opinion of filterOpinions(opinions, decisions, facts)) {
     try {
       result.push(
         await applyOpinion(facts.cwd, opinion, facts, decisions, print)

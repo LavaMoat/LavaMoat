@@ -4,7 +4,7 @@
  *   Decisions,
  *   Facts,
  *   Opinion
- * } from "./types.js"
+ * } from './types.js'
  */
 
 /**
@@ -19,27 +19,21 @@
  * @param {readonly Opinion[]} opinions
  * @param {Decisions} decisions
  * @param {Facts} facts
- * @returns {Promise<ApplicableOpinion[]>}
+ * @returns {AsyncGenerator<ApplicableOpinion>}
  */
-export async function filterOpinions(opinions, decisions, facts) {
-  /** @type {ApplicableOpinion[]} */
-  const result = []
+export async function* filterOpinions(opinions, decisions, facts) {
   for (const opinion of opinions) {
     if (opinion.alternatives) {
       if (decisions.chooseOpinion) {
         const chosen = await decisions.chooseOpinion(opinion, facts)
         if (chosen) {
-          result.push(chosen)
+          yield chosen
         }
       }
     } else {
-      if (!opinion.changes && !opinion.execute) {
-        continue
-      }
       if (await decisions.shouldApplyOpinion(opinion, facts)) {
-        result.push(opinion)
+        yield opinion
       }
     }
   }
-  return result
 }
