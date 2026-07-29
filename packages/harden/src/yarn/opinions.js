@@ -1,4 +1,4 @@
-/** @import {Opinion} from "../tools/types.js" */
+/** @import {Opinion} from '../tools/types.js' */
 import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
 import { buildAllowlistChanges } from './yarn-build-allowlist.js'
 import { buildAllowlistChanges as buildLmAllowlistChanges } from './lm-build-allowlist.js'
@@ -51,7 +51,7 @@ const definedOpinions = [
           {
             id: 'y_latest',
             description: 'Force yarn to be at the latest stable version',
-            level: 'paranoid',
+            level: 'strict',
           },
           facts
         )
@@ -116,7 +116,7 @@ const definedOpinions = [
         id: 'y_lavamoat',
         description:
           'Use @lavamoat/allow-scripts to manage script permissions. This is more complex but allows precise control over which scripts are allowed to run.',
-        level: 'paranoid',
+        level: 'strict',
         changes: [
           {
             target: 'package.json',
@@ -190,7 +190,7 @@ const definedOpinions = [
     id: 'y_nocache',
     description:
       'Disable global cache in yarn to avoid cross-project cache poisoning.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '.yarnrc.yml',
@@ -205,7 +205,7 @@ const definedOpinions = [
     id: 'y_runner',
     description:
       'Take over yarn run and remove bin scripts confusion possibility and configure other limitations.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '/lavamoat',
@@ -235,7 +235,7 @@ const definedOpinions = [
           id: 'y_filterenv',
           description:
             'Limit environment variables exposure to the shell running the scripts.',
-          level: 'paranoid',
+          level: 'strict',
         },
         facts
       )
@@ -254,7 +254,7 @@ const definedOpinions = [
           id: 'y_hardenrun',
           description:
             'Limit permissions of node programs in "yarn run" scripts to prevent unexpected access to the environment.',
-          level: 'paranoid',
+          level: 'strict',
         },
         facts
       )
@@ -288,7 +288,7 @@ const definedOpinions = [
     id: 'y_nonpm',
     description:
       'Prevent npm from being used in case someone accidentally runs an old version of it.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '.npmrc',
@@ -309,7 +309,7 @@ const definedOpinions = [
     id: 'y_ignore_scr',
     description:
       'Prevent yarn1 from running scripts in case someone accidentally uses it before setting up.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '.yarnrc',

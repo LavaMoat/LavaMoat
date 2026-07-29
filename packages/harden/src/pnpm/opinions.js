@@ -2,7 +2,7 @@ import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
 import { buildAllowlistChanges } from './build-allowlist.js'
 import { bundleRunner } from '../runner/runnerBundler.js'
 
-/** @import {Opinion} from "../tools/types.js" */
+/** @import {Opinion} from '../tools/types.js' */
 
 /** @type {readonly Opinion[]} */
 const definedOpinions = [
@@ -69,7 +69,7 @@ const definedOpinions = [
     id: 'p_exotic',
     description:
       'Disable exotic subdeps in older pnpm versions in case someone failed to update.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: 'pnpm-workspace.yaml',
@@ -104,7 +104,7 @@ const definedOpinions = [
     id: 'p_nonpm',
     description:
       'Prevent npm from being used in case someone accidentally runs an old version of it.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '.npmrc',
@@ -125,7 +125,7 @@ const definedOpinions = [
     id: 'p_runner',
     description:
       'Take over pnpm run and remove bin scripts confusion possibility and configure other limitations.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '/lavamoat',
@@ -152,7 +152,7 @@ const definedOpinions = [
           id: 'p_filterenv',
           description:
             'Limit environment variables exposure to the shell running the scripts.',
-          level: 'paranoid',
+          level: 'strict',
         },
         facts
       )
@@ -171,7 +171,7 @@ const definedOpinions = [
           id: 'p_hardenrun',
           description:
             'Limit permissions of node programs in "pnpm run" scripts to prevent unexpected access to the environment.',
-          level: 'paranoid',
+          level: 'strict',
         },
         facts
       )

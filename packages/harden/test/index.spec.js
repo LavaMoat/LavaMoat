@@ -29,14 +29,14 @@ for (const pm of PKGMGR_LIST) {
     t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 
-  test(`hardenDefaults - ${pm} - paranoid level`, async (t) => {
+  test(`hardenDefaults - ${pm} - strict level`, async (t) => {
     const cwd = await copyProject(t, pm)
     const { print, log } = logPrint()
 
     const { result } = await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions: createFallbackDecisions({ level: 'paranoid', print }),
+      decisions: createFallbackDecisions({ level: 'strict', print }),
       print,
     })
 

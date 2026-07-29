@@ -1,16 +1,11 @@
 import type { PackageJson } from 'type-fest'
 
-export type Level = 'baseline' | 'moderate' | 'paranoid'
+export type Level = 'baseline' | 'moderate' | 'strict'
 
 export type SerializableObject = { [key: string]: SerializableValue }
 
 type SerializableValue =
-  | string
-  | number
-  | boolean
-  | null
-  | SerializableValue[]
-  | SerializableObject
+  string | number | boolean | null | SerializableValue[] | SerializableObject
 
 export interface Facts {
   cwd: string
@@ -31,10 +26,7 @@ export interface Facts {
 }
 
 export type ConfigTarget =
-  | '.npmrc'
-  | '.yarnrc'
-  | '.yarnrc.yml'
-  | 'pnpm-workspace.yaml'
+  '.npmrc' | '.yarnrc' | '.yarnrc.yml' | 'pnpm-workspace.yaml'
 export type ChangeTarget = ConfigTarget | 'package.json' | '/lavamoat'
 
 export interface Change {

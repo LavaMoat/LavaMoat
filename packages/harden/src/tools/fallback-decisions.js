@@ -5,7 +5,7 @@
  *   Level,
  *   OpinionWithAlternatives,
  *   PrintApi
- * } from "./types.js"
+ * } from './types.js'
  */
 import { levelRank, matchLevel } from './opinions-engine.js'
 import { print as defaultPrint } from './print.js'
@@ -73,7 +73,7 @@ export function createFallbackDecisions({
       return defaultChooseOpinion(level, opinion)
     },
     askToHarden:
-      level === 'paranoid'
+      level === 'strict'
         ? async (_opinion, _facts) => true
         : async (_opinion, _facts) => false,
     async shouldFollowupCommand(command, _facts) {

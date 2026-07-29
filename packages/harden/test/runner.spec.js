@@ -30,14 +30,14 @@ async function copyProject(t, name) {
 }
 
 for (const pm of PKGMGR_LIST) {
-  test(`.runner.cjs captures scripts in ${pm} after paranoid setup`, async (t) => {
+  test(`.runner.cjs captures scripts in ${pm} after strict setup`, async (t) => {
     const cwd = await copyProject(t, `runner-${pm}`)
 
     await hardenDefaults({
       cwd,
       packageManager: pm,
       decisions: createFallbackDecisions({
-        level: 'paranoid',
+        level: 'strict',
         print: () => {},
       }),
       print: () => {},

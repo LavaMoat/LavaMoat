@@ -11,10 +11,10 @@ const exec = promisify(child_process.exec)
  *   Level,
  *   Opinion,
  *   PrintApi
- * } from "./types.js"
+ * } from './types.js'
  */
 
-const LEVEL_ORDER = /** @type {const} */ (['baseline', 'moderate', 'paranoid'])
+const LEVEL_ORDER = /** @type {const} */ (['baseline', 'moderate', 'strict'])
 
 /**
  * Returns true when `opinionLevel` is at or below `selected` in LEVEL_ORDER. An

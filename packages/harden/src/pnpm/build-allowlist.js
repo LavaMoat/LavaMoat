@@ -7,7 +7,7 @@ import { readYamlArrayField, readYamlDocument } from '../tools/yaml-config.js'
  *   Decisions,
  *   Facts,
  *   PrintApi
- * } from "../tools/types.js"
+ * } from '../tools/types.js'
  */
 
 /**
@@ -23,7 +23,7 @@ export async function buildAllowlistChanges(facts, decisions, print) {
       {
         id: 'p_deny_existing_lifecycle',
         description: "Don't approve existing install scripts. ",
-        level: 'paranoid',
+        level: 'strict',
       },
       facts
     ))

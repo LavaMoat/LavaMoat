@@ -4,14 +4,14 @@
  *   Decisions,
  *   Facts,
  *   PrintApi
- * } from "../tools/types.js"
+ * } from '../tools/types.js'
  */
 
 /**
  * Build the allowlist for approved lifecycle scripts using
  * @lavamoat/allow-scripts.
  *
- * This is the paranoid implementation: install the tool and set an empty
+ * This is the strict implementation: install the tool and set an empty
  * `lavamoat.allowScripts` object. No scripts are allowed by default.
  *
  * @param {Facts} facts
@@ -63,7 +63,7 @@ export async function buildAllowlistChanges(facts, _decisions, _print) {
       key: ['lavamoat', 'allowScripts'],
       value: {},
       comment:
-        'Paranoid default: no lifecycle scripts are allowed until explicitly approved.',
+        'strict default: no lifecycle scripts are allowed until explicitly approved.',
       ifNotExist: true,
     }
   )

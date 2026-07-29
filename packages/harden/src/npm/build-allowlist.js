@@ -8,7 +8,7 @@ const execFile = promisify(child_process.execFile)
  *   Facts,
  *   NpmApproveOutput,
  *   PrintApi
- * } from "../tools/types.js"
+ * } from '../tools/types.js'
  */
 
 /**
@@ -73,7 +73,7 @@ export async function buildAllowlistChanges(facts, decisions, print) {
     {
       id: 'n_deny_existing_lifecycle',
       description: "Don't approve existing install scripts. ",
-      level: 'paranoid',
+      level: 'strict',
     },
     facts
   )

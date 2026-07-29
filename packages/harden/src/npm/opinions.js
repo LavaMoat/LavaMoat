@@ -1,4 +1,4 @@
-/** @import {Opinion} from "../tools/types.js" */
+/** @import {Opinion} from '../tools/types.js' */
 import { buildAllowlistChanges } from './build-allowlist.js'
 import { bundleRunner } from '../runner/runnerBundler.js'
 
@@ -65,7 +65,7 @@ const definedOpinions = [
         id: 'n_noscripts',
         description:
           'Disable lifecycle scripts permanently to prevent malicious code execution on install, with no exceptions.',
-        level: 'paranoid',
+        level: 'strict',
         changes: [
           {
             target: '.npmrc',
@@ -112,7 +112,7 @@ const definedOpinions = [
           {
             id: 'n_strictgit',
             description: `Block git dependencies entirely instead of allowing 'root' despite direct git dependencies being present`,
-            level: 'paranoid',
+            level: 'strict',
           },
           facts
         )
@@ -146,7 +146,7 @@ const definedOpinions = [
     id: 'n_nogit',
     description:
       'Disable git command entirely in npm to prevent git dependency resolution in older npm versions.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '.npmrc',
@@ -159,7 +159,7 @@ const definedOpinions = [
     execute: async (changes, facts, decisions, print) => {
       if (facts.directGitDeps && facts.directGitDeps.length > 0) {
         print(
-          `Found git dependencies in package.json. They won't work with git disabled and you chose paranoid level. Consider removing them or moving to a safer source if possible.`
+          `Found git dependencies in package.json. They won't work with git disabled and you chose strict level. Consider removing them or moving to a safer source if possible.`
         )
       }
     },
@@ -187,7 +187,7 @@ const definedOpinions = [
     id: 'n_runner',
     description:
       'Take over npm run and remove bin scripts confusion possibility and configure other limitations.',
-    level: 'paranoid',
+    level: 'strict',
     changes: [
       {
         target: '/lavamoat',
@@ -214,7 +214,7 @@ const definedOpinions = [
           id: 'n_filterenv',
           description:
             'Limit environment variables exposure to the shell running the scripts.',
-          level: 'paranoid',
+          level: 'strict',
         },
         facts
       )
@@ -233,7 +233,7 @@ const definedOpinions = [
           id: 'n_hardenrun',
           description:
             'Limit permissions of node programs in "npm run" scripts to prevent unexpected access to the environment.',
-          level: 'paranoid',
+          level: 'strict',
         },
         facts
       )

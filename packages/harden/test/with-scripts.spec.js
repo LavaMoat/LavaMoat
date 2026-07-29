@@ -44,7 +44,7 @@ for (const pm of PKGMGR_LIST) {
     t.snapshot(await diffDirs(originalDir, cwd), 'diff')
   })
 
-  test(`verifier - ${pm} - with scripts - paranoid`, async (t) => {
+  test(`verifier - ${pm} - with scripts - strict`, async (t) => {
     const cwd = await copyProject(t, pm)
     const { print, log } = logPrint()
 
@@ -61,16 +61,16 @@ for (const pm of PKGMGR_LIST) {
     const { result } = await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions: createFallbackDecisions({ level: 'paranoid', print }),
+      decisions: createFallbackDecisions({ level: 'strict', print }),
       print,
     })
 
     cleanupInstallArtifacts(cwd)
 
-    t.assert(result.length > 0, 'Expected some changes for paranoid level')
+    t.assert(result.length > 0, 'Expected some changes for strict level')
 
     const decisions = createVerifier({
-      level: 'paranoid',
+      level: 'strict',
       packageManager: pm,
       print,
     })

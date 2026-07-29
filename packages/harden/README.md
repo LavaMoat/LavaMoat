@@ -48,10 +48,10 @@ Detects the package manager in use and writes hardening config at the **moderate
 | ---------- | ------------------------------------------------------------------- |
 | `baseline` | Disables lifecycle scripts, blocks git deps, sets release age gate  |
 | `moderate` | Everything in baseline + enforces minimum package manager version   |
-| `paranoid` | Everything in moderate + additional settings for the extra cautious |
+| `strict`   | Everything in moderate + additional settings for the extra cautious |
 
 ```sh
-harden defaults --level paranoid
+harden defaults --level strict
 ```
 
 Choose the package manager with `--package-manager/-p` instead of guessing:
@@ -65,7 +65,7 @@ harden defaults -p yarn --level baseline
 ```text
 Options:
   -p, --package-manager <pm>  Package manager to harden (npm, yarn, pnpm)
-  -l, --level <level>         Hardening level: baseline, moderate, paranoid  [default: moderate]
+  -l, --level <level>         Hardening level: baseline, moderate, strict  [default: moderate]
 ```
 
 ### Verify
@@ -82,7 +82,7 @@ Exits with code `0` when everything at the selected level is satisfied, and `1` 
 
 ```sh
 harden verify --level moderate
-harden verify -p yarn -l paranoid
+harden verify -p yarn -l strict
 ```
 
 #### Verify Options
@@ -90,7 +90,7 @@ harden verify -p yarn -l paranoid
 ```text
 Options:
   -p, --package-manager <pm>  Package manager to verify against (npm, yarn, pnpm)
-  -l, --level <level>         Hardening level: baseline, moderate, paranoid  [default: moderate]
+  -l, --level <level>         Hardening level: baseline, moderate, strict  [default: moderate]
 ```
 
 ## Opinions

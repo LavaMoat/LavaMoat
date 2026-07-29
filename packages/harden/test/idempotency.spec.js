@@ -4,20 +4,20 @@ import { createFallbackDecisions } from '../src/tools/fallback-decisions.js'
 import { copyProject, logPrint, PKGMGR_LIST } from './utils.js'
 
 for (const pm of PKGMGR_LIST) {
-  test(`hardenDefaults - ${pm} - idempotent (paranoid applied twice)`, async (t) => {
+  test(`hardenDefaults - ${pm} - idempotent (strict applied twice)`, async (t) => {
     const cwd = await copyProject(t, pm)
     const { print, log, forget } = logPrint()
 
     await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions: createFallbackDecisions({ level: 'paranoid', print: forget }),
+      decisions: createFallbackDecisions({ level: 'strict', print: forget }),
       print: forget,
     })
     const { result } = await hardenDefaults({
       cwd,
       packageManager: pm,
-      decisions: createFallbackDecisions({ level: 'paranoid', print }),
+      decisions: createFallbackDecisions({ level: 'strict', print }),
       print,
     })
 

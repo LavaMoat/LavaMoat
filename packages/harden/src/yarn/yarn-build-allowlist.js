@@ -8,7 +8,7 @@ import {
  *   Decisions,
  *   Facts,
  *   PrintApi
- * } from "../tools/types.js"
+ * } from '../tools/types.js'
  */
 
 /**
@@ -27,7 +27,7 @@ export async function buildAllowlistChanges(facts, decisions, print) {
     (await decisions.askToHarden(
       {
         description: "Don't approve existing install scripts. ",
-        level: 'paranoid',
+        level: 'strict',
       },
       facts
     ))
