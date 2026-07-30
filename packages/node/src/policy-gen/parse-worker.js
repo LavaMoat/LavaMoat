@@ -11,7 +11,6 @@
  * visitor logic stays in sync.
  *
  * @packageDocumentation
- * @internal
  */
 
 import { runPipelineInWorker } from '@endo/parser-pipeline'

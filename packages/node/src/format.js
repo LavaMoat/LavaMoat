@@ -27,7 +27,6 @@ export { stripAnsi }
  *   delimiterColor?: ChalkFunction
  * }} [options]
  * @returns {string} Colorized string
- * @internal
  */
 
 export const colorSplit = (
@@ -112,7 +111,6 @@ export const hrCode = chalk.cyan.bold
  * Formats a success symbol.
  *
  * @returns {string}
- * @internal
  */
 
 export const success = chalk.greenBright.bold('✓')
@@ -121,28 +119,21 @@ export const success = chalk.greenBright.bold('✓')
  * Formats an "action" message.
  *
  * @returns {string}
- * @internal
  */
 export const action = chalk.bold
 
 /**
  * Formats a string for emphasis.
- *
- * @internal
  */
 export const emphasis = chalk.italic
 
 /**
  * Formats a string for deemphasis.
- *
- * @internal
  */
 export const deemphasis = chalk.dim
 
 /**
  * Array of spinner characters.
- *
- * @internal
  */
 export const spinnerChars = ['◰', '◳', '◲', '◱']
 
@@ -150,7 +141,6 @@ export const spinnerChars = ['◰', '◳', '◲', '◱']
  * Formats a spinner.
  *
  * @returns {string}
- * @internal
  */
 export const spinner = chalk.magentaBright.bold
 
@@ -158,7 +148,6 @@ export const spinner = chalk.magentaBright.bold
  * Formats a hazard symbol.
  *
  * @returns {string}
- * @internal
  */
 export const hazard = chalk.yellowBright.bold('⚠')
 
@@ -166,7 +155,6 @@ export const hazard = chalk.yellowBright.bold('⚠')
  * Formats a chevron symbol.
  *
  * @returns {string}
- * @internal
  */
 export const chevron = chalk.blackBright('›')
 
@@ -174,7 +162,6 @@ export const chevron = chalk.blackBright('›')
  * Clears the current line.
  *
  * @returns {void}
- * @internal
  */
 export const clearLine = () => {
   process.stderr.write('\r\x1b[2K')
@@ -185,6 +172,5 @@ export const clearLine = () => {
  *
  * @param {number} duration Duration in ms
  * @returns {string} Human-readable duration in seconds
- * @internal
  */
 export const seconds = (duration) => `${hrCode(`~${duration.toFixed(2)}`)}`

@@ -94,7 +94,6 @@ const serializeViolations = ({
  *
  * @param {PolicyGenAnalyzerPassOptions} [options]
  * @returns {VisitorPass<PolicyGenAnalysisResults>}
- * @internal
  */
 export const createPolicyGenVisitor = (options = {}) => {
   const { builtinModules = [...ALL_BUILTIN_MODULES], ...globalsOptions } =

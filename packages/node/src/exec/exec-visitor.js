@@ -25,7 +25,6 @@
  *    tag function may observe `raw`.
  *
  * @packageDocumentation
- * @internal
  */
 
 /**
