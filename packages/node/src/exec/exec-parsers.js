@@ -8,7 +8,6 @@
  * policy inspection only happens during policy generation, not execution.
  *
  * @packageDocumentation
- * @internal
  */
 
 import { makeEvasiveTransformVisitor } from '@endo/evasive-transform/visitor.js'

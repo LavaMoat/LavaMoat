@@ -8,7 +8,6 @@
  * module, parallelizing the work across cores.
  *
  * @packageDocumentation
- * @internal
  */
 
 /**

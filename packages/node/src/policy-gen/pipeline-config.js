@@ -9,7 +9,6 @@
  * {@link policy-gen-parsers.js}.
  *
  * @packageDocumentation
- * @internal
  */
 
 import { createPolicyGenVisitor } from './policy-gen-visitor.js'

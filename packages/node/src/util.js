@@ -298,7 +298,6 @@ export const pluralize = (count, singular, plural = `${singular}s`) =>
  * @param {string} dependency Dependency name
  * @returns {boolean} `true` if `dependency` is an optional dependency within
  *   `packageJson`
- * @internal
  */
 export const isOptionalDependency = (packageJson, dependency) =>
   !!packageJson.optionalDependencies?.[dependency] === true ||

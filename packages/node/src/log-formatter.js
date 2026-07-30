@@ -2,15 +2,11 @@
  * Custom formatter for Loggerr which doesn't trim multiline messages.
  *
  * @packageDocumentation
- * @internal
  */
 
 import util from 'node:util'
 import chalk from 'chalk'
 
-/**
- * @internal
- */
 export function createFormatter() {
   const opts = /** @type {const} */ ({
     colors: true,
