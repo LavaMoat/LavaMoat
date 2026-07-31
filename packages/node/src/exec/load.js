@@ -20,11 +20,11 @@ import { createExecParsers } from './exec-parsers.js'
 
 /**
  * @import {
- *   CanonicalName,
  *   ImportLocationOptions,
  *   PackageCompartmentMapDescriptor,
  *   SyncImportLocationOptions
  * } from '@endo/compartment-mapper'
+ * @import {UnknownCanonicalNames} from '../internal.js'
  * @import {
  *   ApplicationLoader,
  *   ExecuteOptions
@@ -62,13 +62,11 @@ export const load = async (
 ) => {
   /** @type {PackageCompartmentMapDescriptor} */
   let packageCompartmentMap
-  /** @type {Set<CanonicalName>} */
+  /** @type {UnknownCanonicalNames} */
   let unknownCanonicalNames
-  /** @type {Set<CanonicalName>} */
-  let knownCanonicalNames
 
   try {
-    ;({ packageCompartmentMap, unknownCanonicalNames, knownCanonicalNames } =
+    ;({ packageCompartmentMap, unknownCanonicalNames } =
       await makeNodeCompartmentMap(entrypointPath, {
         readPowers,
         prodOnly,
@@ -78,7 +76,7 @@ export const load = async (
       }))
     // note: for execution, warnings are likely disabled by default, and this
     // function only prints warnings.
-    reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
+    reportInvalidCanonicalNames(unknownCanonicalNames, {
       policy,
       log,
       what: 'policy',

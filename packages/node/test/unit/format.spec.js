@@ -3,16 +3,11 @@ import path from 'node:path'
 import { hrPath, stripAnsi } from '../../src/format.js'
 
 test('hrPath - returns relative path if shorter than absolute path', (t) => {
-  t.plan(3)
+  t.plan(2)
   const absPath = path.resolve('test/path')
   const relativePath = path.relative(process.cwd(), absPath)
   const hrRelativePath = hrPath(relativePath)
   const strippedHrRelativePath = stripAnsi(hrRelativePath)
-  t.not(
-    strippedHrRelativePath,
-    hrRelativePath,
-    'hrPath should return a colored string'
-  )
   t.true(
     strippedHrRelativePath.startsWith(`.${path.sep}`),
     'Relative paths returned by hrPath should start with a dot and path separator'

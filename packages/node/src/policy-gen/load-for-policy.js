@@ -49,7 +49,8 @@ import { createPolicyGenParsers } from './policy-gen-parsers.js'
  *   LoadAndGeneratePolicyOptions,
  *   LoadAndGeneratePolicyResult,
  *   ModuleInspectionResult,
- *   StructuredViolationsResult
+ *   StructuredViolationsResult,
+ *   UnknownCanonicalNames
  * } from '../internal.js'
  * @import {FileUrlString} from '../types.js'
  */
@@ -134,10 +135,8 @@ export const loadAndGeneratePolicy = async (
   let packageJsonMap
   /** @type {PackageCompartmentMapDescriptor} */
   let packageCompartmentMap
-  /** @type {Set<CanonicalName>} */
+  /** @type {UnknownCanonicalNames} */
   let unknownCanonicalNames
-  /** @type {Set<CanonicalName>} */
-  let knownCanonicalNames
   /** @type {CanonicalName | undefined} */
   let rootUsePolicy
 
@@ -145,7 +144,6 @@ export const loadAndGeneratePolicy = async (
     ;({
       packageJsonMap,
       packageCompartmentMap,
-      knownCanonicalNames,
       unknownCanonicalNames,
       rootUsePolicy,
     } = await makeNodeCompartmentMap(entrypointPath, {
@@ -304,7 +302,7 @@ export const loadAndGeneratePolicy = async (
     log.warning(moduleSourceHookWarning)
   }
 
-  reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
+  reportInvalidCanonicalNames(unknownCanonicalNames, {
     policy: policyOverride,
     log,
     what: 'policy overrides',
@@ -313,7 +311,7 @@ export const loadAndGeneratePolicy = async (
 
   const hasWarnings = !!(
     moduleSourceHookWarnings.length +
-    unknownCanonicalNames.size +
+    unknownCanonicalNames.length +
     violationsForPackage.size
   )
   // #endregion

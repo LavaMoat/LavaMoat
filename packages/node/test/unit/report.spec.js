@@ -79,7 +79,7 @@ test('reportInvalidCanonicalNames - should not log if no invalid canonical names
       },
     })
   )
-  reportInvalidCanonicalNames(new Set(), new Set(), {
+  reportInvalidCanonicalNames([], {
     log,
     policy: { resources: {} },
   })
@@ -95,7 +95,7 @@ test('reportInvalidCanonicalNames - should not log if no policy was provided', (
       },
     })
   )
-  reportInvalidCanonicalNames(new Set(), new Set(), {
+  reportInvalidCanonicalNames([], {
     log,
   })
   t.false(logged)
@@ -103,11 +103,14 @@ test('reportInvalidCanonicalNames - should not log if no policy was provided', (
 
 test('reportInvalidCanonicalNames - should throw if invalid "what" was provided', (t) => {
   t.throws(() => {
-    reportInvalidCanonicalNames(new Set(['a']), new Set(['b']), {
-      policy: { resources: { a: {}, b: {} } },
-      // @ts-expect-error - purposely invalid type
-      what: 'invalid',
-    })
+    reportInvalidCanonicalNames(
+      [{ canonicalName: 'a', message: 'nope', path: ['resources', 'a'] }],
+      {
+        policy: { resources: { a: {}, b: {} } },
+        // @ts-expect-error - purposely invalid type
+        what: 'invalid',
+      }
+    )
   })
 })
 
@@ -120,9 +123,40 @@ test('reportInvalidCanonicalNames - should log if invalid canonical names were f
       },
     })
   )
-  reportInvalidCanonicalNames(new Set(['a']), new Set(['b']), {
-    log,
-    policy: { resources: { a: {}, b: {} } },
-  })
+  reportInvalidCanonicalNames(
+    [{ canonicalName: 'a', message: 'nope', path: ['resources', 'a'] }],
+    {
+      log,
+      policy: { resources: { a: {}, b: {} } },
+    }
+  )
   t.true(logged)
+})
+
+test('reportInvalidCanonicalNames - should include a suggestion when one was provided on the issue', (t) => {
+  /** @type {string | undefined} */
+  let warning
+  const log = /** @type {Loggerr} */ (
+    /** @type {unknown} */ ({
+      warning: (msg) => {
+        warning = msg
+      },
+    })
+  )
+  reportInvalidCanonicalNames(
+    [
+      {
+        canonicalName: 'a',
+        message: 'nope',
+        path: ['resources', 'a'],
+        suggestion: 'b',
+      },
+    ],
+    {
+      log,
+      policy: { resources: { a: {}, b: {} } },
+    }
+  )
+  t.true(warning?.includes('did you mean'))
+  t.true(warning?.includes('b'))
 })
