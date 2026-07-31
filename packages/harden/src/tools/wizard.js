@@ -1,7 +1,10 @@
 import { createConsola } from 'consola'
 
 /**
- * @import {Decisions} from "./types.js"
+ * @import {
+ *   Decisions,
+ *   DecisionsForOpinions
+ * } from './types.js'
  */
 
 const consola = createConsola({
@@ -23,9 +26,10 @@ export const wizardPrint = (...args) => {
  *
  * @param {object} options
  * @param {string} [options.packageManager]
+ * @param {DecisionsForOpinions} [options.decisionsSnapshot]
  * @returns {Decisions}
  */
-export function createWizard({ packageManager }) {
+export function createWizard({ packageManager, decisionsSnapshot }) {
   const printed = new Set()
   /**
    * @param {string} text
@@ -36,6 +40,9 @@ export function createWizard({ packageManager }) {
       printed.add(text)
     }
   }
+
+  /** @type {DecisionsForOpinions} */
+  const decisionsForOpinions = { ...(decisionsSnapshot ?? {}) }
 
   return {
     async packageManager() {
@@ -75,11 +82,33 @@ ${[...scores.entries()]
         consola.success(`[${opinion.level}] ${opinion.description}`)
         return true
       }
-      return await consola.prompt(`[${opinion.level}] ${opinion.description}`, {
-        type: 'confirm',
-      })
+      if (opinion.id in decisionsForOpinions) {
+        const decision = decisionsForOpinions[opinion.id]
+        if (typeof decision === 'boolean') {
+          return decision
+        }
+      }
+      const decision = await consola.prompt(
+        `[${opinion.level}] ${opinion.description}`,
+        {
+          type: 'confirm',
+        }
+      )
+      decisionsForOpinions[opinion.id] = decision
+      return decision
     },
     async chooseOpinion(opinion, _facts) {
+      if (opinion.id in decisionsForOpinions) {
+        const decision = decisionsForOpinions[opinion.id]
+        if (typeof decision === 'string') {
+          const matched = opinion.alternatives.find(
+            (alt) => alt.id === decision
+          )
+          if (matched) {
+            return matched
+          }
+        }
+      }
       const index = await consola.prompt(`Which do you prefer?`, {
         type: 'select',
         options: opinion.alternatives.map((alt, index) => ({
@@ -87,12 +116,25 @@ ${[...scores.entries()]
           label: `[${alt.level}] ${alt.description}`,
         })),
       })
-      return opinion.alternatives[Number(index)]
+      const choice = opinion.alternatives[Number(index)]
+      decisionsForOpinions[opinion.id] = choice.id
+      return choice
     },
-    async askToHarden({ description }) {
-      return consola.prompt(`[optional hardening] ${description}`, {
-        type: 'confirm',
-      })
+    async askToHarden({ description, id }) {
+      if (id in decisionsForOpinions) {
+        const decision = decisionsForOpinions[id]
+        if (typeof decision === 'boolean') {
+          return decision
+        }
+      }
+      const decision = await consola.prompt(
+        `[optional hardening] ${description}`,
+        {
+          type: 'confirm',
+        }
+      )
+      decisionsForOpinions[id] = decision
+      return decision
     },
     async shouldFollowupCommand(command, _facts) {
       printOnce(`Recommended follow-up command`)
@@ -101,6 +143,14 @@ ${[...scores.entries()]
       })
     },
     async showSummary(summary) {
+      consola.box({
+        title: 'Decisions Snapshot',
+        message: JSON.stringify(decisionsForOpinions, null, 2),
+        style: {
+          padding: 1,
+          borderColor: 'blue',
+        },
+      })
       consola.box({
         title: 'Harden Defaults Summary',
         message: summary,

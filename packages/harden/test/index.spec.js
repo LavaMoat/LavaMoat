@@ -1,6 +1,6 @@
 import test from 'ava'
 import { hardenDefaults } from '../src/index.js'
-import { createFallbackDecisions } from '../src/tools/fallback-decisions.js'
+import { createFallbackDecisions } from '../src/tools/default-decisions.js'
 import { createVerifier } from '../src/tools/verifier.js'
 import {
   copyProject,

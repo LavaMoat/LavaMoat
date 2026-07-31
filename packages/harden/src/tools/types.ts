@@ -104,6 +104,7 @@ export type Opinion = ApplicableOpinion | OpinionWithAlternatives
 
 export type PrintApi = (input: unknown) => void
 
+export type DecisionsForOpinions = Record<string, boolean | string>
 export interface Decisions {
   shouldApplyOpinion: (opinion: Opinion, facts: Facts) => Promise<boolean>
   /**

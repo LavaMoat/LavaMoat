@@ -1,6 +1,6 @@
 import test from 'ava'
 import { hardenDefaults } from '../src/index.js'
-import { createFallbackDecisions } from '../src/tools/fallback-decisions.js'
+import { createFallbackDecisions } from '../src/tools/default-decisions.js'
 import { copyProject, logPrint, PKGMGR_LIST } from './utils.js'
 
 for (const pm of PKGMGR_LIST) {

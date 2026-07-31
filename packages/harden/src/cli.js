@@ -5,7 +5,8 @@ import { resolve } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { hardenDefaults } from './index.js'
 /** @import {Level} from './tools/types.js' */
-import { createFallbackDecisions } from './tools/fallback-decisions.js'
+/** @import {DecisionsForOpinions} from './tools/types.js' */
+import { createFallbackDecisions } from './tools/default-decisions.js'
 import { createWizard, wizardPrint } from './tools/wizard.js'
 import { print } from './tools/print.js'
 import { createVerifier } from './tools/verifier.js'
@@ -17,6 +18,7 @@ const { values, positionals } = parseArgs({
     version: { type: 'boolean', short: 'v' },
     'package-manager': { type: 'string', short: 'p' },
     level: { type: 'string', short: 'l' },
+    'decisions-snapshot': { type: 'string', short: 'd' },
   },
 })
 
@@ -28,11 +30,13 @@ Commands:
     Options:
       -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
       -l, --level <level>         Hardening level (baseline, moderate, strict) [default: moderate]
+      -d, --decisions-snapshot <file>  Path to decisions snapshot file (JSON) to apply regardless of level set
      
 
   wizard      Interactive wizard to generate hardened config
     Options:
       -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
+      -d, --decisions-snapshot <file>  Path to decisions snapshot file (JSON) to pre-fill wizard
 
   verify      Verify current config against a hardening level (exit 1 if not satisfied)
     Options:
@@ -57,11 +61,30 @@ if (values.version) {
 const command = positionals[0]
 let decisions
 let customPrint = print
+/** @type {DecisionsForOpinions | undefined} */
+let decisionsSnapshot
 
 const level = /** @type {Level} */ (values.level ?? 'moderate')
 if (!['baseline', 'moderate', 'strict'].includes(level)) {
   print(`Error: Invalid level "${level}". Use baseline, moderate, or strict.`)
   process.exit(1)
+}
+
+if (values['decisions-snapshot']) {
+  const snapshotPath = resolve(values['decisions-snapshot'])
+  try {
+    print(`Loading decisions from ${snapshotPath}`)
+    const fileContent = await readFile(snapshotPath, 'utf8')
+    decisionsSnapshot = JSON.parse(fileContent)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    print(
+      `[LavaMoat] Error: Could not load decisions snapshot from "${snapshotPath}".\n` +
+        `Make sure the file exists and contains valid JSON.\n` +
+        `Details: ${message}`
+    )
+    process.exit(1)
+  }
 }
 
 switch (command) {
@@ -71,6 +94,7 @@ switch (command) {
         level,
         print,
         packageManager: values['package-manager'],
+        decisionsSnapshot,
       })
     }
     break
@@ -78,6 +102,7 @@ switch (command) {
     {
       decisions = createWizard({
         packageManager: values['package-manager'],
+        decisionsSnapshot,
       })
       customPrint = wizardPrint
     }

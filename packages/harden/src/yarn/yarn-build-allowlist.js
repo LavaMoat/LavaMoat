@@ -26,6 +26,7 @@ export async function buildAllowlistChanges(facts, decisions, print) {
     decisions.askToHarden &&
     (await decisions.askToHarden(
       {
+        id: 'y_noallowlist',
         description: "Don't approve existing install scripts. ",
         level: 'strict',
       },

@@ -2,6 +2,7 @@
  * @import {
  *   ApplicableOpinion,
  *   Decisions,
+ *   DecisionsForOpinions,
  *   Level,
  *   OpinionWithAlternatives,
  *   PrintApi
@@ -46,13 +47,18 @@ function defaultChooseOpinion(selected, opinion) {
  * @param {Level} options.level
  * @param {PrintApi} [options.print]
  * @param {string} [options.packageManager]
+ * @param {DecisionsForOpinions} [options.decisionsSnapshot]
  * @returns {Decisions}
  */
 export function createFallbackDecisions({
   level,
   print = defaultPrint,
   packageManager,
+  decisionsSnapshot,
 }) {
+  /** @type {DecisionsForOpinions} */
+  const decisionsForOpinions = { ...(decisionsSnapshot ?? {}) }
+
   return {
     async shouldStart(score) {
       const total = score.get('total')
@@ -67,12 +73,35 @@ export function createFallbackDecisions({
       return packageManager || null
     },
     async shouldApplyOpinion(opinion, _facts) {
+      if (opinion.id in decisionsForOpinions) {
+        const decision = decisionsForOpinions[opinion.id]
+        if (typeof decision === 'boolean') {
+          return decision
+        }
+      }
       return matchLevel(level, opinion.level)
     },
     async chooseOpinion(opinion, _facts) {
+      if (opinion.id in decisionsForOpinions) {
+        const decision = decisionsForOpinions[opinion.id]
+        if (typeof decision === 'string') {
+          const matched = opinion.alternatives.find(
+            (alt) => alt.id === decision
+          )
+          if (matched) {
+            return matched
+          }
+        }
+      }
       return defaultChooseOpinion(level, opinion)
     },
     async askToHarden(opinion, _facts) {
+      if (opinion.id in decisionsForOpinions) {
+        const decision = decisionsForOpinions[opinion.id]
+        if (typeof decision === 'boolean') {
+          return decision
+        }
+      }
       const result = matchLevel(level, opinion.level)
       if (opinion.level === 'ask-to-opt-in' && !result) {
         print(`Skipped in non-interactive mode: ${opinion.description}`)

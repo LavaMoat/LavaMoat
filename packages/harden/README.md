@@ -34,6 +34,7 @@ Assess your project and interactively apply hardening settings. The wizard will 
 ```text
 Options:
   -p, --package-manager <pm>  Package manager to harden (npm, yarn, pnpm)
+  -d, --decisions-snapshot <file>  Path to decisions snapshot file (JSON) to pre-fill wizard
 ```
 
 ### Apply Defaults
@@ -66,7 +67,30 @@ harden defaults -p yarn --level baseline
 Options:
   -p, --package-manager <pm>  Package manager to harden (npm, yarn, pnpm)
   -l, --level <level>         Hardening level: baseline, moderate, strict  [default: moderate]
+  -d, --decisions-snapshot <file>  Path to decisions snapshot file (JSON) to apply regardless of level set
 ```
+
+### Decisions Snapshot
+
+Use `--decisions-snapshot/-d` to load a JSON file with saved decisions.
+
+- In `wizard`, matching entries pre-fill prompts.
+- In `defaults`, matching entries override level-based defaults.
+
+Example:
+
+```json
+{
+  "n_engines": true,
+  "n_scripts": "n_allowscripts",
+  "n_git": true,
+  "n_strictgit": false,
+  "n_filterenv": true
+}
+```
+
+Wizard will print a snapshot of your decisions at the end, which you can save and re-use later.  
+It's also a good way to share decisions across a team or opt-out of certain opinions without having to go down a level in `harden defaults`.
 
 ### Verify
 

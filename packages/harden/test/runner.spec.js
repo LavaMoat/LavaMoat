@@ -5,7 +5,7 @@ import { promisify } from 'node:util'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { hardenDefaults } from '../src/index.js'
-import { createFallbackDecisions } from '../src/tools/fallback-decisions.js'
+import { createFallbackDecisions } from '../src/tools/default-decisions.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -39,16 +39,14 @@ for (const pm of PKGMGR_LIST) {
       decisions: createFallbackDecisions({
         level: 'strict',
         print: () => {},
+        decisionsSnapshot: {
+          // one override we need to avoid a more elaborate setup for yarn in this test
+          y_allowlist: 'y_meta',
+          y_nocache: false,
+        },
       }),
       print: () => {},
     })
-
-    if (pm === 'yarn') {
-      // call yarn install in the temp dir because it complains otherwise
-      await execFileAsync(pm, ['install'], {
-        cwd,
-      })
-    }
 
     const result = await execFileAsync(pm, ['test'], {
       cwd,
