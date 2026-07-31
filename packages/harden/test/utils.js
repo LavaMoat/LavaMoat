@@ -15,7 +15,7 @@ export const isWindows = platform() === 'win32'
 
 // https://github.com/nodejs/node/issues/38490
 export const fixWindowsExecPath = (inPath) =>
-  '"' + inPath.replace(/"/g, '\\"') + '"'
+  '"' + inPath.replace(/[\\"]/g, '\\$&') + '"'
 
 export const portableExecPath = (inPath, debugLogging) => {
   if (!isWindows) {
@@ -91,7 +91,8 @@ export async function diffDirs(originalDir, modifiedDir) {
   const diff = (stdout ?? '')
     .replaceAll(modifiedDir, '<modified>')
     .replaceAll(originalDir, '<original>')
-    .replace(/^(---|\+\+\+) (.+?)\s+\S+\s+\S+\s+\S+$/gm, '$1 $2')
+    // Keep only the header marker and filename; drop platform-specific metadata.
+    .replace(/^((?:---|\+\+\+) \S+).*/gm, '$1')
     .replace(/^\s*diff -u -N .+$/gm, '\n')
 
   return `--- files ---\n${fileList}\n--- diff ---\n${diff}`
