@@ -28,7 +28,8 @@ import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
  * } from 'type-fest'
  * @import {
  *   MakeNodeCompartmentMapOptions,
- *   MakeNodeCompartmentMapResult
+ *   MakeNodeCompartmentMapResult,
+ *   UnknownCanonicalNames
  * } from '../internal.js'
  */
 
@@ -113,9 +114,9 @@ export const makeNodeCompartmentMap = async (
   const packageJsonsByLocation = new Map()
 
   /**
-   * @type {Set<CanonicalName>}
+   * @type {UnknownCanonicalNames}
    */
-  let unknownCanonicalNames = new Set()
+  let unknownCanonicalNames = []
 
   /**
    * @type {Set<CanonicalName>}
@@ -178,8 +179,11 @@ export const makeNodeCompartmentMap = async (
      */
     mergedMapNodeModulesOptions.unknownCanonicalNameHook = ({
       canonicalName,
+      path,
+      message,
+      suggestion,
     }) => {
-      unknownCanonicalNames.add(canonicalName)
+      unknownCanonicalNames.push({ canonicalName, path, message, suggestion })
     }
   }
 

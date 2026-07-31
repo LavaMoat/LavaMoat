@@ -11,6 +11,7 @@ import type {
   ReadNowPowersProp,
 } from '@endo/compartment-mapper'
 import type { CanonicalName } from '@endo/compartment-mapper/import.js'
+import { type findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
 import type {
   BuiltinPolicy,
   GlobalPolicy,
@@ -140,13 +141,6 @@ export type ReportInvalidCanonicalNamesOptions = ComposeOptions<
     WithLog,
     {
       /**
-       * Maximum number of suggestions to make when reporting invalid canonical
-       * names
-       *
-       * @defaultValue 3
-       */
-      maxSuggestions?: number
-      /**
        * Description of the policy type being reported
        *
        * @defaultValue 'policy'
@@ -223,6 +217,11 @@ export type MakeNodeCompartmentMapOptions = ComposeOptions<
 >
 
 /**
+ * Array of unknown canonical names and details
+ */
+export type UnknownCanonicalNames = ReturnType<typeof findUnknownCanonicalNames>
+
+/**
  * Result of `makeNodeCompartmentMap()`
  */
 export interface MakeNodeCompartmentMapResult {
@@ -235,10 +234,10 @@ export interface MakeNodeCompartmentMapResult {
    */
   packageCompartmentMap: PackageCompartmentMapDescriptor
   /**
-   * Set of canonical names from policy which were not found in
+   * Information about canonical names from policy which were not found in
    * {@link packageCompartmentMap}
    */
-  unknownCanonicalNames: Set<CanonicalName>
+  unknownCanonicalNames: UnknownCanonicalNames
   /**
    * Set of canonical names that were found in {@link packageCompartmentMap}
    */
@@ -405,8 +404,7 @@ export interface ModuleInspectionProgressReporterOptions {
  * Options for {@link createPolicyGenWorkerParsers}
  */
 export type CreatePolicyGenWorkerParsersOptions =
-  | (WithLog & ModuleInspectionProgressReporterOptions)
-  | WithLog
+  (WithLog & ModuleInspectionProgressReporterOptions) | WithLog
 
 /**
  * Options for {@link createMjsExecParser} and {@link createCjsExecParser}

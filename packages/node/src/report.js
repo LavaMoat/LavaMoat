@@ -29,7 +29,7 @@ import {
   success,
 } from './format.js'
 import { log as defaultLog } from './log.js'
-import { findCanonicalNameKeypath, noop, pluralize } from './util.js'
+import { noop, pluralize, toKeypath } from './util.js'
 import { fileURLToPath } from 'node:url'
 
 /**
@@ -42,16 +42,11 @@ import { fileURLToPath } from 'node:url'
  *   ReportModuleInspectionProgressFn,
  *   ReportSesViolationsOptions,
  *   StructuredViolation,
- *   StructuredViolationsResult
+ *   StructuredViolationsResult,
+ *   UnknownCanonicalNames
  * } from './internal.js'
  * @import {Loggerr} from './log.js'
  */
-
-/**
- * Default number of suggestions to make when reporting invalid canonical names
- * in policy
- */
-const DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS = 3
 
 /**
  * Reports resources from policy which weren't found on disk and are thus not in
@@ -59,25 +54,23 @@ const DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS = 3
  *
  * If no `policy` is provided, this function does nothing.
  *
- * @param {Set<CanonicalName>} unknownCanonicalNames - Set of canonical names
- *   that were referenced in policy but not found
- * @param {Set<CanonicalName>} knownCanonicalNames - Set of all canonical names
- *   found in the compartment map
+ * The keypath and suggestion for each issue are computed upstream by
+ * `findUnknownCanonicalNames()` (from `@endo/compartment-mapper/policy.js`), so
+ * this function is only responsible for formatting and logging them.
+ *
+ * @param {UnknownCanonicalNames} unknownCanonicalNames
+ *
+ *   - Issues describing canonical names referenced in policy but not found in the
+ *       compartment map
+ *
  * @param {ReportInvalidCanonicalNamesOptions} options
  * @returns {void}
  */
 export const reportInvalidCanonicalNames = (
   unknownCanonicalNames,
-  knownCanonicalNames,
-  {
-    policy,
-    policyPath,
-    log = defaultLog,
-    maxSuggestions = DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS,
-    what = 'policy',
-  }
+  { policy, policyPath, log = defaultLog, what = 'policy' }
 ) => {
-  if (!policy || unknownCanonicalNames.size === 0) {
+  if (!policy || unknownCanonicalNames.length === 0) {
     return
   }
   if (what !== 'policy' && what !== 'policy overrides') {
@@ -86,56 +79,19 @@ export const reportInvalidCanonicalNames = (
     )
   }
 
-  // Create list of invalid canonical names with their keypaths and source
-  // representations
-  const unknownCanonicalNameMap = [...unknownCanonicalNames].map(
-    (canonicalName) => {
-      const keypath = findCanonicalNameKeypath(policy, canonicalName)
-      return {
-        name: canonicalName,
-        source: keypath || `unknown location for "${canonicalName}"`,
-      }
-    }
-  )
-
-  // if we have any invalid overrides, we will search through the canonical
-  // names from the compartment map and make suggestions for the user to fix
-  // them
-  if (unknownCanonicalNameMap.length) {
-    /** @type {Map<string, string[]>} */
-    const suggestions = new Map()
-    for (const { name: unknownName } of unknownCanonicalNameMap) {
-      const unknownNameParts = unknownName.split('>')
-      const unknownPackageName = unknownNameParts[unknownNameParts.length - 1]
-      const matches = [...knownCanonicalNames].filter((name) =>
-        name.endsWith(`>${unknownPackageName}`)
-      )
-      if (matches.length) {
-        const nameMatches = matches
-          .slice(0, maxSuggestions)
-          .map((name) => hrLabel(name))
-        log.debug(
-          `Found potential match(es) for ${hrLabel(unknownName)}: ${nameMatches.join(', ')}`
-        )
-        suggestions.set(unknownName, nameMatches)
-      }
-    }
-
-    let msg = `The following ${pluralize(unknownCanonicalNameMap.length, 'entry', 'entries')} found in ${what}`
-    msg += policyPath ? ` (${hrPath(policyPath)})` : ''
-    msg += ` ${pluralize(unknownCanonicalNameMap.length, 'was', 'were')} not associated with any Compartment and may be invalid:\n`
-    msg += unknownCanonicalNameMap
-      .map(({ name, source }) => {
-        if (suggestions.has(name)) {
-          const suggestion = /** @type {string[]} */ (suggestions.get(name))
-          return `  - ${hrCode(source)} (did you mean ${suggestion.join(' or ')}?)`
-        }
-        return `  - ${hrCode(source)}`
-      })
-      .join('\n')
-    log.warning(msg)
-    return
-  }
+  let msg = `The following ${pluralize(unknownCanonicalNames.length, 'entry', 'entries')} found in ${what}`
+  msg += policyPath ? ` (${hrPath(policyPath)})` : ''
+  msg += ` ${pluralize(unknownCanonicalNames.length, 'was', 'were')} not associated with any Compartment and may be invalid:\n`
+  msg += unknownCanonicalNames
+    .map(({ canonicalName, path, suggestion }) => {
+      const source =
+        toKeypath(path) || `unknown location for "${canonicalName}"`
+      return suggestion
+        ? `  - ${hrCode(source)} (did you mean ${hrLabel(suggestion)}?)`
+        : `  - ${hrCode(source)}`
+    })
+    .join('\n')
+  log.warning(msg)
 }
 
 /**
