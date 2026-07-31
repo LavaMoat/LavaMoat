@@ -2,6 +2,7 @@ import { promisify } from 'node:util'
 import child_process from 'node:child_process'
 const execFile = promisify(child_process.execFile)
 /**
+ * @import {ExecFileException} from 'node:child_process'
  * @import {
  *   Change,
  *   Decisions,
@@ -51,7 +52,7 @@ async function discoverPendingScripts(cwd, print) {
     )
     return parseAllowScripts(stdout)
   } catch (err) {
-    const stdout = /** @type {{ stdout?: string } | undefined} */ (err)?.stdout
+    const stdout = /** @type {ExecFileException | undefined} */ (err)?.stdout
     if (stdout) {
       return parseAllowScripts(stdout)
     }

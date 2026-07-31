@@ -33,7 +33,8 @@ module.exports = {
           const workspace = project.tryWorkspaceByLocator(locator)
 
           if (!workspace) {
-            // a script is being executed outside of a workspace context, so we can't apply any custom logic
+            // a script is being executed outside of a workspace context, so we
+            // can't apply any custom logic.
             // This is the case when a postinstal is running.
 
             // "Do nothing" - return the original executor immediately
@@ -68,6 +69,9 @@ module.exports = {
             }
           )
 
+          // extra.env is a reference to the mutable object, but a different variable
+          // containing that reference is used within execute, so we must amend not
+          // replace it.
           const newEnv = wrapper.processEnv(extra.env)
           for (const key of Object.keys(extra.env)) {
             delete extra.env[key]

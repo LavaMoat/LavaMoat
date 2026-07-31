@@ -1,11 +1,12 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
 
 /**
  * @import {
  *   AppliedChange,
  *   Change as PackageJsonEntry
- * } from "./types.js"
+ * } from './types.js'
  */
 
 /**
@@ -51,7 +52,12 @@ export async function applyPackageJson(cwd, entries, dryRun = false) {
       continue
     }
 
-    if (JSON.stringify(existingValue) === JSON.stringify(entry.value)) {
+    if (
+      // @ts-expect-error - 3rd arg is ignored until node v24.9
+      isDeepStrictEqual(existingValue, entry.value, {
+        skipPrototype: true,
+      })
+    ) {
       continue
     }
 
