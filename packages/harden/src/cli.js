@@ -2,7 +2,7 @@
 
 import { parseArgs } from 'node:util'
 import { resolve } from 'node:path'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { hardenDefaults } from './index.js'
 /** @import {Level} from './tools/types.js' */
 /** @import {DecisionsForOpinions} from './tools/types.js' */
@@ -19,6 +19,7 @@ const { values, positionals } = parseArgs({
     'package-manager': { type: 'string', short: 'p' },
     level: { type: 'string', short: 'l' },
     'decisions-snapshot': { type: 'string', short: 'd' },
+    'save-decisions': { type: 'boolean', short: 's' },
   },
 })
 
@@ -46,6 +47,7 @@ Commands:
 Options
   -h, --help                  Show this help
   -v, --version               Show version
+  -s, --save-decisions        Save decisions snapshot to ./decisions-snapshot.json at the end of the run
       `)
   process.exit(0)
 }
@@ -63,6 +65,19 @@ let decisions
 let customPrint = print
 /** @type {DecisionsForOpinions | undefined} */
 let decisionsSnapshot
+
+/** @type {((decisions: DecisionsForOpinions) => Promise<void>) | undefined} */
+const saveDecisions = values['save-decisions']
+  ? async (snapshot) => {
+      const outputPath = resolve('decisions-snapshot.json')
+      await writeFile(
+        outputPath,
+        `${JSON.stringify(snapshot, null, 2)}\n`,
+        'utf8'
+      )
+      print(`Saved decisions snapshot to ${outputPath}`)
+    }
+  : undefined
 
 const level = /** @type {Level} */ (values.level ?? 'moderate')
 if (!['baseline', 'moderate', 'strict'].includes(level)) {
@@ -95,6 +110,7 @@ switch (command) {
         print,
         packageManager: values['package-manager'],
         decisionsSnapshot,
+        saveDecisions,
       })
     }
     break
@@ -103,6 +119,7 @@ switch (command) {
       decisions = createWizard({
         packageManager: values['package-manager'],
         decisionsSnapshot,
+        saveDecisions,
       })
       customPrint = wizardPrint
     }
@@ -132,6 +149,7 @@ try {
   })
 
   const { exitCode } = await decisions.showSummary(summary)
+
   process.exitCode = exitCode
 } catch (err) {
   print(err)

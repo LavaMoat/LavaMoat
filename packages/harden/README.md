@@ -35,6 +35,7 @@ Assess your project and interactively apply hardening settings. The wizard will 
 Options:
   -p, --package-manager <pm>  Package manager to harden (npm, yarn, pnpm)
   -d, --decisions-snapshot <file>  Path to decisions snapshot file (JSON) to pre-fill wizard
+  -s, --save-decisions  Save decisions snapshot to ./decisions-snapshot.json at end of run
 ```
 
 ### Apply Defaults
@@ -68,11 +69,13 @@ Options:
   -p, --package-manager <pm>  Package manager to harden (npm, yarn, pnpm)
   -l, --level <level>         Hardening level: baseline, moderate, strict  [default: moderate]
   -d, --decisions-snapshot <file>  Path to decisions snapshot file (JSON) to apply regardless of level set
+  -s, --save-decisions  Save decisions snapshot to ./decisions-snapshot.json at end of run (useful as a template to edit and re-use)
 ```
 
 ### Decisions Snapshot
 
 Use `--decisions-snapshot/-d` to load a JSON file with saved decisions.
+Use `--save-decisions/-s` to write the final decisions to `./decisions-snapshot.json`.
 
 - In `wizard`, matching entries pre-fill prompts.
 - In `defaults`, matching entries override level-based defaults.
@@ -89,8 +92,15 @@ Example:
 }
 ```
 
-Wizard will print a snapshot of your decisions at the end, which you can save and re-use later.  
-It's also a good way to share decisions across a team or opt-out of certain opinions without having to go down a level in `harden defaults`.
+Wizard can save a snapshot of your decisions at the end with `-s`. It will also write `decisions-snapshot.json` in the current working directory so you can re-use it later.
+You can also put together a subset of decisions. This is a good way to share decisions across a team or opt-out of certain opinions without having to go down a level in `harden defaults`.
+
+Example:
+
+```sh
+harden wizard -s
+harden defaults -d ./decisions-snapshot.json
+```
 
 ### Verify
 

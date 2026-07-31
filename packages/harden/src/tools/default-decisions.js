@@ -48,6 +48,7 @@ function defaultChooseOpinion(selected, opinion) {
  * @param {PrintApi} [options.print]
  * @param {string} [options.packageManager]
  * @param {DecisionsForOpinions} [options.decisionsSnapshot]
+ * @param {(decisions: DecisionsForOpinions) => Promise<void>} [options.saveDecisions]
  * @returns {Decisions}
  */
 export function createFallbackDecisions({
@@ -55,6 +56,7 @@ export function createFallbackDecisions({
   print = defaultPrint,
   packageManager,
   decisionsSnapshot,
+  saveDecisions,
 }) {
   /** @type {DecisionsForOpinions} */
   const decisionsForOpinions = { ...(decisionsSnapshot ?? {}) }
@@ -113,6 +115,9 @@ export function createFallbackDecisions({
       return false
     },
     async showSummary(summary) {
+      if (saveDecisions) {
+        await saveDecisions(decisionsForOpinions)
+      }
       print('______________________________________________________\n')
       print(summary)
       print('______________________________________________________\n')

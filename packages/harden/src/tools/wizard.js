@@ -27,9 +27,14 @@ export const wizardPrint = (...args) => {
  * @param {object} options
  * @param {string} [options.packageManager]
  * @param {DecisionsForOpinions} [options.decisionsSnapshot]
+ * @param {(decisions: DecisionsForOpinions) => Promise<void>} [options.saveDecisions]
  * @returns {Decisions}
  */
-export function createWizard({ packageManager, decisionsSnapshot }) {
+export function createWizard({
+  packageManager,
+  decisionsSnapshot,
+  saveDecisions,
+}) {
   const printed = new Set()
   /**
    * @param {string} text
@@ -143,6 +148,9 @@ ${[...scores.entries()]
       })
     },
     async showSummary(summary) {
+      if (saveDecisions) {
+        await saveDecisions(decisionsForOpinions)
+      }
       consola.box({
         title: 'Decisions Snapshot',
         message: JSON.stringify(decisionsForOpinions, null, 2),
