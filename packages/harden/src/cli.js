@@ -39,7 +39,7 @@ Commands:
       -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
       -d, --decisions-snapshot <file>  Path to decisions snapshot file (JSON) to pre-fill wizard
 
-  verify      Verify current config against a hardening level (exit 1 if not satisfied)
+  check       Check current config against a hardening level (exit 1 if not satisfied)
     Options:
       -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
       -l, --level <level>         Hardening level (baseline, moderate, strict) [default: moderate]
@@ -124,7 +124,7 @@ switch (command) {
       customPrint = wizardPrint
     }
     break
-  case 'verify':
+  case 'check':
     {
       decisions = createVerifier({
         level,

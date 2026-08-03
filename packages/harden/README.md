@@ -19,7 +19,7 @@ For details, see [Opinions](#opinions).
 
 - [`harden wizard`](#wizard) - interactively applies the hardening by asking questions
 - [`harden defaults`](#apply-defaults) - applies the hardening by level
-- [`harden verify`](#verify) - checks the current config against a level and reports what's missing
+- [`harden check`](#check) - checks the current config against a level and reports what's missing
 
 ### Wizard
 
@@ -102,10 +102,10 @@ harden wizard -s
 harden defaults -d ./decisions-snapshot.json
 ```
 
-### Verify
+### Check
 
 ```sh
-harden verify
+harden check
 ```
 
 Checks your project's current package manager configuration against the requested _hardening level_ without making any changes. Prints a checklist of which opinions at the selected level are already satisfied (`✔`) and which are not (`✖`), along with a summary of scores per package manager config source.
@@ -115,15 +115,15 @@ This is useful to enforce in CI to ensure a baseline of hardening is maintained.
 Exits with code `0` when everything at the selected level is satisfied, and `1` otherwise.
 
 ```sh
-harden verify --level moderate
-harden verify -p yarn -l strict
+harden check --level moderate
+harden check -p yarn -l strict
 ```
 
-#### Verify Options
+#### Check Options
 
 ```text
 Options:
-  -p, --package-manager <pm>  Package manager to verify against (npm, yarn, pnpm)
+  -p, --package-manager <pm>  Package manager to check against (npm, yarn, pnpm)
   -l, --level <level>         Hardening level: baseline, moderate, strict  [default: moderate]
 ```
 
