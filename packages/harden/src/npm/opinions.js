@@ -169,6 +169,19 @@ const definedOpinions = Object.freeze(
         return results.length === 0
       },
     },
+    {
+      id: 'n_noremote',
+      description: 'Disable installing dependencies from remote URLs.',
+      level: 'moderate',
+      changes: [
+        {
+          target: '.npmrc',
+          key: 'allow-remote',
+          value: 'none',
+          comment: 'Disable installing dependencies from remote URLs.',
+        },
+      ],
+    },
 
     {
       id: 'n_pin_allowed',

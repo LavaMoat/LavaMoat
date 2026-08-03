@@ -164,6 +164,21 @@ const definedOpinions = Object.freeze(
         },
       ],
     },
+    {
+      id: 'y_hardened',
+      description:
+        'Enable yarn hardened mode to validate lockfile content against remote registries.',
+      level: 'strict',
+      changes: [
+        {
+          target: '.yarnrc.yml',
+          key: 'enableHardenedMode',
+          value: true,
+          comment:
+            'Hardened mode to validate lockfile content against remote registries.',
+        },
+      ],
+    },
 
     {
       id: 'y_git',

@@ -46,11 +46,11 @@ harden defaults
 
 Detects the package manager in use and writes hardening config at the **moderate** level (recommended for most projects). Pass `--level/-l` to adjust:
 
-| Level      | What it covers                                                      |
-| ---------- | ------------------------------------------------------------------- |
-| `baseline` | Disables lifecycle scripts, blocks git deps, sets release age gate  |
-| `moderate` | Everything in baseline + enforces minimum package manager version   |
-| `strict`   | Everything in moderate + additional settings for the extra cautious |
+| Level      | What it covers                                                     |
+| ---------- | ------------------------------------------------------------------ |
+| `baseline` | Disables lifecycle scripts, blocks git deps, sets release age gate |
+| `moderate` | Everything in baseline + enforces minimum package manager version  |
+| `strict`   | Maximum hardening, everything the package has to offer             |
 
 ```sh
 harden defaults --level strict
@@ -134,24 +134,25 @@ Options:
 <!-- prettier-ignore-start -->
 <!-- no toc -->
 - [Package manager versions](#package-manager-versions)
-- [Which packages can be installed](#package-installation)
 - [Which packages are allowed to run an "install" or "post-install" script](#install-scripts)
 - [The environment in which `package.json` scripts run](#script-execution-environment)
-- [Cutting-edge tools to prevent certain classes of supply chain attacks](#tools)
 - [Lesser-known security-relevant settings](#other)
 <!-- prettier-ignore-end -->
 
 ### Package Manager Versions
 
-FILL IN
+`@lavamoat/harden` enforces a minimum version of the package manager in use. The reason for this is nothing to do with vulnerabilities in older versions, but it's about availability of security-related features. For example, `yarn` minimum is, among other things, one of the earliest versions that limit git dependencies; `npm` minimum is one of the earliest versions that support `--ignore-scripts`.
 
-### Package Installation
-
-FILL IN
+If you use the wizard, you can opt-in to set the minimum to current latest version.
 
 ### Install Scripts
 
-FILL IN
+Now that all package managers support a way to skip running lifecycle scripts, we use that. Yarn is, at the time of writing, not supporting a way to pin to specific versions, which we're trying to do as it's preventing your trusted packages being taken over from impacting you before you notice.
+
+Depending on your strictness choice, for yarn we can use the built-in `dependenciesMeta` feature to allow scripts for specific packages, or we can use `@lavamoat/allow-scripts` to be more precise about what's allowed. Note that `allow-scripts` requires that yarn creates a `node_modules` folder instead of using Plug'n'Play, so we live it up to you to decide on the tradeoff.
+
+> If you choose to approve detected lifecycle scripts in your dependencies, `@lavamoat/harden` will (except `yarn dependenciesMeta`) generate entries with version pinned. You should keep them pinned to the version you actually use. None of the package managers support enforcing that the versions remain pinned (at the time of writing).  
+> Future versions of `@lavamoat/harden` may help with that if we find a way to enforce it.
 
 ### Script Execution Environment
 
@@ -161,17 +162,9 @@ One of the more advanced capabilities `@lavamoat/harden` brings to the project i
 - Rearranges `$PATH` to mitigate [bin confusion][bin-confusion]
 - Adds a `scriptsConfig` property to `package.json` where files with [Node.js Permissions][permissions] options can be selected for each script individually with a fallback to `#default`. Example configurations are provided, but it's recommended you customize them to adhere to the [principle of least privilege][least-privilege].
 
-### Tools
-
-FILL IN
-
 ### Other
 
-FILL IN
-
-## Notes
-
-FILL IN (could contain info such as how package manager detection works)
+`@lavamoat/harden` attempts to cover all of the security-relevant settings for package managers, so things like age gates, git dependencies limitations, and package-manager-specific settings like `pnpm`'s `trustPolicy: no-downgrade` are all covered.
 
 ## License
 
