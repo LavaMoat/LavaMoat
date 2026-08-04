@@ -103,26 +103,21 @@ function endowmentsToolkit({
           explicitlyBanned.push(path)
           return
         }
-        // write access handled elsewhere
+        whitelistedReads.push(path)
         if (packagePolicyValue === 'write') {
-          if (!handleGlobalWrite) {
-            return
+          if (handleGlobalWrite) {
+            if (pathParts.length > 1) {
+              throw new Error(
+                `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+              )
+            }
+            allowedWriteFields.add(path)
           }
-          if (pathParts.length > 1) {
-            throw new Error(
-              `LavaMoat - write access is only allowed at the top level, saw "${path}"`
-            )
-          }
-          allowedWriteFields.add(path)
-          whitelistedReads.push(path)
-          return
-        }
-        if (packagePolicyValue !== true) {
+        } else if (packagePolicyValue !== true) {
           throw new Error(
             `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
           )
         }
-        whitelistedReads.push(path)
       }
     )
     // sort by length to optimize further steps
@@ -742,7 +737,11 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
 }
 
 /**
- * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
+ * @import {
+ *   ContextTestFn,
+ *   SomeFunction,
+ *   SomeParameters
+ * } from './internal.js'
  */
 
 /**
@@ -769,8 +768,8 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
  */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
-   * @returns {ReturnType<T>}
    * @this {U | Record<PropertyKey, any>}
+   * @returns {ReturnType<T>}
    */
   const newValue = function () {
     'use strict'

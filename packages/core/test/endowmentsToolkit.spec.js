@@ -371,6 +371,44 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
   // ava seems to be forcing sloppy mode
   t.is(getter.call(), globalThis)
 })
+test.only('getEndowmentsForConfig - ensure wrapped setters work', (t) => {
+  'use strict'
+  // compartment.globalThis.document would error because 'this' value is not window
+  const { getEndowmentsForConfig, copyWrappedGlobals } = prepareTest({
+    knownWritable: new Set(['onerror']),
+  })
+  const originalGlobal = {}
+  Object.defineProperty(originalGlobal, 'onerror', {
+    set(value) {
+      this._onerror = value
+    },
+    get() {
+      return this._onerror
+    },
+  })
+
+  // verify that the setter works on the original global
+  originalGlobal.onerror = 'initialErrorHandler'
+  t.is(originalGlobal._onerror, 'initialErrorHandler')
+
+  const sourceGlobal = copyWrappedGlobals(originalGlobal, {})
+
+  // verify that the setter works on the wrapped global
+  sourceGlobal.onerror = 'wrappedErrorHandler'
+  t.is(originalGlobal._onerror, 'wrappedErrorHandler')
+
+  const config = {
+    globals: {
+      onerror: 'write',
+    },
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+
+  resultGlobal.onerror = 'myErrorHandler'
+  // proof that the setter was called on the original global
+  t.is(originalGlobal._onerror, 'myErrorHandler')
+  t.is(resultGlobal._onerror, undefined)
+})
 
 test('getEndowmentsForConfig - specify unwrap to', (t) => {
   'use strict'
