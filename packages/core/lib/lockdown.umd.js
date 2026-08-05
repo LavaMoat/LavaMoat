@@ -218,6 +218,8 @@
     {
     },
     {
+      _amplifyArrayBufferForTests: cell("_amplifyArrayBufferForTests"),
+      immutableArrayBufferLibProperties: cell("immutableArrayBufferLibProperties"),
       isBufferImmutable: cell("isBufferImmutable"),
       sliceBufferToImmutable: cell("sliceBufferToImmutable"),
       optTransferBufferToImmutable: cell("optTransferBufferToImmutable"),
@@ -227,9 +229,9 @@
     {
     },
     {
+      enJoin: cell("enJoin"),
       an: cell("an"),
       bestEffortStringify: cell("bestEffortStringify"),
-      enJoin: cell("enJoin"),
     },
     {
     },
@@ -369,7 +371,9 @@
     },
     {
       consoleLevelMethods: cell("consoleLevelMethods"),
+      consoleSpecialMethods: cell("consoleSpecialMethods"),
       consoleOtherMethods: cell("consoleOtherMethods"),
+      sanitizeFormatData: cell("sanitizeFormatData"),
       makeLoggingConsoleKit: cell("makeLoggingConsoleKit"),
       pumpLogToConsole: cell("pumpLogToConsole"),
       makeCausalConsole: cell("makeCausalConsole"),
@@ -697,6 +701,8 @@ function observeImports(map, importName, importIndex) {
     liveVar: {
     },
     onceVar: {
+      amplifyArrayBuffer: cells[4]._amplifyArrayBufferForTests.set,
+      immutableArrayBufferLibProperties: cells[4].immutableArrayBufferLibProperties.set,
       isBufferImmutable: cells[4].isBufferImmutable.set,
       sliceBufferToImmutable: cells[4].sliceBufferToImmutable.set,
       optTransferBufferToImmutable: cells[4].optTransferBufferToImmutable.set,
@@ -706,7 +712,7 @@ function observeImports(map, importName, importIndex) {
   functors[5]({
     imports(entries) {
       const map = new Map(entries);
-      observeImports(map, "./immutable-arraybuffer-pony.js", 4);
+      observeImports(map, "./lib.js", 4);
     },
     liveVar: {
     },
@@ -717,7 +723,7 @@ function observeImports(map, importName, importIndex) {
   functors[6]({
     imports(entries) {
       const map = new Map(entries);
-      observeImports(map, "./src/immutable-arraybuffer-shim.js", 5);
+      observeImports(map, "./src/shim.js", 5);
     },
     liveVar: {
     },
@@ -733,9 +739,9 @@ function observeImports(map, importName, importIndex) {
     liveVar: {
     },
     onceVar: {
+      enJoin: cells[7].enJoin.set,
       an: cells[7].an.set,
       bestEffortStringify: cells[7].bestEffortStringify.set,
-      enJoin: cells[7].enJoin.set,
     },
     importMeta: {},
   });
@@ -1212,7 +1218,9 @@ function observeImports(map, importName, importIndex) {
     },
     onceVar: {
       consoleLevelMethods: cells[42].consoleLevelMethods.set,
+      consoleSpecialMethods: cells[42].consoleSpecialMethods.set,
       consoleOtherMethods: cells[42].consoleOtherMethods.set,
+      sanitizeFormatData: cells[42].sanitizeFormatData.set,
       makeLoggingConsoleKit: cells[42].makeLoggingConsoleKit.set,
       pumpLogToConsole: cells[42].pumpLogToConsole.set,
       makeCausalConsole: cells[42].makeCausalConsole.set,
@@ -1592,7 +1600,6 @@ function observeImports(map, importName, importIndex) {
  * @module
  */
 
-/* global globalThis */
 /* eslint-disable no-restricted-globals */
 
 // We cannot use globalThis as the local name since it would capture the
@@ -2136,8 +2143,7 @@ if (getThis()) {
 })()
 ,
 // === 2. env-options ./src/env-options.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([]);/* global globalThis */
-// @ts-check
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([]);// @ts-check
 
 // `@endo/env-options` needs to be imported quite early, and so should
 // avoid importing from ses or anything that depends on ses.
@@ -2222,7 +2228,7 @@ const Fail = (literals, ...args) => {
           arrayPush(capturedEnvironmentOptionNames, optionName);
         }
         const optionValue = globalEnv[optionName];
-        // eslint-disable-next-line @endo/no-polymorphic-call
+
         typeof optionValue === 'string' ||
           Fail`Environment option named ${q(
             optionName,
@@ -2291,10 +2297,8 @@ freeze(makeEnvironmentCaptor);
 ({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([["./src/env-options.js", []]]);
 })()
 ,
-// === 4. immutable-arraybuffer ./src/immutable-arraybuffer-pony.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([]);/* global globalThis */
-
-const {
+// === 4. immutable-arraybuffer ./src/lib.js ===
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([]);const {
   ArrayBuffer,
   Object,
   Reflect,
@@ -2307,18 +2311,46 @@ const {
   // eslint-disable-next-line no-restricted-globals
 } = globalThis;
 
-const { freeze, defineProperty, getPrototypeOf, getOwnPropertyDescriptor } =
+const { freeze, defineProperty, getOwnPropertyDescriptor, getPrototypeOf } =
   Object;
 const { apply, ownKeys } = Reflect;
-const { toStringTag } = Symbol;
+
+// Capture the WeakMap prototype methods up front so we can use them with
+// `apply` below, without exposing the `buffers` WeakMap to post-hoc
+// prototype lookups or polymorphic dispatch.
+const { get: weakmapGet, set: weakmapSet, has: weakmapHas } = WeakMap.prototype;
 
 const { prototype: arrayBufferPrototype } = ArrayBuffer;
-const { slice, transfer: optTransfer } = arrayBufferPrototype;
+const {
+  slice,
+  transfer: optTransfer,
+  resize: optResize,
+  transferToFixedLength: optTransferToFixedLength,
+} = arrayBufferPrototype;
 // @ts-expect-error TS doesn't know it'll be there
 const { get: arrayBufferByteLength } = getOwnPropertyDescriptor(
   arrayBufferPrototype,
   'byteLength',
 );
+
+// Capture the resizable-ArrayBuffer proposal's accessors when present. On
+// platforms without that proposal (Node <= 18, Hermes), these are absent;
+// the fallthrough branches in the lib property record short-circuit on
+// brand membership and never reach the captured accessor in that case
+// (an emulated immutable always has `detached === false`, `resizable ===
+// false`, and `maxByteLength === byteLength`).
+const optArrayBufferDetached = getOwnPropertyDescriptor(
+  arrayBufferPrototype,
+  'detached',
+)?.get;
+const optArrayBufferResizable = getOwnPropertyDescriptor(
+  arrayBufferPrototype,
+  'resizable',
+)?.get;
+const optArrayBufferMaxByteLength = getOwnPropertyDescriptor(
+  arrayBufferPrototype,
+  'maxByteLength',
+)?.get;
 
 const typedArrayPrototype = getPrototypeOf(Uint8Array.prototype);
 const { set: uint8ArraySet } = typedArrayPrototype;
@@ -2348,10 +2380,8 @@ const arrayBufferSlice = (realBuffer, start = undefined, end = undefined) =>
  * On other platforms, we can still emulate
  * `ArrayBuffer.prototoype.sliceToImmutable`, but not
  * `ArrayBuffer.prototype.transferToImmutable`.
- * Currently, these known-deficient platforms are
- * - Hermes
- * - Node.js <= 16
- * - Apparently some versions of JavaScriptCore that are still of concern.
+ * See the package README section "Platform support for `transferToImmutable`"
+ * for the per-engine version thresholds and feature-testing guidance.
  *
  * @param {ArrayBuffer} arrayBuffer
  * @returns {ArrayBuffer}
@@ -2381,80 +2411,198 @@ if (optTransfer) {
  * emulate the `this.#buffer` private field, including its use as a brand check.
  * Maps from all and only emulated Immutable ArrayBuffers to real ArrayBuffers.
  *
- * @type {Pick<WeakMap<ArrayBuffer, ArrayBuffer>, 'get' | 'has' | 'set'>}
+ * @type {WeakMap<ArrayBuffer, ArrayBuffer>}
  */
 const buffers = new WeakMap();
-// Avoid post-hoc prototype lookups.
-for (const methodName of ['get', 'has', 'set']) {
-  defineProperty(buffers, methodName, { value: buffers[methodName] });
-}
-const getBuffer = immuAB => {
-  // Safe because this WeakMap owns its get method.
-  // eslint-disable-next-line @endo/no-polymorphic-call
-  const result = buffers.get(immuAB);
-  if (result) {
+const isEmulatedImmutable = buf => apply(weakmapHas, buffers, [buf]);
+
+/**
+ * Amplifier-with-this-fallthrough: returns the underlying genuine
+ * `ArrayBuffer` when `arrayBuffer` is an emulated immutable buffer (in the
+ * brand WeakMap), and returns `arrayBuffer` itself otherwise. This lets the
+ * methods on the shared `ArrayBuffer.prototype` (after the shim install)
+ * work as drop-in replacements for the genuine methods when invoked on a
+ * genuine `ArrayBuffer`, while transparently reaching the underlying buffer
+ * for the emulated-immutable case. The name aligns with the analogous
+ * `amplifyTypedArray` on the freezable-TypedArray experiment branch.
+ *
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {ArrayBuffer}
+ */
+const amplifyArrayBuffer = arrayBuffer => {
+  const result = apply(weakmapGet, buffers, [arrayBuffer]);
+  if (result !== undefined) {
     return result;
   }
-  throw TypeError('Not an emulated Immutable ArrayBuffer');
+  return arrayBuffer;
 };
 
-// Omits `constructor` so `Array.prototype.constructor` is inherited.
-const ImmutableArrayBufferInternalPrototype = {
-  __proto__: arrayBufferPrototype,
+/**
+ * A plain record of the properties the shim copies onto
+ * `ArrayBuffer.prototype` to install immutable-ArrayBuffer support. This is
+ * not a prototype of any object: emulated immutable buffers directly inherit
+ * from `ArrayBuffer.prototype`, and the methods here become the ones the
+ * (now shared) prototype dispatches to. Each method either calls
+ * `amplifyArrayBuffer(this)` to reach the underlying buffer (read accessors,
+ * `slice`, `sliceToImmutable`) or discriminates on brand WeakMap membership
+ * and delegates to the captured genuine method on fallthrough (the mutators
+ * `resize`, `transfer`, `transferToFixedLength`, `transferToImmutable`).
+ *
+ * Omits `constructor` so the original `ArrayBuffer.prototype.constructor` is unchanged.
+ */$h͏_once.amplifyArrayBuffer(amplifyArrayBuffer);
+       const immutableArrayBufferLibProperties = {
+  __proto__: null,
+  /**
+   * @this {ArrayBuffer}
+   */
   get byteLength() {
-    return apply(arrayBufferByteLength, getBuffer(this), []);
-  },
-  get detached() {
-    getBuffer(this); // shim brand check
-    return false;
-  },
-  get maxByteLength() {
-    // Not underlying maxByteLength, which is irrelevant
-    return apply(arrayBufferByteLength, getBuffer(this), []);
-  },
-  get resizable() {
-    getBuffer(this); // shim brand check
-    return false;
-  },
-  get immutable() {
-    getBuffer(this); // shim brand check
-    return true;
-  },
-  slice(start = undefined, end = undefined) {
-    return arrayBufferSlice(getBuffer(this), start, end);
-  },
-  sliceToImmutable(start = undefined, end = undefined) {
-    // eslint-disable-next-line no-use-before-define
-    return sliceBufferToImmutable(getBuffer(this), start, end);
-  },
-  resize(_newByteLength = undefined) {
-    getBuffer(this); // shim brand check
-    throw TypeError('Cannot resize an immutable ArrayBuffer');
-  },
-  transfer(_newLength = undefined) {
-    getBuffer(this); // shim brand check
-    throw TypeError('Cannot detach an immutable ArrayBuffer');
-  },
-  transferToFixedLength(_newLength = undefined) {
-    getBuffer(this); // shim brand check
-    throw TypeError('Cannot detach an immutable ArrayBuffer');
-  },
-  transferToImmutable(_newLength = undefined) {
-    getBuffer(this); // shim brand check
-    throw TypeError('Cannot detach an immutable ArrayBuffer');
+    return apply(arrayBufferByteLength, amplifyArrayBuffer(this), []);
   },
   /**
-   * See https://github.com/endojs/endo/tree/master/packages/immutable-arraybuffer#purposeful-violation
+   * @this {ArrayBuffer}
    */
-  [toStringTag]: 'ImmutableArrayBuffer',
+  get detached() {
+    if (isEmulatedImmutable(this)) {
+      return false;
+    }
+    // Genuine `ArrayBuffer.prototype.detached` is a stage-finished accessor
+    // on platforms with the resizable-ArrayBuffer proposal. On older
+    // platforms (Node <= 18, Hermes) it does not exist; the conservative
+    // answer for a non-detached genuine buffer in that case is false.
+    if (optArrayBufferDetached === undefined) {
+      return false;
+    }
+    return apply(optArrayBufferDetached, this, []);
+  },
+  /**
+   * @this {ArrayBuffer}
+   */
+  get maxByteLength() {
+    if (isEmulatedImmutable(this)) {
+      // For an emulated immutable buffer, maxByteLength is byteLength: it
+      // cannot grow.
+      return apply(arrayBufferByteLength, amplifyArrayBuffer(this), []);
+    }
+    if (optArrayBufferMaxByteLength === undefined) {
+      return apply(arrayBufferByteLength, this, []);
+    }
+    return apply(optArrayBufferMaxByteLength, this, []);
+  },
+  /**
+   * @this {ArrayBuffer}
+   */
+  get resizable() {
+    if (isEmulatedImmutable(this)) {
+      return false;
+    }
+    if (optArrayBufferResizable === undefined) {
+      return false;
+    }
+    return apply(optArrayBufferResizable, this, []);
+  },
+  /**
+   * @this {ArrayBuffer}
+   */
+  get immutable() {
+    return isEmulatedImmutable(this);
+  },
+  /**
+   * @this {ArrayBuffer}
+   * @param {number} [start]
+   * @param {number} [end]
+   */
+  slice(start = undefined, end = undefined) {
+    return arrayBufferSlice(amplifyArrayBuffer(this), start, end);
+  },
+  /**
+   * @this {ArrayBuffer}
+   * @param {number} [start]
+   * @param {number} [end]
+   */
+  sliceToImmutable(start = undefined, end = undefined) {
+    // eslint-disable-next-line no-use-before-define
+    return sliceBufferToImmutable(amplifyArrayBuffer(this), start, end);
+  },
+  /**
+   * @this {ArrayBuffer}
+   * @param {number} [newByteLength]
+   */
+  resize(newByteLength = undefined) {
+    if (isEmulatedImmutable(this)) {
+      throw TypeError('Cannot resize an immutable ArrayBuffer');
+    }
+    if (optResize === undefined) {
+      throw TypeError(
+        'Cannot resize ArrayBuffer: underlying platform lacks ArrayBuffer.prototype.resize',
+      );
+    }
+    return apply(optResize, this, [newByteLength]);
+  },
+  /**
+   * @this {ArrayBuffer}
+   * @param {number} [newLength]
+   */
+  transfer(newLength = undefined) {
+    if (isEmulatedImmutable(this)) {
+      throw TypeError('Cannot detach an immutable ArrayBuffer');
+    }
+    if (optTransfer === undefined) {
+      throw TypeError(
+        'Cannot transfer ArrayBuffer: underlying platform lacks ArrayBuffer.prototype.transfer',
+      );
+    }
+    return apply(optTransfer, this, [newLength]);
+  },
+  /**
+   * @this {ArrayBuffer}
+   * @param {number} [newLength]
+   */
+  transferToFixedLength(newLength = undefined) {
+    if (isEmulatedImmutable(this)) {
+      throw TypeError('Cannot detach an immutable ArrayBuffer');
+    }
+    if (optTransferToFixedLength === undefined) {
+      throw TypeError(
+        'Cannot transferToFixedLength ArrayBuffer: underlying platform lacks ArrayBuffer.prototype.transferToFixedLength',
+      );
+    }
+    return apply(optTransferToFixedLength, this, [newLength]);
+  },
+  /**
+   * @this {ArrayBuffer}
+   * @param {number} [newLength]
+   */
+  transferToImmutable(newLength = undefined) {
+    if (isEmulatedImmutable(this)) {
+      throw TypeError('Cannot detach an immutable ArrayBuffer');
+    }
+    // eslint-disable-next-line no-use-before-define
+    if (optTransferBufferToImmutable === undefined) {
+      throw TypeError(
+        'Cannot transfer to immutable: underlying platform lacks transfer or structuredClone',
+      );
+    }
+    // eslint-disable-next-line no-use-before-define
+    return optTransferBufferToImmutable(this, newLength);
+  },
 };
 
-// Better fidelity emulation of a class prototype
-for (const key of ownKeys(ImmutableArrayBufferInternalPrototype)) {
-  defineProperty(ImmutableArrayBufferInternalPrototype, key, {
+// Better fidelity emulation of a class prototype: each property is
+// non-enumerable, matching the shape `ArrayBuffer.prototype` itself uses.
+$h͏_once.immutableArrayBufferLibProperties(immutableArrayBufferLibProperties);for(const key of ownKeys(immutableArrayBufferLibProperties)){
+  defineProperty(immutableArrayBufferLibProperties, key, {
     enumerable: false,
   });
 }
+freeze(immutableArrayBufferLibProperties);
+
+// Internal-test export. The helper itself is load-bearing for every
+// method on `immutableArrayBufferLibProperties`, but the package's
+// public export surface intentionally keeps it private (callers either
+// touch the helper indirectly through `ArrayBuffer.prototype` methods
+// or rely on `isBufferImmutable`). The export exists so the
+// adversarial-tests skill can exercise the helper in isolation.
+
 
 /**
  * Emulates what would have been the encapsulated `ImmutableArrayBufferInternal`
@@ -2462,18 +2610,39 @@ for (const key of ownKeys(ImmutableArrayBufferInternalPrototype)) {
  * result encapsulates. Security demands that this result has exclusive access
  * to the `realBuffer` it is given, which its callers must ensure.
  *
+ * The emulated immutable buffer directly inherits from `ArrayBuffer.prototype`.
+ * The brand WeakMap is the sole discriminator: `ArrayBuffer.prototype`'s
+ * methods (after the shim installs the lib properties) check brand membership
+ * to decide whether to treat the receiver as immutable.
+ *
  * @param {ArrayBuffer} realBuffer
  * @returns {ArrayBuffer}
  */
 const makeImmutableArrayBufferInternal = realBuffer => {
   const result = /** @type {ArrayBuffer} */ (
     /** @type {unknown} */ ({
-      __proto__: ImmutableArrayBufferInternalPrototype,
+      __proto__: arrayBufferPrototype,
     })
   );
-  // Safe because this WeakMap owns its set method.
-  // eslint-disable-next-line @endo/no-polymorphic-call
-  buffers.set(result, realBuffer);
+  // Install `[Symbol.toStringTag] = 'ImmutableArrayBuffer'` as an own
+  // property of each emulated immutable buffer (not on the shared prototype,
+  // which must retain the genuine `'ArrayBuffer'` tag so genuine instances
+  // continue to read as `[object ArrayBuffer]`). This is the minimum
+  // departure from DESIGN.md Move 2 paragraph 7 needed to keep
+  // `concordance` (and any downstream consumer that sniffs the toStringTag)
+  // from misrouting an emulated immutable through `Buffer.from`, which
+  // throws because the emulated immutable is not a genuine exotic. With the
+  // own-property slot in place, `Object.prototype.toString.call(immuAB)`
+  // returns `'[object ImmutableArrayBuffer]'` and concordance routes the
+  // value through its unrenderable-value path. Genuine ArrayBuffers
+  // continue to inherit `'ArrayBuffer'` from the prototype.
+  defineProperty(result, Symbol.toStringTag, {
+    value: 'ImmutableArrayBuffer',
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  });
+  apply(weakmapSet, buffers, [result, realBuffer]);
   return result;
 };
 // Since `makeImmutableArrayBufferInternal` MUST not escape,
@@ -2481,14 +2650,27 @@ const makeImmutableArrayBufferInternal = realBuffer => {
 freeze(makeImmutableArrayBufferInternal);
 
 /**
+ * Internal brand check. Returns `true` when `buffer` is an emulated
+ * immutable buffer (in the lib's brand WeakMap), `false` otherwise. After
+ * the premise-2 fold-in the package no longer exports this from a public
+ * entry point; callers use `buffer.immutable` (the accessor installed by
+ * the shim on `ArrayBuffer.prototype`) or `Object.prototype.toString
+ * .call(buffer) === '[object ImmutableArrayBuffer]'`. The internal export
+ * lets the in-package tests (`test/lib-*.test.js`) reach the helper
+ * directly without round-tripping through the prototype.
+ *
  * @param {ArrayBuffer} buffer
  * @returns {boolean}
  */
-// eslint-disable-next-line @endo/no-polymorphic-call
-       const isBufferImmutable = buffer => buffers.has(buffer);
+       const isBufferImmutable = buffer => isEmulatedImmutable(buffer);
 
 /**
- * Creates an immutable slice of the given buffer.
+ * Creates an immutable slice of the given buffer. Internal helper used by
+ * `immutableArrayBufferLibProperties.sliceToImmutable` and by the shim's
+ * own install. After the premise-2 fold-in the package no longer exports
+ * this from a public entry point; the internal export lets the in-package
+ * tests reach it directly.
+ *
  * @param {ArrayBuffer} buffer The original buffer.
  * @param {number} [start] The start index.
  * @param {number} [end] The end index.
@@ -2499,9 +2681,7 @@ freeze(makeImmutableArrayBufferInternal);
   start = undefined,
   end = undefined,
 ) => {
-  // Safe because this WeakMap owns its get method.
-  // eslint-disable-next-line @endo/no-polymorphic-call
-  let realBuffer = buffers.get(buffer);
+  let realBuffer = apply(weakmapGet, buffers, [buffer]);
   if (realBuffer === undefined) {
     realBuffer = buffer;
   }
@@ -2513,7 +2693,9 @@ freeze(makeImmutableArrayBufferInternal);
 let transferBufferToImmutable;
 if (optArrayBufferTransfer) {
   /**
-   * Transfer the contents to a new Immutable ArrayBuffer
+   * Transfer the contents to a new Immutable ArrayBuffer. Internal helper
+   * used by `immutableArrayBufferLibProperties.transferToImmutable` and by
+   * the shim's own install. Not part of the package's public export surface.
    *
    * @param {ArrayBuffer} buffer The original buffer.
    * @param {number} [newLength] The start index.
@@ -2527,7 +2709,7 @@ if (optArrayBufferTransfer) {
     } else {
       buffer = optArrayBufferTransfer(buffer);
       const oldLength = buffer.byteLength;
-      // eslint-disable-next-line @endo/restrict-comparison-operands
+
       if (newLength <= oldLength) {
         buffer = arrayBufferSlice(buffer, 0, newLength);
       } else {
@@ -2547,108 +2729,45 @@ if (optArrayBufferTransfer) {
        const optTransferBufferToImmutable = transferBufferToImmutable;$h͏_once.optTransferBufferToImmutable(optTransferBufferToImmutable);
 })()
 ,
-// === 5. immutable-arraybuffer ./src/immutable-arraybuffer-shim.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let isBufferImmutable,sliceBufferToImmutable,optXferBuf2Immu;$h͏_imports([["./immutable-arraybuffer-pony.js", [["isBufferImmutable",[$h͏_a => (isBufferImmutable = $h͏_a)]],["sliceBufferToImmutable",[$h͏_a => (sliceBufferToImmutable = $h͏_a)]],["optTransferBufferToImmutable",[$h͏_a => (optXferBuf2Immu = $h͏_a)]]]]]);
+// === 5. immutable-arraybuffer ./src/shim.js ===
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let immutableArrayBufferLibProperties;$h͏_imports([["./lib.js", [["immutableArrayBufferLibProperties",[$h͏_a => (immutableArrayBufferLibProperties = $h͏_a)]]]]]);
 
+// eslint-disable-next-line no-restricted-globals
+const { ArrayBuffer, Object } = globalThis;
 
-
-
-
-
-
-const {
-  ArrayBuffer,
-  JSON,
-  Object,
-  Reflect
-  // eslint-disable-next-line no-restricted-globals
-} = globalThis;
-
-// Even though the imported one is not exported by the pony as a live binding,
-// TS doesn't know that,
-// so it cannot do its normal flow-based inference. By making and using a local
-// copy, no problem.
-const optTransferBufferToImmutable = optXferBuf2Immu;
-
-const { getOwnPropertyDescriptors, defineProperties, defineProperty } = Object;
-const { ownKeys } = Reflect;
+const { getOwnPropertyDescriptors, defineProperties } = Object;
 const { prototype: arrayBufferPrototype } = ArrayBuffer;
-const { stringify } = JSON;
 
-const arrayBufferMethods = {
-  /**
-   * Creates an immutable slice of the given buffer.
-   *
-   * @this {ArrayBuffer} buffer The original buffer.
-   * @param {number} [start] The start index.
-   * @param {number} [end] The end index.
-   * @returns {ArrayBuffer} The sliced immutable ArrayBuffer.
-   */
-  sliceToImmutable(start = undefined, end = undefined) {
-    return sliceBufferToImmutable(this, start, end);
-  },
-
-  /**
-   * @this {ArrayBuffer}
-   */
-  get immutable() {
-    return isBufferImmutable(this);
-  },
-
-  ...(optTransferBufferToImmutable
-    ? {
-        /**
-         * Transfer the contents to a new immutable ArrayBuffer
-         *
-         * @this {ArrayBuffer} buffer The original buffer.
-         * @param {number} [newLength] The start index.
-         * @returns {ArrayBuffer} The new immutable ArrayBuffer.
-         */
-        transferToImmutable(newLength = undefined) {
-          return optTransferBufferToImmutable(this, newLength);
-        },
-      }
-    : {}),
-};
-
-// Better fidelity emulation of a class prototype
-for (const key of ownKeys(arrayBufferMethods)) {
-  defineProperty(arrayBufferMethods, key, {
-    enumerable: false,
-  });
-}
-
-// Modern shim practice frowns on conditional installation, at least for
-// proposals prior to stage 3. This is so changes to the proposal since
-// an old shim was distributed don't need to worry about the proposal
-// breaking old code depending on the old shim. Thus, if we detect that
-// we're about to overwrite a prior installation, we simply issue this
-// warning and continue.
+// Stage-3 install policy: detect-then-skip.
 //
-// TODO, if the primordials are frozen after the prior implementation, such as
-// by `lockdown`, then this precludes overwriting as expected. However, for
-// this case, the following warning text will be confusing.
+// Both the Immutable ArrayBuffer proposal and the parallel Freezable
+// TypedArray proposal are part of the same TC39 proposal, which has
+// reached stage 3. At stage 3 or above our policy is detect-then-skip:
+// if a prior installation (a native implementation, or a previously
+// loaded shim) has already provided `sliceToImmutable` on
+// `ArrayBuffer.prototype`, we defer to that installation rather than
+// overwriting it. The native implementation always wins.
 //
-// Allowing polymorphic calls because these occur during initialization.
-// eslint-disable-next-line @endo/no-polymorphic-call
-const overwrites = ownKeys(arrayBufferMethods).filter(
-  key => key in arrayBufferPrototype,
-);
-if (overwrites.length > 0) {
-  // eslint-disable-next-line @endo/no-polymorphic-call
-  console.warn(
-    `About to overwrite ArrayBuffer.prototype properties ${stringify(overwrites)}`,
+// `sliceToImmutable` is the load-bearing presence check: the proposal
+// adds `sliceToImmutable`, `transferToImmutable`, and the `immutable`
+// accessor as a unit, and any installer (native or shim) that provides
+// one provides all three. Checking only one keeps the detect-then-skip
+// branch deterministic.
+//
+// For proposals prior to stage 3 a warn-and-overwrite policy would be
+// appropriate so the shim stays authoritative across partial or
+// divergent platform implementations. The Immutable ArrayBuffer proposal
+// is past that threshold.
+if (!('sliceToImmutable' in arrayBufferPrototype)) {
+  defineProperties(
+    arrayBufferPrototype,
+    getOwnPropertyDescriptors(immutableArrayBufferLibProperties),
   );
 }
-
-defineProperties(
-  arrayBufferPrototype,
-  getOwnPropertyDescriptors(arrayBufferMethods),
-);
 })()
 ,
 // === 6. immutable-arraybuffer ./shim.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([["./src/immutable-arraybuffer-shim.js", []]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([["./src/shim.js", []]]);
 })()
 ,
 // === 7. ses ./src/error/stringify-utils.js ===
@@ -2705,7 +2824,7 @@ defineProperties(
  * @param {string} str The noun to prepend
  * @returns {string} The noun prepended with a/an
  */$h͏_once.enJoin(enJoin);
-const an = str => {
+       const an = str => {
   str = `${str}`;
   if (str.length >= 1 && stringIncludes('aeiouAEIOU', str[0])) {
     return `an ${str}`;
@@ -2713,7 +2832,6 @@ const an = str => {
   return `a ${str}`;
 };$h͏_once.an(an);
 freeze(an);
-
 
 /**
  * Like `JSON.stringify` but does not blow up if given a cycle or a bigint.
@@ -2742,7 +2860,7 @@ freeze(an);
  * @param {(string|number)=} spaces
  * @returns {string}
  */
-const bestEffortStringify = (payload, spaces = undefined) => {
+       const bestEffortStringify = (payload, spaces = undefined) => {
   const seenSet = new Set();
   const replacer = (_, val) => {
     switch (typeof val) {
@@ -3013,21 +3131,17 @@ freeze(bestEffortStringify);
 ,
 // === 10. cache-map ./src/cachemap.js ===
 ({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';$h͏_imports([]);// @ts-check
-/* global globalThis */
-/* eslint-disable @endo/no-polymorphic-call */
 
-// eslint-disable-next-line no-restricted-globals
 const { Error, TypeError, WeakMap } = globalThis;
-// eslint-disable-next-line no-restricted-globals
+
 const { parse, stringify } = JSON;
-// eslint-disable-next-line no-restricted-globals
+
 const { isSafeInteger } = Number;
-// eslint-disable-next-line no-restricted-globals
+
 const { freeze } = Object;
-// eslint-disable-next-line no-restricted-globals
+
 const { toStringTag: toStringTagSymbol } = Symbol;
 
-// eslint-disable-next-line no-restricted-globals
 const UNKNOWN_KEY = Symbol('UNKNOWN_KEY');
 
 /**
@@ -3206,7 +3320,7 @@ const zeroMetrics = freeze({
       // @ts-expect-error
       MaybeCtor();
       return /** @type {any} */ (MaybeCtor);
-    } catch (err) {
+    } catch (_err) {
       // @ts-expect-error
       const constructNewMap = () => new MaybeCtor();
       return constructNewMap;
@@ -3466,7 +3580,17 @@ freeze(makeNoteLogArgsArrayKit);
 
 
 /**
- * @import {BaseAssert, Assert, AssertionFunctions, AssertionUtilities, DeprecatedAssertionUtilities, Stringable, DetailsToken, MakeAssert} from '../../types.js';
+ * @import {BaseAssert,
+ *   Assert,
+ *   AssertionFunctions,
+ *   AssertionUtilities,
+ *   DeprecatedAssertionUtilities,
+ *   Stringable,
+ *   DetailsToken,
+ *   MakeAssert,
+ *   Details,
+ *   GenericErrorConstructor,
+ *   AssertMakeErrorOptions} from '../../types.js';
  * @import {LogArgs, NoteCallback, LoggedErrorHandler} from './internal-types.js';
  */
 
@@ -3703,7 +3827,7 @@ const tagError = (err, optErrorName = err.name) => {
  *     such as `stack` on v8 (Chrome, Brave, Edge?)
  *   - `sanitizeError` will freeze the error, preventing any correct engine from
  *     adding or
- *     altering any of the error's own properties `sanitizeError` is done.
+ *     altering any of the error's own properties once `sanitizeError` is done.
  *
  * However, `sanitizeError` will not, for example, `harden`
  * (i.e., deeply freeze)
@@ -3723,10 +3847,16 @@ const tagError = (err, optErrorName = err.name) => {
     errors: _errorsDesc = undefined,
     cause: _causeDesc = undefined,
     stack: _stackDesc = undefined,
+    code: codeDesc = undefined,
     ...restDescs
   } = descs;
 
   const restNames = ownKeys(restDescs);
+
+  // the spec allows any value, but we drop 'code' if it's not a string
+  if (codeDesc?.value !== undefined && typeof codeDesc.value !== 'string') {
+    arrayPush(restNames, 'code');
+  }
   if (restNames.length >= 1) {
     for (const name of restNames) {
       delete error[name];
@@ -3751,34 +3881,51 @@ const tagError = (err, optErrorName = err.name) => {
  * @type {AssertionUtilities['makeError']}
  */$h͏_once.sanitizeError(sanitizeError);
 const makeError = (
-  optDetails = redactedDetails`Assert failed`,
-  errConstructor = globalThis.Error,
+  optDetails,
+  errConstructor,
   {
     errorName = undefined,
     cause = undefined,
     errors = undefined,
     sanitize = true,
+    code = undefined,
   } = {},
 ) => {
+  // The first two parameters above cannot be inferred unless this is rewritten
+  // as a function declaration using an @overload tag. This is a workaround so
+  // that we at least have type-safety within the function body.
+  //
+  // Note that due to the overload of AssertionUtilities['makeError'], strict
+  // Note that due to the overload of AssertionUtilities['makeError'], Typescript's so-called "strict
+  // mode" will complain if default parameters are provided in the method
+  // signature. The below workaround (optDetails -> details; errConstructor ->
+  // errCtor) is functionally equivalent but allows us to use type assertions to
+  // workaround the issue with TypeScript's so-called "strict mode".
+  let details = /** @type {Details} */ (
+    optDetails ?? redactedDetails`Assert failed`
+  );
+
+  // Internally, this is a GenericErrorConstructor, but externally it can be
+  // some T which extends GenericErrorConstructor.
+  const errCtor = /** @type {GenericErrorConstructor} */ (
+    errConstructor ?? globalThis.Error
+  );
   // Promote string-valued `optDetails` into a minimal DetailsParts
   // consisting of that string as the sole literal part with no substitutions.
-  if (typeof optDetails === 'string') {
-    optDetails = redactedDetails([optDetails]);
+  if (typeof details === 'string') {
+    details = redactedDetails([details]);
   }
-  const hiddenDetails = weakmapGet(hiddenDetailsMap, optDetails);
+  const hiddenDetails = weakmapGet(hiddenDetailsMap, details);
   if (hiddenDetails === undefined) {
-    throw TypeError(`unrecognized details ${quote(optDetails)}`);
+    throw TypeError(`unrecognized details ${quote(details)}`);
   }
   const messageString = getMessageString(hiddenDetails);
   const opts = cause && { cause };
   let error;
-  if (
-    typeof AggregateError !== 'undefined' &&
-    errConstructor === AggregateError
-  ) {
+  if (typeof AggregateError !== 'undefined' && errCtor === AggregateError) {
     error = AggregateError(errors || [], messageString, opts);
   } else {
-    const ErrorCtor = /** @type {ErrorConstructor} */ (errConstructor);
+    const ErrorCtor = /** @type {ErrorConstructor} */ (errCtor);
     error = ErrorCtor(messageString, opts);
     // Since we need to tolerate `errors` on an AggregateError, we may as well
     // tolerate it on all errors.
@@ -3791,6 +3938,14 @@ const makeError = (
       });
     }
   }
+  if (code !== undefined) {
+    defineProperty(error, 'code', {
+      value: code,
+      writable: true,
+      enumerable: false,
+      configurable: true,
+    });
+  }
   weakmapSet(hiddenMessageLogArgs, error, getLogArgs(hiddenDetails));
   if (errorName !== undefined) {
     tagError(error, errorName);
@@ -3798,7 +3953,11 @@ const makeError = (
   if (sanitize) {
     sanitizeError(error);
   }
-  // The next line is a particularly fruitful place to put a breakpoint.
+  // Externally, the return type below is InstanceType<T> where T extends
+  // GenericErrorConstructor. Internally, it's
+  // InstanceType<GenericErrorConstructor> for simplicity of implementation.
+
+  //  The next line is a particularly fruitful place to put a breakpoint.
   return error;
 };$h͏_once.makeError(makeError);
 freeze(makeError);
@@ -4373,7 +4532,7 @@ const freezeTypedArray = array => {
 /** @import {GenericErrorConstructor} from '../types.js' */
 
 /**
- * Exports {@code permits}, a recursively defined
+ * Exports `permits`, a recursively defined
  * JSON record enumerating all intrinsics and their properties
  * according to ECMA specs.
  *
@@ -4468,6 +4627,15 @@ const freezeTypedArray = array => {
 
   JSON: 'JSON',
   Reflect: 'Reflect',
+
+  // WHATWG Encoding Standard
+  // https://encoding.spec.whatwg.org/
+  // TextEncoder and TextDecoder are pure transformations between string and
+  // Uint8Array with no static side channels and no exposed iterator
+  // prototype. They are permitted universally; on hosts that do not provide
+  // them (XS), the sampling pass tolerates the absence.
+  TextEncoder: 'TextEncoder',
+  TextDecoder: 'TextDecoder',
 
   // *** Annex B
 
@@ -4626,20 +4794,20 @@ if (typeof AggregateError !== 'undefined') {
  *     are also considered blacklisted and are removed.
  * <li>A string value equal to a primitive ("number", "string", etc),
  *     in which case the property is permitted if its value property
- *     is typeof the given type. For example, {@code "Infinity"} leads to
- *     "number" and property values that fail {@code typeof "number"}.
+ *     is typeof the given type. For example, `Infinity` leads to
+ *     "number" and property values that fail `typeof "number`.
  *     are removed.
  * <li>A string value equal to an intinsic name ("ObjectPrototype",
  *     "Array", etc), in which case the property permitted if its
  *     value property is equal to the value of the corresponfing
- *     intrinsics. For example, {@code Map.prototype} leads to
+ *     intrinsics. For example, `Map.prototype` leads to
  *     "MapPrototype" and the property is removed if its value is
  *     not equal to %MapPrototype%
  * <li>Another record, in which case this property is simply
  *     permitted and that next record represents the disposition of
- *     the object which is its value. For example, {@code "Object"}
- *     leads to another record explaining what properties {@code
- *     "Object"} may have and how each such property should be treated.
+ *     the object which is its value. For example, `Object`
+ *     leads to another record explaining what properties
+ *     `Object` may have and how each such property should be treated.
  *
  * <p>Notes:
  * <li>"[[Proto]]" is used to refer to the "[[Prototype]]" internal
@@ -5754,30 +5922,6 @@ const CommonMath = {
     immutable: getter,
   },
 
-  // If this exists, it is purely an artifact of how we currently shim
-  // `transferToImmutable`. As natively implemented, there would be no
-  // such extra prototype.
-  '%ImmutableArrayBufferPrototype%': {
-    '[[Proto]]': '%ArrayBufferPrototype%',
-    byteLength: getter,
-    slice: fn,
-    // See https://github.com/endojs/endo/tree/master/packages/immutable-arraybuffer#purposeful-violation
-    '@@toStringTag': 'string',
-    // See https://github.com/tc39/proposal-resizablearraybuffer
-    transfer: fn,
-    resize: fn,
-    resizable: getter,
-    maxByteLength: getter,
-    // https://github.com/tc39/proposal-arraybuffer-transfer
-    transferToFixedLength: fn,
-    detached: getter,
-    // https://github.com/endojs/endo/pull/2309#issuecomment-2155513240
-    // to be proposed
-    transferToImmutable: fn,
-    sliceToImmutable: fn,
-    immutable: getter,
-  },
-
   // SharedArrayBuffer Objects
   SharedArrayBuffer: false, // UNSAFE and purposely suppressed.
   '%SharedArrayBufferPrototype%': false, // UNSAFE and purposely suppressed.
@@ -6450,6 +6594,38 @@ const CommonMath = {
     '@@toStringTag': 'string',
   },
 
+  // WHATWG Encoding Standard
+  // https://encoding.spec.whatwg.org/
+
+  TextEncoder: {
+    // Properties of the TextEncoder Constructor
+    '[[Proto]]': '%FunctionPrototype%',
+    prototype: '%TextEncoderPrototype%',
+  },
+
+  '%TextEncoderPrototype%': {
+    constructor: 'TextEncoder',
+    encode: fn,
+    encodeInto: fn,
+    encoding: getter,
+    '@@toStringTag': 'string',
+  },
+
+  TextDecoder: {
+    // Properties of the TextDecoder Constructor
+    '[[Proto]]': '%FunctionPrototype%',
+    prototype: '%TextDecoderPrototype%',
+  },
+
+  '%TextDecoderPrototype%': {
+    constructor: 'TextDecoder',
+    decode: fn,
+    encoding: getter,
+    fatal: getter,
+    ignoreBOM: getter,
+    '@@toStringTag': 'string',
+  },
+
   // Appendix B
 
   // Annex B: Additional Properties of the Global Object
@@ -6480,6 +6656,7 @@ const CommonMath = {
     load: asyncFn,
     importNow: fn,
     module: fn,
+    __noNamespaceBox__: getter,
     '@@toStringTag': 'string',
   },
 
@@ -7023,7 +7200,7 @@ function sampleGlobals(globalObject, newPropertyNames) {
     // Verify that the method is not callable.
     // eslint-disable-next-line @endo/no-polymorphic-call
     FERAL_FUNCTION.prototype.constructor('return 1');
-  } catch (ignore) {
+  } catch (_err) {
     // Throws, no need to patch.
     return freeze({});
   }
@@ -7693,71 +7870,62 @@ const methods = {
 // === 25. ses ./src/enablements.js ===
 ({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let toStringTagSymbol,iteratorSymbol;$h͏_imports([["./commons.js", [["toStringTagSymbol",[$h͏_a => (toStringTagSymbol = $h͏_a)]],["iteratorSymbol",[$h͏_a => (iteratorSymbol = $h͏_a)]]]]]);
 
-/**
- * Exports {@code enablements}, a recursively defined
- * JSON record defining the optimum set of intrinsics properties
- * that need to be "repaired" before hardening is applied on
- * enviromments subject to the override mistake.
- *
- * @author JF Paradis
- * @author Mark S. Miller
- *
- * @module
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
- * <p>Because "repairing" replaces data properties with accessors, every
- * time a repaired property is accessed, the associated getter is invoked,
- * which degrades the runtime performance of all code executing in the
- * repaired enviromment, compared to the non-repaired case. In order
- * to maintain performance, we only repair the properties of objects
- * for which hardening causes a breakage of their normal intended usage.
- *
- * There are three unwanted cases:
- * <ul>
- * <li>Overriding properties on objects typically used as records,
- *     namely {@code "Object"} and {@code "Array"}. In the case of arrays,
- *     the situation is unintentional, a given program might not be aware
- *     that non-numerical properties are stored on the underlying object
- *     instance, not on the array. When an object is typically used as a
- *     map, we repair all of its prototype properties.
- * <li>Overriding properties on objects that provide defaults on their
- *     prototype and that programs typically set using an assignment, such as
- *     {@code "Error.prototype.message"} and {@code "Function.prototype.name"}
- *     (both default to "").
- * <li>Setting-up a prototype chain, where a constructor is set to extend
- *     another one. This is typically set by assignment, for example
- *     {@code "Child.prototype.constructor = Child"}, instead of invoking
- *     Object.defineProperty();
- *
- * <p>Each JSON record enumerates the disposition of the properties on
- * some corresponding intrinsic object.
- *
- * <p>For each such record, the values associated with its property
- * names can be:
- * <ul>
- * <li>true, in which case this property is simply repaired. The
- *     value associated with that property is not traversed. For
- *     example, {@code "Function.prototype.name"} leads to true,
- *     meaning that the {@code "name"} property of {@code
- *     "Function.prototype"} should be repaired (which is needed
- *     when inheriting from @code{Function} and setting the subclass's
- *     {@code "prototype.name"} property). If the property is
- *     already an accessor property, it is not repaired (because
- *     accessors are not subject to the override mistake).
- * <li>"*", in which case this property is not repaired but the
- *     value associated with that property are traversed and repaired.
- * <li>Another record, in which case this property is not repaired
- *     and that next record represents the disposition of the object
- *     which is its value. For example,{@code "FunctionPrototype"}
- *     leads to another record explaining which properties {@code
- *     Function.prototype} need to be repaired.
- */
-
-/**
- * Minimal enablements when all the code is modern and known not to
- * step into the override mistake, except for the following pervasive
- * cases.
+ * Minimal enablements when all the code is modern and known not to step into
+ * the override mistake, except for the following pervasive cases.
  */
        const minEnablements = {
   '%ObjectPrototype%': {
@@ -9672,7 +9840,10 @@ let markVirtualizedNativeFunction;
 })()
 ,
 // === 42. ses ./src/error/console.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let WeakSet,arrayFilter,arrayFlatMap,arrayMap,arrayPop,arrayPush,defineProperty,freeze,fromEntries,isError,stringEndsWith,stringIncludes,stringSplit,weaksetAdd,weaksetHas;$h͏_imports([["../commons.js", [["WeakSet",[$h͏_a => (WeakSet = $h͏_a)]],["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["arrayFlatMap",[$h͏_a => (arrayFlatMap = $h͏_a)]],["arrayMap",[$h͏_a => (arrayMap = $h͏_a)]],["arrayPop",[$h͏_a => (arrayPop = $h͏_a)]],["arrayPush",[$h͏_a => (arrayPush = $h͏_a)]],["defineProperty",[$h͏_a => (defineProperty = $h͏_a)]],["freeze",[$h͏_a => (freeze = $h͏_a)]],["fromEntries",[$h͏_a => (fromEntries = $h͏_a)]],["isError",[$h͏_a => (isError = $h͏_a)]],["stringEndsWith",[$h͏_a => (stringEndsWith = $h͏_a)]],["stringIncludes",[$h͏_a => (stringIncludes = $h͏_a)]],["stringSplit",[$h͏_a => (stringSplit = $h͏_a)]],["weaksetAdd",[$h͏_a => (weaksetAdd = $h͏_a)]],["weaksetHas",[$h͏_a => (weaksetHas = $h͏_a)]]]]]);
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let WeakSet,arrayFilter,arrayFlatMap,arrayMap,arrayPop,arrayPush,defineProperty,freeze,fromEntries,globalThis,isError,stringEndsWith,stringIncludes,stringSplit,weaksetAdd,weaksetHas,stringIndexOf,stringSlice;$h͏_imports([["../commons.js", [["WeakSet",[$h͏_a => (WeakSet = $h͏_a)]],["arrayFilter",[$h͏_a => (arrayFilter = $h͏_a)]],["arrayFlatMap",[$h͏_a => (arrayFlatMap = $h͏_a)]],["arrayMap",[$h͏_a => (arrayMap = $h͏_a)]],["arrayPop",[$h͏_a => (arrayPop = $h͏_a)]],["arrayPush",[$h͏_a => (arrayPush = $h͏_a)]],["defineProperty",[$h͏_a => (defineProperty = $h͏_a)]],["freeze",[$h͏_a => (freeze = $h͏_a)]],["fromEntries",[$h͏_a => (fromEntries = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]],["isError",[$h͏_a => (isError = $h͏_a)]],["stringEndsWith",[$h͏_a => (stringEndsWith = $h͏_a)]],["stringIncludes",[$h͏_a => (stringIncludes = $h͏_a)]],["stringSplit",[$h͏_a => (stringSplit = $h͏_a)]],["weaksetAdd",[$h͏_a => (weaksetAdd = $h͏_a)]],["weaksetHas",[$h͏_a => (weaksetHas = $h͏_a)]],["stringIndexOf",[$h͏_a => (stringIndexOf = $h͏_a)]],["stringSlice",[$h͏_a => (stringSlice = $h͏_a)]]]]]);
+
+
+
 
 
 
@@ -9749,7 +9920,7 @@ const defineName = (name, fn) => defineProperty(fn, 'name', { value: name });
  * This is the same as the log severity of these on other
  * platform console implementations when they all agree.
  *
- * @type {readonly [ConsoleProps, LogSeverity | undefined][]}
+ * @type {readonly [ConsoleProps, LogSeverity][]}
  */
        const consoleLevelMethods = freeze([
   ['debug', 'debug'], // (fmt?, ...args) verbose level on Chrome
@@ -9765,24 +9936,34 @@ const defineName = (name, fn) => defineProperty(fn, 'name', { value: name });
 ]);
 
 /**
+ * We special case `console.assert` because it contains `fmt?, ...args` just
+ * like the `consoleLevelMethods`, but not in the same place.
+ * We special case `console.timeLog` because it contains the same kind of
+ * `...args`, but with no format string.
+ *
+ * @type {readonly [ConsoleProps, LogSeverity][]}
+ */$h͏_once.consoleLevelMethods(consoleLevelMethods);
+       const consoleSpecialMethods = freeze([
+  ['assert', 'error'], // (value, fmt?, ...args)
+  ['timeLog', 'log']  // (label?, ...args) no fmt string
+]);
+
+/**
  * Those console methods other than those already enumerated by
- * `consoleLevelMethods`.
+ * `consoleLevelMethods` and `consoleSpecialMethods`.
  *
  * Each is paired with what we consider to be their log severity level.
  * This is the same as the log severity of these on other
  * platform console implementations when they all agree.
  *
- * @type {readonly [ConsoleProps, LogSeverity | undefined][]}
- */$h͏_once.consoleLevelMethods(consoleLevelMethods);
+ * @type {readonly [ConsoleProps, LogSeverity][]}
+ */$h͏_once.consoleSpecialMethods(consoleSpecialMethods);
        const consoleOtherMethods = freeze([
-  ['assert', 'error'], // (value, fmt?, ...args)
-  ['timeLog', 'log'], // (label?, ...args) no fmt string
-
   // Insensitive to whether any argument is an error. All arguments can pass
   // thru to baseConsole as is.
-  ['clear', undefined], // ()
+  ['clear', 'info'], // (), level is not well defined
   ['count', 'info'], // (label?)
-  ['countReset', undefined], // (label?)
+  ['countReset', 'info'], // (label?), level is not well defined
   ['dir', 'log'], // (item, options?)
   ['groupEnd', 'log'], // ()
   // In theory tabular data may be or contain an error. However, we currently
@@ -9792,14 +9973,15 @@ const defineName = (name, fn) => defineProperty(fn, 'name', { value: name });
   ['timeEnd', 'info'], // (label?)
 
   // Node Inspector only, MDN, and TypeScript, but not whatwg
-  ['profile', undefined], // (label?)
-  ['profileEnd', undefined], // (label?)
-  ['timeStamp', undefined]  // (label?)
+  ['profile', 'info'], // (label?)
+  ['profileEnd', 'info'], // (label?)
+  ['timeStamp', 'info']  // (label?)
 ]);
 
-/** @type {readonly [ConsoleProps, LogSeverity | undefined][]} */$h͏_once.consoleOtherMethods(consoleOtherMethods);
+/** @type {readonly [ConsoleProps, LogSeverity][]} */$h͏_once.consoleOtherMethods(consoleOtherMethods);
 const consoleMethodPermits = freeze([
   ...consoleLevelMethods,
+  ...consoleSpecialMethods,
   ...consoleOtherMethods,
 ]);
 
@@ -9829,6 +10011,111 @@ const consoleMethodPermits = freeze([
  *   // A variety of other symbols also seen on Node
  * ]);
  */
+
+/**
+ * If `formatData` consists of `[fmt, ...args]` and `fmt` is a string
+ * containing a `%c` specifier that acts as an `%c` specifier
+ * according to https://console.spec.whatwg.org/#formatting-specifiers
+ * then omit it and its corresponding argument. For the rest of the `fmt`
+ * string and its corresponding arguments, return them as a replacement
+ * `formatData` to be fed to the underlying console log functions.
+ *
+ * The test takes into account the number of remaining `args`.
+ * A `%c` beyond `args` does not act as a specifier.
+ * The additional issue not mentioned at
+ * https://console.spec.whatwg.org/#formatting-specifiers
+ * is that `%%` is an escaped `%`, so the `%c` found within,
+ * for example, `%%c` does not act as a specifier.
+ * Instead, it gets rendered as `%c` without consuming an argument.
+ *
+ * Note terminology differences from the spec-internal `Logger` function
+ * at https://console.spec.whatwg.org/#formatting-specifiers .
+ *
+ * | `Logger` terminology | `sanitizeFormatData` terminology |
+ * | ---------------------|----------------------------------|
+ * | `args`               | `formatData`                     |
+ * | `first`              | `fmt`                            |
+ * | `rest`               | `args`                           |
+ *
+ * Exported only for testing.
+ *
+ * @param {any[]} formatData
+ * @returns {any[]}
+ */
+       const sanitizeFormatData = ([...formatData]) => {
+  freeze(formatData);
+  if (formatData.length <= 1) {
+    return formatData;
+  }
+  const [fmt, ...args] = formatData;
+  if (typeof fmt !== 'string' || !stringIncludes(fmt, '%')) {
+    return formatData;
+  }
+
+  let startPos = 0;
+  let argI = 0;
+  let newFmt = '';
+  const newArgs = [];
+  for (
+    let percentPos = stringIndexOf(fmt, '%');
+    // Notice the `- 1` below, which leaves room for one more character after
+    // the `'%'`.
+    percentPos >= startPos && percentPos < fmt.length - 1 && argI < args.length;
+    percentPos = stringIndexOf(fmt, '%', startPos)
+  ) {
+    // The four cases in the following switch are purposely partially
+    // redundant. But the total code is small and our attempts at more
+    // reuse made the code less clear. Clarity sometimes wins over DRY.
+    const char = fmt[percentPos + 1];
+    switch (char) {
+      case 's':
+      case 'd':
+      case 'i':
+      case 'f':
+      case 'o':
+      case 'O': {
+        // transfer segment + % + char
+        newFmt += stringSlice(fmt, startPos, percentPos + 2);
+        startPos = percentPos + 2;
+        // transfer 1 arg
+        arrayPush(newArgs, args[argI]);
+        argI += 1;
+        break;
+      }
+      case 'c': {
+        // transfer segment. Consume %c
+        newFmt += stringSlice(fmt, startPos, percentPos);
+        startPos = percentPos + 2;
+        // consume 1 arg
+        argI += 1;
+        break;
+      }
+      case '%': {
+        // transfer segment + % + char. Ignore args
+        newFmt += stringSlice(fmt, startPos, percentPos + 2);
+        startPos = percentPos + 2;
+        break;
+      }
+      default: {
+        // transfer segment + %% + char. Ignore args
+        // So that %<unspecified> is treated as unknown even if
+        // implemented by the local platform, such as %j on Node.
+        newFmt += stringSlice(fmt, startPos, percentPos);
+        newFmt += `%%${char}`;
+        startPos = percentPos + 2;
+        break;
+      }
+    }
+  }
+  if (startPos < fmt.length) {
+    newFmt += stringSlice(fmt, startPos, fmt.length);
+  }
+  for (; argI < args.length; argI += 1) {
+    arrayPush(newArgs, args[argI]);
+  }
+  return /** @type {any[]} */ (freeze([newFmt, ...newArgs]));
+};$h͏_once.sanitizeFormatData(sanitizeFormatData);
+freeze(sanitizeFormatData);
 
 // //////////////////////////// Logging Console ////////////////////////////////
 
@@ -9898,10 +10185,31 @@ const ErrorInfo = {
 freeze(ErrorInfo);
 
 /** @type {MakeCausalConsole} */
-       const makeCausalConsole = (baseConsole, loggedErrorHandler) => {
-  if (!baseConsole) {
+       const makeCausalConsole = (feralConsole, loggedErrorHandler) => {
+  if (!feralConsole) {
     return undefined;
   }
+
+  // In Node.js, the global console does a deep scan of its inputs for methods
+  // keyed by Symbol.for('nodejs.util.inspect.custom'), and invokes any that are
+  // found with unhardened arguments as described at
+  // https://nodejs.org/docs/latest/api/util.html#custom-inspection-functions-on-objects
+  // To circumvent that problematic behavior, we use its
+  // https://nodejs.org/docs/latest/api/console.html#class-console Console
+  // constructor to build a replacement that explicitly opts out by setting the
+  // `customInspect` option to false.
+  // https://nodejs.org/docs/latest/api/util.html#utilinspectobject-options
+  /** @type {new (options: any) => typeof console} */
+  const Console = /** @type {any} */ (feralConsole).Console;
+  const { stdout, stderr } = globalThis.process || { __proto__: null };
+  const baseConsole =
+    typeof Console === 'function' && (stdout || stderr)
+      ? new Console({
+          stdout,
+          stderr,
+          inspectOptions: { colors: undefined, customInspect: false },
+        })
+      : feralConsole;
 
   const { getStackString, tagError, takeMessageLogArgs, takeNoteLogArgsArray } =
     loggedErrorHandler;
@@ -10050,32 +10358,53 @@ freeze(ErrorInfo);
     logSubErrors(severity, subErrors, errorTag);
   };
 
-  const levelMethods = arrayMap(consoleLevelMethods, ([level, _]) => {
+  const levelMethods = arrayMap(consoleLevelMethods, ([name, level]) => {
     /**
      * @param {...any} logArgs
      */
-    const levelMethod = defineName(level, (...logArgs) => {
+    const levelMethod = defineName(name, (...logArgs) => {
       const subErrors = [];
-      const argTags = extractErrorArgs(logArgs, subErrors);
-      if (baseConsole[level]) {
-        // eslint-disable-next-line @endo/no-polymorphic-call
-        baseConsole[level](...argTags);
-      }
-      // @ts-expect-error ConsoleProp vs LogSeverity mismatch
+      const argTags = extractErrorArgs(sanitizeFormatData(logArgs), subErrors);
+      // eslint-disable-next-line @endo/no-polymorphic-call
+      baseConsole[name](...argTags);
       logSubErrors(level, subErrors);
     });
-    return [level, freeze(levelMethod)];
+    return [name, freeze(levelMethod)];
   });
-  const otherMethodNames = arrayFilter(
-    consoleOtherMethods,
-    ([name, _]) => name in baseConsole,
-  );
-  const otherMethods = arrayMap(otherMethodNames, ([name, _]) => {
+
+  const assertMethod = defineName('assert', (...assertArgs) => {
+    if (assertArgs.length <= 1) {
+      // eslint-disable-next-line @endo/no-polymorphic-call
+      baseConsole.assert(...assertArgs);
+    } else {
+      const [cond, ...logArgs] = assertArgs;
+      const subErrors = [];
+      const argTags = extractErrorArgs(sanitizeFormatData(logArgs), subErrors);
+      // eslint-disable-next-line @endo/no-polymorphic-call
+      baseConsole.assert(cond, ...argTags);
+      logSubErrors('error', subErrors);
+    }
+  });
+
+  const timeLogMethod = defineName('timeLog', (...timeLogArgs) => {
+    if (timeLogArgs.length <= 1) {
+      // eslint-disable-next-line @endo/no-polymorphic-call
+      baseConsole.timeLog(...timeLogArgs);
+    } else {
+      const [label, ...logArgs] = timeLogArgs;
+      const subErrors = [];
+      const argTags = extractErrorArgs(sanitizeFormatData(logArgs), subErrors);
+      // eslint-disable-next-line @endo/no-polymorphic-call
+      baseConsole.timeLog(label, ...argTags);
+      logSubErrors('log', subErrors);
+    }
+  });
+
+  const otherMethods = arrayMap(consoleOtherMethods, ([name, _level]) => {
     /**
      * @param {...any} args
      */
     const otherMethod = defineName(name, (...args) => {
-      // @ts-ignore
       // eslint-disable-next-line @endo/no-polymorphic-call
       baseConsole[name](...args);
       return undefined;
@@ -10083,7 +10412,17 @@ freeze(ErrorInfo);
     return [name, freeze(otherMethod)];
   });
 
-  const causalConsole = fromEntries([...levelMethods, ...otherMethods]);
+  const methodEntries = arrayFilter(
+    [
+      ...levelMethods,
+      ['assert', assertMethod],
+      ['timeLog', timeLogMethod],
+      ...otherMethods,
+    ],
+    ([name, _]) => name in baseConsole,
+  );
+
+  const causalConsole = fromEntries(methodEntries);
   return /** @type {VirtualConsole} */ (freeze(causalConsole));
 };$h͏_once.makeCausalConsole(makeCausalConsole);
 freeze(makeCausalConsole);
@@ -10394,7 +10733,6 @@ const wrapLogger = (logger, thisArg) =>
     };
   }
 
-  // eslint-disable-next-line no-restricted-globals
   const originalConsole = /** @type {VirtualConsole} */ (
     // eslint-disable-next-line no-nested-ternary
     typeof globalThis.console !== 'undefined'
@@ -10404,7 +10742,6 @@ const wrapLogger = (logger, thisArg) =>
           // log at a specific level with no special argument interpretation).
           // https://console.spec.whatwg.org/#logging
           (p => freeze({ debug: p, log: p, info: p, warn: p, error: p }))(
-            // eslint-disable-next-line no-undef
             wrapLogger(globalThis.print),
           )
         : undefined
@@ -10995,7 +11332,7 @@ let initialGetStackString = tamedMethods.getStackString;
      * @this {ErrorConstructor}
      * @param {...any} rest
      */
-    // eslint-disable-next-line no-shadow
+
     const ResultError = function Error(...rest) {
       let error;
       if (new.target === undefined) {
@@ -11421,7 +11758,6 @@ function* loadWithoutErrorAnnotation(
   }
 
   if (typeof moduleDescriptor === 'string') {
-    // eslint-disable-next-line @endo/no-polymorphic-call
     throw makeError(
       X`Cannot map module ${q(moduleSpecifier)} to ${q(
         moduleDescriptor,
@@ -11733,7 +12069,6 @@ const memoizedLoadWithErrorAnnotation = (
       moduleLoads,
     ],
     error => {
-      // eslint-disable-next-line @endo/no-polymorphic-call
       annotateError(
         error,
         X`${error.message}, loading ${q(moduleSpecifier)} in compartment ${q(
@@ -12995,7 +13330,6 @@ function validateModuleSource(moduleSource, moduleSpecifier) {
 
 
 
-
 /**
  * @import {ImportHook, ImportMetaHook, ImportNowHook, ModuleDescriptor, ModuleExportsNamespace, ModuleMap, ModuleMapHook, ResolveHook, ModuleSource, CompartmentOptions} from '../types.js'
  * @import {Transform} from './lockdown.js'
@@ -13080,6 +13414,11 @@ const compartmentImportNow = (compartment, specifier) => {
   get name() {
     return /** @type {CompartmentFields} */ (weakmapGet(privateFields, this))
       .name;
+  },
+
+  get __noNamespaceBox__() {
+    return /** @type {CompartmentFields} */ (weakmapGet(privateFields, this))
+      .noNamespaceBox;
   },
 
   evaluate(source, options = {}) {
@@ -13409,8 +13748,7 @@ defineProperties(InertCompartment, {
 })()
 ,
 // === 53. ses ./src/get-anonymous-intrinsics.js ===
-({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let FERAL_FUNCTION,FERAL_FLOAT64_ARRAY,Map,Set,String,getOwnPropertyDescriptor,getPrototypeOf,iterateArray,iterateMap,iterateSet,iterateString,matchAllRegExp,matchAllSymbol,regexpPrototype,globalThis,assign,AsyncGeneratorFunctionInstance,ArrayBuffer,InertCompartment;$h͏_imports([["./commons.js", [["FERAL_FUNCTION",[$h͏_a => (FERAL_FUNCTION = $h͏_a)]],["FERAL_FLOAT64_ARRAY",[$h͏_a => (FERAL_FLOAT64_ARRAY = $h͏_a)]],["Map",[$h͏_a => (Map = $h͏_a)]],["Set",[$h͏_a => (Set = $h͏_a)]],["String",[$h͏_a => (String = $h͏_a)]],["getOwnPropertyDescriptor",[$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]],["getPrototypeOf",[$h͏_a => (getPrototypeOf = $h͏_a)]],["iterateArray",[$h͏_a => (iterateArray = $h͏_a)]],["iterateMap",[$h͏_a => (iterateMap = $h͏_a)]],["iterateSet",[$h͏_a => (iterateSet = $h͏_a)]],["iterateString",[$h͏_a => (iterateString = $h͏_a)]],["matchAllRegExp",[$h͏_a => (matchAllRegExp = $h͏_a)]],["matchAllSymbol",[$h͏_a => (matchAllSymbol = $h͏_a)]],["regexpPrototype",[$h͏_a => (regexpPrototype = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]],["assign",[$h͏_a => (assign = $h͏_a)]],["AsyncGeneratorFunctionInstance",[$h͏_a => (AsyncGeneratorFunctionInstance = $h͏_a)]],["ArrayBuffer",[$h͏_a => (ArrayBuffer = $h͏_a)]]]],["./compartment.js", [["InertCompartment",[$h͏_a => (InertCompartment = $h͏_a)]]]]]);
-
+({imports:$h͏_imports,liveVar:$h͏_live,onceVar:$h͏_once,import:$h͏_import,importMeta:$h͏____meta})=>(function(){'use strict';let FERAL_FUNCTION,FERAL_FLOAT64_ARRAY,Map,Set,String,getOwnPropertyDescriptor,getPrototypeOf,iterateArray,iterateMap,iterateSet,iterateString,matchAllRegExp,matchAllSymbol,regexpPrototype,globalThis,assign,AsyncGeneratorFunctionInstance,InertCompartment;$h͏_imports([["./commons.js", [["FERAL_FUNCTION",[$h͏_a => (FERAL_FUNCTION = $h͏_a)]],["FERAL_FLOAT64_ARRAY",[$h͏_a => (FERAL_FLOAT64_ARRAY = $h͏_a)]],["Map",[$h͏_a => (Map = $h͏_a)]],["Set",[$h͏_a => (Set = $h͏_a)]],["String",[$h͏_a => (String = $h͏_a)]],["getOwnPropertyDescriptor",[$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]],["getPrototypeOf",[$h͏_a => (getPrototypeOf = $h͏_a)]],["iterateArray",[$h͏_a => (iterateArray = $h͏_a)]],["iterateMap",[$h͏_a => (iterateMap = $h͏_a)]],["iterateSet",[$h͏_a => (iterateSet = $h͏_a)]],["iterateString",[$h͏_a => (iterateString = $h͏_a)]],["matchAllRegExp",[$h͏_a => (matchAllRegExp = $h͏_a)]],["matchAllSymbol",[$h͏_a => (matchAllSymbol = $h͏_a)]],["regexpPrototype",[$h͏_a => (regexpPrototype = $h͏_a)]],["globalThis",[$h͏_a => (globalThis = $h͏_a)]],["assign",[$h͏_a => (assign = $h͏_a)]],["AsyncGeneratorFunctionInstance",[$h͏_a => (AsyncGeneratorFunctionInstance = $h͏_a)]]]],["./compartment.js", [["InertCompartment",[$h͏_a => (InertCompartment = $h͏_a)]]]]]);
 
 
 
@@ -13465,7 +13803,6 @@ function makeArguments() {
 
   // 21.1.5.2 The %StringIteratorPrototype% Object
 
-  // eslint-disable-next-line no-new-wrappers
   const StringIteratorObject = iterateString(new String());
   const StringIteratorPrototype = getPrototypeOf(StringIteratorObject);
 
@@ -13477,7 +13814,6 @@ function makeArguments() {
 
   // 22.1.5.2 The %ArrayIteratorPrototype% Object
 
-  // eslint-disable-next-line no-array-constructor
   const ArrayIteratorObject = iterateArray([]);
   const ArrayIteratorPrototype = getPrototypeOf(ArrayIteratorObject);
 
@@ -13576,15 +13912,6 @@ function makeArguments() {
       // eslint-disable-next-line @endo/no-polymorphic-call
       globalThis.AsyncIterator.from({ next() {} }),
     );
-  }
-
-  const ab = new ArrayBuffer(0);
-  // eslint-disable-next-line @endo/no-polymorphic-call
-  const iab = ab.sliceToImmutable();
-  const iabProto = getPrototypeOf(iab);
-  if (iabProto !== ArrayBuffer.prototype) {
-    // In a native implementation, these will be the same prototype
-    intrinsics['%ImmutableArrayBufferPrototype%'] = iabProto;
   }
 
   return intrinsics;
@@ -13702,7 +14029,7 @@ const throws = thunk => {
   try {
     thunk();
     return false;
-  } catch (er) {
+  } catch (_err) {
     return true;
   }
 };
