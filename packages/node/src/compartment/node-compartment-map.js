@@ -33,7 +33,12 @@ import { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
  * } from '../internal.js'
  */
 
-const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])
+const DEFAULT_CONDITIONS = /** @type {const} */ ([
+  'node',
+  'default',
+  'import',
+  'require',
+])
 
 const { entries } = Object
 
