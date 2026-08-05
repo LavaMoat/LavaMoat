@@ -90,5 +90,5 @@ test('violations have plain location data (structured-clone safe)', (t) => {
 
 test('throws if done() is called before traversal', (t) => {
   const pass = createPolicyGenVisitor()
-  t.throws(() => pass.done?.(), { message: /ast was not captured/i })
+  t.throws(() => pass.done?.(), { message: /did not visit program node/i })
 })
