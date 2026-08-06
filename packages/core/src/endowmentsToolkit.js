@@ -168,7 +168,14 @@ function endowmentsToolkit({
             unwrapFrom || targetRef
           )
         } else {
-          instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef)
+          instrumentDynamicValueAtPath(
+            pathParts,
+            sourceRef,
+            targetRef,
+            createFunctionWrapper,
+            unwrapTo,
+            unwrapFrom || targetRef
+          )
         }
       } else {
         copyValueAtPath(
@@ -718,26 +725,54 @@ function makeWritableValueAtPath(
  * @param {string[]} pathParts
  * @param {Record<string, any>} sourceRef
  * @param {Record<string, any>} targetRef
+ * @param {DefaultWrapperFn} [wrapFn]
+ * @param {object} [unwrapTo]
+ * @param {object} [unwrapFrom]
  */
-function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
+function instrumentDynamicValueAtPath(
+  pathParts,
+  sourceRef,
+  targetRef,
+  wrapFn,
+  unwrapTo,
+  unwrapFrom
+) {
   const enumerable = Reflect.getOwnPropertyDescriptor(
     sourceRef,
     pathParts[0]
   )?.enumerable
+
+  const resolveLeaf = () => {
+    const dynamicValue = sourceRef[pathParts[0]]
+    let leaf = dynamicValue,
+      parent = sourceRef
+
+    for (let i = 1; i < pathParts.length; i++) {
+      parent = leaf
+      leaf = leaf[pathParts[i]]
+    }
+    if (typeof leaf === 'function' && pathParts.length > 1) {
+      leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
+    }
+    return leaf
+  }
+
+  // Capture and wrap the initial leaf value once. If the top-level writable
+  // field is later replaced (by another package with write permission), the
+  // getter re-resolves and returns the new leaf unwrapped.
+  const initialTopValue = sourceRef[pathParts[0]]
+  const initialLeaf = resolveLeaf()
+  const wrappedInitialLeaf =
+    wrapFn && unwrapTo && typeof initialLeaf === 'function'
+      ? wrapFn(initialLeaf, (thisValue) => thisValue === unwrapFrom, unwrapTo)
+      : initialLeaf
+
   const dynamicGetterDesc = {
     get: () => {
-      const dynamicValue = sourceRef[pathParts[0]]
-      let leaf = dynamicValue,
-        parent = sourceRef
-
-      for (let i = 1; i < pathParts.length; i++) {
-        parent = leaf
-        leaf = leaf[pathParts[i]]
+      if (wrappedInitialLeaf !== initialLeaf && sourceRef[pathParts[0]] === initialTopValue) {
+        return wrappedInitialLeaf
       }
-      if (typeof leaf === 'function') {
-        leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
-      }
-      return leaf
+      return resolveLeaf()
     },
     writeable: false,
     enumerable, // Initial value will have to suffice. Change will not propagate dynamically.
