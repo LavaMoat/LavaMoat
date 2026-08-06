@@ -188,8 +188,9 @@ exports.generateIdentifierLookup = ({
    * @returns {LavaMoatPolicy}
    */
   const stripMeta = (policy) => {
-    const { resources = Object.create(null) } = policy
+    const { resources = Object.create(null), use } = policy
     const strippedPolicy = {
+      ...(use ? { use } : {}),
       resources: Object.fromEntries(
         Object.entries(resources)
           .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used
