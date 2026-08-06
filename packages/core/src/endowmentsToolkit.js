@@ -159,7 +159,14 @@ function endowmentsToolkit({
       const pathParts = path.split('.')
       if (knownWritableFields.has(pathParts[0])) {
         if (allowedWriteFields.has(pathParts[0])) {
-          makeWritableValueAtPath(pathParts[0], sourceRef, targetRef)
+          makeWritableValueAtPath(
+            pathParts[0],
+            sourceRef,
+            targetRef,
+            createFunctionWrapper,
+            unwrapTo,
+            unwrapFrom || targetRef
+          )
         } else {
           instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef)
         }
@@ -665,12 +672,30 @@ function isEmpty(value) {
  * @param {string} key
  * @param {Record<string, any>} sourceRef
  * @param {Record<string, any>} targetRef
+ * @param {DefaultWrapperFn} [wrapFn]
+ * @param {object} [unwrapTo]
+ * @param {object} [unwrapFrom]
  */
-function makeWritableValueAtPath(key, sourceRef, targetRef) {
+function makeWritableValueAtPath(
+  key,
+  sourceRef,
+  targetRef,
+  wrapFn,
+  unwrapTo,
+  unwrapFrom
+) {
   const enumerable = Reflect.getOwnPropertyDescriptor(
     sourceRef,
     key
   )?.enumerable
+  // Capture and wrap the initial value once. If the value on sourceRef is later
+  // replaced (monkey-patching), the getter returns the new value unwrapped —
+  // the replacement is expected to call the captured (already-wrapped) original.
+  const initialValue = sourceRef[key]
+  const wrappedInitialValue =
+    wrapFn && unwrapTo && typeof initialValue === 'function'
+      ? wrapFn(initialValue, (thisValue) => thisValue === unwrapFrom, unwrapTo)
+      : initialValue
   Reflect.defineProperty(targetRef, key, {
     configurable: false,
     enumerable,
@@ -678,6 +703,9 @@ function makeWritableValueAtPath(key, sourceRef, targetRef) {
       sourceRef[key] = newValue
     },
     get() {
+      if (sourceRef[key] === initialValue) {
+        return wrappedInitialValue
+      }
       return sourceRef[key]
     },
   })
