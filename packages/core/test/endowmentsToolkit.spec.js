@@ -454,31 +454,31 @@ test('getEndowmentsForConfig - writable global handles monkey-patching', (t) => 
 
   packageCompartmentGlobal.fetch = function sentryLikeFetchWrapper(url) {
     'use strict'
-    return 'patched!' + originalFetch(url)
+    return 'patched1!' + originalFetch(url)
   }
 
   t.is(
     packageCompartmentGlobal.fetch('https://example.com'),
-    'patched!fetched(https://example.com) // undefined false'
+    'patched1!fetched(https://example.com) // undefined false'
   )
   t.is(
     anotherPackageCompartmentGlobal.fetch('https://example.com'),
-    'patched!fetched(https://example.com) // undefined false'
+    'patched1!fetched(https://example.com) // undefined false'
   )
 
   // bound case
   packageCompartmentGlobal.fetch = function sentryLikeFetchWrapper(url) {
     'use strict'
-    return originalFetch.call(packageCompartmentGlobal, url)
+    return 'patched2!' + originalFetch.call(packageCompartmentGlobal, url)
   }
 
   t.is(
     packageCompartmentGlobal.fetch('https://example.com'),
-    'patched!fetched(https://example.com) // object true'
+    'patched2!fetched(https://example.com) // object true'
   )
   t.is(
     anotherPackageCompartmentGlobal.fetch('https://example.com'),
-    'patched!fetched(https://example.com) // object true'
+    'patched2!fetched(https://example.com) // object true'
   )
 })
 

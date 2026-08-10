@@ -742,37 +742,39 @@ function instrumentDynamicValueAtPath(
     pathParts[0]
   )?.enumerable
 
-  const resolveLeaf = () => {
-    const dynamicValue = sourceRef[pathParts[0]]
-    let leaf = dynamicValue,
-      parent = sourceRef
-
-    for (let i = 1; i < pathParts.length; i++) {
-      parent = leaf
-      leaf = leaf[pathParts[i]]
-    }
-    if (typeof leaf === 'function' && pathParts.length > 1) {
-      leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
-    }
-    return leaf
-  }
-
-  // Capture and wrap the initial leaf value once. If the top-level writable
+  // Capture and wrap the initial top value once. If the top-level writable
   // field is later replaced (by another package with write permission), the
-  // getter re-resolves and returns the new leaf unwrapped.
+  // wrapping is no longer useful.
   const initialTopValue = sourceRef[pathParts[0]]
-  const initialLeaf = resolveLeaf()
-  const wrappedInitialLeaf =
-    wrapFn && unwrapTo && typeof initialLeaf === 'function'
-      ? wrapFn(initialLeaf, (thisValue) => thisValue === unwrapFrom, unwrapTo)
-      : initialLeaf
+  const wrappedInitialTopV =
+    wrapFn && unwrapTo && typeof initialTopValue === 'function'
+      ? wrapFn(
+          initialTopValue,
+          (thisValue) => thisValue === unwrapFrom,
+          unwrapTo
+        )
+      : initialTopValue
 
   const dynamicGetterDesc = {
     get: () => {
-      if (wrappedInitialLeaf !== initialLeaf && sourceRef[pathParts[0]] === initialTopValue) {
-        return wrappedInitialLeaf
+      const dynamicValue = sourceRef[pathParts[0]]
+      let leaf, parent
+      if (
+        typeof dynamicValue === 'function' &&
+        dynamicValue === initialTopValue
+      ) {
+        leaf = wrappedInitialTopV
+      } else {
+        leaf = dynamicValue
       }
-      return resolveLeaf()
+      for (let i = 1; i < pathParts.length; i++) {
+        parent = leaf
+        leaf = leaf[pathParts[i]]
+      }
+      if (typeof leaf === 'function' && pathParts.length > 1) {
+        leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
+      }
+      return leaf
     },
     writeable: false,
     enumerable, // Initial value will have to suffice. Change will not propagate dynamically.
