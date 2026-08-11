@@ -2,7 +2,7 @@
 import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
 import { buildAllowlistChanges } from './yarn-build-allowlist.js'
 import { buildAllowlistChanges as buildLmAllowlistChanges } from './lm-build-allowlist.js'
-import { bundleRunner } from '../runner/runnerBundler.js'
+import { bundleRunner } from '../runner/runner-bundler.js'
 
 /** @satisfies {readonly Opinion[]} */
 const definedOpinions = Object.freeze(

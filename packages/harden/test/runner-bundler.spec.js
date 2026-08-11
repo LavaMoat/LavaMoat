@@ -1,5 +1,5 @@
 import test from 'ava'
-import { bundleRunner } from '../src/runner/runnerBundler.js'
+import { bundleRunner } from '../src/runner/runner-bundler.js'
 
 test('bundleRunner inlines wrapper into npm adapter', (t) => {
   const bundled = bundleRunner({

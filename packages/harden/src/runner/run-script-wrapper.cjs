@@ -1,4 +1,4 @@
-/// <reference path="./makeRunScriptWrapper.global.d.ts" />
+/// <reference path="./make-run-script-wrapper.global.d.ts" />
 
 /**
  * @param {MakeRunScriptWrapperOptions} param0

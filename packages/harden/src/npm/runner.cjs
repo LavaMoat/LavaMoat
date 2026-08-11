@@ -1,5 +1,5 @@
 #! /usr/bin/env node
-/// <reference path="../runner/makeRunScriptWrapper.global.d.ts" />
+/// <reference path="../runner/make-run-script-wrapper.global.d.ts" />
 
 /* global makeRunScriptWrapper */
 

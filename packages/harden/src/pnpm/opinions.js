@@ -4,7 +4,7 @@ import {
   assertPackageManager,
 } from '../tools/versions.js'
 import { buildAllowlistChanges } from './build-allowlist.js'
-import { bundleRunner } from '../runner/runnerBundler.js'
+import { bundleRunner } from '../runner/runner-bundler.js'
 
 /** @import {Opinion} from '../tools/types.js' */
 

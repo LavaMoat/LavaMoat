@@ -13,7 +13,7 @@ export function bundleRunner({ packageManager, fileName }) {
   const adapterPath = path.join(__dirname, '..', packageManager, fileName)
   const adapterCode = fs.readFileSync(adapterPath, 'utf-8')
 
-  const runScriptWrapperPath = path.join(__dirname, 'runScriptWrapper.cjs')
+  const runScriptWrapperPath = path.join(__dirname, 'run-script-wrapper.cjs')
   const runScriptWrapperCode = fs.readFileSync(runScriptWrapperPath, 'utf-8')
 
   if (!runScriptWrapperCode.includes(EXPORT_TO_REPLACE)) {

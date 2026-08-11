@@ -1,7 +1,7 @@
 import { applyNpmrc } from './npmrc.js'
 import { applyYamlConfig } from './yaml-config.js'
 import { applyPackageJson } from './packagejson.js'
-import { applyLegacyYarnrc } from './legacyYarnrc.js'
+import { applyLegacyYarnrc } from './legacy-yarnrc.js'
 import { applyLavamoatFolder } from './lavamoat-folder.js'
 /**
  * @import {
@@ -12,7 +12,7 @@ import { applyLavamoatFolder } from './lavamoat-folder.js'
  *   Decisions,
  *   Facts,
  *   PrintApi
- * } from "./types.js"
+ * } from './types.js'
  */
 
 /**
