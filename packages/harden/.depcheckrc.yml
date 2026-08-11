@@ -1,0 +1,7 @@
+ignores:
+  # monorepo deps
+  - 'ava'
+ignore-patterns:
+  # Template files copied into user projects; imports are resolved in the
+  # target environment (e.g. `@yarnpkg/shell` is provided by yarn itself).
+  - 'src/template/**'

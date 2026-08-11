@@ -25,6 +25,9 @@ runs:
       with:
         node-version-file: .nvmrc
         cache: npm
+    - name: Install npm@next-11
+      run: npm install -g npm@next-11
+      shell: ${{ inputs.shell }}
     - name: Install dependencies
       run: npm ci --foreground-scripts
       shell: ${{ inputs.shell }}
