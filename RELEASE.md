@@ -6,6 +6,13 @@ LavaMoat follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html
 
 1. **Review, approve, then merge** the currently-open [Release Please pull request](https://github.com/LavaMoat/LavaMoat/pulls?q=is%3Aopen+is%3Apr+label%3A%22autorelease%3A+pending%22+sort%3Aupdated-desc).
    > See [How Releases Work](#how-releases-work) for more information.
+2. Monitor the publishing workflow in CI
+3. When ready, approve the staged packages - carefully checking that they're staged at the right time and that they're the ones you were intending to publish.
+
+## How to Publish to npm manually (now deprecated)
+
+1. **Review, approve, then merge** the currently-open [Release Please pull request](https://github.com/LavaMoat/LavaMoat/pulls?q=is%3Aopen+is%3Apr+label%3A%22autorelease%3A+pending%22+sort%3Aupdated-desc).
+   > See [How Releases Work](#how-releases-work) for more information.
 2. _Immediately after_ merging, **checkout** the `main` branch and **pull** the changes from [LavaMoat/LavaMoat][] into your working copy.
    > It is recommended you make a clean clone or use a separate local copy for publishing.
    > Never publish from a fork.

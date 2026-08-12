@@ -4,6 +4,7 @@
   "packages/browserify": "20.0.6",
   "packages/core": "18.0.5",
   "packages/git-safe-dependencies": "1.0.1",
+  "packages/harden": "0.6.0",
   "packages/lavapack": "8.0.5",
   "packages/laverna": "2.1.0",
   "packages/lavamoat-node": "11.1.4",
