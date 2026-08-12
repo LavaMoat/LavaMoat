@@ -17,6 +17,9 @@
     "packages/git-safe-dependencies": {
       "package-name": "@lavamoat/git-safe-dependencies"
     },
+    "packages/harden": {
+      "package-name": "@lavamoat/harden"
+    },
     "packages/lavapack": {
       "package-name": "@lavamoat/lavapack"
     },

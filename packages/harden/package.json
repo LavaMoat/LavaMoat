@@ -6,7 +6,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LavaMoat/LavaMoat.git",
-    "directory": "packages/allow-scripts"
+    "directory": "packages/harden"
   },
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/harden",
   "author": "LavaMoat Team",
