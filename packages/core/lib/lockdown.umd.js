@@ -1,4 +1,4 @@
-// ses@2.2.0
+// ses@2.3.0
 (functors => options => {
   'use strict';
 
@@ -6609,6 +6609,9 @@ const CommonMath = {
     encodeInto: fn,
     encoding: getter,
     '@@toStringTag': 'string',
+
+    // Non-standard property used by Node.js
+    'RegisteredSymbol(nodejs.util.inspect.custom)': false,
   },
 
   TextDecoder: {
@@ -6624,6 +6627,9 @@ const CommonMath = {
     fatal: getter,
     ignoreBOM: getter,
     '@@toStringTag': 'string',
+
+    // Non-standard property used by Node.js
+    'RegisteredSymbol(nodejs.util.inspect.custom)': false,
   },
 
   // Appendix B
