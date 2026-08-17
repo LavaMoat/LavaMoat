@@ -28,10 +28,12 @@
  * @import {
  *   ErrorMessage,
  *   InspectionResultsMessage,
- *   InspectMessage,
- *   StructuredViolationsResult
+ *   InspectMessage
  * } from '../internal.js'
- * @import {SourceType} from '../types.js'
+ * @import {
+ *   SourceType,
+ *   StructuredViolationsResult
+ * } from '../types.js'
  */
 
 import { parse } from '@babel/parser'
