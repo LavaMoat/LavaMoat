@@ -63,7 +63,7 @@
     "chalk": "4.1.2",
     "lavamoat-core": "^18.0.5",
     "lavamoat-tofu": "^9.0.3",
-    "loggerr": "4.2.0",
+    "loggerr": "4.6.0",
     "ses": "1.15.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.41.0",
