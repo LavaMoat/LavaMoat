@@ -14,11 +14,11 @@ import {
 import { log as fallbackLog } from '../../src/log.js'
 
 /**
- * @import {Volume} from 'memfs'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
- * @import {LavaMoatEndoPolicy} from '../../src/types.js'
- * @import {ReadFn} from '@endo/compartment-mapper'
- * @import {PlatformRunScenario} from 'lavamoat-core/test/util.js'
+ * @import {ReadFn} from "@endo/compartment-mapper"
+ * @import {LavaMoatPolicy} from "@lavamoat/types"
+ * @import {PlatformRunScenario} from "lavamoat-core/test/util.js"
+ * @import {Volume} from "memfs"
+ * @import {LavaMoatEndoPolicy} from "../../src/types.js"
  */
 
 /**
@@ -210,8 +210,10 @@ export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
     /** @type {ReturnType<typeof trapOutput> | undefined} */
     let outputPromise
 
+    const nodeNoWarnings = process.env.NODE_NO_WARNINGS
     try {
       const entryPath = path.join(projectDir, scenario.entries[0])
+      process.env.NODE_NO_WARNINGS = '1'
       const worker = new Worker(RUNNER_MODULE_PATH, {
         stdout: true,
         stderr: true,
@@ -249,6 +251,7 @@ export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
     } finally {
       // TODO use AbortController
       outputPromise?.catch(() => {})
+      process.env.NODE_NO_WARNINGS = nodeNoWarnings
     }
 
     // nothing should output to stderr. except a debugger
