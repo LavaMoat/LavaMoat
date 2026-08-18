@@ -13,6 +13,7 @@ const NPM = {
   CONF: {
     SCRIPTS: 'ignore-scripts=true',
     BINS: 'bin-links=false',
+    GIT: 'allow-git=root',
   },
 }
 const YARN1 = {
@@ -26,6 +27,7 @@ const YARN3PLUS = {
   RCFILE: '.yarnrc.yml',
   CONF: {
     SCRIPTS: 'enableScripts: false',
+    GIT: 'approvedGitRepositories: []',
   },
 }
 
@@ -60,6 +62,10 @@ function writeRcFile() {
   const npmRcExists = existsSync(addInstallParentDir(NPM.RCFILE))
   const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
 
+  const packageJson = /** @type {import('type-fest').PackageJson} */ (
+    require(addInstallParentDir('package.json'))
+  )
+
   const configs = []
   if (yarnRcExists || yarnLockExists) {
     configs.push({
@@ -81,6 +87,16 @@ function writeRcFile() {
       exists: yarnYmlExists,
       entry: YARN3PLUS.CONF.SCRIPTS,
     })
+    if (
+      packageJson.packageManager &&
+      versionAtLeast(packageJson.packageManager, '4.14.0')
+    ) {
+      configs.push({
+        file: YARN3PLUS.RCFILE,
+        exists: yarnYmlExists,
+        entry: YARN3PLUS.CONF.GIT,
+      })
+    }
   }
   if (configs.length === 0) {
     // default to npm, because that's what everyone has anyway
@@ -88,6 +104,11 @@ function writeRcFile() {
       file: NPM.RCFILE,
       exists: npmRcExists,
       entry: NPM.CONF.SCRIPTS,
+    })
+    configs.push({
+      file: NPM.RCFILE,
+      exists: npmRcExists,
+      entry: NPM.CONF.GIT,
     })
     if (FEATURE.bins) {
       configs.push({
@@ -119,13 +140,9 @@ function addPackage(name) {
 
   if (result.status !== 0) {
     process.stderr.write(result.stderr)
-    console.log(
-      `@lavamoat/allow-scripts: Could not add ${name}.`
-    )
+    console.log(`@lavamoat/allow-scripts: Could not add ${name}.`)
   } else {
-    console.log(
-      `@lavamoat/allow-scripts: Added dev dependency ${name}.`
-    )
+    console.log(`@lavamoat/allow-scripts: Added dev dependency ${name}.`)
   }
 }
 
@@ -156,6 +173,29 @@ function editPackageJson() {
 }
 
 // internals
+
+/**
+ * Checks if the packageManager field's yarn version is at least the given
+ * minimum version.
+ *
+ * @param {string} packageManager - E.g. "yarn@4.14.0" or
+ *   "yarn@4.14.0+sha256.abc"
+ * @param {string} minVersion - E.g. "4.14.0"
+ * @returns {boolean}
+ */
+function versionAtLeast(packageManager, minVersion) {
+  const versionMatch = packageManager.match(/^yarn@(\d+)\.(\d+)\.(\d+)/)
+  if (!versionMatch) return false
+  const [, major, minor, patch] = versionMatch.map(Number)
+
+  const minMatch = minVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)
+  if (!minMatch) return false
+  const [, minMajor, minMinor, minPatch] = minMatch.map(Number)
+
+  if (major !== minMajor) return false
+  if (minor !== minMinor) return minor > minMinor
+  return patch >= minPatch
+}
 
 /**
  * @param {string} filename
