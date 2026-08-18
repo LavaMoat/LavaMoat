@@ -136,13 +136,12 @@ test('reportInvalidCanonicalNames - should log if invalid canonical names were f
 test('reportInvalidCanonicalNames - should include a suggestion when one was provided on the issue', (t) => {
   /** @type {string | undefined} */
   let warning
-  const log = /** @type {Loggerr} */ (
-    /** @type {unknown} */ ({
-      warning: (msg) => {
-        warning = msg
-      },
-    })
-  )
+  const log = /** @type {Loggerr} */ ({
+    /** @type {Loggerr['warning']} */
+    warning: (msg) => {
+      warning = `${msg}`
+    },
+  })
   reportInvalidCanonicalNames(
     [
       {
