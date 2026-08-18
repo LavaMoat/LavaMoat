@@ -256,6 +256,30 @@ test('getEndowmentsForConfig - read-write', (t) => {
   }
 })
 
+test('getEndowmentsForConfig - write to global symbol', (t) => {
+  const { getEndowmentsForConfig } = prepareTest({})
+  const sourceGlobal = {}
+  const config1 = {
+    globals: {
+      'symbol-for': 'write-symbol',
+    },
+  }
+  const sym = Symbol.for('symbol-for')
+  const global1 = getEndowmentsForConfig(sourceGlobal, config1)
+  const global2 = getEndowmentsForConfig(sourceGlobal, config1)
+
+  {
+    t.is(global1[sym], undefined)
+    t.is(global2[sym], undefined)
+    global1[sym] = 11
+    t.is(global1[sym], 11)
+    t.is(global2[sym], 11)
+    global2[sym] = 22
+    t.is(global1[sym], 22)
+    t.is(global2[sym], 22)
+  }
+})
+
 test('getEndowmentsForConfig - basic getter', (t) => {
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
