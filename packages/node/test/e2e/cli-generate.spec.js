@@ -19,6 +19,7 @@ const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
 const basic = fixture('basic')
 const deptree = fixture('deptree')
 const dev = fixture('dev')
+const basicTs = fixture('basic-ts', { entrypointFilename: 'index.ts' })
 
 /**
  * @typedef E2EGenerateTestContext
@@ -48,6 +49,22 @@ test('basic policy generation', async (t) => {
     ['generate', basic.entrypoint, '--policy', policyPath],
     t,
     { cwd: basic.dir }
+  )
+  t.is(code, undefined)
+  t.snapshot(await readPolicy(policyPath))
+})
+
+test('basic ts policy generation', async (t) => {
+  t.plan(2)
+
+  const policyPath = t.context.tempdir.join(
+    `basic-ts-${DEFAULT_POLICY_FILENAME}`
+  )
+
+  const { code } = await runCLI(
+    ['generate', basicTs.entrypoint, '--policy', policyPath],
+    t,
+    { cwd: basicTs.dir }
   )
   t.is(code, undefined)
   t.snapshot(await readPolicy(policyPath))
