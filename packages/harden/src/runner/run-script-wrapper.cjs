@@ -24,6 +24,27 @@ function makeRunScriptWrapper(
   }
 
   /**
+   * @param {Record<string, string>} configs
+   * @param {string} scriptName
+   * @returns {string | undefined}
+   */
+  function prefixMatch(configs, scriptName) {
+    const keys = Object.keys(configs)
+    const matchingKeys = keys
+      .filter((k) => k.endsWith('*'))
+      .filter((k) => scriptName.startsWith(k.slice(0, -1)))
+
+    if (matchingKeys.length === 0) {
+      return undefined
+    }
+    // longest prefix match wins
+    const bestMatch = matchingKeys.reduce((a, b) =>
+      a.length > b.length ? a : b
+    )
+    return configs[bestMatch]
+  }
+
+  /**
    * @param {object} opts
    * @param {Record<string, string> | undefined} opts.scriptsConfig
    * @param {string} [opts.scriptName]
@@ -38,7 +59,9 @@ function makeRunScriptWrapper(
       return {}
     }
     const configName =
-      scriptsConfig[scriptName] || scriptsConfig[DEFAULT_PERMISSION_KEY]
+      scriptsConfig[scriptName] ||
+      prefixMatch(scriptsConfig, scriptName) ||
+      scriptsConfig[DEFAULT_PERMISSION_KEY]
 
     // config needs to be optional, because it's opt-in first and specifying a default turns it opt-out.
     if (!configName) {

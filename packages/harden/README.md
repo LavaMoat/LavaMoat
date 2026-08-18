@@ -160,7 +160,26 @@ One of the more advanced capabilities `@lavamoat/harden` brings to the project i
 
 - Censoring of environment variables. A `lavamoat/.env.ban.json` file configures censoring environment variables that match given strings
 - Rearranges `$PATH` to mitigate [bin confusion][bin-confusion]
-- Adds a `scriptsConfig` property to `package.json` where files with [Node.js Permissions][permissions] options can be selected for each script individually with a fallback to `#default`. Example configurations are provided, but it's recommended you customize them to adhere to the [principle of least privilege][least-privilege].
+- Adds a `scriptsConfig` property to `package.json` where files with [Node.js Permissions][permissions] options can be selected per script with a fallback to `#default`. Example configurations are provided, but it's recommended you customize them to adhere to the [principle of least privilege][least-privilege].
+
+`scriptsConfig` matching rules:
+
+- Exact script name match has highest priority.
+- Prefix wildcard keys ending in `*` are supported (for example, `lint:*` matches `lint:eslint` and `lint:types`).
+- If multiple wildcard prefixes match, the longest prefix wins.
+- If there is no exact or wildcard match, `#default` is used when present.
+
+Example:
+
+```json
+{
+  "scriptsConfig": {
+    "lint:*": "lavamoat/scripts.strict.json",
+    "lint:fix": "lavamoat/scripts.loose.json",
+    "#default": "lavamoat/scripts.loose.json"
+  }
+}
+```
 
 ### Other
 
