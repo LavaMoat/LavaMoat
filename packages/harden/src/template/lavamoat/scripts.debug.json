@@ -1,0 +1,7 @@
+{
+  "notes": "Prints all permission checks without enforcing anything. Useful for discovering what is being blocked in programs that swallow errors.",
+  "nodeOptions": {
+    "--permission-audit": true,
+    "--import": "\"data:text/javascript,import%20dc%20from%20'node%3Adiagnostics_channel'%3B%5B'fs'%2C'net'%2C'child'%2C'worker'%2C'inspector'%2C'wasi'%2C'addon'%2C'ffi'%5D.forEach(s%3D%3Edc.subscribe('node%3Apermission-model%3A'%2Bs%2C(msg)%3D%3Econsole.error('%5BLM%20DEBUG%5D'%2Cmsg.permission%2B'%20on%20'%2Bmsg.resource)))%3B\""
+  }
+}
