@@ -3,8 +3,6 @@ import path from 'node:path'
 
 const __dirname = import.meta.dirname
 
-const EXPORT_TO_REPLACE = 'module.exports = makeRunScriptWrapper'
-
 /**
  * @param {{ packageManager: string; fileName: string }} opts
  * @returns {string}
@@ -16,16 +14,5 @@ export function bundleRunner({ packageManager, fileName }) {
   const runScriptWrapperPath = path.join(__dirname, 'run-script-wrapper.cjs')
   const runScriptWrapperCode = fs.readFileSync(runScriptWrapperPath, 'utf-8')
 
-  if (!runScriptWrapperCode.includes(EXPORT_TO_REPLACE)) {
-    throw new Error(
-      `RunScriptWrapper file does not contain the required export statement or it was altered.`
-    )
-  }
-
-  const modifiedRunScriptWrapperCode = runScriptWrapperCode.replace(
-    EXPORT_TO_REPLACE,
-    ''
-  )
-
-  return `${adapterCode}\n;;\n${modifiedRunScriptWrapperCode}`
+  return `${adapterCode}\n;;\n${runScriptWrapperCode}`
 }

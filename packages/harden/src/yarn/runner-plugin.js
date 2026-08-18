@@ -7,6 +7,7 @@
 /** @typedef {NonNullable<import('@yarnpkg/core').Hooks['wrapScriptExecution']>} WrapScriptExecutionHook */
 
 /* global makeRunScriptWrapper */
+/* global LMFolderIntegrityCheck */
 
 /**
  * Yarn 4 plugin factory for wrapScriptExecution hook.
@@ -18,6 +19,7 @@ module.exports = {
   name: '@yarnpkg/plugin-runner',
   factory: function (/** @type {NodeJS.Require} */ require) {
     const { tmpdir } = require('node:os')
+    const { createHash } = require('node:crypto')
     return {
       hooks: {
         /** @type {WrapScriptExecutionHook} */
@@ -69,6 +71,14 @@ module.exports = {
             }
           )
 
+          const integrity = LMFolderIntegrityCheck({
+            projectRoot: extra.cwd,
+            pathJoin: path.join,
+            createHash,
+            readdirSync: fs.readdirSync,
+            readFileSync: fs.readFileSync,
+          })
+
           // extra.env is a reference to the mutable object, but a different variable
           // containing that reference is used within execute, so we must amend not
           // replace it.
@@ -77,7 +87,13 @@ module.exports = {
             delete extra.env[key]
           }
           Object.assign(extra.env, newEnv)
-          return executor
+          return async (...args) => {
+            try {
+              return await executor(...args)
+            } finally {
+              integrity.verifyAfter()
+            }
+          }
         },
       },
     }
