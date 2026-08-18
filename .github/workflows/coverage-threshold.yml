@@ -1,0 +1,34 @@
+name: Update Coverage Thresholds
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at midnight UTC
+
+jobs:
+  update-coverage-thresholds:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: ./.github/actions/prepare
+      - id: coverage-threshold
+        uses: ./.github/actions/coverage-threshold
+      - if: steps.coverage-threshold.outputs.updated == 'true'
+        run: |
+          echo "Coverage thresholds updated"
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -a -n -m "chore: update coverage thresholds"
+      - if: steps.coverage-threshold.outputs.updated == 'true'
+        uses: ad-m/github-push-action@d91a481090679876dfc4178fef17f286781251df # v0.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+      - if: steps.coverage-threshold.outputs.updated != 'true'
+        run: echo "No coverage thresholds were updated"
+        shell: bash

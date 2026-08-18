@@ -1,0 +1,43 @@
+name: 'Update Coverage Threshold'
+
+description: 'Updates the coverage thresholds for all packages having a test:cover script'
+
+outputs:
+  updated:
+    description: 'Whether or not the coverage thresholds were updated'
+    value: ${{ steps.check-updated.outputs.updated }}
+
+runs:
+  steps:
+    # test:cover should be using --check-coverage anyway, but this forces the issue;
+    # without it, coverage thresholds could decrease.
+    # we allow failures here because we're not running PR checks.
+    - id: check-coverage
+      run: |
+        npm run --workspaces --if-present test:cover -- --reporter=json-summary --check-coverage && echo "success=true" >> $GITHUB_OUTPUT || echo "success=false" >> $GITHUB_OUTPUT
+      shell: bash
+    - if: steps.check-coverage.outputs.success == 'true'
+      run: |
+        find packages/*/coverage -name coverage-summary.json -exec bash -c \
+          'jq ".total | map_values(.pct)" {} > $(dirname {})/../.c8rc' \;
+      shell: bash
+    - if: steps.check-coverage.outputs.success != 'true'
+      id: check-updated
+      run: |
+        echo "No coverage change due to error(s)."
+        echo "updated=false" >> $GITHUB_OUTPUT
+      shell: bash
+    - if: steps.check-coverage.outputs.success == 'true'
+      id: check-updated
+      run: |
+        UPDATED=$(git ls-files -mo -- packages/*/.c8rc)
+        if [ -n "$UPDATED" ]; then
+          echo "Updated/added files: $UPDATED"
+          echo "updated=true" >> $GITHUB_OUTPUT
+        else
+          echo "No coverage change."
+          echo "updated=false" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+
+  using: composite
