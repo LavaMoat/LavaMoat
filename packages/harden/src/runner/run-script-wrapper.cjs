@@ -141,13 +141,29 @@ function makeRunScriptWrapper(
   /**
    * Checks the config obtained from package.json and puts it in as NODE_OPTIONS
    *
-   * @param {string | undefined} existingOptions
    * @param {ConfigOptions} configOptions
    * @param {NodeJS.ProcessEnv} env
    */
-  function installNodeOptions(existingOptions, configOptions, env) {
+  function installNodeOptions(configOptions, env) {
+    const existingOptions = env.NODE_OPTIONS
+    const inLavaMoatEnvAlready = !!env.LAVAMOAT_RUN_SCRIPT
+
     if (!configOptions) {
       return existingOptions || ''
+    }
+    // Calls to run can be nested, so existing NODE_OPTIONS are not to be preserved.
+    // If end user needs to set some options, let them put those in the script config json too.
+    // If this becomes an issue, we could use a separate env var to distinguish between options we set and options that were there already.
+
+    // If we're not nested, but there are existing options, it's safe to warn the user without being annoying.
+    if (
+      !inLavaMoatEnvAlready &&
+      existingOptions &&
+      existingOptions.length > 0
+    ) {
+      console.error(
+        `[LavaMoat] Warning: Replacing existing NODE_OPTIONS. Move them to the relevant JSON file in lavamoat/ if they were intentional.`
+      )
     }
 
     customizePermissionsConfig(configOptions, env)
@@ -156,7 +172,7 @@ function makeRunScriptWrapper(
 
     const confOption = makeFlagsFromConfig(configOptions)
 
-    return `${existingOptions || ''} ${confOption.trim()}`.trim()
+    return confOption.trim()
   }
 
   /**
@@ -257,12 +273,9 @@ function makeRunScriptWrapper(
 
       const fixedEnv = {
         ...filterEnv(existingEnv, lavamoatDir),
+        LAVAMOAT_RUN_SCRIPT: scriptName,
         PATH: envPathOpinions(existingPath),
-        NODE_OPTIONS: installNodeOptions(
-          existingEnv.NODE_OPTIONS,
-          config.nodeOptions,
-          existingEnv
-        ),
+        NODE_OPTIONS: installNodeOptions(config.nodeOptions, existingEnv),
       }
       return fixedEnv
     },
