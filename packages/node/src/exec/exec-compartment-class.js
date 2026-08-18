@@ -6,6 +6,7 @@
  */
 
 import { endowmentsToolkit } from 'lavamoat-core'
+import { createRequire } from 'node:module'
 const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper
 
 /**
@@ -15,6 +16,25 @@ const wrapFunctionConstructor = endowmentsToolkit.defaultCreateFunctionWrapper
  *   SomeGlobalThis
  * } from '../internal.js'
  */
+
+/**
+ *
+ *
+ * @param {string} _parentModuleSpecifier
+ * @param {Record<string, any>} meta
+ */
+const importMetaHook = (_parentModuleSpecifier, meta) => {
+  assert(meta.url, 'meta.url should be provided by endo, but missing')
+  /**
+   * @param {string} specifier
+   * @param {string} [parent]
+   * @returns {string}
+   */
+  meta.resolve = (specifier, parent) => {
+    const require = createRequire(parent || meta.url)
+    return require.resolve(specifier)
+  }
+}
 
 /**
  * Creates a subclass of `Compartment` which, when instantiated, applies fixes
@@ -33,7 +53,7 @@ export const makeExecutionCompartment = (originalGlobalThis) => {
      * @param {CompartmentOptions} [options]
      */
     constructor(options) {
-      super({ ...options, noAggregateLoadErrors: true })
+      super({ ...options, noAggregateLoadErrors: true, importMetaHook })
 
       const { globalThis: compartmentGlobalThis } = this
 
