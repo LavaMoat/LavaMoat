@@ -30,7 +30,7 @@ async function copyProject(t, name) {
 }
 
 for (const pm of PKGMGR_LIST) {
-  test(`.runner.cjs captures scripts in ${pm} after strict setup`, async (t) => {
+  test(`runner captures scripts in ${pm} after strict setup`, async (t) => {
     const cwd = await copyProject(t, `runner-${pm}`)
 
     await hardenDefaults({
@@ -62,3 +62,25 @@ for (const pm of PKGMGR_LIST) {
     )
   })
 }
+test(`runner wildcard support in scriptsConfig exits zero`, async (t) => {
+  t.plan(1)
+  const cwd = await copyProject(t, 'runner-features')
+
+  await hardenDefaults({
+    cwd,
+    packageManager: 'npm',
+    decisions: createFallbackDecisions({
+      level: 'strict',
+      print: () => {},
+    }),
+    print: () => {},
+  })
+
+  const result = await execFileAsync('npm', ['test'], {
+    cwd,
+    env: { ...process.env },
+  })
+  t.log(result.stdout)
+
+  t.pass()
+})
