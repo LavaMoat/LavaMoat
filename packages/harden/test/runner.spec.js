@@ -1,32 +1,25 @@
 import test from 'ava'
-import { cp, mkdtemp } from 'node:fs/promises'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { join } from 'node:path'
-import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { copyProject } from './utils.js'
 import { hardenDefaults } from '../src/index.js'
 import { createFallbackDecisions } from '../src/tools/default-decisions.js'
 
 const execFileAsync = promisify(execFile)
 
-const DEBUG = false
-
 const PKGMGR_LIST = ['npm', 'pnpm', 'yarn']
-const PROJECTS_DIR = new URL('./projects/', import.meta.url).pathname
 
-/**
- * Copies a fixture project to a temp dir and returns the temp path.
- *
- * @param {string} name - Project folder name
- */
-async function copyProject(t, name) {
-  if (DEBUG) {
-    return join(PROJECTS_DIR, name)
+function cleanupPathAfterNpm(PATH) {
+  const pathFragments = PATH.split(path.delimiter)
+  const filteredFragments = []
+
+  for (const fragment of pathFragments) {
+    if (!fragment.includes('node_modules')) {
+      filteredFragments.push(fragment)
+    }
   }
-  const tmp = await mkdtemp(join(tmpdir(), `harden-test-${name}-`))
-  await cp(join(PROJECTS_DIR, name), tmp, { recursive: true })
-  t.log(`--- setting up test in ${tmp}`)
-  return tmp
+  return filteredFragments.join(path.delimiter)
 }
 
 for (const pm of PKGMGR_LIST) {
@@ -50,7 +43,12 @@ for (const pm of PKGMGR_LIST) {
 
     const result = await execFileAsync(pm, ['test'], {
       cwd,
-      env: { ...process.env, TOKEN: 'SECRET', BISFOR: 'Bananas' },
+      env: {
+        ...process.env,
+        TOKEN: 'SECRET',
+        BISFOR: 'Bananas',
+        PATH: cleanupPathAfterNpm(process.env.PATH),
+      },
     })
     t.log(result.stderr)
     t.regex(result.stdout, /^Absolutely$/gm, 'Expected output not found')

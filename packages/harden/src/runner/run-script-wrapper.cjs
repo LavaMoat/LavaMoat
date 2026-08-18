@@ -65,7 +65,7 @@ function makeRunScriptWrapper(
 
     // config needs to be optional, because it's opt-in first and specifying a default turns it opt-out.
     if (!configName) {
-      return {}
+      return { config: {}, name: undefined }
     }
     const configPath = pathJoin(projectRoot, configName)
     let conf
@@ -81,7 +81,10 @@ function makeRunScriptWrapper(
         { cause: err }
       )
     }
-    return conf
+    return {
+      config: conf,
+      name: configName,
+    }
   }
 
   /**
@@ -169,7 +172,7 @@ function makeRunScriptWrapper(
    */
   function installNodeOptions(configOptions, env) {
     const existingOptions = env.NODE_OPTIONS
-    const inLavaMoatEnvAlready = !!env.LAVAMOAT_RUN_SCRIPT
+    const inLavaMoatEnvAlready = !!env.LAVAMOAT_RUN_CONF
 
     if (!configOptions) {
       return existingOptions || ''
@@ -273,15 +276,23 @@ function makeRunScriptWrapper(
         filteredFragments.push(fragment)
       }
     }
-    // Why would there be multiple bin fragments? In a npm workspace, local bin and workspace root bin is added
-    filteredFragments.push(...nodeModulesBinFragments)
+    // This should preserve order of items.
+    const uniqueNodeModulesBinFragments = Array.from(
+      new Set(nodeModulesBinFragments)
+    )
+
+    // Why would there even be multiple bin fragments? ecause
+    // npm happily adds entries for hypothetical node_modules/.bin
+    // in all parent dirs
+    filteredFragments.push(...uniqueNodeModulesBinFragments)
+
     return filteredFragments.join(pathDelimiter)
   }
 
   return {
     processEnv: (existingEnv) => {
       const scriptsConfig = readScriptsConfig(projectRoot)
-      const config = readConfig({
+      const { config, name: configName } = readConfig({
         scriptsConfig,
         scriptName,
         projectRoot,
@@ -296,7 +307,7 @@ function makeRunScriptWrapper(
 
       const fixedEnv = {
         ...filterEnv(existingEnv, lavamoatDir),
-        LAVAMOAT_RUN_SCRIPT: scriptName,
+        LAVAMOAT_RUN_CONF: configName,
         PATH: envPathOpinions(existingPath),
         NODE_OPTIONS: installNodeOptions(config.nodeOptions, existingEnv),
       }
