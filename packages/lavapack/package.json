@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/lavapack",
-  "version": "8.0.5",
+  "version": "9.0.0",
   "description": "LavaMoat packer",
   "repository": {
     "type": "git",
