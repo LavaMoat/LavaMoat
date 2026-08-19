@@ -1,10 +1,54 @@
 /// <reference path="./make-run-script-wrapper.global.d.ts" />
 
 /**
+ * @param {object} opts
+ * @param {string} opts.projectRoot
+ * @param {typeof import('node:path').join} opts.pathJoin
+ * @param {typeof import('node:crypto').createHash} opts.createHash
+ * @param {typeof import('node:fs').readdirSync} opts.readdirSync
+ * @param {typeof import('node:fs').readFileSync} opts.readFileSync
+ */
+// eslint-disable-next-line no-unused-vars
+function LMFolderIntegrityCheck({
+  projectRoot,
+  pathJoin,
+  createHash,
+  readdirSync,
+  readFileSync,
+}) {
+  const lavamoatDir = pathJoin(projectRoot, 'lavamoat')
+
+  const hashFilesInDir = () => {
+    const hash = createHash('sha1')
+    readdirSync(lavamoatDir, { withFileTypes: true })
+      .filter((f) => f.isFile())
+      .map((f) => f.name)
+      .sort()
+      .forEach((f) => hash.update(readFileSync(pathJoin(lavamoatDir, f))))
+
+    return hash.digest('hex')
+  }
+
+  const hashZero = hashFilesInDir()
+
+  return {
+    verifyAfter: () => {
+      const hashNow = hashFilesInDir()
+      if (hashNow !== hashZero) {
+        throw new Error(
+          `[LavaMoat] lavamoat folder integrity check failed. It was modified during the script run.`
+        )
+      }
+    },
+  }
+}
+
+/**
  * @param {MakeRunScriptWrapperOptions} param0
  * @param {MakeRunScriptWrapperIO} param1
  * @returns {MakeRunScriptWrapper}
  */
+// eslint-disable-next-line no-unused-vars
 function makeRunScriptWrapper(
   {
     scriptName,
@@ -268,5 +312,3 @@ function makeRunScriptWrapper(
     },
   }
 }
-
-module.exports = makeRunScriptWrapper

@@ -2,8 +2,10 @@
 /// <reference path="../runner/make-run-script-wrapper.global.d.ts" />
 
 /* global makeRunScriptWrapper */
+/* global LMFolderIntegrityCheck */
 
 const { spawnSync } = require('node:child_process')
+const { createHash } = require('node:crypto')
 const fs = require('node:fs')
 const path = require('node:path')
 const { tmpdir } = require('node:os')
@@ -55,6 +57,14 @@ const wrapper = makeRunScriptWrapper(
   }
 )
 
+const integrity = LMFolderIntegrityCheck({
+  projectRoot: pkgJsonFolder,
+  pathJoin: path.join,
+  createHash,
+  readdirSync: fs.readdirSync,
+  readFileSync: fs.readFileSync,
+})
+
 const customEnv = wrapper.processEnv(process.env)
 
 // Note: spawnSync is used here instead of process.execve because execve is
@@ -67,6 +77,9 @@ const result = spawnSync(fallbackShell, [...shellArgs, scriptPayload], {
   env: customEnv,
   cwd: pkgJsonFolder,
 })
+
+integrity.verifyAfter()
+
 if (result.error) {
   console.error(
     `[LavaMoat wrapper failed to execute "${scriptName}"] ${result.error.message}`

@@ -1,4 +1,16 @@
 declare global {
+  type LMFolderIntegrityCheckOptions = {
+    projectRoot: string
+    pathJoin: (...segments: string[]) => string
+    createHash: typeof import('node:crypto').createHash
+    readdirSync: typeof import('node:fs').readdirSync
+    readFileSync: typeof import('node:fs').readFileSync
+  }
+
+  type LMFolderIntegrityCheck = {
+    verifyAfter: () => void
+  }
+
   type MakeRunScriptWrapperConfigOptions = Record<
     string,
     boolean | string | string[]
@@ -36,6 +48,10 @@ declare global {
     options: MakeRunScriptWrapperOptions,
     io: MakeRunScriptWrapperIO
   ): MakeRunScriptWrapper
+
+  function LMFolderIntegrityCheck(
+    options: LMFolderIntegrityCheckOptions
+  ): LMFolderIntegrityCheck
 }
 
 export {}
