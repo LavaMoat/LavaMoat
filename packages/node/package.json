@@ -50,9 +50,9 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",
-    "test:cover": "c8 --check-coverage npm run test:run",
-    "test:run": "cross-env LOCKDOWN_REPORTING=none ava",
-    "test:update-snapshots": "npm run test:run -- -u"
+    "test:cover": "c8 --check-coverage ava",
+    "test:run": "ava",
+    "test:update-snapshots": "ava -u"
   },
   "dependencies": {
     "@babel/parser": "7.29.7",
