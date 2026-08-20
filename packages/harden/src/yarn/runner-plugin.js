@@ -51,7 +51,7 @@ module.exports = {
             {
               scriptName,
               scriptPayload: extra.script,
-              projectRoot: extra.cwd,
+              projectRoot: project.cwd,
               pathBinMatcher: (fragment) => {
                 return fragment.endsWith(binFolder)
               },
