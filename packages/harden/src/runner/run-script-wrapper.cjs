@@ -281,7 +281,7 @@ function makeRunScriptWrapper(
       new Set(nodeModulesBinFragments)
     )
 
-    // Why would there even be multiple bin fragments? ecause
+    // Why would there even be multiple bin fragments? because
     // npm happily adds entries for hypothetical node_modules/.bin
     // in all parent dirs
     filteredFragments.push(...uniqueNodeModulesBinFragments)

@@ -74,11 +74,9 @@ test(`runner wildcard support in scriptsConfig exits zero`, async (t) => {
     print: () => {},
   })
 
-  const result = await execFileAsync('npm', ['test'], {
+  const result = await t.notThrowsAsync(execFileAsync('npm', ['test'], {
     cwd,
     env: { ...process.env },
-  })
+  }));
   t.log(result.stdout)
-
-  t.pass()
 })
