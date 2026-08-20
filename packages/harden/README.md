@@ -125,6 +125,7 @@ harden check -p yarn -l strict
 Options:
   -p, --package-manager <pm>  Package manager to check against (npm, yarn, pnpm)
   -l, --level <level>         Hardening level: baseline, moderate, strict  [default: moderate]
+  --json                      Output machine-readable JSON to stdout
 ```
 
 ## Opinions
