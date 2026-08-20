@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-#!/usr/bin/env node
 
 /**
  * Main CLI entry point
@@ -17,19 +16,18 @@
 
 import './preamble.js'
 
+import { terminalLink } from '@lavamoat/vog'
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
 import fs from 'node:fs'
 import path from 'node:path'
-import { stripVTControlCharacters } from 'node:util'
-import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
 import { NoPolicyError } from './error.js'
 import { run } from './exec/run.js'
-import { action, hrPath, seconds, success } from './format.js'
+import { action, hrPath, seconds, stripAnsi, success } from './format.js'
 import { readJsonFile } from './fs.js'
-import { disableWarnings, log } from './log.js'
+import { disableWarnings, log, LogLevels } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import {
   policyInput as buildPolicyInput,
@@ -112,7 +110,6 @@ const main = async (args = hideBin(process.argv)) => {
   // In Node.js v23, import attributes are no longer flagged as experimental.
   // See https://nodejs.org/api/esm.html#import-attributes
   // TODO: Use import attributes instead
-  // #region use import attributes instead
   const pkgJson = /** @type {PackageJson} */ (
     await readJsonFile(toPath(new URL('../package.json', import.meta.url)))
   )
@@ -124,7 +121,6 @@ const main = async (args = hideBin(process.argv)) => {
     -4
   )
   const bugs = `${pkgJson.bugs}`
-  // #endregion
 
   /**
    * Bug-reporting link for truly unexpected error messages
@@ -165,10 +161,10 @@ const main = async (args = hideBin(process.argv)) => {
     const niceResolvedEntrypoint = hrPath(resolvedEntrypoint)
     argv.entrypoint = resolvedEntrypoint
     if (
-      path.normalize(stripVTControlCharacters(niceResolvedEntrypoint)) !==
-      path.normalize(stripVTControlCharacters(niceOriginalEntrypoint))
+      path.normalize(stripAnsi(niceResolvedEntrypoint)) !==
+      path.normalize(stripAnsi(niceOriginalEntrypoint))
     ) {
-      log.warning(
+      log.warn(
         `Resolved entrypoint ${niceOriginalEntrypoint} → ${niceResolvedEntrypoint}`
       )
     }
@@ -182,7 +178,7 @@ const main = async (args = hideBin(process.argv)) => {
    */
   const disableWarningsMiddleware = ({ warnings }) => {
     if (!warnings) {
-      disableWarnings(log)
+      disableWarnings()
     }
   }
 
@@ -229,6 +225,7 @@ const main = async (args = hideBin(process.argv)) => {
   📖 Read ${terminalLink(`the LavaMoat docs`, homepage)}
 `
     )
+    // #region global options
     .options({
       bin: {
         alias: ['b'],
@@ -237,8 +234,6 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
-
-      // #region path args
 
       /**
        * The three `policy*` options below are used for both reading and
@@ -283,7 +278,6 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: PATH_GROUP,
       },
-      // #endregion
 
       'prod-only': {
         describe: 'Exclude development dependencies',
@@ -303,6 +297,7 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
+      // #endregion
     })
     .conflicts('quiet', 'verbose')
     .middleware(
@@ -346,15 +341,15 @@ const main = async (args = hideBin(process.argv)) => {
           }
         }
         if (argv.verbose) {
-          log.setLevel('debug')
+          log.level = LogLevels.debug
         } else if (argv.quiet) {
-          // This assumes that we will never use the "emergency" log level!
-          log.setLevel('emergency')
+          log.level = LogLevels.silent
         }
       }
     )
+    // #region run
     /**
-     * Default command (no command)
+     * Default command (`run <entrypoint>`)
      */
     .command(
       ['$0 <entrypoint>', 'run <entrypoint>'],
@@ -511,6 +506,12 @@ const main = async (args = hideBin(process.argv)) => {
         })
       }
     )
+    // #endregion
+
+    // #region generate
+    /**
+     * Generate command (`generate <entrypoint>`)
+     */
     .command(
       ['generate <entrypoint>', 'gen <entrypoint>'],
       'Generate a policy',
@@ -630,13 +631,12 @@ const main = async (args = hideBin(process.argv)) => {
               `${success} ${action('Wrote')} compacted policy override to ${hrPath(policyOverridePath)}`
             )
           } else {
-            log.warning(
-              `No policy override file to compact; skipping compaction`
-            )
+            log.warn(`No policy override file to compact; skipping compaction`)
           }
         }
       }
     )
+    // #endregion
     .fail((msg, err, yargs) => {
       // `msg` is from yargs. if it's from yargs, we should probably just print
       // the help, because it is likely an invalid flag. `err` is from our code,
@@ -647,7 +647,7 @@ const main = async (args = hideBin(process.argv)) => {
       } else {
         yargs.showHelp()
         // if `msg` is undefined, then idk--might be a yargs bug?
-        log.notice(msg ?? `unknown error - ${reportThisBug}`)
+        log.warn(msg ?? `unknown error - ${reportThisBug}`)
       }
       // this is recommended by the yargs docs, because `fail()` can be used to
       // salvage the process if failure happened before the command handler. if
