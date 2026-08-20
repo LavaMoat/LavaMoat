@@ -12,6 +12,7 @@ import type {
   Policy as EndoPolicy,
   FsInterface,
   ImportLocationOptions,
+  PackageCompartmentDescriptor,
   PackagePolicy,
   PathInterface,
   ReadNowPowers,
@@ -23,13 +24,10 @@ import type { IsBuiltinFn, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
-import type { Except, LiteralUnion, Simplify } from 'type-fest'
+import type { Except, Simplify, Writable } from 'type-fest'
 import type {
-  ATTENUATORS_COMPARTMENT,
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
-  LAVAMOAT_PKG_POLICY_ROOT,
-  MERGED_POLICY_FIELD,
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from './constants.js'
@@ -89,14 +87,6 @@ export interface WithLog {
   log?: Loggerr
 }
 
-export interface WithPolicyPath {
-  policyPath?: string | URL
-}
-
-export interface WithPolicy {
-  policy?: LavaMoatPolicy
-}
-
 export interface WithPolicyOnly {
   /**
    * A {@link LavaMoatPolicy} object.
@@ -106,57 +96,6 @@ export interface WithPolicyOnly {
    * Disallowed in lieu of {@link policy}
    */
   policyPath?: never
-}
-
-/**
- * Options having a `policyOverride` property and _not_ a `policyOverridePath`
- */
-export type WithPolicyOverrideOnly = {
-  /**
-   * Disallowed in lieu of {@link policyOverride}
-   */
-  policyOverridePath?: never
-  /**
-   * A policy override object.
-   */
-  policyOverride?: LavaMoatPolicy
-}
-
-/**
- * Options having a `policyOverridePath` property and _not_ a `policyOverride`
- */
-export type WithPolicyOverridePathOnly = {
-  /**
-   * Path to a policy override file.
-   */
-  policyOverridePath?: string | URL
-
-  /**
-   * Disallowed in lieu of {@link policyOverridePath}
-   */
-  policyOverride?: never
-}
-
-/**
- * Options having a `policyOverride` or `policyOverridePath` property (not both
- * at once!)
- */
-export type WithPolicyOverrideOrPath =
-  | WithPolicyOverrideOnly
-  | WithPolicyOverridePathOnly
-
-/**
- * Options having a `policyOverride` property
- */
-export interface WithPolicyOverride {
-  policyOverride?: LavaMoatPolicy
-}
-
-/**
- * Options having a `policyOverridePath` property
- */
-export interface WithPolicyOverridePath {
-  policyOverridePath?: string | URL
 }
 
 /**
@@ -241,22 +180,6 @@ export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
  */
 export type SourceType = typeof SOURCE_TYPE_MODULE | typeof SOURCE_TYPE_SCRIPT
 
-/**
- * Options for `execute()`
- */
-export type ExecuteOptions = ComposeOptions<
-  [
-    Except<
-      ImportLocationOptions | SyncImportLocationOptions,
-      'log' | 'dev' | 'policy'
-    >,
-    WithReadPowersAndTrustAndEndoPolicy,
-    WithLog,
-    WithProdOnly,
-    WithPolicyOnly,
-  ]
->
-
 export interface WithLavaMoatEndoPolicy {
   endoPolicy?: LavaMoatEndoPolicy
 }
@@ -286,7 +209,9 @@ export type GeneratePolicyOptions = ComposeOptions<
     WithIsBuiltin,
     WithLoadForMapOptions,
     WithScuttleGlobalThis,
-    LoadPoliciesOptions,
+    WithProjectRoot,
+    WithReadFile,
+    WithPolicies,
     WithCompact,
   ]
 >
@@ -295,7 +220,7 @@ export type GeneratePolicyOptions = ComposeOptions<
  * Result of `generatePolicy()`
  */
 export type GeneratePolicyResult = {
-  policy: MergedLavaMoatPolicy
+  policy: Merged<LavaMoatPolicy>
   hasWarnings: boolean
   /**
    * Present only when `compact: true` was passed and a policy override was
@@ -383,9 +308,9 @@ export type RunOptions = ComposeOptions<
     WithTrustRoot,
     WithScuttleGlobalThis,
     WithLog,
-    WithPolicy,
-    WithPolicyPath,
-    LoadPoliciesOptions,
+    WithProjectRoot,
+    WithReadFile,
+    WithPolicies,
   ]
 >
 
@@ -398,26 +323,8 @@ export interface WithProjectRoot {
    *
    * @defaultValue `process.cwd()`
    */
-  projectRoot?: string
+  projectRoot?: string | URL
 }
-
-/**
- * Options for `toEndoPolicy()`
- */
-export type ToEndoPolicyOptions = ComposeOptions<
-  [WithPolicyOverrideOrPath, WithLog, WithProjectRoot]
->
-
-/**
- * Used when the first parameter to `toEndoPolicy()` is a
- * {@link MergedLavaMoatPolicy}
- */
-export type ToEndoPolicyOptionsWithoutPolicyOverride = ComposeOptions<
-  [
-    Except<ToEndoPolicyOptions, 'policyOverridePath' | 'policyOverride'>,
-    { policyOverride?: never; policyOverridePath?: never },
-  ]
->
 
 /**
  * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
@@ -445,23 +352,7 @@ export type WithReadPowersAndTrustAndEndoPolicy = ComposeOptions<
   [WithReadPowersAndTrust, WithLavaMoatEndoPolicy]
 >
 
-/**
- * Options for `loadPolicies()`
- */
-export type LoadPoliciesOptions = ComposeOptions<
-  [
-    WithProjectRoot,
-    WithReadFile,
-    WithPolicyOverride,
-    WithPolicyOverridePath,
-    WithPolicyPath,
-  ]
->
-
-export type CanonicalName = LiteralUnion<
-  typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
-  string
->
+export type CanonicalName = PackageCompartmentDescriptor['label']
 
 // re-export schema
 // TODO: make this less bad
@@ -564,10 +455,107 @@ export type ComposeOptions<T extends object[]> = Simplify<
     : object
 >
 
-export type MergedLavaMoatPolicy = LavaMoatPolicy & {
-  [MERGED_POLICY_FIELD]: true
+/**
+ * Options bucket containing a `policies` prop
+ */
+export interface WithPolicies {
+  policies?: PolicyInput
 }
 
-export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
-  [MERGED_POLICY_FIELD]?: never
+/**
+ * Discriminated union describing where a primary policy comes from.
+ *
+ * Use the helper factories to construct these values:
+ *
+ * - {@link policySourceFromFile}
+ * - {@link policySourceFromInline}
+ * - {@link policySourceFromDefault}
+ */
+export type PolicySource =
+  | { readonly kind: 'inline'; readonly policy: LavaMoatPolicy }
+  | { readonly kind: 'file'; readonly path: string }
+  | { readonly kind: 'default'; readonly projectRoot: string }
+
+/**
+ * Discriminated union describing where a policy override comes from (or whether
+ * it does not exist).
+ *
+ * Use the helper factories to construct these values:
+ *
+ * - {@link policyOverrideSourceFromFile}
+ * - {@link policyOverrideSourceFromInline}
+ * - {@link policyOverrideAuto}
+ * - {@link policyOverrideNone}
+ */
+export type PolicyOverrideSource =
+  | { readonly kind: 'inline'; readonly policy: LavaMoatPolicy }
+  | { readonly kind: 'file'; readonly path: string }
+  | { readonly kind: 'auto'; readonly projectRoot: string }
+  | { readonly kind: 'none' }
+
+/**
+ * Structured input for policy loading.
+ *
+ * Replaces the polymorphic / XOR-shaped option patterns in the legacy API.
+ * Construct using {@link policyInput}.
+ */
+export type PolicyInput = {
+  readonly policy: PolicySource
+  readonly override: PolicyOverrideSource
 }
+
+/**
+ * Options for {@link policyInput}.
+ */
+export type PolicyInputOptions = ComposeOptions<
+  [Partial<Writable<PolicyInput>>, WithProjectRoot]
+>
+
+/**
+ * An opaque wrapper around a merged {@link LavaMoatPolicy}.
+ *
+ * Unlike the symbol-branded {@link MergedLavaMoatPolicy}, this form survives
+ * serialization. Access the underlying policy via `.policy` or
+ * {@link unwrapMerged}.
+ *
+ * @template P The merged policy type. Default is `LavaMoatPolicy`
+ */
+export type Merged<P extends LavaMoatPolicy = LavaMoatPolicy> = {
+  readonly policy: P
+  readonly merged: true
+}
+
+/**
+ * Options bucket containing a `policy` prop
+ */
+export interface WithPolicy {
+  policy?: LavaMoatPolicy
+}
+
+/**
+ * Options bucket containing a `policyOverride` prop
+ */
+export interface WithPolicyOverride {
+  policyOverride?: LavaMoatPolicy
+}
+
+/**
+ * Options for {@link load}
+ */
+export type LoadOptions = ComposeOptions<
+  [
+    Except<
+      ImportLocationOptions | SyncImportLocationOptions,
+      'log' | 'dev' | 'policy'
+    >,
+    WithReadPowersAndTrustAndEndoPolicy,
+    WithLog,
+    WithProdOnly,
+    WithPolicy,
+  ]
+>
+
+/**
+ * Options for {@link execute}
+ */
+export type ExecuteOptions = LoadOptions

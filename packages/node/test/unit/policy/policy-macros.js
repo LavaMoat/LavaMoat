@@ -3,10 +3,10 @@ import '../../../src/preamble.js'
 import { Loggerr } from 'loggerr'
 import { fileURLToPath } from 'node:url'
 import { defaultReadPowers } from '../../../src/compartment/power.js'
-import { MERGED_POLICY_FIELD, SourceTypes } from '../../../src/constants.js'
+import { SourceTypes } from '../../../src/constants.js'
 import { log as defaultLog } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
-import { isPolicy } from '../../../src/policy-util.js'
+import { isPolicy, unwrapMerged } from '../../../src/policy-util.js'
 import { isFunction } from '../../../src/util.js'
 import { fixtureFinder } from '../../test-util.js'
 import {
@@ -16,18 +16,32 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicy
+ * } from '@lavamoat/types'
  * @import {
  *   Macro,
+ *   Macro,
  *   MacroDeclarationOptions,
+ *   MacroDeclarationOptions,
+ *   TestFn,
  *   TestFn
  * } from 'ava'
- * @import {SourceType} from '../../../src/types.js'
+ * @import {
+ *   SourceType,
+ *   SourceType
+ * } from '../../../src/types.js'
  * @import {
  *   ScaffoldFixtureOptions,
+ *   ScaffoldFixtureOptions,
+ *   ScaffoldFixtureResult,
  *   ScaffoldFixtureResult,
  *   TestPolicyForFixtureOptions,
+ *   TestPolicyForFixtureOptions,
  *   TestPolicyForJSONOptions,
+ *   TestPolicyForJSONOptions,
+ *   TestPolicyMacroOptions,
  *   TestPolicyMacroOptions
  * } from './types.js'
  */
@@ -113,7 +127,7 @@ export function createGeneratePolicyMacros(test) {
         }
       }
 
-      const { policy: actualPolicy } = await loadAndGeneratePolicy(
+      const { policy: wrappedPolicy } = await loadAndGeneratePolicy(
         '/entry.js',
         {
           log,
@@ -125,17 +139,15 @@ export function createGeneratePolicyMacros(test) {
         }
       )
 
+      const actualPolicy = unwrapMerged(wrappedPolicy)
+
       if (isPolicy(expectedPolicy)) {
-        const actual = /** @type {LavaMoatPolicy} */ ({ ...actualPolicy })
-        delete (/** @type {any} */ (actual)[MERGED_POLICY_FIELD])
-        t.deepEqual(actual, expectedPolicy)
+        t.deepEqual(actualPolicy, expectedPolicy)
       } else if ('expected' in expectedPolicy) {
         if (!isPolicy(expectedPolicy.expected)) {
           throw new TypeError('expectedPolicy.expected is not a policy')
         }
-        const actual = /** @type {LavaMoatPolicy} */ ({ ...actualPolicy })
-        delete (/** @type {any} */ (actual)[MERGED_POLICY_FIELD])
-        t.deepEqual(actual, expectedPolicy.expected)
+        t.deepEqual(actualPolicy, expectedPolicy.expected)
       } else {
         t.snapshot(actualPolicy)
       }
@@ -263,7 +275,7 @@ export function createGeneratePolicyMacros(test) {
           log.setLevel(Loggerr.EMERGENCY)
         }
 
-        const { policy: actualPolicy } = await loadAndGeneratePolicy(
+        const { policy: wrappedPolicy } = await loadAndGeneratePolicy(
           jsonEntrypoint,
           {
             ...otherOptions,
@@ -271,14 +283,18 @@ export function createGeneratePolicyMacros(test) {
           }
         )
 
+        const actualPolicy = unwrapMerged(wrappedPolicy)
+
         // if overrides provided, then we will make a second check that
         // asserts `actualPolicy` is a superset of the override
         t.plan(options?.policyOverride ? 2 : 1)
 
         if (isPolicy(expected)) {
-          const actual = /** @type {LavaMoatPolicy} */ ({ ...actualPolicy })
-          delete (/** @type {any} */ (actual)[MERGED_POLICY_FIELD])
-          t.deepEqual(actual, expected, 'policy does not deeply equal expected')
+          t.deepEqual(
+            actualPolicy,
+            expected,
+            'policy does not deeply equal expected'
+          )
         } else if (isFunction(expected)) {
           await expected(t, actualPolicy)
         } else {
@@ -372,7 +388,7 @@ export function createGeneratePolicyMacros(test) {
           entrypoint,
           entrypointFilename,
         })
-        const { policy: actualPolicy } = await loadAndGeneratePolicy(
+        const { policy: wrappedPolicy } = await loadAndGeneratePolicy(
           entrypointPath,
           {
             ...otherOptions,
@@ -381,6 +397,8 @@ export function createGeneratePolicyMacros(test) {
             log,
           }
         )
+
+        const actualPolicy = unwrapMerged(wrappedPolicy)
 
         // if overrides provided, then we will make a second check that
         // asserts `actualPolicy` is a superset of the override
