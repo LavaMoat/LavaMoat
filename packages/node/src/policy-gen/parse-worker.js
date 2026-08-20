@@ -30,7 +30,7 @@ if (!parentPort) {
 /** @type {PolicyGenWorkerData} */
 const { globalRefs, globalsOptionsByLanguage = {}, builtinModules } = workerData
 
-runPipelineInWorker(
+void runPipelineInWorker(
   parentPort,
   createPolicyGenPipelineConfig({
     globalRefs,
