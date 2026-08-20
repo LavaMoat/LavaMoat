@@ -10,7 +10,7 @@
  *   LavaMoatPolicy,
  *   ResourcePolicy,
  *   Resources
- * } from "@lavamoat/types"
+ * } from '@lavamoat/types'
  */
 
 const { entries, keys } = Object
@@ -55,9 +55,7 @@ exports.compactPolicyOverride = (policyOverride, policy) => {
   const compactedResources = {}
   let compacted = false
 
-  for (const [name, overrideResource] of Object.entries(
-    policyOverride.resources
-  )) {
+  for (const [name, overrideResource] of entries(policyOverride.resources)) {
     const baseResource = policy.resources[name]
 
     /** @type {ResourcePolicy} */
