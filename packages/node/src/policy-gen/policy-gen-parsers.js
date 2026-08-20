@@ -235,8 +235,5 @@ export const createPolicyGenParsers = (inspectionResults, reporterOptions) => {
     onModuleComplete,
   })
 
-  return {
-    mjs: asyncParsers[LANGUAGE_MJS],
-    cjs: asyncParsers[LANGUAGE_CJS],
-  }
+  return asyncParsers
 }
