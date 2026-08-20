@@ -24,6 +24,27 @@ function makeRunScriptWrapper(
   }
 
   /**
+   * @param {Record<string, string>} configs
+   * @param {string} scriptName
+   * @returns {string | undefined}
+   */
+  function prefixMatch(configs, scriptName) {
+    const keys = Object.keys(configs)
+    const matchingKeys = keys
+      .filter((k) => k.endsWith('*'))
+      .filter((k) => scriptName.startsWith(k.slice(0, -1)))
+
+    if (matchingKeys.length === 0) {
+      return undefined
+    }
+    // longest prefix match wins
+    const bestMatch = matchingKeys.reduce((a, b) =>
+      a.length > b.length ? a : b
+    )
+    return configs[bestMatch]
+  }
+
+  /**
    * @param {object} opts
    * @param {Record<string, string> | undefined} opts.scriptsConfig
    * @param {string} [opts.scriptName]
@@ -38,11 +59,13 @@ function makeRunScriptWrapper(
       return {}
     }
     const configName =
-      scriptsConfig[scriptName] || scriptsConfig[DEFAULT_PERMISSION_KEY]
+      scriptsConfig[scriptName] ||
+      prefixMatch(scriptsConfig, scriptName) ||
+      scriptsConfig[DEFAULT_PERMISSION_KEY]
 
     // config needs to be optional, because it's opt-in first and specifying a default turns it opt-out.
     if (!configName) {
-      return {}
+      return { config: {}, name: undefined }
     }
     const configPath = pathJoin(projectRoot, configName)
     let conf
@@ -58,7 +81,10 @@ function makeRunScriptWrapper(
         { cause: err }
       )
     }
-    return conf
+    return {
+      config: conf,
+      name: configName,
+    }
   }
 
   /**
@@ -141,13 +167,29 @@ function makeRunScriptWrapper(
   /**
    * Checks the config obtained from package.json and puts it in as NODE_OPTIONS
    *
-   * @param {string | undefined} existingOptions
    * @param {ConfigOptions} configOptions
    * @param {NodeJS.ProcessEnv} env
    */
-  function installNodeOptions(existingOptions, configOptions, env) {
+  function installNodeOptions(configOptions, env) {
+    const existingOptions = env.NODE_OPTIONS
+    const inLavaMoatEnvAlready = !!env.LAVAMOAT_RUN_CONF
+
     if (!configOptions) {
       return existingOptions || ''
+    }
+    // Calls to run can be nested, so existing NODE_OPTIONS are not to be preserved.
+    // If end user needs to set some options, let them put those in the script config json too.
+    // If this becomes an issue, we could use a separate env var to distinguish between options we set and options that were there already.
+
+    // If we're not nested, but there are existing options, it's safe to warn the user without being annoying.
+    if (
+      !inLavaMoatEnvAlready &&
+      existingOptions &&
+      existingOptions.length > 0
+    ) {
+      console.error(
+        `[LavaMoat] Warning: Replacing existing NODE_OPTIONS. Move them to the relevant JSON file in lavamoat/ if they were intentional.`
+      )
     }
 
     customizePermissionsConfig(configOptions, env)
@@ -156,7 +198,7 @@ function makeRunScriptWrapper(
 
     const confOption = makeFlagsFromConfig(configOptions)
 
-    return `${existingOptions || ''} ${confOption.trim()}`.trim()
+    return confOption.trim()
   }
 
   /**
@@ -234,15 +276,23 @@ function makeRunScriptWrapper(
         filteredFragments.push(fragment)
       }
     }
-    // Why would there be multiple bin fragments? In a npm workspace, local bin and workspace root bin is added
-    filteredFragments.push(...nodeModulesBinFragments)
+    // This should preserve order of items.
+    const uniqueNodeModulesBinFragments = Array.from(
+      new Set(nodeModulesBinFragments)
+    )
+
+    // Why would there even be multiple bin fragments? because
+    // npm happily adds entries for hypothetical node_modules/.bin
+    // in all parent dirs
+    filteredFragments.push(...uniqueNodeModulesBinFragments)
+
     return filteredFragments.join(pathDelimiter)
   }
 
   return {
     processEnv: (existingEnv) => {
       const scriptsConfig = readScriptsConfig(projectRoot)
-      const config = readConfig({
+      const { config, name: configName } = readConfig({
         scriptsConfig,
         scriptName,
         projectRoot,
@@ -257,12 +307,9 @@ function makeRunScriptWrapper(
 
       const fixedEnv = {
         ...filterEnv(existingEnv, lavamoatDir),
+        LAVAMOAT_RUN_CONF: configName,
         PATH: envPathOpinions(existingPath),
-        NODE_OPTIONS: installNodeOptions(
-          existingEnv.NODE_OPTIONS,
-          config.nodeOptions,
-          existingEnv
-        ),
+        NODE_OPTIONS: installNodeOptions(config.nodeOptions, existingEnv),
       }
       return fixedEnv
     },

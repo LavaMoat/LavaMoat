@@ -44,8 +44,10 @@ module.exports = {
           }
 
           const pkgJson = workspace.manifest.raw
-          const binFolder =
-            extra.env.BERRY_BIN_FOLDER || `node_modules${path.sep}.bin`
+          // Abundance of caution. It seems yarn is not adding
+          // any node_modules/.bin locations to the PATH by default.
+          const binFolder = `node_modules${path.sep}.bin`
+          const berryBin = extra.env.BERRY_BIN_FOLDER
 
           const wrapper = makeRunScriptWrapper(
             {
@@ -53,6 +55,9 @@ module.exports = {
               scriptPayload: extra.script,
               projectRoot: extra.cwd,
               pathBinMatcher: (fragment) => {
+                if (berryBin && fragment === berryBin) {
+                  return true
+                }
                 return fragment.endsWith(binFolder)
               },
               customizePermissionsConfig: addMandatoryReads,
@@ -69,9 +74,9 @@ module.exports = {
             }
           )
 
-          // extra.env is a reference to the mutable object, but a different variable
-          // containing that reference is used within execute, so we must amend not
-          // replace it.
+          // extra.env is a reference to the mutable object, but a
+          // different variable containing that reference is used within
+          // execute, so we must amend not replace it.
           const newEnv = wrapper.processEnv(extra.env)
           for (const key of Object.keys(extra.env)) {
             delete extra.env[key]

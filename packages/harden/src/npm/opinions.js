@@ -257,6 +257,12 @@ const definedOpinions = Object.freeze(
           changes.push({
             target: '/lavamoat',
             ifNotExist: true,
+            key: 'scripts.debug.json',
+            value: null,
+          })
+          changes.push({
+            target: '/lavamoat',
+            ifNotExist: true,
             key: 'scripts.strict.json',
             value: null,
           })

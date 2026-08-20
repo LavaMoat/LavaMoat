@@ -6,7 +6,7 @@ import { matchLevel } from './opinions-engine.js'
  *   Decisions,
  *   Level,
  *   PrintApi
- * } from "./types.js"
+ * } from './types.js'
  */
 
 const consola = createConsola({
@@ -24,9 +24,10 @@ const consola = createConsola({
  * @param {Level} options.level
  * @param {PrintApi} options.print
  * @param {string} [options.packageManager]
+ * @param {boolean} [options.json]
  * @returns {Decisions}
  */
-export function createVerifier({ level, packageManager, print }) {
+export function createVerifier({ level, packageManager, print, json = false }) {
   let verified = true
   return {
     async packageManager() {
@@ -36,23 +37,69 @@ export function createVerifier({ level, packageManager, print }) {
       return packageManager
     },
     async shouldStart(scores, opinions) {
+      /**
+       * @type {{
+       *   id: string
+       *   level: string
+       *   satisfied: number
+       * }[]}
+       */
+      const checks = []
+
       // use scores and level to determine if there's any work left to do.
       for (const opinion of opinions) {
         if (!matchLevel(level, opinion.level)) {
           continue
         }
+        const satisfied = opinion.detected ?? 0
+        const satisfiedPercent = `${100 * (satisfied ?? 0)}%`
+        checks.push({
+          id: opinion.id,
+          level: opinion.level,
+          satisfied,
+        })
         if (opinion.detected === 1) {
-          print(` ✔ ${opinion.id}`)
+          if (!json) {
+            print(` ✔ ${opinion.id}`)
+          }
         } else {
           verified = false
-          print(` ✖ ${opinion.id} [${100 * (opinion.detected ?? 0)}%]`)
+          if (!json) {
+            print(` ✖ ${opinion.id} [${satisfiedPercent}]`)
+          }
         }
       }
 
-      // print a box summary
-      consola.box({
-        title: 'Harden Defaults Verifier',
-        message: `The current state of recommendations is:
+      if (json) {
+        const scoreByLevel = Object.fromEntries(
+          [...scores.entries()].map(([name, [applied, total]]) => [
+            name,
+            {
+              applied,
+              total,
+              ratio: total === 0 ? 0 : applied / total,
+            },
+          ])
+        )
+
+        print(
+          `${JSON.stringify(
+            {
+              level,
+              packageManager,
+              verified,
+              scores: scoreByLevel,
+              checks,
+            },
+            null,
+            2
+          )}`
+        )
+      } else {
+        // print a box summary
+        consola.box({
+          title: 'Harden Defaults Verifier',
+          message: `The current state of recommendations is:
 ${[...scores.entries()]
   .map(
     ([key, [applied, total]]) =>
@@ -60,12 +107,13 @@ ${[...scores.entries()]
   )
   .join('\n')}
         `,
-        style: {
-          padding: 1,
-          borderColor: 'magenta',
-          borderStyle: 'double-single-rounded',
-        },
-      })
+          style: {
+            padding: 1,
+            borderColor: 'magenta',
+            borderStyle: 'double-single-rounded',
+          },
+        })
+      }
 
       // don't run anything
       return false
