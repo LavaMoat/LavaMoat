@@ -15,13 +15,15 @@ const {
 const { entries, keys } = Object
 
 /**
- * @import {LavaMoatPolicy,
- *   GlobalPolicy,
+ * @import {
  *   BuiltinPolicy,
- *   ResourcePolicy,
- *   Resources,
+ *   GlobalPolicy,
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicyDebug,
  *   Resolutions,
- *   LavaMoatPolicyDebug} from '@lavamoat/types'
+ *   ResourcePolicy,
+ *   Resources
+ * } from '@lavamoat/types'
  */
 
 /**
@@ -206,26 +208,47 @@ const mergeInclude = (policy, policyOverride, mergedPolicy) => {
     ]
 
     /** @type {Set<string>} */
-    const seenStrings = new Set()
-    /** @type {Map<string, Set<string>>} */
-    const seenObjects = new Map()
+    const seen = new Set()
+
+    /**
+     * Computes a canonical dedup key for an include item.
+     *
+     * Prefixes distinguish variants so a string `"foo"`, a ByName `{ name:
+     * "foo" }`, and a ByLocation `{ location: "foo" }` never collide. Module
+     * lists are sorted before joining so order doesn't affect identity.
+     *
+     * @param {import('@lavamoat/types').IncludePolicy} item
+     * @returns {string}
+     */
+    const keyOf = (item) => {
+      if (typeof item === 'string') {
+        return `s:${item}`
+      }
+      const modules = item.modules ? [...item.modules].sort().join('\0') : ''
+      return 'name' in item
+        ? `n:${item.name}\0${modules}`
+        : `l:${item.location}\0${modules}`
+    }
+
+    /**
+     * Deep-clones an include item so the merged result shares no object
+     * references with the inputs.
+     *
+     * @param {import('@lavamoat/types').IncludePolicy} item
+     * @returns {import('@lavamoat/types').IncludePolicy}
+     */
+    const clone = (item) =>
+      typeof item === 'string'
+        ? item
+        : item.modules
+          ? { ...item, modules: [...item.modules] }
+          : { ...item }
 
     mergedPolicy.include = combined.reduce((acc, item) => {
-      if (typeof item === 'string') {
-        if (!seenStrings.has(item)) {
-          seenStrings.add(item)
-          acc.push(item)
-        }
-      } else {
-        const entries = seenObjects.get(item.name)
-        if (!entries?.has(item.entry)) {
-          if (entries) {
-            entries.add(item.entry)
-          } else {
-            seenObjects.set(item.name, new Set([item.entry]))
-          }
-          acc.push({ ...item })
-        }
+      const key = keyOf(item)
+      if (!seen.has(key)) {
+        seen.add(key)
+        acc.push(clone(item))
       }
       return acc
     }, /** @type {NonNullable<LavaMoatPolicy['include']>} */ ([]))

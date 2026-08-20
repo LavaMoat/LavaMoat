@@ -32,7 +32,9 @@ const { entryPath, policy, vol, scuttleGlobalThis } =
 
 const { fs } = memfs(vol)
 
-const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (fs) })
+const readPowers = makeReadPowers({
+  fs: /** @type {FsInterface} */ (fs),
+})
 
 const log = new Loggerr({
   formatter: 'cli',
