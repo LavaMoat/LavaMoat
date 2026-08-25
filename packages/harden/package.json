@@ -36,7 +36,7 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "ava",
-    "test:prep": "echo '>>COREPACK<<' && corepack enable",
+    "test:prep": "corepack enable --install-directory \"$(dirname \"$(command -v node)\")\" npm pnpm yarn && corepack prepare pnpm@latest --activate && corepack prepare yarn@stable --activate",
     "test:wizard": "cd test/projects/npm && node ../../../src/cli.js wizard"
   },
   "dependencies": {
