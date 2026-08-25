@@ -36,7 +36,7 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "ava",
-    "test:prep": "corepack enable",
+    "test:prep": "echo '>>COREPACK<<' && corepack enable",
     "test:wizard": "cd test/projects/npm && node ../../../src/cli.js wizard"
   },
   "dependencies": {
