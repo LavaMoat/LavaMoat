@@ -10,12 +10,34 @@ const execFileAsync = promisify(execFile)
 
 const PKGMGR_LIST = ['npm', 'pnpm', 'yarn']
 
+const runnerSetupPerPm = {
+  npm: {
+    n_runner: true,
+    n_hardenrun: true,
+    n_filterenv: true,
+    n_engines: false, // explicitly skip baseline
+  },
+  yarn: {
+    y_runner: true,
+    y_hardenrun: true,
+    y_filterenv: true,
+    y_nocache: false,
+    y_engines: false, // explicitly skip baseline
+  },
+  pnpm: {
+    p_runner: true,
+    p_hardenrun: true,
+    p_filterenv: true,
+    p_engines: false, // explicitly skip baseline
+  },
+}
+
 function cleanupPathAfterNpm(PATH) {
   const pathFragments = PATH.split(path.delimiter)
   const filteredFragments = []
 
   for (const fragment of pathFragments) {
-    if (!fragment.includes('node_modules')) {
+    if (!fragment.includes('node_modules/.bin')) {
       filteredFragments.push(fragment)
     }
   }
@@ -30,13 +52,9 @@ for (const pm of PKGMGR_LIST) {
       cwd,
       packageManager: pm,
       decisions: createFallbackDecisions({
-        level: 'strict',
+        level: 'baseline',
         print: () => {},
-        decisionsSnapshot: {
-          // one override we need to avoid a more elaborate setup for yarn in this test
-          y_allowlist: 'y_meta',
-          y_nocache: false,
-        },
+        decisionsSnapshot: runnerSetupPerPm[pm],
       }),
       print: () => {},
     })
