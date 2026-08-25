@@ -34,6 +34,7 @@
     "!tsconfig.json"
   ],
   "scripts": {
+    "env": "env",
     "lint:deps": "depcheck",
     "test": "ava",
     "test:prep": "corepack enable",

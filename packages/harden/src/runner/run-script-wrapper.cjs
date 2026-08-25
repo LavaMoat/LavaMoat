@@ -216,6 +216,7 @@ function makeRunScriptWrapper(
       banConfig = readJsonFile(banFilePath)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
+      // TODO: this file is optional, warning about it missing is messy output
       console.error(
         `[LavaMoat] Warning: Failed to read .env.ban.json: ${message}.`
       )

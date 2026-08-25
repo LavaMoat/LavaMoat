@@ -215,7 +215,7 @@ const definedOpinions = Object.freeze(
         {
           target: '.npmrc',
           key: 'script-shell',
-          value: './lavamoat/.runner.cjs',
+          value: 'lavamoat/.runner.cjs',
           comment: 'Protect the runtime of calls to "npm run" scripts.',
         },
       ],
@@ -224,6 +224,25 @@ const definedOpinions = Object.freeze(
         return results.length === 0
       },
       execute: async (changes, facts, decisions) => {
+        if (facts.packageJson?.workspaces) {
+          // if workspaces exist, we're forced to install the runner as bin so that npm resolves it correctly from every folder.
+          const hardToGuess = Math.random().toFixed(8).slice(2)
+          const runnerBinName = `@lavamoat/runner-${hardToGuess}`
+          changes[1].value = runnerBinName
+          changes.push({
+            target: '/lavamoat',
+            key: 'package.json',
+            value: `{"name": "${runnerBinName}", "bin": "./.runner.cjs"}`,
+          })
+          changes.push({
+            target: 'package.json',
+            key: 'devDependencies',
+            value: {
+              [runnerBinName]: `file:lavamoat`,
+            },
+          })
+        }
+
         const filterEnv = await decisions.askToHarden(
           {
             id: 'n_filterenv',
