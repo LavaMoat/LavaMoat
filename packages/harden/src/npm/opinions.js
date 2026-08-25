@@ -227,7 +227,7 @@ const definedOpinions = Object.freeze(
         if (facts.packageJson?.workspaces) {
           // if workspaces exist, we're forced to install the runner as bin so that npm resolves it correctly from every folder.
           const hardToGuess = Math.random().toFixed(8).slice(2)
-          const runnerBinName = `@lavamoat/runner-${hardToGuess}`
+          const runnerBinName = `lavamoat-runner-${hardToGuess}`
           changes[1].value = runnerBinName
           changes.push({
             target: '/lavamoat',

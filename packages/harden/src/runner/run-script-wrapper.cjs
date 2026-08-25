@@ -292,7 +292,7 @@ function makeRunScriptWrapper(
 
   return {
     processEnv: (existingEnv) => {
-      const scriptsConfig = readScriptsConfig(projectRoot)
+      const scriptsConfig = readScriptsConfig()
       const { config, name: configName } = readConfig({
         scriptsConfig,
         scriptName,

@@ -11,6 +11,8 @@ const scriptName = process.env.npm_lifecycle_event
 const scriptPayload = process.argv[3]
 
 const pkgJsonPath = process.env.npm_package_json
+// use the fact that we know how we're installed to find the workspace root
+const workspaceRoot = path.join(__dirname, '..')
 
 if (!pkgJsonPath) {
   throw Error(
@@ -34,7 +36,7 @@ const wrapper = makeRunScriptWrapper(
   {
     scriptName,
     scriptPayload,
-    projectRoot: pkgJsonFolder,
+    projectRoot: workspaceRoot,
     pathBinMatcher: (fragment) => fragment.endsWith(pathBinMatcherString),
     customizePermissionsConfig: addMandatoryReads,
     readScriptsConfig: () => {
