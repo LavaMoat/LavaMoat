@@ -1,6 +1,11 @@
 {
   "name": "test-yarn-project",
   "version": "1.0.0",
+  "scripts": {
+    "a": "echo Absolutely",
+    "b": "echo $BISFOR",
+    "test": "yarn run a && yarn run b && echo stealing: ${TOKEN:-}"
+  },
   "packageManager": "yarn@4.16.0",
   "devEngines": {
     "packageManager": {
@@ -8,11 +13,6 @@
       "version": ">=4.16.0",
       "onFail": "error"
     }
-  },
-  "scripts": {
-    "a": "echo Absolutely",
-    "b": "echo $BISFOR",
-    "test": "yarn run a && yarn run b && echo stealing: ${TOKEN:-}"
   },
   "dependenciesMeta": {},
   "scriptsConfig": {

@@ -82,7 +82,7 @@ export default function makeRunScriptWrapper(
     projectRoot,
   }) {
     if (!scriptsConfig) {
-      return {}
+      return { config: {}, name: undefined }
     }
     const configName =
       scriptsConfig[scriptName] ||

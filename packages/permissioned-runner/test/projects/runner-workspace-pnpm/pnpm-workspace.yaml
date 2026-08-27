@@ -1,0 +1,3 @@
+packages:
+  - 'packages/*'
+scriptShell: lavamoat-permissioned-runner

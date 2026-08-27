@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process'
 import { rmSync } from 'node:fs'
-import { cp, mkdtemp, readdir } from 'node:fs/promises'
+import { cp, symlink, mkdtemp, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir, platform } from 'node:os'
 import { promisify } from 'node:util'
@@ -46,6 +46,12 @@ export async function copyProject(t, name) {
   }
   const tmp = await mkdtemp(join(tmpdir(), `harden-test-${name}-`))
   await cp(getProjectDir(name), tmp, { recursive: true })
+  // add a symlink to lavamoat workspace packages/ folder to let fixtures use them in overrides
+  await symlink(
+    join(PROJECTS_DIR, '..', '..', '..'),
+    join(tmp, '@lavamoat'),
+    'dir'
+  )
   t.log(`--- setting up test in ${tmp}`)
   return tmp
 }

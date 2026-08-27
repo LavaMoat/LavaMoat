@@ -495,7 +495,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['packages/permissioned-runner/src/**/*.js'],
+    files: ['packages/permissioned-runner/**/*.js'],
     languageOptions: {
       sourceType: 'module',
     },

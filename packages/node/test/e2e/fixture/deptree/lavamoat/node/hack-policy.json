@@ -1,0 +1,17 @@
+{
+  "resources": {
+    "evil-pkg": {
+      "packages": {
+        "shared-pkg": true
+      },
+      "globals": {
+        "console": true
+      }
+    },
+    "shared-pkg": {
+      "globals": {
+        "console": true
+      }
+    }
+  }
+}

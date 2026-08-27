@@ -24,12 +24,23 @@ if (!scriptName) {
   )
 }
 
-// if dirname(pkgJsonPath) contains lavamoat dir, use it. Otherwise, use __dirname and split off the node_modules.*
-const workspaceRoot = existsSync(join(dirname(pkgJsonPath), 'lavamoat'))
-  ? dirname(pkgJsonPath) // no workspaces setup or running script in the top-level
-  : import.meta.dirname.split(`${sep}node_modules${sep}`)[0] // fallback for when running a script in a workspace dir
+const pkgJsonDir = dirname(pkgJsonPath)
+const possibleWorkspaceRoots = [
+  pkgJsonDir, // no workspaces setup or running script in the top-level
+  process.env.npm_config_local_prefix, // fallback for when running a script in a npm workspace dir
+  import.meta.dirname.includes(`${sep}node_modules${sep}`)
+    ? import.meta.dirname.split(`${sep}node_modules${sep}`)[0]
+    : undefined, // fallback for when running a script in a workspace dir, can fail if symlinked from outside of node_modules
+  join(pkgJsonDir, '..'), // attempt looking up one level for a workspace root
+  join(pkgJsonDir, '..', '..'),
+  join(pkgJsonDir, '..', '..', '..'), // anything beyond that should be considered bad practice :D
+]
 
-const pkgJsonFolder = dirname(pkgJsonPath)
+const workspaceRoot =
+  possibleWorkspaceRoots.find(
+    (path) => path && existsSync(join(path, 'lavamoat'))
+  ) ?? pkgJsonDir
+
 const fallbackShell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh'
 const shellArgs = process.platform === 'win32' ? ['/d', '/s', '/c'] : ['-c']
 
@@ -66,7 +77,7 @@ const customEnv = wrapper.processEnv(process.env)
 const result = spawnSync(fallbackShell, [...shellArgs, scriptPayload], {
   stdio: 'inherit',
   env: customEnv,
-  cwd: pkgJsonFolder, // should this be process.cwd? Outcomes are generally better when the script runs with package.json location as cwd even if invoked from a nested folder in my experience.
+  cwd: pkgJsonDir, // should this be process.cwd? Outcomes are generally better when the script runs with package.json location as cwd even if invoked from a nested folder in my experience.
 })
 if (result.error) {
   console.error(

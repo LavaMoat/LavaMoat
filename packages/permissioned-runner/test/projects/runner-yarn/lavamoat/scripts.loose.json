@@ -1,0 +1,16 @@
+{
+  "notes": "Loose default: permission enforcement on with wide fs-read but net denied.",
+  "nodeOptions": {
+    "--permission": true,
+    "--allow-fs-read": ["/"],
+    "--allow-fs-write": ["./"],
+    "--allow-fs-tmp": true,
+    "--allow-net": false,
+    "--allow-child-process": true,
+    "--allow-worker": true,
+    "--allow-addons": true,
+    "--allow-wasi": true,
+    "--allow-inspector": false,
+    "--disable-warning": "SecurityWarning"
+  }
+}
