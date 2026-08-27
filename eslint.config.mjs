@@ -20,7 +20,7 @@ import semver from 'semver'
 import tseslint from 'typescript-eslint'
 
 /**
- * @import {Linter} from "eslint"
+ * @import {Linter} from 'eslint'
  */
 
 const rootPkg = JSON.parse(
@@ -489,9 +489,15 @@ export default defineConfig(
   },
   // --- packages/harden ---
   {
-    files: ['packages/harden/src/**/runner.cjs'],
+    files: ['packages/permissioned-runner/src/npm-runner.js'],
     rules: {
       'n/hashbang': 'off',
+    },
+  },
+  {
+    files: ['packages/permissioned-runner/src/**/*.js'],
+    languageOptions: {
+      sourceType: 'module',
     },
   },
 

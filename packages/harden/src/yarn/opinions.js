@@ -2,7 +2,7 @@
 import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
 import { buildAllowlistChanges } from './yarn-build-allowlist.js'
 import { buildAllowlistChanges as buildLmAllowlistChanges } from './lm-build-allowlist.js'
-import { bundleRunner } from '../runner/runner-bundler.js'
+import { bundleYarnPlugin } from '@lavamoat/permissioned-runner'
 
 /** @satisfies {readonly Opinion[]} */
 const definedOpinions = Object.freeze(
@@ -231,10 +231,7 @@ const definedOpinions = Object.freeze(
         {
           target: '/lavamoat',
           key: '.runner-plugin.js',
-          value: bundleRunner({
-            packageManager: 'yarn',
-            fileName: 'runner-plugin.js',
-          }),
+          value: bundleYarnPlugin(),
         },
       ],
       verify: async (changes, results, _facts) => {

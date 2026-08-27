@@ -6,7 +6,7 @@
 
 /** @typedef {NonNullable<import('@yarnpkg/core').Hooks['wrapScriptExecution']>} WrapScriptExecutionHook */
 
-/* global makeRunScriptWrapper */
+const makeRunScriptWrapper = require('./run-script-wrapper.js')
 
 /**
  * Yarn 4 plugin factory for wrapScriptExecution hook.

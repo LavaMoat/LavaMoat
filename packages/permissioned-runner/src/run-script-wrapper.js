@@ -1,11 +1,37 @@
-/// <reference path="./make-run-script-wrapper.global.d.ts" />
+/**
+ * @typedef {Record<string, boolean | string | string[]>} ConfigOptions
+ */
+
+/**
+ * @typedef {object} MakeRunScriptWrapperOptions
+ * @property {string} [scriptName]
+ * @property {string} [scriptPayload]
+ * @property {string} projectRoot
+ * @property {(fragment: string) => boolean} pathBinMatcher
+ * @property {(configOptions: ConfigOptions, env: NodeJS.ProcessEnv) => void} customizePermissionsConfig
+ * @property {(projectRoot?: string) => Record<string, string> | undefined} readScriptsConfig
+ */
+
+/**
+ * @typedef {object} MakeRunScriptWrapperIO
+ * @property {(path: string, encoding: 'utf8') => string} readFileSync
+ * @property {(...segments: string[]) => string} pathJoin
+ * @property {string} pathDelimiter
+ * @property {() => string} tmpdir
+ * @property {(path: string) => string} realpathSync
+ */
+
+/**
+ * @typedef {object} MakeRunScriptWrapper
+ * @property {(existingEnv: NodeJS.ProcessEnv) => NodeJS.ProcessEnv} processEnv
+ */
 
 /**
  * @param {MakeRunScriptWrapperOptions} param0
  * @param {MakeRunScriptWrapperIO} param1
  * @returns {MakeRunScriptWrapper}
  */
-function makeRunScriptWrapper(
+export default function makeRunScriptWrapper(
   {
     scriptName,
     scriptPayload: _scriptPayload, // might be useful to read in the future
@@ -316,5 +342,3 @@ function makeRunScriptWrapper(
     },
   }
 }
-
-module.exports = makeRunScriptWrapper

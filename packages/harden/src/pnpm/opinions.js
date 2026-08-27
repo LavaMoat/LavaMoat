@@ -3,10 +3,16 @@ import {
   assertDevEngines,
   assertPackageManager,
 } from '../tools/versions.js'
+import { createRequire } from 'node:module'
 import { buildAllowlistChanges } from './build-allowlist.js'
-import { bundleRunner } from '../runner/runner-bundler.js'
 
 /** @import {Opinion} from '../tools/types.js' */
+
+// pin the runner to the exact version resolved at harden install time
+const runnerPkg = createRequire(import.meta.url)(
+  '@lavamoat/permissioned-runner/package.json'
+)
+const runnerBinName = 'lavamoat-permissioned-runner'
 
 /** @satisfies {readonly Opinion[]} */
 const definedOpinions = Object.freeze(
@@ -156,18 +162,16 @@ const definedOpinions = Object.freeze(
       level: 'strict',
       changes: [
         {
-          target: '/lavamoat',
-          key: '.runner.cjs',
-          value: bundleRunner({
-            packageManager: 'npm', // currently reusing the npm one
-            fileName: 'runner.cjs',
-          }),
+          target: 'package.json',
+          key: ['devDependencies', '@lavamoat/permissioned-runner'],
+          value: runnerPkg.version,
         },
         {
           target: 'pnpm-workspace.yaml',
           key: 'scriptShell',
-          value: './lavamoat/.runner.cjs',
-          comment: 'Protect the runtime of calls to "pnpm run" scripts.',
+          value: runnerBinName,
+          comment:
+            'Protect the runtime of calls to "pnpm run" scripts. Resolved via node_modules/.bin, which pnpm adds to PATH for scripts.',
         },
       ],
       verify: async (changes, results, _facts) => {

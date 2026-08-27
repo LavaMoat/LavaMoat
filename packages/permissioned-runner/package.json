@@ -1,0 +1,49 @@
+{
+  "name": "@lavamoat/permissioned-runner",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Script-execution wrapper that applies Node.js permission model and PATH hardening to package-manager 'run' scripts. Consumed by @lavamoat/harden.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/permissioned-runner"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/permissioned-runner",
+  "author": "LavaMoat Team",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.5.1 || ^24.0.0 || ^26.0.0"
+  },
+  "bin": {
+    "lavamoat-permissioned-runner": "src/npm-runner.js"
+  },
+  "main": "src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src",
+    "types",
+    "!*.tsbuildinfo",
+    "!tsconfig.json"
+  ],
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "ava"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "60s"
+  }
+}

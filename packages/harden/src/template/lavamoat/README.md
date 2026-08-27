@@ -2,7 +2,7 @@
 
 ## script running
 
-`script-shell=./lavamoat/.runner.cjs` for npm and pnpm and called through a plugin in yarn.
+The `lavamoat-permissioned-runner` bin (provided by `@lavamoat/permissioned-runner`, a devDependency added by `harden`) is used as `script-shell` for npm and pnpm, and loaded through a bundled plugin file (`.runner-plugin.js`) in yarn.
 
 ## yarn plugin-allow-scripts
 

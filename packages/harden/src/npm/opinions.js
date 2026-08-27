@@ -1,6 +1,12 @@
 /** @import {Opinion} from '../tools/types.js' */
+import { createRequire } from 'node:module'
 import { buildAllowlistChanges } from './build-allowlist.js'
-import { bundleRunner } from '../runner/runner-bundler.js'
+
+// pin the runner to the exact version resolved at harden install time
+const runnerPkg = createRequire(import.meta.url)(
+  '@lavamoat/permissioned-runner/package.json'
+)
+const runnerBinName = 'lavamoat-permissioned-runner'
 
 /** @satisfies {readonly Opinion[]} */
 const definedOpinions = Object.freeze(
@@ -205,18 +211,16 @@ const definedOpinions = Object.freeze(
       level: 'strict',
       changes: [
         {
-          target: '/lavamoat',
-          key: '.runner.cjs',
-          value: bundleRunner({
-            packageManager: 'npm',
-            fileName: 'runner.cjs',
-          }),
+          target: 'package.json',
+          key: ['devDependencies', '@lavamoat/permissioned-runner'],
+          value: runnerPkg.version,
         },
         {
           target: '.npmrc',
           key: 'script-shell',
-          value: 'lavamoat/.runner.cjs',
-          comment: 'Protect the runtime of calls to "npm run" scripts.',
+          value: runnerBinName,
+          comment:
+            'Protect the runtime of calls to "npm run" scripts. Resolved via node_modules/.bin, which npm adds to PATH for scripts.',
         },
       ],
       verify: async (changes, results, _facts) => {
@@ -224,25 +228,6 @@ const definedOpinions = Object.freeze(
         return results.length === 0
       },
       execute: async (changes, facts, decisions) => {
-        if (facts.packageJson?.workspaces) {
-          // if workspaces exist, we're forced to install the runner as bin so that npm resolves it correctly from every folder.
-          const hardToGuess = Math.random().toFixed(8).slice(2)
-          const runnerBinName = `lavamoat-runner-${hardToGuess}`
-          changes[1].value = runnerBinName
-          changes.push({
-            target: '/lavamoat',
-            key: 'package.json',
-            value: `{"name": "${runnerBinName}", "bin": "./.runner.cjs"}`,
-          })
-          changes.push({
-            target: 'package.json',
-            key: 'devDependencies',
-            value: {
-              [runnerBinName]: `file:lavamoat`,
-            },
-          })
-        }
-
         const filterEnv = await decisions.askToHarden(
           {
             id: 'n_filterenv',

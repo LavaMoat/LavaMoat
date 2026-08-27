@@ -1,18 +1,16 @@
 #! /usr/bin/env node
-/// <reference path="../runner/make-run-script-wrapper.global.d.ts" />
 
-/* global makeRunScriptWrapper */
+import { spawnSync } from 'node:child_process'
+import { readFileSync, realpathSync, existsSync } from 'node:fs'
+import { delimiter, dirname, join, sep } from 'node:path'
+import { tmpdir } from 'node:os'
 
-const { spawnSync } = require('node:child_process')
-const fs = require('node:fs')
-const path = require('node:path')
-const { tmpdir } = require('node:os')
+import makeRunScriptWrapper from './run-script-wrapper.js'
+
 const scriptName = process.env.npm_lifecycle_event
 const scriptPayload = process.argv[3]
 
 const pkgJsonPath = process.env.npm_package_json
-// use the fact that we know how we're installed to find the workspace root
-const workspaceRoot = path.join(__dirname, '..')
 
 if (!pkgJsonPath) {
   throw Error(
@@ -26,11 +24,16 @@ if (!scriptName) {
   )
 }
 
-const pkgJsonFolder = path.dirname(pkgJsonPath)
+// if dirname(pkgJsonPath) contains lavamoat dir, use it. Otherwise, use __dirname and split off the node_modules.*
+const workspaceRoot = existsSync(join(dirname(pkgJsonPath), 'lavamoat'))
+  ? dirname(pkgJsonPath) // no workspaces setup or running script in the top-level
+  : import.meta.dirname.split(`${sep}node_modules${sep}`)[0] // fallback for when running a script in a workspace dir
+
+const pkgJsonFolder = dirname(pkgJsonPath)
 const fallbackShell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh'
 const shellArgs = process.platform === 'win32' ? ['/d', '/s', '/c'] : ['-c']
 
-const pathBinMatcherString = `node_modules${path.sep}.bin`
+const pathBinMatcherString = `node_modules${sep}.bin`
 
 const wrapper = makeRunScriptWrapper(
   {
@@ -41,7 +44,7 @@ const wrapper = makeRunScriptWrapper(
     customizePermissionsConfig: addMandatoryReads,
     readScriptsConfig: () => {
       try {
-        const pkgData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
+        const pkgData = JSON.parse(readFileSync(pkgJsonPath, 'utf8'))
         return pkgData.scriptsConfig
       } catch {
         return undefined
@@ -49,25 +52,21 @@ const wrapper = makeRunScriptWrapper(
     },
   },
   {
-    readFileSync: fs.readFileSync,
-    pathJoin: path.join,
-    pathDelimiter: path.delimiter,
+    readFileSync,
+    pathJoin: join,
+    pathDelimiter: delimiter,
     tmpdir,
-    realpathSync: fs.realpathSync,
+    realpathSync,
   }
 )
 
 const customEnv = wrapper.processEnv(process.env)
 
-// Note: spawnSync is used here instead of process.execve because execve is
-// not available on Windows. Leaving this here to switch to execve in case other reasons to
-// drop Windows support arise.
-// process.execve(fallbackShell, [...shellArgs, scriptPayload], customEnv)
-
+// process.execve would be better here, but it is unavailable on Windows
 const result = spawnSync(fallbackShell, [...shellArgs, scriptPayload], {
   stdio: 'inherit',
   env: customEnv,
-  cwd: pkgJsonFolder,
+  cwd: pkgJsonFolder, // should this be process.cwd? Outcomes are generally better when the script runs with package.json location as cwd even if invoked from a nested folder in my experience.
 })
 if (result.error) {
   console.error(

@@ -9,6 +9,7 @@
   "packages/laverna": "2.1.0",
   "packages/lavamoat-node": "11.1.4",
   "packages/node": "1.0.7",
+  "packages/permissioned-runner": "0.0.1",
   "packages/preinstall-always-fail": "3.0.0",
   "packages/react-native-lockdown": "1.0.0",
   "packages/tofu": "9.0.3",

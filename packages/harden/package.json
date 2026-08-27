@@ -41,6 +41,7 @@
     "test:wizard": "cd test/projects/npm && node ../../../src/cli.js wizard"
   },
   "dependencies": {
+    "@lavamoat/permissioned-runner": "^0.0.1",
     "@yarnpkg/core": "4.8.0",
     "@yarnpkg/fslib": "3.1.5",
     "consola": "3.4.2",

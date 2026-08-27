@@ -32,6 +32,10 @@
     "packages/node": {
       "package-name": "@lavamoat/node"
     },
+    "packages/permissioned-runner": {
+      "package-name": "@lavamoat/permissioned-runner",
+      "initial-version": "0.0.1"
+    },
     "packages/preinstall-always-fail": {
       "package-name": "@lavamoat/preinstall-always-fail"
     },
