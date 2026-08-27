@@ -1,8 +1,8 @@
 import test from 'ava'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import path from 'node:path'
 import { copyProject } from './utils.js'
+import { delimiter, join } from 'node:path'
 import { hardenDefaults } from '../src/index.js'
 import { createFallbackDecisions } from '../src/tools/default-decisions.js'
 
@@ -11,15 +11,30 @@ const execFileAsync = promisify(execFile)
 const PKGMGR_LIST = ['npm', 'pnpm', 'yarn']
 
 function cleanupPathAfterNpm(PATH) {
-  const pathFragments = PATH.split(path.delimiter)
+  const pathFragments = PATH.split(delimiter)
   const filteredFragments = []
-
   for (const fragment of pathFragments) {
     if (!fragment.includes('node_modules')) {
       filteredFragments.push(fragment)
     }
   }
-  return filteredFragments.join(path.delimiter)
+  return filteredFragments.join(delimiter)
+}
+
+const runnerSetupPerPm = {
+  npm: {
+    n_runner: true,
+    n_hardenrun: true,
+  },
+  yarn: {
+    y_runner: true,
+    y_hardenrun: true,
+    y_nocache: false,
+  },
+  pnpm: {
+    p_runner: true,
+    p_hardenrun: true,
+  },
 }
 
 for (const pm of PKGMGR_LIST) {
@@ -59,7 +74,55 @@ for (const pm of PKGMGR_LIST) {
       'Expected no secret leakage, but SECRET is present'
     )
   })
+
+  test(`runner loads default config in root and nested workspace package for ${pm}`, async (t) => {
+    const cwd = await copyProject(t, `runner-workspace-${pm}`)
+    const nestedCwd = join(cwd, 'packages', 'nested')
+
+    await hardenDefaults({
+      cwd,
+      packageManager: pm,
+      decisions: createFallbackDecisions({
+        level: 'baseline',
+        print: () => {},
+        decisionsSnapshot: runnerSetupPerPm[pm],
+      }),
+      print: () => {},
+    })
+
+    // pnm install
+    await execFileAsync(pm, ['install'], {
+      cwd,
+      env: { PATH: cleanupPathAfterNpm(process.env.PATH) },
+    })
+
+    const rootResult = await execFileAsync(pm, ['run', 'root-default'], {
+      cwd,
+      env: {
+        PATH: cleanupPathAfterNpm(process.env.PATH),
+      },
+    })
+
+    const nestedResult = await execFileAsync(pm, ['run', 'nested-default'], {
+      cwd: nestedCwd,
+      env: {
+        PATH: cleanupPathAfterNpm(process.env.PATH),
+      },
+    })
+
+    t.regex(
+      rootResult.stdout,
+      /^ROOT_DEFAULT:lavamoat\/scripts\.loose\.json$/gm,
+      'Expected root package to load default scripts config'
+    )
+    t.regex(
+      nestedResult.stdout,
+      /^NESTED_DEFAULT:lavamoat\/scripts\.loose\.json$/gm,
+      'Expected nested workspace package to load default scripts config'
+    )
+  })
 }
+
 test(`runner wildcard support in scriptsConfig exits zero`, async (t) => {
   t.plan(1)
   const cwd = await copyProject(t, 'runner-features')

@@ -40,6 +40,8 @@
     "test:wizard": "cd test/projects/npm && node ../../../src/cli.js wizard"
   },
   "dependencies": {
+    "@npmcli/map-workspaces": "3.0.6",
+    "@pnpm/find-workspace-packages": "6.0.9",
     "@yarnpkg/core": "4.8.0",
     "@yarnpkg/fslib": "3.1.5",
     "consola": "3.4.2",

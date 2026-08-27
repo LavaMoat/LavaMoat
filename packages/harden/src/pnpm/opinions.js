@@ -6,6 +6,10 @@ import {
 import { buildAllowlistChanges } from './build-allowlist.js'
 import { bundleRunner } from '../runner/runner-bundler.js'
 
+import { findWorkspacePackages } from '@pnpm/find-workspace-packages'
+import { relative, join } from 'node:path'
+import { symlinkSync } from 'node:fs'
+
 /** @import {Opinion} from '../tools/types.js' */
 
 /** @satisfies {readonly Opinion[]} */
@@ -175,6 +179,30 @@ const definedOpinions = Object.freeze(
         return results.length === 0
       },
       execute: async (changes, facts, decisions) => {
+        // findWorkspacePackages reads pnpm-workspace.yaml and returns an array of projects
+        const projects = await findWorkspacePackages(facts.cwd)
+
+        for (const project of projects) {
+          const workspacePath = project.dir
+
+          const projectPathRelativeToWorkspace = relative(
+            workspacePath,
+            facts.cwd
+          )
+
+          // pnpm includes the root folder in its results.
+          // If the relative path is empty, we are at the root. Skip it.
+          if (projectPathRelativeToWorkspace === '') {
+            continue
+          }
+
+          symlinkSync(
+            join(projectPathRelativeToWorkspace, 'lavamoat'),
+            join(workspacePath, 'lavamoat'),
+            'dir'
+          )
+        }
+
         const filterEnv = await decisions.askToHarden(
           {
             id: 'p_filterenv',
