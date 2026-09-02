@@ -103,26 +103,21 @@ function endowmentsToolkit({
           explicitlyBanned.push(path)
           return
         }
-        // write access handled elsewhere
+        whitelistedReads.push(path)
         if (packagePolicyValue === 'write') {
-          if (!handleGlobalWrite) {
-            return
+          if (handleGlobalWrite) {
+            if (pathParts.length > 1) {
+              throw new Error(
+                `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+              )
+            }
+            allowedWriteFields.add(path)
           }
-          if (pathParts.length > 1) {
-            throw new Error(
-              `LavaMoat - write access is only allowed at the top level, saw "${path}"`
-            )
-          }
-          allowedWriteFields.add(path)
-          whitelistedReads.push(path)
-          return
-        }
-        if (packagePolicyValue !== true) {
+        } else if (packagePolicyValue !== true) {
           throw new Error(
             `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
           )
         }
-        whitelistedReads.push(path)
       }
     )
     // sort by length to optimize further steps
@@ -164,9 +159,23 @@ function endowmentsToolkit({
       const pathParts = path.split('.')
       if (knownWritableFields.has(pathParts[0])) {
         if (allowedWriteFields.has(pathParts[0])) {
-          makeWritableValueAtPath(pathParts[0], sourceRef, targetRef)
+          makeWritableValueAtPath(
+            pathParts[0],
+            sourceRef,
+            targetRef,
+            createFunctionWrapper,
+            unwrapTo,
+            unwrapFrom || targetRef
+          )
         } else {
-          instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef)
+          instrumentDynamicValueAtPath(
+            pathParts,
+            sourceRef,
+            targetRef,
+            createFunctionWrapper,
+            unwrapTo,
+            unwrapFrom || targetRef
+          )
         }
       } else {
         copyValueAtPath(
@@ -670,12 +679,30 @@ function isEmpty(value) {
  * @param {string} key
  * @param {Record<string, any>} sourceRef
  * @param {Record<string, any>} targetRef
+ * @param {DefaultWrapperFn} [wrapFn]
+ * @param {object} [unwrapTo]
+ * @param {object} [unwrapFrom]
  */
-function makeWritableValueAtPath(key, sourceRef, targetRef) {
+function makeWritableValueAtPath(
+  key,
+  sourceRef,
+  targetRef,
+  wrapFn,
+  unwrapTo,
+  unwrapFrom
+) {
   const enumerable = Reflect.getOwnPropertyDescriptor(
     sourceRef,
     key
   )?.enumerable
+  // Capture and wrap the initial value once. If the value on sourceRef is later
+  // replaced (monkey-patching), the getter returns the new value unwrapped —
+  // the replacement is expected to call the captured (already-wrapped) original.
+  const initialValue = sourceRef[key]
+  const wrappedInitialValue =
+    wrapFn && unwrapTo && typeof initialValue === 'function'
+      ? wrapFn(initialValue, (thisValue) => thisValue === unwrapFrom, unwrapTo)
+      : initialValue
   Reflect.defineProperty(targetRef, key, {
     configurable: false,
     enumerable,
@@ -683,6 +710,9 @@ function makeWritableValueAtPath(key, sourceRef, targetRef) {
       sourceRef[key] = newValue
     },
     get() {
+      if (sourceRef[key] === initialValue) {
+        return wrappedInitialValue
+      }
       return sourceRef[key]
     },
   })
@@ -695,23 +725,53 @@ function makeWritableValueAtPath(key, sourceRef, targetRef) {
  * @param {string[]} pathParts
  * @param {Record<string, any>} sourceRef
  * @param {Record<string, any>} targetRef
+ * @param {DefaultWrapperFn} [wrapFn]
+ * @param {object} [unwrapTo]
+ * @param {object} [unwrapFrom]
  */
-function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
+function instrumentDynamicValueAtPath(
+  pathParts,
+  sourceRef,
+  targetRef,
+  wrapFn,
+  unwrapTo,
+  unwrapFrom
+) {
   const enumerable = Reflect.getOwnPropertyDescriptor(
     sourceRef,
     pathParts[0]
   )?.enumerable
+
+  // Capture and wrap the initial top value once. If the top-level writable
+  // field is later replaced (by another package with write permission), the
+  // wrapping is no longer useful.
+  const initialTopValue = sourceRef[pathParts[0]]
+  const wrappedInitialTopV =
+    wrapFn && unwrapTo && typeof initialTopValue === 'function'
+      ? wrapFn(
+          initialTopValue,
+          (thisValue) => thisValue === unwrapFrom,
+          unwrapTo
+        )
+      : initialTopValue
+
   const dynamicGetterDesc = {
     get: () => {
       const dynamicValue = sourceRef[pathParts[0]]
-      let leaf = dynamicValue,
-        parent = sourceRef
-
+      let leaf, parent
+      if (
+        typeof dynamicValue === 'function' &&
+        dynamicValue === initialTopValue
+      ) {
+        leaf = wrappedInitialTopV
+      } else {
+        leaf = dynamicValue
+      }
       for (let i = 1; i < pathParts.length; i++) {
         parent = leaf
         leaf = leaf[pathParts[i]]
       }
-      if (typeof leaf === 'function') {
+      if (typeof leaf === 'function' && pathParts.length > 1) {
         leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
       }
       return leaf
@@ -742,7 +802,11 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
 }
 
 /**
- * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
+ * @import {
+ *   ContextTestFn,
+ *   SomeFunction,
+ *   SomeParameters
+ * } from './internal.js'
  */
 
 /**
@@ -769,8 +833,8 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
  */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
-   * @returns {ReturnType<T>}
    * @this {U | Record<PropertyKey, any>}
+   * @returns {ReturnType<T>}
    */
   const newValue = function () {
     'use strict'
