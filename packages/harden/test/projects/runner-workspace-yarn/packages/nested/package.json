@@ -1,0 +1,11 @@
+{
+  "name": "nested-workspace-package",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "nested-default": "node -e \"console.log('NESTED_DEFAULT:' + (process.env.LAVAMOAT_RUN_CONF || ''))\""
+  },
+  "scriptsConfig": {
+    "#default": "lavamoat/scripts.loose.json"
+  }
+}
