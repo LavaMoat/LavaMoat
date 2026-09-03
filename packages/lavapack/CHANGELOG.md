@@ -24,6 +24,24 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [9.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v8.0.5...lavapack-v9.0.0) (2026-09-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lavapack:** The minimum supported language version guaranteed by the bundle created by `@lavamoat/lavapack` is now ES2023.
+
+### Bug Fixes
+
+* **lavapack:** minimum ES version now ES2023 ([bb32982](https://github.com/LavaMoat/LavaMoat/commit/bb3298243a98c74f4e8a59237ef36eeb127f6ce8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.5 to ^18.0.6
+
 ## [8.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v8.0.4...lavapack-v8.0.5) (2026-06-25)
 
 

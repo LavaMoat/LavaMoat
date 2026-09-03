@@ -18,6 +18,21 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [2.3.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.4...webpack-v2.3.0) (2026-09-03)
+
+
+### Features
+
+* Add opt-in flag to overwrite policy.json with overrides ([#2061](https://github.com/LavaMoat/LavaMoat/issues/2061)) ([c4760e6](https://github.com/LavaMoat/LavaMoat/commit/c4760e62f60b36cbd5a47e4895498a6abf1eb669))
+* **webpack:** capture importScripts reference for use in runtime despite scuttling ([#2070](https://github.com/LavaMoat/LavaMoat/issues/2070)) ([e9c0c48](https://github.com/LavaMoat/LavaMoat/commit/e9c0c481aba7ff9e4cb3eb087ba88c17d1d4e58e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.5 to ^18.0.6
+
 ## [2.2.4](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.3...webpack-v2.2.4) (2026-06-25)
 
 
