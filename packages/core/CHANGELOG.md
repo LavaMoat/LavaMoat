@@ -6,6 +6,13 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [18.0.6](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.5...lavamoat-core-v18.0.6) (2026-09-03)
+
+
+### Bug Fixes
+
+* **core:** prevent the endowment logic from skipping writable fields ([#2081](https://github.com/LavaMoat/LavaMoat/issues/2081)) ([68118ab](https://github.com/LavaMoat/LavaMoat/commit/68118ab3f8dc7e839ad0241fc01b02077134fce7))
+
 ## [18.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.4...lavamoat-core-v18.0.5) (2026-06-25)
 
 

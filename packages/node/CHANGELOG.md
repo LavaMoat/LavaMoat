@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.1.0](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.7...node-v1.1.0) (2026-09-03)
+
+
+### Features
+
+* @lavamoat/harden ([#2034](https://github.com/LavaMoat/LavaMoat/issues/2034)) ([70bcb21](https://github.com/LavaMoat/LavaMoat/commit/70bcb21aa71d8b365a059f3253eba7db81c95dee))
+
+
+### Bug Fixes
+
+* **deps:** update definitelytyped ([#2073](https://github.com/LavaMoat/LavaMoat/issues/2073)) ([b7aae4f](https://github.com/LavaMoat/LavaMoat/commit/b7aae4fad24829323cd52c14ed5f45acd5748ae4))
+* **deps:** update dependency @types/node to v22.20.0 ([#2039](https://github.com/LavaMoat/LavaMoat/issues/2039)) ([fc95da2](https://github.com/LavaMoat/LavaMoat/commit/fc95da29f26fbe4fa8ea06645ba53c43b7963a7b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.5 to ^18.0.6
+
 ## [1.0.7](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.6...node-v1.0.7) (2026-06-25)
 
 
