@@ -55,6 +55,9 @@
     "tmp-promise": "3.0.3",
     "watchify": "4.0.0"
   },
+  "ava": {
+    "timeout": "2m"
+  },
   "lavamoat": {
     "allowScripts": {
       "keccak": false
