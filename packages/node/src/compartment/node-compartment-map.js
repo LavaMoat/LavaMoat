@@ -143,7 +143,6 @@ export const makeNodeCompartmentMap = async (
         canonicalName,
         name,
       } of packageData.values()) {
-        // @ts-expect-error - https://github.com/endojs/endo/pull/3111
         if (!trustRoot && canonicalName === ROOT_COMPARTMENT) {
           rootUsePolicy = name
         }
