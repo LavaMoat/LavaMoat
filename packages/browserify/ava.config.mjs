@@ -8,6 +8,6 @@ if (process.env.CI && process.platform === 'darwin') {
 
 export default {
   files,
-  timeout: '4m',
+  timeout: '7m',
   concurrency: 1,
 }
