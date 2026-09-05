@@ -1,11 +1,16 @@
 name: Validate Commit Messages
 on: [pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   commitlint:
+    name: Run commitlint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -13,7 +18,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
         with:
           node-version: 24.x
       - name: Validate PR commits with commitlint
