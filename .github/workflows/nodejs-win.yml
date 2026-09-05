@@ -33,11 +33,11 @@ jobs:
         with:
           persist-credentials: false
       - name: Use Node.js
-        uses: ./.github/actions/prepare
+        uses: $/.github/actions/prepare
         with:
           shell: pwsh
       - name: Build & Test
-        uses: ./.github/actions/test
+        uses: $/.github/actions/test
         with:
           shell: pwsh
           workspaces: ${{ env.TEST_WORKSPACES }}
