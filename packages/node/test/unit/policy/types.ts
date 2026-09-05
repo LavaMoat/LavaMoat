@@ -5,10 +5,8 @@ import { type Volume } from 'memfs'
 import type {
   ComposeOptions,
   GeneratePolicyOptions,
-  MergedLavaMoatPolicy,
   SourceType,
   WithLog,
-  WithPolicyOverrideOnly,
 } from '../../../src/types.js'
 import { type FixtureOptions } from '../../types.js'
 
@@ -19,7 +17,7 @@ import { type FixtureOptions } from '../../types.js'
  */
 export type TestPolicyMacroOptions = ComposeOptions<
   [
-    WithPolicyOverrideOnly,
+    { policyOverride?: LavaMoatPolicy },
     WithLog,
     {
       /**
@@ -49,7 +47,12 @@ export type WithExpected<Context = unknown> = {
  * @internal
  */
 export type TestPolicyForFixtureOptions<Context = unknown> = ComposeOptions<
-  [GeneratePolicyOptions, WithExpected<Context>, FixtureOptions]
+  [
+    GeneratePolicyOptions,
+    WithExpected<Context>,
+    FixtureOptions,
+    { policyOverride?: LavaMoatPolicy },
+  ]
 >
 
 /**
@@ -59,7 +62,9 @@ export type TestPolicyForFixtureOptions<Context = unknown> = ComposeOptions<
  */
 export type TestPolicyForJSONOptions<Context = unknown> = ComposeOptions<
   [
-    Omit<GeneratePolicyOptions, 'readPowers' | 'policyOverridePath'>,
+    Omit<GeneratePolicyOptions, 'readPowers'> & {
+      policyOverride?: LavaMoatPolicy
+    },
     WithExpected<Context>,
     {
       /**
@@ -83,7 +88,7 @@ export type TestPolicyForJSONOptions<Context = unknown> = ComposeOptions<
  */
 export type TestPolicyExpectationFn<Context = unknown> = (
   t: ExecutionContext<Context>,
-  policy: MergedLavaMoatPolicy
+  policy: LavaMoatPolicy
 ) => void | Promise<void>
 
 /**
