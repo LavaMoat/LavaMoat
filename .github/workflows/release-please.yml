@@ -1,5 +1,12 @@
-# this workflow automatically creates release PRs when something gets merged into the main branch.
-# we're using the strategy documented here https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md
+# This workflow is used to release LavaMoat packages via Changesets. Versioning
+# & tagging is handled by changesets/action. The pack and publish job are
+# explicitly isolated so that publishing does not require any project
+# dependencies installed.
+
+# NOTE: this file is named release-please.yml for historical reasons. The
+# filename cannot be changed because npm's trusted publishing environment is
+# keyed to this exact workflow path. If we DO change it, all trusted publishing
+# configs must be re-created (tedious, but not difficult).
 
 on:
   push:
@@ -7,8 +14,8 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      pathsReleased:
-        description: 'JSON array of workspace paths to release (e.g. ["packages/core","packages/node"])'
+      workspaces:
+        description: 'JSON array of workspace names or paths to release (e.g. ["@lavamoat/aa","packages/node"])'
         required: true
         type: string
 
@@ -17,62 +24,97 @@ permissions: {}
 name: Release & Publish
 
 jobs:
-  # Creates release PRs, and creates GitHub Releases once those PRs are merged.
-  release-please:
-    name: Release Please
+  # Runs changesets/action which either:
+  #  - opens/updates a "Version Packages" PR when changesets are present, or
+  #  - creates git tags + GitHub Releases and sets published=true when
+  #    the version PR is merged and there are no changesets left.
+  # The publish-script (changeset git-tag) never touches npm; the pack and
+  # publish jobs below handle the actual registry publish via staged publishing.
+  release:
+    name: Release
     concurrency:
-      group: release-please-${{ github.ref }}
+      group: release-${{ github.ref }}
       cancel-in-progress: false
     runs-on: ubuntu-latest
     outputs:
-      # boolean indicating whether any releases were created
-      releases_created: ${{ steps.release.outputs.releases_created || steps.manual.outputs.releases_created }}
-      # JSON array of workspace paths that were released
-      paths_released: ${{ steps.release.outputs.paths_released || steps.manual.outputs.paths_released }}
+      # boolean string indicating whether any releases were created
+      published: ${{ steps.changesets.outputs.published || steps.manual.outputs.published }}
+      # JSON array of workspace names/paths that were released
+      workspaces: ${{ steps.workspaces.outputs.workspaces || steps.manual.outputs.workspaces }}
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # changesets/action pushes the version branch and release tags
+      pull-requests: write # changesets/action creates/updates the version PR
     steps:
-      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
-        id: release
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: github.event_name != 'workflow_dispatch'
+        with:
+          # Full history so @changesets/changelog-github can attribute changesets
+          # to commits. Full tags let `changeset git-tag` skip per-package
+          # `git ls-remote` probes for already-tagged packages.
+          fetch-depth: 0
+          # changesets/action pushes via the GitHub API, not the git CLI,
+          # so no persisted credentials are needed.
+          persist-credentials: false
+      - uses: $/.github/actions/prepare
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          node-version: 24.x
+      - uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
+        id: changesets
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          version-script: npm run changeset:version
+          publish-script: npm run changeset:tag
+          commit-message: 'chore: version packages'
+          pr-title: 'chore: version packages'
+      - name: Extract released workspace names
+        id: workspaces
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          workspaces=$(jq -c '[.[].name]' <<< "$PUBLISHED_PACKAGES")
+          echo "workspaces=$workspaces" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          # Note: 'published-packages' contains a hyphen, so bracket notation
+          # is required here; dot notation parses as arithmetic subtraction.
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs['published-packages'] }}
       - name: Use manual input
         id: manual
         if: github.event_name == 'workflow_dispatch'
         run: |
-          echo "releases_created=true" >> "$GITHUB_OUTPUT"
-          echo "paths_released=${INPUTS_PATHSRELEASED}" >> "$GITHUB_OUTPUT"
+          echo "published=true" >> "$GITHUB_OUTPUT"
+          echo "workspaces=${INPUTS_WORKSPACES}" >> "$GITHUB_OUTPUT"
         env:
-          INPUTS_PATHSRELEASED: ${{ inputs.pathsReleased }}
+          INPUTS_WORKSPACES: ${{ inputs.workspaces }}
 
-  # If any releases were created in release-please, this job packs the released
+  # If any releases were created in the release job, this job packs the released
   # workspaces into tarballs and uploads them as artifacts.
   pack:
     name: Pack Released Workspaces
     runs-on: ubuntu-latest
-    needs: release-please
+    needs: release
     concurrency:
       group: pack-${{ github.ref }}
       cancel-in-progress: false
     outputs:
       # JSON array of tarball filenames that were packed (relative to outdir)
       files: ${{ steps.pack.outputs.files }}
-    if: needs.release-please.result == 'success' && needs.release-please.outputs.releases_created == 'true'
+    if: needs.release.result == 'success' && needs.release.outputs.published == 'true'
     permissions: {}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
         with:
-          node-version: 24.x
+          node-version: 24
       - run: npm run build
       - id: pack
         run: |
-          paths="${NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED}"
-          outdir='${{ runner.temp }}/lavamoat-pack'
+          workspaces="${NEEDS_RELEASE_OUTPUTS_WORKSPACES}"
+          outdir="${TEMPDIR}/lavamoat-pack"
           mkdir -p "$outdir"
-          readarray -t workspace_args < <(jq -r '.[] | "--workspace=" + .' <<< "$paths")
+          readarray -t workspace_args < <(jq -r '.[] | "--workspace=" + .' <<< "$workspaces")
           echo "Packing workspaces: ${workspace_args[*]}"
           pack_output=$(npm pack "${workspace_args[@]}" --pack-destination="$outdir" --json --silent)
           echo $pack_output
@@ -80,7 +122,8 @@ jobs:
           echo "files=$files" >> "$GITHUB_OUTPUT"
         shell: bash
         env:
-          NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED: ${{ needs.release-please.outputs.paths_released }}
+          NEEDS_RELEASE_OUTPUTS_WORKSPACES: ${{ needs.release.outputs.workspaces }}
+          TEMPDIR: ${{ runner.temp }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: lavamoat-pack
@@ -91,7 +134,7 @@ jobs:
   publish:
     name: Publish Released Workspaces
     runs-on: ubuntu-latest
-    needs: [release-please, pack]
+    needs: pack
     permissions:
       id-token: write
     environment: npm
@@ -104,14 +147,13 @@ jobs:
         with:
           name: lavamoat-pack
           path: ${{ runner.temp }}/lavamoat-tarballs
-      - name: Setup Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+      - uses: $/.github/actions/prepare
         with:
-          node-version: 24.16.0
-      - run: npm install -g 'npm@^11.15.0'
+          node-version: 24
+          install-dependencies: false
       - run: |
           files="${NEEDS_PACK_OUTPUTS_FILES}"
-          pkgdir='${{ runner.temp }}/lavamoat-tarballs'
+          pkgdir="${TEMPDIR}/lavamoat-tarballs"
           while IFS= read -r filename; do
             echo "Publishing $filename to staging registry..."
             npm stage publish "$pkgdir/$filename" --provenance --ignore-scripts --access=public --registry=https://registry.npmjs.org
@@ -119,3 +161,4 @@ jobs:
         shell: bash
         env:
           NEEDS_PACK_OUTPUTS_FILES: ${{ needs.pack.outputs.files }}
+          TEMPDIR: ${{ runner.temp }}
