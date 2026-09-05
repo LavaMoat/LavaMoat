@@ -43,7 +43,7 @@
     "@commitlint/config-conventional": "21.2.0",
     "@endo/compartment-mapper": "2.4.0",
     "@eslint/js": "10.0.1",
-    "@tsconfig/node22": "22.0.5",
+    "@tsconfig/node22": "22.0.6",
     "@types/lint-staged": "14.0.0",
     "@types/node": "22.20.1",
     "@types/semver": "7.7.1",
