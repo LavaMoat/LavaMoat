@@ -13,7 +13,7 @@
   "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
-    "node": "^22.5.1 || ^24.0.0",
+    "node": "^22.5.1 || ^24.0.0 || ^26.0.0",
     "npm": ">=9.0.0"
   },
   "bin": {
@@ -68,7 +68,7 @@
     "ses": "2.0.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.41.0",
-    "yargs": "17.7.3"
+    "yargs": "18.0.0"
   },
   "devDependencies": {
     "@babel/generator": "7.28.3",
