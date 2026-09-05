@@ -10,6 +10,10 @@ inputs:
     description: 'Shell to use'
     required: false
     default: 'bash'
+  install-dependencies:
+    description: 'Install dependencies'
+    required: false
+    default: true
 
 runs:
   steps:
@@ -26,9 +30,10 @@ runs:
         node-version-file: .nvmrc
         cache: npm
     - name: Install npm@next-11
-      run: npm install -g npm@next-11
+      run: npm install -g npm@next-11 # zizmor: ignore[adhoc-packages]
       shell: ${{ inputs.shell }}
     - name: Install dependencies
+      if: ${{ inputs.install-dependencies }}
       run: npm ci --foreground-scripts
       shell: ${{ inputs.shell }}
   using: composite
