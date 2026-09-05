@@ -11,11 +11,14 @@
   ],
   "engines": {
     "node": "^22.22.2 || ^24.15.0",
-    "npm": ">=7.0.0"
+    "npm": ">=10.9.0"
   },
   "scripts": {
     "build": "npm run --workspaces --if-present build && npm run build:types",
     "build:types": "tsc -b",
+    "changeset": "changeset",
+    "changeset:tag": "changeset git-tag",
+    "changeset:version": "changeset version && npm install --package-lock-only",
     "clean:types": "git clean -fx -e \"**/node_modules/**\" \"packages/*/types/*.d.ts*\" \"*.tsbuildinfo\"; tsc -b --clean",
     "lint": "npm run lint:eslint && npm run lint:deps && npm run lint:lockfile && npm run lint:engines",
     "lint:commit": "commitlint",
@@ -39,6 +42,8 @@
   },
   "devDependencies": {
     "@babel/types": "7.29.7",
+    "@changesets/changelog-github": "1.0.0",
+    "@changesets/cli": "3.0.1",
     "@commitlint/cli": "21.2.1",
     "@commitlint/config-conventional": "21.2.0",
     "@endo/compartment-mapper": "2.4.0",
