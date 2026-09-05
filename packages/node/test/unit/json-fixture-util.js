@@ -117,16 +117,21 @@ export async function loadJSONFixture(
       : Volume.fromJSON(json)
   }
 
-  const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (vol) })
+  const readPowers = makeReadPowers({
+    fs: /** @type {FsInterface} */ (vol),
+  })
   if (randomDelay) {
-    const { maybeRead } = readPowers
+    const { read } = readPowers
     readPowers.maybeRead = async (specifier) => {
       // eslint-disable-next-line n/no-unsupported-features/node-builtins
       await scheduler.wait(
         Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1)) + MIN_DELAY
       )
-      // @ts-expect-error needs type fix
-      return maybeRead(specifier)
+      try {
+        return await read(specifier)
+      } catch {
+        return undefined
+      }
     }
   }
   return { vol, readPowers }
