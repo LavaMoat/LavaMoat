@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/node-v1.1.0...node-v2.0.0) (2026-09-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **node:** The API of `generatePolicy()` has changed; instead of resolving with a `LavaMoatPolicy`, it now resolves with an object having properties `policy: LavaMoatPolicy` and `hasWarnings: boolean`. This only affects programmatic consumption of `@lavamoat/node`. To migrate, destructure `policy` from the resolved object. `generatePolicy()` no longer accepts `write`/`writableFs`  options and does not write policy to disk; to write a policy, use `writePolicy `imported from `@lavamoat/node`.
+
+### Features
+
+* **node:** use @endo/parser-pipeline ([9fe2cce](https://github.com/LavaMoat/LavaMoat/commit/9fe2cceb6a969c2df9a5e5511527b7cf4825fb19))
+
+
+### Bug Fixes
+
+* **deps:** update endo ([#2048](https://github.com/LavaMoat/LavaMoat/issues/2048)) ([e07902b](https://github.com/LavaMoat/LavaMoat/commit/e07902bf52358578531c81be6095bca0d02e8141))
+* **deps:** upgrade ses ([83f704a](https://github.com/LavaMoat/LavaMoat/commit/83f704acbfc175a5bc1837752b3b52e597a0d5ad))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^18.0.6 to ^19.0.0
+
 ## [1.1.0](https://github.com/LavaMoat/LavaMoat/compare/node-v1.0.7...node-v1.1.0) (2026-09-03)
 
 

@@ -6,6 +6,23 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [19.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.6...lavamoat-core-v19.0.0) (2026-09-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **node:** The API of `generatePolicy()` has changed; instead of resolving with a `LavaMoatPolicy`, it now resolves with an object having properties `policy: LavaMoatPolicy` and `hasWarnings: boolean`. This only affects programmatic consumption of `@lavamoat/node`. To migrate, destructure `policy` from the resolved object. `generatePolicy()` no longer accepts `write`/`writableFs`  options and does not write policy to disk; to write a policy, use `writePolicy `imported from `@lavamoat/node`.
+
+### Features
+
+* **core:** expose policy override compact function ([bf19d9d](https://github.com/LavaMoat/LavaMoat/commit/bf19d9d283d03910d5e8ec95ab5ae3940a7fa24d))
+* **node:** use @endo/parser-pipeline ([9fe2cce](https://github.com/LavaMoat/LavaMoat/commit/9fe2cceb6a969c2df9a5e5511527b7cf4825fb19))
+
+
+### Bug Fixes
+
+* **deps:** upgrade ses ([83f704a](https://github.com/LavaMoat/LavaMoat/commit/83f704acbfc175a5bc1837752b3b52e597a0d5ad))
+
 ## [18.0.6](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.5...lavamoat-core-v18.0.6) (2026-09-03)
 
 
