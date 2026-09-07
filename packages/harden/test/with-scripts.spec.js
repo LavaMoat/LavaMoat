@@ -69,6 +69,10 @@ for (const pm of PKGMGR_LIST) {
 
     t.assert(result.length > 0, 'Expected some changes for strict level')
 
+    // cache busting - calling hardenDefaults multilpe times reuses dryRun cache otherwise
+    const cwd2 = cwd + '-m'
+    await execFileAsync('mv', [cwd, cwd2])
+
     const decisions = createVerifier({
       level: 'strict',
       packageManager: pm,
@@ -76,7 +80,7 @@ for (const pm of PKGMGR_LIST) {
     })
 
     const { summary } = await hardenDefaults({
-      cwd,
+      cwd: cwd2,
       packageManager: pm,
       decisions,
       print,

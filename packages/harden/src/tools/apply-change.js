@@ -93,7 +93,6 @@ export async function applyOpinion(cwd, opinion, facts, decisions, print) {
  */
 export async function verifyOpinion(cwd, opinion, facts) {
   const changes = opinion.changes ? structuredClone(opinion.changes) : []
-
   if (!changes) {
     return 0 // if there are no changes or custom verifier, consider the opinion NOT applied
   }
@@ -102,9 +101,11 @@ export async function verifyOpinion(cwd, opinion, facts) {
     result.push(...(await applyChange({ cwd, change, dryRun: true })))
   }
 
+  let score = 1 - result.length / changes.length
+
   if (opinion.verify) {
-    return (await opinion.verify(changes, result, facts)) ? 1 : 0
+    score = (await opinion.verify(changes, result, facts)) ? 1 : 0
   }
 
-  return 1 - result.length / changes.length
+  return score
 }
