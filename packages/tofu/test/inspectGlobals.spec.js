@@ -443,8 +443,208 @@ testInspect(
   {}
 )
 
+testInspect(
+  'passing global to function',
+  {},
+  () => {
+    function getHref(doc) {
+      return doc.location.href
+    }
+
+    const href = getHref(document)
+
+    console.log(href)
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing global to different functions',
+  {},
+  () => {
+    function getHref(doc) {
+      return doc.location.href
+    }
+
+    function getElement(doc) {
+      return doc.activeElement
+    }
+
+    const href = getHref(document)
+    const element = getElement(document)
+
+    console.log(element, href)
+  },
+  {
+    'console.log': 'read',
+    'document.activeElement': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing multiple globals to function',
+  {},
+  () => {
+    function logHref(console, doc) {
+      console.log(doc.location.href)
+    }
+
+    logHref(console, document)
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing global to function with redeclaration',
+  {},
+  () => {
+    function getElement(doc) {
+      let document = doc
+      return document.activeElement
+    }
+
+    const element = getElement(document)
+
+    console.log(element)
+  },
+  {
+    'console.log': 'read',
+    document: 'read',
+  }
+)
+
+testInspect(
+  'passing global to function declared twice',
+  {},
+  () => {
+    function getElement(doc) {
+      return doc.activeElement
+    }
+
+    function nested() {
+      const element = getElement(document)
+      console.log(element)
+
+      function getElement(doc) {
+        return doc.location.href
+      }
+    }
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing global to function with write',
+  {},
+  () => {
+    function overwriteElement(doc) {
+      doc.activeElement = null
+    }
+
+    overwriteElement(document)
+  },
+  {
+    'document.activeElement': 'write',
+  }
+)
+
+testInspect(
+  'passing global to function expression callee',
+  {},
+  () => {
+    const getHref = function (doc) {
+      return doc.location.href
+    }
+
+    const href = getHref(document)
+    console.log(href)
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'passing global to arrow function callee',
+  {},
+  () => {
+    const getHref = (doc) => doc.location.href
+    const href = getHref(document)
+    console.log(href)
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'does not break when callee not readable',
+  {},
+  () => {
+    const getHref = require('./getHref')
+    const href = getHref(document)
+    console.log(href)
+  },
+  {
+    'console.log': 'read',
+    document: 'read',
+    require: 'read',
+  }
+)
+
+testInspect.bind(test.failing)(
+  'passing global to member-expression callee',
+  {},
+  () => {
+    const api = {
+      getHref(doc) {
+        return doc.location.href
+      },
+    }
+    const href = api.getHref(document)
+    console.log(href)
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
+testInspect(
+  'naive behavior: attributes usage after parameter reassignment to global argument',
+  {},
+  () => {
+    const fake = { location: { href: 'https://example.invalid' } }
+
+    function getHref(doc) {
+      doc = fake
+      return doc.location.href
+    }
+
+    const href = getHref(document)
+    console.log(href)
+  },
+  {
+    'console.log': 'read',
+    'document.location.href': 'read',
+  }
+)
+
 function testInspect(label, opts, fn, expectedResultObj) {
-  test(label, (t) => {
+  const run = typeof this === 'function' ? this : test
+  run(label, (t) => {
     const src = fnToCodeBlock(fn)
     const result = inspectGlobals(src, opts)
     const resultSorted = [...result.entries()].sort(sortBy(0))

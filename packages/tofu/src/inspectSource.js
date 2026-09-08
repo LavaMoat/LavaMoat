@@ -90,10 +90,23 @@ function inspectGlobals(
           parents
         )
       )
+
+      // inspect globals passed to functions
+      if (parent.type === 'CallExpression') {
+        const narrowedUsages = inspectFunctionArgumentUsage(path, parent)
+        if (narrowedUsages) {
+          narrowedUsages.forEach(({ keys, use }) => {
+            maybeAddGlobalUsage([...keyPath, ...keys].join('.'), use)
+          })
+          return
+        }
+      }
+
       // if nested API lookup begins with a globalRef, drop it
       if (globalRefs.includes(keyPath[0])) {
         keyPath.shift()
       }
+
       // inspect for destructuring
       let destructuredPaths
       if (
@@ -121,8 +134,7 @@ function inspectGlobals(
 
   /**
    * @param {string} variableName
-   * @param {import('@babel/types').Identifier
-   *   | import('@babel/types').ThisExpression} identifierNode
+   * @param {import('@babel/types').Identifier | import('@babel/types').ThisExpression} identifierNode
    * @param {import('./inspectPrimordialAssignments').MemberLikeExpression[]} parents
    * @returns
    */
@@ -156,6 +168,68 @@ function inspectGlobals(
       ...getPathFromMemberExpressionChain(memberExpressions),
     ]
     return { identifierUse, path, parent: parentOfMembershipChain }
+  }
+
+  /**
+   * Collects keys used from a global in a function it is being passed to
+   *
+   * @param {import('@babel/traverse').NodePath<
+   *   import('@babel/types').Identifier | import('@babel/types').ThisExpression
+   * >} path
+   * @param {import('@babel/types').CallExpression} callExpression
+   * @returns {{ keys: string[]; use: GlobalPolicyValue }[] | null}
+   */
+  function inspectFunctionArgumentUsage(path, callExpression) {
+    const argIndex = callExpression.arguments.indexOf(path.node)
+    if (argIndex === -1 || callExpression.callee.type !== 'Identifier') {
+      return null
+    }
+    const bindingPath = path.scope.getBinding(callExpression.callee.name)?.path
+    /**
+     * @type {import('@babel/traverse').NodePath<
+     *       | import('@babel/types').FunctionDeclaration
+     *       | import('@babel/types').FunctionExpression
+     *       | import('@babel/types').ArrowFunctionExpression
+     *     >
+     *   | null}
+     */
+    let functionPath = null
+    if (bindingPath?.isFunctionDeclaration()) {
+      functionPath = bindingPath
+    } else if (bindingPath?.isVariableDeclarator()) {
+      const initPath = bindingPath.get('init')
+      if (
+        initPath?.isFunctionExpression() ||
+        initPath?.isArrowFunctionExpression()
+      ) {
+        functionPath = initPath
+      }
+    }
+    if (!functionPath) {
+      return null
+    }
+
+    const param = functionPath.node.params[argIndex]
+    // skip parameters that arent plain identifiers
+    if (param?.type !== 'Identifier') {
+      return null
+    }
+    const paramReferences = functionPath.scope.getBinding(
+      param.name
+    )?.referencePaths
+    if (!paramReferences || paramReferences.length === 0) {
+      return null
+    }
+    return paramReferences.map((ref) => {
+      const { path, identifierUse } = inspectIdentifierForDirectMembershipChain(
+        param.name,
+        /** @type {import('@babel/types').Identifier} */ (ref.node),
+        /** @type {import('./inspectPrimordialAssignments').MemberLikeExpression[]} */ (
+          getParents(ref)
+        )
+      )
+      return { keys: path.slice(1), use: identifierUse }
+    })
   }
 
   /**
