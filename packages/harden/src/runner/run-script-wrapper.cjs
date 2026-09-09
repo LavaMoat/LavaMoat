@@ -125,25 +125,27 @@ function makeRunScriptWrapper(
     // 2. tmp write - crossplatform
     if (configOptions['--allow-fs-tmp'] === true) {
       delete configOptions['--allow-fs-tmp']
-      if (configOptions['--allow-fs-write']) {
-        if (typeof configOptions['--allow-fs-write'] === 'string') {
-          configOptions['--allow-fs-write'] = [
-            configOptions['--allow-fs-write'],
-          ]
-        }
-        if (configOptions['--allow-fs-write'] === true) {
-          return // none of this matters
-        }
-      } else {
-        // do this for both undefined and false
-        configOptions['--allow-fs-write'] = []
-      }
       const tmp = tmpdir()
-      configOptions['--allow-fs-write'].push(tmp)
-      // because macos is being weird
       const tmpRealPath = realpathSync(tmp)
-      if (tmpRealPath !== tmp) {
-        configOptions['--allow-fs-write'].push(tmpRealPath)
+      // write doesn't grant read, sadly
+      for (const perm of ['write', 'read']) {
+        const allowOption = `--allow-fs-${perm}`
+        if (configOptions[allowOption]) {
+          if (typeof configOptions[allowOption] === 'string') {
+            configOptions[allowOption] = [configOptions[allowOption]]
+          }
+          if (configOptions[allowOption] === true) {
+            continue // none of this matters
+          }
+        } else {
+          // do this for both undefined and false
+          configOptions[allowOption] = []
+        }
+        configOptions[allowOption].push(tmp)
+        // because macos is being weird
+        if (tmpRealPath !== tmp) {
+          configOptions[allowOption].push(tmpRealPath)
+        }
       }
     }
   }

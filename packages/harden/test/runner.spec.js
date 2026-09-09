@@ -78,7 +78,7 @@ for (const pm of PKGMGR_LIST) {
     )
   })
 }
-test(`runner wildcard support in scriptsConfig exits zero`, async (t) => {
+test(`runner features smoke test exits zero`, async (t) => {
   t.plan(1)
   const cwd = await copyProject(t, 'runner-features')
 
