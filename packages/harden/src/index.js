@@ -127,7 +127,7 @@ export async function hardenDefaults(options) {
 
 /**
  * @param {readonly Opinion[]} from
- * @returns Opinion[]
+ * @returns {Opinion[]}
  */
 function shallowCopy(from) {
   return from.map((item) => ({ ...item }))

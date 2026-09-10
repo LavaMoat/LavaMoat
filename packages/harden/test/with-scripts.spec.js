@@ -1,4 +1,5 @@
 import test from 'ava'
+import { promises as fsPromises } from 'node:fs'
 import { hardenDefaults } from '../src/index.js'
 import { createFallbackDecisions } from '../src/tools/default-decisions.js'
 import { createVerifier } from '../src/tools/verifier.js'
@@ -69,9 +70,9 @@ for (const pm of PKGMGR_LIST) {
 
     t.assert(result.length > 0, 'Expected some changes for strict level')
 
-    // cache busting - calling hardenDefaults multilpe times reuses dryRun cache otherwise
+    // cache busting - calling hardenDefaults multiple times reuses dryRun cache otherwise
     const cwd2 = cwd + '-m'
-    await execFileAsync('mv', [cwd, cwd2])
+    await fsPromises.rename(cwd, cwd2)
 
     const decisions = createVerifier({
       level: 'strict',
