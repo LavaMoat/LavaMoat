@@ -14,7 +14,6 @@
   schedule: '* 0-6 * * *', // run things only during 0-6am UTC
   // providing this overrides `:ignoreModulesAndTests` which comes in thru `config:js-app` via `config:recommended`
   ignorePaths: [
-    'packages/perf/trials/**/*',
     '**/node_modules/**',
     '**/example*/**',
     '**/fixture*/**',
@@ -22,6 +21,7 @@
   ],
   packageRules: [
     {
+      matchManagers: ['npm'],
       // as long as we use CJS, everything owned by @sindresorhus should be in this list
       matchPackageNames: [
         // Missing support for LavaMoat supported major Node.js version(s)
@@ -63,6 +63,7 @@
       enabled: false,
     },
     {
+      matchManagers: ['npm'],
       matchPackageNames: ['@endo/*', 'ses'],
       groupName: 'endo',
     },
@@ -81,6 +82,12 @@
       matchManagers: ['github-actions'],
       matchPackageNames: ['ghcr.io/zizmorcore/zizmor'],
       minimumReleaseAge: '3 days',
+    },
+    {
+      // group up memfs and snapshot-related packages
+      matchManagers: ['npm'],
+      matchPackageNames: ['memfs', '@jsonjoy.com/*'],
+      groupName: 'memfs',
     },
   ],
 }
