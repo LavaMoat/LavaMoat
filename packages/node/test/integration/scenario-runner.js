@@ -5,7 +5,7 @@
  */
 import '../../src/preamble.js'
 
-import { Loggerr } from 'loggerr'
+import { LogLevels } from '../../src/log.js'
 import { memfs } from 'memfs'
 import { isMainThread, workerData } from 'node:worker_threads'
 import { makeReadPowers } from '../../src/compartment/power.js'
@@ -39,20 +39,7 @@ const { fs } = memfs(vol)
 
 const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (fs) })
 
-const log = new Loggerr({
-  formatter: 'cli',
-  streams: [
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-  ],
-  level: Loggerr.EMERGENCY,
-})
+const log = defaultLog.create({ level: LogLevels.silent })
 
 void run(entryPath, {
   policies: policyInput({
