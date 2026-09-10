@@ -1,0 +1,16 @@
+{
+  "extends": "../../../.config/tsconfig.src.json",
+  "compilerOptions": {
+    "paths": {
+      "@lavamoat/types": ["../../types"]
+    },
+    "module": "NodeNext",
+    "strict": true,
+    "stripInternal": true,
+    "preserveSymlinks": true,
+    "emitDeclarationOnly": false,
+    "erasableSyntaxOnly": true
+  },
+  "include": ["."],
+  "references": [{ "path": "../../types/tsconfig.json" }]
+}
