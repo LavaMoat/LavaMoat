@@ -6,24 +6,18 @@
  */
 import nodeFs from 'node:fs'
 import { makeReadPowers } from '../compartment/power.js'
-import {
-  DEFAULT_ATTENUATOR,
-  DEFAULT_TRUST_ROOT_COMPARTMENT,
-} from '../constants.js'
-import { TrustMismatchError } from '../error.js'
-import { hrCode, hrPath } from '../format.js'
+import { DEFAULT_ATTENUATOR } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
-import { isTrusted, loadPolicies } from '../policy-util.js'
+import { loadPolicy, policyInput } from '../policy-input.js'
+import { assertTrustRootMatchesPolicy, unwrapMerged } from '../policy-util.js'
 import { makeAttenuators } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
 
 /**
  * @import {
- *   ExecuteOptions,
- *   LoadPoliciesOptions,
- *   MergedLavaMoatPolicy,
+ *   LoadOptions,
  *   RunOptions
  * } from '../types.js'
  */
@@ -49,33 +43,18 @@ export const run = async (
     readFile = nodeFs.promises.readFile,
     log = defaultLog,
     scuttleGlobalThis,
-    ...options
+    policies,
+    ...readPowerOpts
   } = {}
 ) => {
   await Promise.resolve()
 
-  /**
-   * @remarks
-   * This is a typescript-ism.
-   * @type {LoadPoliciesOptions}
-   */
-  const loadPoliciesOptions = {
-    readFile,
-    projectRoot,
-    policyPath: options.policyPath,
-    policyOverride: options.policyOverride,
-    policyOverridePath: options.policyOverridePath,
-  }
+  const input = policies ?? policyInput({ projectRoot })
+  const merged = await loadPolicy(input, { readFile })
 
-  const policy = await loadPolicies(
-    options.policy ?? options.policyPath,
-    loadPoliciesOptions
-  )
-
-  // because we have a merged policy, we don't need to provide overrides to `toEndoPolicy`
-  const endoPolicy = await toEndoPolicy(policy, { projectRoot })
-
-  assertTrustRootMatchesPolicy(policy, entrypoint, trustRoot)
+  assertTrustRootMatchesPolicy(merged, entrypoint, trustRoot)
+  const policy = unwrapMerged(merged)
+  const endoPolicy = await toEndoPolicy(merged)
 
   const { attenuateGlobals, attenuateModule } = makeAttenuators({
     policy,
@@ -83,8 +62,8 @@ export const run = async (
     trustRoot,
   })
 
-  /** @type {ExecuteOptions} */
-  const executeOptions = {
+  /** @type {LoadOptions} */
+  const loadOptions = {
     Compartment: makeExecutionCompartment(globalThis),
     modules: {
       // We are passing the default attenuator in as an exit module. It's not required
@@ -100,36 +79,10 @@ export const run = async (
     endoPolicy,
     prodOnly,
     log,
-    readPowers: makeReadPowers(options),
+    readPowers: makeReadPowers(readPowerOpts),
     trustRoot,
     policy,
   }
 
-  return execute(entrypoint, executeOptions)
-}
-
-/**
- * Asserts the value of `trustRoot` matches that returned by {@link isTrusted}
- * when run against `policy`
- *
- * @remarks
- * This only makes sense prior to execution.
- * @param {MergedLavaMoatPolicy} policy LavaMoat policy
- * @param {string | URL} entrypoint Path to entry point (for error message)
- * @param {boolean} trustRoot Whether we plan to trust the root environment
- */
-const assertTrustRootMatchesPolicy = (
-  policy,
-  entrypoint,
-  trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT
-) => {
-  if (trustRoot && !isTrusted(policy)) {
-    throw new TrustMismatchError(
-      `Attempted to execute entrypoint ${hrPath(entrypoint)} as trusted, but policy expects an untrusted root. Either call ${hrCode('run()')} with option ${hrCode('{trustRoot: true}')} or provide a policy which trusts the root (without ${hrCode('root.usePolicy')}). Aborting`
-    )
-  } else if (!trustRoot && isTrusted(policy)) {
-    throw new TrustMismatchError(
-      `Attempted to execute entrypoint ${hrPath(entrypoint)} as untrusted, but policy expects a trusted root. Either call ${hrCode('run()')} with option ${hrCode('{trustRoot: false}')} or provide a policy which does not trust the root. Aborting`
-    )
-  }
+  return execute(entrypoint, loadOptions)
 }

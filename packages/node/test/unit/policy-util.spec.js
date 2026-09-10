@@ -7,15 +7,23 @@ import { ErrorCodes } from '../../src/error-code.js'
 import nodePath from 'node:path'
 import {
   assertPolicy,
+  isMergedWrapper,
   isPolicy,
   isTrusted,
-  loadPolicies,
   makeDefaultPolicyOverridePath,
   makeDefaultPolicyPath,
   maybeReadPolicyOverride,
   readPolicy,
+  unwrapMerged,
+  wrapMerged,
   writePolicy,
 } from '../../src/policy-util.js'
+
+/**
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
+ */
+
+const EMPTY_POLICY = /** @type {LavaMoatPolicy} */ ({ resources: {} })
 
 test.beforeEach(() => {
   vol.reset()
@@ -67,18 +75,6 @@ test('readPolicyOverride - reads and validates policy override from disk (defaul
   t.deepEqual(policyOverride, { resources: {} })
 })
 
-test('loadPolicies - loads and merges policies from disk', async (t) => {
-  vol.fromJSON({
-    '/policy.json': JSON.stringify({ resources: {} }),
-    '/policy-override.json': JSON.stringify({ resources: {} }),
-  })
-  const policy = await loadPolicies('/policy.json', {
-    policyOverridePath: '/policy-override.json',
-    readFile: /** @type {any} */ (fs.promises.readFile),
-  })
-  t.deepEqual(policy, { resources: {}, [constants.MERGED_POLICY_FIELD]: true })
-})
-
 test('isPolicy - returns true for valid policy', (t) => {
   t.true(isPolicy({ resources: {} }))
 })
@@ -115,26 +111,6 @@ test('isTrusted - returns true for empty root policy', (t) => {
 
 test('isTrusted - returns false for root policy w/ usePolicy', (t) => {
   t.false(isTrusted({ root: { usePolicy: 'foo' }, resources: {} }))
-})
-
-test('loadPolicies - uses policyPath option as hint for override path when given a policy object', async (t) => {
-  const overrideResources = { foo: { packages: { bar: true } } }
-  vol.fromJSON({
-    '/hint/policy-override.json': JSON.stringify({
-      resources: overrideResources,
-    }),
-  })
-  const policy = await loadPolicies(
-    { resources: {} },
-    {
-      policyPath: '/hint/policy.json',
-      readFile: /** @type {any} */ (fs.promises.readFile),
-    }
-  )
-  t.deepEqual(policy, {
-    resources: overrideResources,
-    [constants.MERGED_POLICY_FIELD]: true,
-  })
 })
 
 test('makeDefaultPolicyPath - returns default policy path for project root', (t) => {
@@ -200,4 +176,45 @@ test('writePolicy - removes created directory when file write fails', async (t) 
   )
   t.is(/** @type {Error} */ (err).cause, cause)
   t.deepEqual(rmCall, { path: '/nope', opts: { recursive: true } })
+})
+
+test('wrapMerged - wraps a policy in a Merged container', (t) => {
+  const wrapped = wrapMerged(EMPTY_POLICY)
+  t.is(wrapped.policy, EMPTY_POLICY)
+  t.true(wrapped.merged)
+})
+
+test('wrapMerged - result is frozen', (t) => {
+  const wrapped = wrapMerged(EMPTY_POLICY)
+  t.true(Object.isFrozen(wrapped))
+})
+
+test('unwrapMerged - extracts the policy from a Merged container', (t) => {
+  const wrapped = wrapMerged(EMPTY_POLICY)
+  t.is(unwrapMerged(wrapped), EMPTY_POLICY)
+})
+
+test('isMergedWrapper - returns true for a Merged wrapper', (t) => {
+  t.true(isMergedWrapper(wrapMerged(EMPTY_POLICY)))
+})
+
+test('isMergedWrapper - returns false for a plain policy', (t) => {
+  t.false(isMergedWrapper(EMPTY_POLICY))
+})
+
+test('isMergedWrapper - returns false for null', (t) => {
+  t.false(isMergedWrapper(null))
+})
+
+test('isMergedWrapper - returns false for { merged: true } without a policy', (t) => {
+  t.false(isMergedWrapper({ merged: true }))
+})
+
+test('isMergedWrapper - returns false for { policy: {}, merged: false }', (t) => {
+  t.false(isMergedWrapper({ policy: EMPTY_POLICY, merged: false }))
+})
+
+test('wrapMerged / unwrapMerged round-trip is lossless', (t) => {
+  const policy = { ...EMPTY_POLICY, extra: 'data' }
+  t.is(unwrapMerged(wrapMerged(policy)), policy)
 })

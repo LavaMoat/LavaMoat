@@ -216,3 +216,8 @@ npm run test:workspaces
 ```
 
 **Always check that your changes don't break the core security functionality by running the CI test suite before submitting code.**
+
+## Code Style
+
+- When importing types in `.js` sources, _always_ use the `@import {T} from './specifier'` comment syntax.
+- Combine multiple imports from a single module into a single `@import {X, Y, Z} from './specifier'` comment.
