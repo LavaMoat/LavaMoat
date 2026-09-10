@@ -1,5 +1,5 @@
 {
   "nodeOptions": {
-    "--permissions": true
+    "--permission": true
   }
 }
