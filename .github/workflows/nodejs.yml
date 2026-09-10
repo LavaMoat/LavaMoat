@@ -43,15 +43,16 @@ jobs:
           persist-credentials: false
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: ./.github/actions/prepare
+        uses: $/.github/actions/prepare
         with:
           node-version: ${{ matrix.node-version }}
       - name: Build & Test
-        uses: ./.github/actions/test
+        uses: $/.github/actions/test
       - name: Dirty Check
         run: node ./scripts/dirty-check.js
 
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -59,7 +60,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Use Node.js from .nvmrc
-        uses: ./.github/actions/prepare
+        uses: $/.github/actions/prepare
       - name: Build
         run: npm run build
       - parallel:
