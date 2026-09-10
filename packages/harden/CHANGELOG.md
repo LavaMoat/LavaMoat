@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.7.0...harden-v0.7.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **harden:** avoid test flakiness by relying less on one run per process ([#2103](https://github.com/LavaMoat/LavaMoat/issues/2103)) ([7014109](https://github.com/LavaMoat/LavaMoat/commit/7014109b4758454f2a1175056482b5e14e9e6f3e))
+
 ## [0.7.0](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.6.0...harden-v0.7.0) (2026-09-03)
 
 

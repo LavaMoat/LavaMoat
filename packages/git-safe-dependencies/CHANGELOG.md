@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v1.0.2...git-safe-dependencies-v1.0.3) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** upgrade js-yaml ([#2099](https://github.com/LavaMoat/LavaMoat/issues/2099)) ([b775fc7](https://github.com/LavaMoat/LavaMoat/commit/b775fc7ed7064efe5dbcf45141d69e5a5c15f47d))
+
 ## [1.0.2](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v1.0.1...git-safe-dependencies-v1.0.2) (2026-09-03)
 
 
