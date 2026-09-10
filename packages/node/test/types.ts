@@ -1,6 +1,7 @@
 import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
 import type { LavaMoatScuttleOpts } from 'lavamoat-core'
+import { type NormalizedScenario } from 'lavamoat-core/test/scenario.js'
 import type { NestedDirectoryJSON } from 'memfs'
 import type { ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
@@ -140,4 +141,19 @@ export interface Fixture {
   policyPath: string
   policyOverridePath: string
   dir: string
+}
+
+/**
+ * A scenario running under `@lavamoat/node`
+ */
+export type LavaMoatNodeScenario = NormalizedScenario & {
+  /**
+   * Whether the scenario should fail because it is incompatible with
+   * `@lavamoat/node`.
+   *
+   * Used to suppress output during expected test failures. This does _not_ mean
+   * the same thing as {@link LavaMoatNodeScenario.expectedFailure} (whatever
+   * that means).
+   */
+  expectedLavaMoatNodeFailure?: boolean
 }
