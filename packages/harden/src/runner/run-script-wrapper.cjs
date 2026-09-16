@@ -126,7 +126,16 @@ function makeRunScriptWrapper(
     if (configOptions['--allow-fs-tmp'] === true) {
       delete configOptions['--allow-fs-tmp']
       const tmp = tmpdir()
-      const tmpRealPath = realpathSync(tmp)
+      let tmpRealPath = tmp
+      try {
+        tmpRealPath = realpathSync(tmp)
+      } catch (_) {
+        // if realpathSync fails, it's been restricted by permissions
+        // TODO: fall back to
+        // if (stats.isSymbolicLink()) {
+        //   tmpRealPath = fs.readlinkSync(tmp)
+        // }
+      }
       // write doesn't grant read, sadly
       for (const perm of ['write', 'read']) {
         const allowOption = `--allow-fs-${perm}`
