@@ -56,7 +56,7 @@ function makeRunScriptWrapper(
     projectRoot,
   }) {
     if (!scriptsConfig) {
-      return {}
+      return { config: {} }
     }
     const configName =
       scriptsConfig[scriptName] ||
