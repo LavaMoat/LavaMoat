@@ -14,7 +14,15 @@ function makeRunScriptWrapper(
     customizePermissionsConfig,
     readScriptsConfig,
   },
-  { readFileSync, pathJoin, pathDelimiter, tmpdir, realpathSync }
+  {
+    readFileSync,
+    pathJoin,
+    pathDelimiter,
+    tmpdir,
+    realpathSync,
+    lstatSync,
+    readlinkSync,
+  }
 ) {
   const DEFAULT_PERMISSION_KEY = '#default'
 
@@ -131,10 +139,14 @@ function makeRunScriptWrapper(
         tmpRealPath = realpathSync(tmp)
       } catch (_) {
         // if realpathSync fails, it's been restricted by permissions
-        // TODO: fall back to
-        // if (stats.isSymbolicLink()) {
-        //   tmpRealPath = fs.readlinkSync(tmp)
-        // }
+        try {
+          const stats = lstatSync(tmp)
+          if (stats.isSymbolicLink()) {
+            tmpRealPath = readlinkSync(tmp)
+          }
+        } catch (_) {
+          // silence the error and continue with no separate tmpRealPath
+        }
       }
       // write doesn't grant read, sadly
       for (const perm of ['write', 'read']) {
