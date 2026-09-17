@@ -21,9 +21,13 @@ const execFileAsync = promisify(execFile)
 const CLI_PATH = fileURLToPath(new URL('../../src/cli.js', import.meta.url))
 
 /**
- * @import {ExecFileException} from 'node:child_process'
- * @import {ExitCode, RunCLIOptions, RunCLIOutput} from '../types.js'
  * @import {ExecutionContext} from 'ava'
+ * @import {ExecFileException} from 'node:child_process'
+ * @import {
+ *   ExitCode,
+ *   RunCLIOptions,
+ *   RunCLIOutput
+ * } from '../types.js'
  */
 
 /**

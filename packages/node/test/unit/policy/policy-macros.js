@@ -18,6 +18,7 @@ import {
 /**
  * @import {LavaMoatPolicy} from '@lavamoat/types'
  * @import {
+ *   Macro,
  *   MacroDeclarationOptions,
  *   TestFn
  * } from 'ava'
@@ -43,6 +44,38 @@ const fixture = fixtureFinder(new URL('..', import.meta.url))
  * @template [Ctx=unknown] Custom execution context, if any. Default is
  *   `unknown`
  * @param {TestFn<Ctx>} test - AVA test function
+ * @returns {{
+ *   testPolicyForJSON: Macro<
+ *     [
+ *       fixtureFilename: string,
+ *       expectedPolicyOrOptions?: LavaMoatPolicy | TestPolicyForJSONOptions,
+ *       options?: TestPolicyForJSONOptions,
+ *     ],
+ *     Ctx
+ *   >
+ *   testPolicyForFixture: Macro<
+ *     [
+ *       name: string,
+ *       expectedPolicyOrOptions?: LavaMoatPolicy | TestPolicyForFixtureOptions,
+ *       options?: TestPolicyForFixtureOptions,
+ *     ],
+ *     Ctx
+ *   >
+ *   testPolicyForModule: Macro<
+ *     [
+ *       content: string,
+ *       expectedPolicy?: LavaMoatPolicy | TestPolicyMacroOptions,
+ *     ],
+ *     Ctx
+ *   >
+ *   testPolicyForScript: Macro<
+ *     [
+ *       content: string,
+ *       expectedPolicy?: LavaMoatPolicy | TestPolicyMacroOptions,
+ *     ],
+ *     Ctx
+ *   >
+ * }}
  */
 export function createGeneratePolicyMacros(test) {
   /**
@@ -278,7 +311,7 @@ export function createGeneratePolicyMacros(test) {
           options = /** @type {TestPolicyForJSONOptions} */ (
             expectedPolicyOrOptions ?? {}
           )
-          ;({ expected, ...options } = options)
+          ;({ expected } = options)
         }
 
         if (isPolicy(expected)) {
@@ -304,8 +337,7 @@ export function createGeneratePolicyMacros(test) {
      *   [
      *     name: string,
      *     expectedPolicyOrOptions?:
-     *       | LavaMoatPolicy
-     *       | TestPolicyForFixtureOptions,
+     *       LavaMoatPolicy | TestPolicyForFixtureOptions,
      *     options?: TestPolicyForFixtureOptions,
      *   ],
      *   Ctx
@@ -392,7 +424,7 @@ export function createGeneratePolicyMacros(test) {
           options = /** @type {TestPolicyForFixtureOptions} */ (
             expectedPolicyOrOptions ?? {}
           )
-          ;({ expected, ...options } = options)
+          ;({ expected } = options)
         }
 
         if (isPolicy(expected)) {

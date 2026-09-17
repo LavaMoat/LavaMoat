@@ -6,7 +6,7 @@ import { parseDocument } from 'yaml'
  * @import {
  *   AppliedChange,
  *   Change
- * } from "./types.js"
+ * } from './types.js'
  */
 
 const yamlDocumentCache = new Map()

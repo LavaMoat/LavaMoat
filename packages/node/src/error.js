@@ -1,6 +1,11 @@
 /**
- * @import {ErrorCode, LavaMoatErrorClass, LavaMoatErrorClassParams, LavaMoatErrorOptions} from './errors.js'
  * @import {Class} from 'type-fest'
+ * @import {
+ *   ErrorCode,
+ *   LavaMoatErrorClass,
+ *   LavaMoatErrorClassParams,
+ *   LavaMoatErrorOptions
+ * } from './errors.js'
  */
 import { ErrorCodes } from './error-code.js'
 

@@ -29,7 +29,7 @@ export { stripAnsi }
  * @returns {string} Colorized string
  */
 
-const colorSplit = (
+export const colorSplit = (
   value,
   {
     delimiter = '>',
@@ -51,32 +51,39 @@ const colorSplit = (
  * Path delimiters are platform-aware.
  *
  * @param {string | URL} filepath Path to display
+ * @param {boolean} [colorOnly] If true, only color the path; don't optimize for
+ *   length
  * @returns {string} Human-readable path
  */
-export const hrPath = (filepath) => {
+export const hrPath = (filepath, colorOnly) => {
   filepath = toPath(filepath)
-  if (nodePath.isAbsolute(filepath)) {
-    const relativePath = nodePath.relative(process.cwd(), filepath)
-    if (relativePath.length < filepath.length) {
-      filepath = relativePath.startsWith('..')
-        ? relativePath
-        : `.${nodePath.sep}${relativePath}`
-    }
-  } else {
-    const absolutePath = nodePath.resolve(filepath)
-    if (absolutePath.length < filepath.length) {
-      filepath = absolutePath
+  if (!colorOnly) {
+    if (nodePath.isAbsolute(filepath)) {
+      const relativePath = nodePath.relative(process.cwd(), filepath)
+      if (relativePath.length < filepath.length) {
+        filepath = relativePath.startsWith('..')
+          ? relativePath
+          : `.${nodePath.sep}${relativePath}`
+      }
     } else {
-      filepath = filepath.startsWith('..')
-        ? filepath
-        : `.${nodePath.sep}${filepath}`
+      const absolutePath = nodePath.resolve(filepath)
+      if (absolutePath.length < filepath.length) {
+        filepath = absolutePath
+      } else {
+        filepath = filepath.startsWith('..')
+          ? filepath
+          : `.${nodePath.sep}${filepath}`
+      }
     }
   }
-  return colorSplit(filepath, {
-    delimiter: nodePath.sep,
-    color: chalk.greenBright,
-    delimiterColor: chalk.green,
-  })
+  return colorSplit(
+    colorSplit(filepath, {
+      delimiter: nodePath.sep,
+      color: chalk.greenBright,
+      delimiterColor: chalk.green,
+    }),
+    { delimiter: ':', color: chalk.greenBright, delimiterColor: chalk.green }
+  )
 }
 
 /**
@@ -99,3 +106,71 @@ export const hrLabel = (name, dim = false) =>
  * @returns {string}
  */
 export const hrCode = chalk.cyan.bold
+
+/**
+ * Formats a success symbol.
+ *
+ * @returns {string}
+ */
+
+export const success = chalk.greenBright.bold('✓')
+
+/**
+ * Formats an "action" message.
+ *
+ * @returns {string}
+ */
+export const action = chalk.bold
+
+/**
+ * Formats a string for emphasis.
+ */
+export const emphasis = chalk.italic
+
+/**
+ * Formats a string for deemphasis.
+ */
+export const deemphasis = chalk.dim
+
+/**
+ * Array of spinner characters.
+ */
+export const spinnerChars = ['◰', '◳', '◲', '◱']
+
+/**
+ * Formats a spinner.
+ *
+ * @returns {string}
+ */
+export const spinner = chalk.magentaBright.bold
+
+/**
+ * Formats a hazard symbol.
+ *
+ * @returns {string}
+ */
+export const hazard = chalk.yellowBright.bold('⚠')
+
+/**
+ * Formats a chevron symbol.
+ *
+ * @returns {string}
+ */
+export const chevron = chalk.blackBright('›')
+
+/**
+ * Clears the current line.
+ *
+ * @returns {void}
+ */
+export const clearLine = () => {
+  process.stderr.write('\r\x1b[2K')
+}
+
+/**
+ * Formats a duration in seconds as a human-readable string.
+ *
+ * @param {number} duration Duration in ms
+ * @returns {string} Human-readable duration in seconds
+ */
+export const seconds = (duration) => `${hrCode(`~${duration.toFixed(2)}`)}`

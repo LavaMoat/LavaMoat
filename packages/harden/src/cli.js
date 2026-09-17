@@ -16,6 +16,7 @@ const { values, positionals } = parseArgs({
   options: {
     help: { type: 'boolean', short: 'h' },
     version: { type: 'boolean', short: 'v' },
+    json: { type: 'boolean' },
     'package-manager': { type: 'string', short: 'p' },
     level: { type: 'string', short: 'l' },
     'decisions-snapshot': { type: 'string', short: 'd' },
@@ -43,6 +44,7 @@ Commands:
     Options:
       -p, --package-manager <pm>  Package manager (npm, yarn, pnpm)
       -l, --level <level>         Hardening level (baseline, moderate, strict) [default: moderate]
+      --json                       Output machine-readable JSON to stdout (check only)
 
 Options
   -h, --help                  Show this help
@@ -130,6 +132,7 @@ switch (command) {
         level,
         print,
         packageManager: values['package-manager'],
+        json: values.json === true,
       })
     }
     break

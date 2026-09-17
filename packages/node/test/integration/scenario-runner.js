@@ -13,8 +13,8 @@ import { run } from '../../src/exec/run.js'
 import { log as defaultLog } from '../../src/log.js'
 
 /**
- * @import {FsInterface} from '@endo/compartment-mapper';
- * @import {RunnerWorkerData} from '../types.js';
+ * @import {FsInterface} from '@endo/compartment-mapper'
+ * @import {RunnerWorkerData} from '../types.js'
  */
 
 if (isMainThread) {

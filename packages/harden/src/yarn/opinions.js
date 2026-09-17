@@ -202,8 +202,10 @@ const definedOpinions = Object.freeze(
           changes[0].value = facts.directGitDeps
         }
       },
-      verify: async (changes, results, _facts) => {
-        return results.length === 0
+      verify: async (changes, results, facts) => {
+        return !!(
+          results.length === 0 || facts?.yarnConfig?.approvedGitRepositories
+        )
       },
     },
 

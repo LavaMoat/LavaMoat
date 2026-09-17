@@ -1,0 +1,14 @@
+{
+  "name": "test-npm-project",
+  "version": "1.0.0",
+  "scripts": {
+    "lint:directmatch": "bash -c '[[ -z \"${NODE_OPTIONS:-}\" ]] && echo PASS-lint:directmatch-no-node-options || { echo FAIL-lint:directmatch-has-node-options:${NODE_OPTIONS}; exit 1; }'",
+    "lint:something": "bash -c '[[ \"${NODE_OPTIONS:-}\" == *\"--permissions\"* ]] && echo PASS-lint:something-permissions || { echo FAIL-lint:something-empty; exit 1; }'",
+    "lint:somethingelse": "bash -c '[[ \"${NODE_OPTIONS:-}\" == *\"--permissions\"* ]] && echo PASS-lint:somethingelse-permissions || { echo FAIL-lint:somethingelse-empty; exit 1; }'",
+    "test": "npm run lint:something && npm run lint:somethingelse && npm run lint:directmatch"
+  },
+  "scriptsConfig": {
+    "lint:*": "lavamoat/scripts.permissions.json",
+    "lint:directmatch": "lavamoat/scripts.empty.json"
+  }
+}

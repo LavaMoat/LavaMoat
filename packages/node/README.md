@@ -144,7 +144,7 @@ npx exec lavamoat generate --help
 
 The following issues (or missing features) are _intended to be resolved_:
 
-- `await import()` is not yet supported in CommonJS scripts
+- ~~`await import()` is not yet supported in CommonJS scripts~~ (supported in v2.0.0)
 - _Scuttling_ (i.e. "deletion" of unused objects from the execution environment)
   is not yet supported
 

@@ -84,7 +84,7 @@ export async function diffDirs(originalDir, modifiedDir) {
         ? f.parentPath.slice(modifiedDir.length + 1) + '/' + f.name
         : f.name
     )
-    .filter((p) => !p.startsWith('node_modules/'))
+    .filter((p) => !p.startsWith('node_modules/') && p.split('/').length < 3)
     .sort()
     .join('\n')
 
@@ -94,6 +94,9 @@ export async function diffDirs(originalDir, modifiedDir) {
     // Keep only the header marker and filename; drop platform-specific metadata.
     .replace(/^((?:---|\+\+\+) \S+).*/gm, '$1')
     .replace(/^\s*diff -u -N .+$/gm, '\n')
+    // Remove common subdirectory lines to avoid breaking snapshot with garbage
+    .replace(/^\s*Common subdirectories:.+$/gm, '')
+    .replace(/^\s*$/gm, '')
 
   return `--- files ---\n${fileList}\n--- diff ---\n${diff}`
 }

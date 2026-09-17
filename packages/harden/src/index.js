@@ -9,8 +9,9 @@ import { opinions as pnpmOpinions } from './pnpm/opinions.js'
  * @import {
  *   HardenDefaultsOptions,
  *   HardenResult,
+ *   Opinion,
  *   PrintApi
- * } from "./tools/types.js"
+ * } from './tools/types.js'
  */
 
 /**
@@ -56,13 +57,13 @@ export async function hardenDefaults(options) {
   let opinions
   switch (pmName) {
     case 'npm':
-      opinions = npmOpinions
+      opinions = shallowCopy(npmOpinions)
       break
     case 'yarn':
-      opinions = yarnOpinions
+      opinions = shallowCopy(yarnOpinions)
       break
     case 'pnpm':
-      opinions = pnpmOpinions
+      opinions = shallowCopy(pnpmOpinions)
       break
     default:
       throw new Error(`Unsupported package manager: ${pmName}`)
@@ -122,4 +123,12 @@ export async function hardenDefaults(options) {
           .join('\n')
 
   return { result, summary }
+}
+
+/**
+ * @param {readonly Opinion[]} from
+ * @returns {Opinion[]}
+ */
+function shallowCopy(from) {
+  return from.map((item) => ({ ...item }))
 }

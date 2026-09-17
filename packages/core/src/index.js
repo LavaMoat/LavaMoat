@@ -14,6 +14,7 @@ const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const endowmentsToolkit = require('./endowmentsToolkit')
 const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 const { MODULE_REFS, DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
+const { compactPolicyOverride } = require('./compact')
 
 module.exports = {
   DEFAULT_GLOBAL_THIS_REFS,
@@ -36,4 +37,5 @@ module.exports = {
   makeInitStatsHook,
   codeSampleFromAstNode,
   endowmentsToolkit,
+  compactPolicyOverride,
 }

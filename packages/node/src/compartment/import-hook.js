@@ -6,7 +6,7 @@
 
 import { Module } from 'node:module'
 import { fileURLToPath } from 'node:url'
-import { isObject } from '../util.js'
+import { isObject, noop } from '../util.js'
 
 const { freeze, keys, assign } = Object
 
@@ -80,6 +80,6 @@ export const nullImportHook = async () => {
   return freeze({
     imports: [],
     exports: [],
-    execute: () => {},
+    execute: noop,
   })
 }

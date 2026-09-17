@@ -5,6 +5,41 @@
  */
 
 import { Loggerr } from 'loggerr'
+import { createFormatter } from './log-formatter.js'
+import { noop } from './util.js'
+
+/**
+ * @import {
+ *   DefaultLevels,
+ *   LoggerrOptions
+ * } from 'loggerr'
+ */
+
+/**
+ * Factory function to create a new logger.
+ *
+ * @param {LoggerrOptions<DefaultLevels>} [options]
+ * @returns {Loggerr<DefaultLevels>}
+ */
+export const createLogger = (options) => {
+  const log = new Loggerr({
+    formatter: createFormatter(),
+    streams: [
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+    ],
+    level: process.env.LAVAMOAT_DEBUG ? Loggerr.DEBUG : Loggerr.INFO,
+    ...options,
+  })
+
+  return log
+}
 
 /**
  * This is a logger object.
@@ -22,19 +57,18 @@ import { Loggerr } from 'loggerr'
  * Because the value is handled as a tuple, we cannot generate it via
  * {@link Array.fill}
  */
-export const log = new Loggerr({
-  formatter: 'cli',
-  streams: [
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-  ],
-  level: process.env.LAVAMOAT_DEBUG ? Loggerr.DEBUG : Loggerr.INFO,
-})
+export const log = createLogger()
 
 export { Loggerr }
+
+/**
+ * Disables warnings for a logger.
+ *
+ * Mutates the {@link Loggerr} instance in place.
+ *
+ * @param {Loggerr<DefaultLevels>} log
+ * @returns {void}
+ */
+export const disableWarnings = (log) => {
+  log.warning = noop
+}

@@ -68,4 +68,35 @@ for (const pm of PKGMGR_LIST) {
     t.is(exitCode, 1, 'Expected exit code 1 when nothing is applied')
     t.snapshot(log)
   })
+
+  test(`verifier --json - ${pm} - moderate level`, async (t) => {
+    const cwd = await copyProject(t, pm)
+    const { print, log } = logPrint()
+
+    const decisions = createVerifier({
+      level: 'moderate',
+      packageManager: pm,
+      print,
+      json: true,
+    })
+
+    const { result, summary } = await hardenDefaults({
+      cwd,
+      packageManager: pm,
+      decisions,
+      print,
+    })
+
+    const { exitCode } = await decisions.showSummary(summary)
+
+    t.deepEqual(result, [], 'Expected no changes to be reported with verifier')
+
+    t.is(
+      exitCode,
+      1,
+      'Expected verifier check to exit with code 1 when not fully hardened'
+    )
+
+    t.snapshot(log)
+  })
 }

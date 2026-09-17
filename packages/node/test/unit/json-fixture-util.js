@@ -6,10 +6,15 @@ import { makeReadPowers } from '../../src/compartment/power.js'
 import { isString } from '../../src/util.js'
 
 /**
- * @import {ReadNowPowers, FsInterface} from '@endo/compartment-mapper'
+ * @import {
+ *   FsInterface,
+ *   ReadNowPowers
+ * } from '@endo/compartment-mapper'
+ * @import {
+ *   JsonUint8Array,
+ *   SnapshotNode
+ * } from '@jsonjoy.com/fs-snapshot'
  * @import {DirectoryJSON} from 'memfs'
- * @import {SnapshotNode} from '@jsonjoy.com/fs-snapshot'
- * @import {JsonUint8Array} from '@jsonjoy.com/fs-snapshot'
  */
 
 /**

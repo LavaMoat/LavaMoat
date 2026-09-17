@@ -6,7 +6,7 @@ import nodeUrl from 'node:url'
 
 /**
  * @import {ReadNowPowers} from '@endo/compartment-mapper'
- * @import {MakeReadPowersOptions} from '../types.js';
+ * @import {MakeReadPowersOptions} from '../types.js'
  */
 
 /**

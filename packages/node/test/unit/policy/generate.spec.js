@@ -1,6 +1,7 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+import { log, Loggerr } from '../../../src/log.js'
 import { loadAndGeneratePolicy } from '../../../src/policy-gen/load-for-policy.js'
 import { keysOr } from '../../../src/util.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
@@ -152,34 +153,46 @@ test(
   }
 )
 
-test.failing('path stability', async (t) => {
-  // no plan; this should fail on the first assertion failure
-
+test('path stability', async (t) => {
   const maxIterations = 20
+  if (process.env.LAVAMOAT_DEBUG === undefined) {
+    log.setLevel(Loggerr.EMERGENCY)
+  }
+  t.plan(maxIterations)
+
   const { readPowers } = await loadJSONFixture(
     new URL('canonical-name.json', JSON_FIXTURE_DIR_URL),
     { randomDelay: true }
   )
-  const expectedCanonicalName = 'paperino>topoino>goofy'
-  for (let i = 0; i < maxIterations; i++) {
-    const policy = await loadAndGeneratePolicy('/node_modules/app/index.js', {
-      readPowers,
-    })
 
-    // this will fail if we get the wrong canonical name for goofy
-    t.like(
-      policy,
-      {
-        resources: {
-          [expectedCanonicalName]: {
-            globals: {
-              'console.log': true,
+  const expectedCanonicalName = 'paperino>topolino>goofy'
+  const promises = []
+  for (let i = 0; i < maxIterations; i++) {
+    promises.push(
+      loadAndGeneratePolicy('/node_modules/app/index.js', {
+        readPowers,
+      })
+    )
+  }
+  const results = await Promise.allSettled(promises)
+  for (const [iteration, result] of results.entries()) {
+    if (result.status === 'fulfilled') {
+      t.like(
+        result.value.policy,
+        {
+          resources: {
+            [expectedCanonicalName]: {
+              globals: {
+                'console.log': true,
+              },
             },
           },
         },
-      },
-      `failed on iteration ${i}`
-    )
+        `should have correct policy for ${expectedCanonicalName} in iteration ${iteration}`
+      )
+    } else {
+      t.fail(`${result.reason} (iteration ${iteration})`)
+    }
   }
 })
 

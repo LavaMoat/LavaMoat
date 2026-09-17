@@ -7,7 +7,10 @@ import {
 import { toPath } from '../src/util.js'
 
 /**
- * @import {Fixture, FixtureOptions} from './types.js'
+ * @import {
+ *   Fixture,
+ *   FixtureOptions
+ * } from './types.js'
  */
 
 const DEFAULT_ENTRYPOINT_FILENAME = 'index.js'

@@ -371,6 +371,158 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
   // ava seems to be forcing sloppy mode
   t.is(getter.call(), globalThis)
 })
+test('getEndowmentsForConfig - writable global setter propagates to original', (t) => {
+  'use strict'
+  // compartment.globalThis.document would error because 'this' value is not window
+  const { getEndowmentsForConfig, copyWrappedGlobals } = prepareTest({
+    knownWritable: new Set(['onerror']),
+  })
+  const originalGlobal = {}
+  Object.defineProperty(originalGlobal, 'onerror', {
+    set(value) {
+      this._onerror = value
+    },
+    get() {
+      return this._onerror
+    },
+  })
+
+  // verify that the setter works on the original global
+  originalGlobal.onerror = 'initialErrorHandler'
+  t.is(originalGlobal._onerror, 'initialErrorHandler')
+
+  const sourceGlobal = copyWrappedGlobals(originalGlobal, {})
+
+  // verify that the setter works on the wrapped global
+  sourceGlobal.onerror = 'wrappedErrorHandler'
+  t.is(originalGlobal._onerror, 'wrappedErrorHandler')
+
+  const config = {
+    globals: {
+      onerror: 'write',
+    },
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+
+  resultGlobal.onerror = 'myErrorHandler'
+  // proof that the setter was called on the original global
+  t.is(originalGlobal._onerror, 'myErrorHandler')
+  t.is(resultGlobal._onerror, undefined)
+})
+
+test('getEndowmentsForConfig - writable global handles monkey-patching', (t) => {
+  'use strict'
+  const knownWritable = new Set(['fetch'])
+  const { getEndowmentsForConfig, copyWrappedGlobals } = prepareTest({
+    knownWritable,
+  })
+
+  // Simulate a native function
+  const browserGlobal = {}
+  browserGlobal.fetch = function nativeFetch(url) {
+    // yes, fetch is funny like that.
+    if (typeof this !== 'undefined' && this !== browserGlobal) {
+      throw new TypeError(
+        `Illegal invocation: expected this=browserGlobal, got this=${String(this)}`
+      )
+    }
+
+    return `fetched(${url}) // ${typeof this} ${this === browserGlobal}`
+  }
+
+  // Level 1: copyWrappedGlobals produces the root compartment's source global.
+  const rootCompartmentGlobal = copyWrappedGlobals(browserGlobal, {})
+
+  // Level 2: getEndowmentsForConfig with write policy produces the package view.
+  const packageCompartmentGlobal = getEndowmentsForConfig(
+    rootCompartmentGlobal,
+    { globals: { fetch: 'write' } },
+    rootCompartmentGlobal // unwrapTo
+  )
+
+  const anotherPackageCompartmentGlobal = getEndowmentsForConfig(
+    rootCompartmentGlobal,
+    { globals: { fetch: true } },
+    rootCompartmentGlobal // unwrapTo
+  )
+
+  const directCallResult = packageCompartmentGlobal.fetch('https://example.com')
+  t.is(directCallResult, 'fetched(https://example.com) // object true')
+
+  // Sentry-style instrumentation: capture original, replace with wrapper, call original
+  const originalFetch = packageCompartmentGlobal.fetch
+
+  packageCompartmentGlobal.fetch = function sentryLikeFetchWrapper(url) {
+    'use strict'
+    return 'patched1!' + originalFetch(url)
+  }
+
+  t.is(
+    packageCompartmentGlobal.fetch('https://example.com'),
+    'patched1!fetched(https://example.com) // undefined false'
+  )
+  t.is(
+    anotherPackageCompartmentGlobal.fetch('https://example.com'),
+    'patched1!fetched(https://example.com) // undefined false'
+  )
+
+  // bound case
+  packageCompartmentGlobal.fetch = function sentryLikeFetchWrapper(url) {
+    'use strict'
+    return 'patched2!' + originalFetch.call(packageCompartmentGlobal, url)
+  }
+
+  t.is(
+    packageCompartmentGlobal.fetch('https://example.com'),
+    'patched2!fetched(https://example.com) // object true'
+  )
+  t.is(
+    anotherPackageCompartmentGlobal.fetch('https://example.com'),
+    'patched2!fetched(https://example.com) // object true'
+  )
+})
+
+test('getEndowmentsForConfig - writable global is not leaky (in case AI insists on making it so again)', (t) => {
+  'use strict'
+  const knownWritable = new Set(['fetch'])
+  const { getEndowmentsForConfig, copyWrappedGlobals } = prepareTest({
+    knownWritable,
+  })
+
+  // Simulate a native function
+  const browserGlobal = {}
+  browserGlobal.fetch = function nativeFetch() {
+    //whatever
+  }
+
+  const rootCompartmentGlobal = copyWrappedGlobals(browserGlobal, {})
+
+  const packageCompartmentGlobal = getEndowmentsForConfig(
+    rootCompartmentGlobal,
+    { globals: { fetch: 'write' } },
+    rootCompartmentGlobal
+  )
+
+  const anotherPackageCompartmentGlobal = getEndowmentsForConfig(
+    rootCompartmentGlobal,
+    { globals: { fetch: true } },
+    rootCompartmentGlobal // unwrapTo
+  )
+
+  packageCompartmentGlobal.fetch = function abuseRewrapping() {
+    return [this]
+  }
+
+  const stolen = packageCompartmentGlobal.fetch()
+  t.not(stolen[0], browserGlobal)
+  t.not(stolen[0], rootCompartmentGlobal)
+  t.is(stolen[0], packageCompartmentGlobal)
+
+  const anotherStolen = anotherPackageCompartmentGlobal.fetch()
+  t.not(anotherStolen[0], browserGlobal)
+  t.not(anotherStolen[0], rootCompartmentGlobal)
+  t.is(anotherStolen[0], anotherPackageCompartmentGlobal)
+})
 
 test('getEndowmentsForConfig - specify unwrap to', (t) => {
   'use strict'

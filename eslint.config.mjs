@@ -264,6 +264,7 @@ export default defineConfig(
   // ---------------------------------------------------------------------------
   {
     files: ['**/test/**/*.{js,ts}'],
+    extends: avaPlugin.configs.recommended,
     plugins: {
       ava: avaPlugin,
     },
@@ -273,8 +274,6 @@ export default defineConfig(
       },
     },
     rules: {
-      .../** @type {any} */ (avaPlugin.configs.recommended)[0].rules,
-
       // this should be removed and the issues fixed
       'n/no-path-concat': 'warn',
 
