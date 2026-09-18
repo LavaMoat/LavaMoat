@@ -14,7 +14,15 @@ function makeRunScriptWrapper(
     customizePermissionsConfig,
     readScriptsConfig,
   },
-  { readFileSync, pathJoin, pathDelimiter, tmpdir, realpathSync }
+  {
+    readFileSync,
+    pathJoin,
+    pathDelimiter,
+    tmpdir,
+    realpathSync,
+    lstatSync,
+    readlinkSync,
+  }
 ) {
   const DEFAULT_PERMISSION_KEY = '#default'
 
@@ -125,25 +133,46 @@ function makeRunScriptWrapper(
     // 2. tmp write - crossplatform
     if (configOptions['--allow-fs-tmp'] === true) {
       delete configOptions['--allow-fs-tmp']
-      if (configOptions['--allow-fs-write']) {
-        if (typeof configOptions['--allow-fs-write'] === 'string') {
-          configOptions['--allow-fs-write'] = [
-            configOptions['--allow-fs-write'],
-          ]
-        }
-        if (configOptions['--allow-fs-write'] === true) {
-          return // none of this matters
-        }
-      } else {
-        // do this for both undefined and false
-        configOptions['--allow-fs-write'] = []
-      }
       const tmp = tmpdir()
-      configOptions['--allow-fs-write'].push(tmp)
-      // because macos is being weird
-      const tmpRealPath = realpathSync(tmp)
-      if (tmpRealPath !== tmp) {
-        configOptions['--allow-fs-write'].push(tmpRealPath)
+      let tmpRealPath = tmp
+      try {
+        tmpRealPath = realpathSync(tmp)
+      } catch {
+        // if realpathSync fails, it's been restricted by permissions
+        try {
+          const stats = lstatSync(tmp)
+          if (stats.isSymbolicLink()) {
+            tmpRealPath = readlinkSync(tmp)
+          }
+        } catch {
+          // silence the error and continue with no separate tmpRealPath
+        }
+      }
+      // write doesn't grant read, sadly
+      for (const perm of ['write', 'read']) {
+        const allowOption = `--allow-fs-${perm}`
+        if (configOptions[allowOption]) {
+          if (configOptions[allowOption] === true) {
+            continue // all of fs allowed, nothing to add
+          }
+          if (typeof configOptions[allowOption] === 'string') {
+            // need to expand to multiple paths
+            configOptions[allowOption] = [configOptions[allowOption]]
+          }
+          if (!Array.isArray(configOptions[allowOption])) {
+            throw Error(
+              `Unexpected type for ${allowOption}: ${typeof configOptions[allowOption]}`
+            )
+          }
+        } else {
+          // do this for both undefined and false
+          configOptions[allowOption] = []
+        }
+        configOptions[allowOption].push(tmp)
+        // because macos is being weird
+        if (tmpRealPath !== tmp) {
+          configOptions[allowOption].push(tmpRealPath)
+        }
       }
     }
   }

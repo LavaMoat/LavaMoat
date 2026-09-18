@@ -71,6 +71,8 @@ module.exports = {
               pathDelimiter: path.delimiter,
               tmpdir,
               realpathSync: fs.realpathSync,
+              lstatSync: fs.lstatSync,
+              readlinkSync: fs.readlinkSync,
             }
           )
 

@@ -1,0 +1,6 @@
+{
+  "nodeOptions": {
+    "--permission": true,
+    "--allow-fs-tmp": true
+  }
+}
