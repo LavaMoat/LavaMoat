@@ -1,3 +1,4 @@
+import { type Stats } from 'fs'
 declare global {
   type MakeRunScriptWrapperConfigOptions = Record<
     string,
@@ -26,7 +27,7 @@ declare global {
     pathDelimiter: string
     tmpdir: () => string
     realpathSync: (path: string) => string
-    lstatSync: (path: string) => import('fs').Stats
+    lstatSync: (path: string) => Stats
     readlinkSync: (path: string) => string
   }
 

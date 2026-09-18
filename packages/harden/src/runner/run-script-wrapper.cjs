@@ -137,14 +137,14 @@ function makeRunScriptWrapper(
       let tmpRealPath = tmp
       try {
         tmpRealPath = realpathSync(tmp)
-      } catch (_) {
+      } catch {
         // if realpathSync fails, it's been restricted by permissions
         try {
           const stats = lstatSync(tmp)
           if (stats.isSymbolicLink()) {
             tmpRealPath = readlinkSync(tmp)
           }
-        } catch (_) {
+        } catch {
           // silence the error and continue with no separate tmpRealPath
         }
       }
@@ -152,11 +152,17 @@ function makeRunScriptWrapper(
       for (const perm of ['write', 'read']) {
         const allowOption = `--allow-fs-${perm}`
         if (configOptions[allowOption]) {
+          if (configOptions[allowOption] === true) {
+            continue // all of fs allowed, nothing to add
+          }
           if (typeof configOptions[allowOption] === 'string') {
+            // need to expand to multiple paths
             configOptions[allowOption] = [configOptions[allowOption]]
           }
-          if (configOptions[allowOption] === true) {
-            continue // none of this matters
+          if (!Array.isArray(configOptions[allowOption])) {
+            throw Error(
+              `Unexpected type for ${allowOption}: ${typeof configOptions[allowOption]}`
+            )
           }
         } else {
           // do this for both undefined and false
