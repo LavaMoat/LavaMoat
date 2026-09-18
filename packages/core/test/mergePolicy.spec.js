@@ -1,11 +1,17 @@
 // @ts-check
 
 /**
- * @import {TestFn, ExecutionContext} from 'ava'
- * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from '@lavamoat/types'
+ * @import {
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicyDebug
+ * } from '@lavamoat/types'
+ * @import {
+ *   ExecutionContext,
+ *   TestFn
+ * } from 'ava'
  */
 
-const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { mergePolicy } = require('../src/mergePolicy.js')
 
 /**

@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const fs = require('node:fs')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
@@ -67,17 +67,14 @@ const getPkgJsonFromRoot = (projectRoot) =>
     )
   )
 
-test('cli - auto command', (t) => {
+test.only('cli - auto command', (t) => {
   // set up the directories
   const projectRoot = path.join(__dirname, 'projects', '1')
 
-  // delete any existing package.json
-  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
-
-  // npm init -y
+  // clean up package.json
   const initResult = spawnSync(
     NPM_CMD,
-    ['init', '-y'],
+    ['pkg', 'delete', 'lavamoat'],
     realisticEnvOptions(projectRoot)
   )
 
@@ -85,7 +82,7 @@ test('cli - auto command', (t) => {
     t.log('initResult', initResult)
 
     t.fail(
-      `Failed calling 'npm init -y': ${JSON.stringify(
+      `Failed calling 'npm pkg delete lavamoat': ${JSON.stringify(
         {
           projectRoot,
           options: realisticEnvOptions(projectRoot),
@@ -124,10 +121,12 @@ skipOnWindows('cli - auto command with experimental bins', (t) => {
   // set up the directories
   const projectRoot = path.join(__dirname, 'projects', '1')
 
-  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
-
-  // npm init -y
-  spawnSync(NPM_CMD, ['init', '-y'], realisticEnvOptions(projectRoot))
+  // clean up package.json
+  spawnSync(
+    NPM_CMD,
+    ['pkg', 'delete', 'lavamoat'],
+    realisticEnvOptions(projectRoot)
+  )
 
   // run the auto command
   run(t, ['auto', '--experimental-bins'], projectRoot)

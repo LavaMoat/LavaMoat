@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { runScenario } = require('./util')
 const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
 
@@ -22,17 +22,16 @@ test('globals - has only the expected global circular refs', async (t) => {
 test('globals - circular refs taming', async (t) => {
   'use strict'
   const shared = {
-    context: Object.defineProperties(
-      Object.create(null), {
-        global: {get: () => ({})},
-      }),
+    context: Object.defineProperties(Object.create(null), {
+      global: { get: () => ({}) },
+    }),
     config: {
       resources: {
         one: {
           globals: {
             global: true,
             globalThis: true,
-            "console.warn": true,
+            'console.warn': true,
           },
         },
       },
@@ -54,8 +53,8 @@ test('globals - circular refs taming', async (t) => {
   const testResult = await runScenario({ scenario: handlesAccess })
   t.deepEqual(testResult, {
     globalThis: true,
-    global:  true,
-    warn:  'function',
+    global: true,
+    warn: 'function',
     info: 'undefined',
   })
 })

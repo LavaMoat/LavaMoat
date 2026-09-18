@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { runScenario } = require('./util.js')
 const { loadScenarios } = require('lavamoat-core/test/scenarios/index')
 const { runAndTestScenario } = require('lavamoat-core/test/util')
@@ -11,7 +11,6 @@ test('Run scenarios with precompiled modules', async (t) => {
     }
     t.log(`Running Browserify Scenario: ${scenario.name}`)
     await runAndTestScenario(t, scenario, ({ scenario }) =>
-       
       runScenario({ scenario, log: t.log.bind(t) })
     )
   }

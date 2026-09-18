@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 
-const test = require('ava')
+const { default: test } = require('ava')
 
 const { autoConfigForScenario } = require('./util')
 const { createScenarioFromScaffold } = require('lavamoat-core/test/util')

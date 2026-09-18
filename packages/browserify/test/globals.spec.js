@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { runScenario, createBrowserifyScenarioFromScaffold } = require('./util')
 const { runAndTestScenario } = require('lavamoat-core/test/util.js')
 

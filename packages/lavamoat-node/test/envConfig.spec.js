@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { runScenario } = require('./util')
 const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
 
@@ -12,7 +12,6 @@ test('envConfig - intrinsic prototype mutating package running in unfrozen realm
       }
     },
     defineTwo: () => {
-       
       Function.prototype.xyz = 'Hello'
       module.exports = Function.prototype.xyz
     },

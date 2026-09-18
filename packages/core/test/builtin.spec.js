@@ -1,5 +1,5 @@
 /* eslint-disable n/prefer-global/buffer */
-const test = require('ava')
+const { default: test } = require('ava')
 const {
   createScenarioFromScaffold,
   runScenario,

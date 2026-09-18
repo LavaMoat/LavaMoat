@@ -1,4 +1,4 @@
-const test = /** @type {import('ava').TestFn} */ (require('ava'))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { generateIdentifierLookup } = require('../src/buildtime/aa')
 
 const lookupFixture = {

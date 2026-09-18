@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 /* global checkThis: true, checkSelf: true, checkWindow: true, checkGlobal: true */
 
-const test = require('ava')
+const { default: test } = require('ava')
 const { runScenario } = require('./util')
 const { DEFAULT_GLOBAL_THIS_REFS } = require('lavamoat-core')
 const {
@@ -27,14 +27,13 @@ test('globalRef - has only the expected global circular refs', async (t) => {
 test('globals - circular refs taming', async (t) => {
   'use strict'
   const shared = {
-    context: Object.defineProperties(
-      Object.create(null), {
-        top: {get: () => ({})},
-        window: {get: () => ({})},
-        frames: {get: () => ({})},
-        parent: {get: () => ({})},
-        self: {get: () => ({})},
-      }),
+    context: Object.defineProperties(Object.create(null), {
+      top: { get: () => ({}) },
+      window: { get: () => ({}) },
+      frames: { get: () => ({}) },
+      parent: { get: () => ({}) },
+      self: { get: () => ({}) },
+    }),
     config: {
       resources: {
         one: {
@@ -45,7 +44,7 @@ test('globals - circular refs taming', async (t) => {
             parent: true,
             globalThis: true,
             self: true,
-            "console.warn": true,
+            'console.warn': true,
           },
         },
       },
@@ -74,8 +73,8 @@ test('globals - circular refs taming', async (t) => {
     frames: true,
     parent: true,
     globalThis: true,
-    self:  true,
-    warn:  'function',
+    self: true,
+    warn: 'function',
     info: 'undefined',
   })
 })

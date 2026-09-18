@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { parse, inspectSesCompat } = require('../src/index')
 
 // some input from https://www.geeksforgeeks.org/strict-mode-javascript/

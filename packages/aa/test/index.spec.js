@@ -1,6 +1,6 @@
 const path = require('node:path')
 const { unlink } = require('node:fs/promises')
-const test = require('ava')
+const { default: test } = require('ava')
 const { loadCanonicalNameMap } = require('../src/index.js')
 const { Module } = require('node:module')
 const { createProject4Symlink, normalizePaths } = require('./utils.js')

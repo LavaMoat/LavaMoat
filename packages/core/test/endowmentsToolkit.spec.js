@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
 function prepareTest({ knownWritable } = {}) {

@@ -1,7 +1,7 @@
 const { realpathSync, lstatSync } = require('node:fs')
 const { unlink } = require('node:fs/promises')
 const path = require('node:path')
-const test = /** @type {import('ava').TestFn} */ (require('ava'))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { createProject4Symlink } = require('./utils')
 const { simpleBench } = require('./bench')
 

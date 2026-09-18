@@ -8,7 +8,7 @@ The following code was moved from `lavamoat-browserify` to `@lavamoat/lavapack`.
 /* eslint-disable ava/no-skip-test, no-undef, n/no-missing-require */
 // to be migrated into lavapack from lavamoat-browserify
 
-const test = require('ava')
+const { default: test } = require('ava')
 const UglifyJS = require('uglify-js')
 const { SourceMapConsumer } = require('source-map')
 

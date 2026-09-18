@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { loadScenarios } = require('./scenarios')
 const { runScenario, runAndTestScenario } = require('./util')
 

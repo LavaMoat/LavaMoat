@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-const test = require('ava')
+const { default: test } = require('ava')
 const { jsonStringifySortedPolicy } = require('../src/stringifyPolicy')
 const { createConfigForTest, generateConfigFromFiles } = require('./util')
 

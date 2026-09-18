@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { evaluateWithSourceUrl } = require('./util')
 
 const SCUTTLER_NAME_ERROR = {

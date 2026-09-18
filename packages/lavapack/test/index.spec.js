@@ -1,5 +1,5 @@
 const fs = require('node:fs')
-const test = require('ava')
+const { default: test } = require('ava')
 const { pipe, concat } = require('mississippi')
 const { SourceMapConsumer } = require('source-map')
 const convertSourceMap = require('convert-source-map')
@@ -40,8 +40,7 @@ test('sourcemap test', async (t) => {
     {
       id: '2',
       sourceFile: 'log.js',
-      source:
-        `console.log('hi');\nnew Error('danger');\nconsole.log('the end');
+      source: `console.log('hi');\nnew Error('danger');\nconsole.log('the end');
         //# sourceMappingURL=data:application/json;charset=utf-8;base64,e30K
         /*# sourceMappingURL=data:application/json;charset=utf-8;base64,e30K
           }} invalid JS {{ /*

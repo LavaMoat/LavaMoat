@@ -2,7 +2,7 @@
 
 const fs = require('node:fs')
 const path = require('node:path')
-const test = require('ava')
+const { default: test } = require('ava')
 const { parse } = require('../src/index')
 const { findGlobals } = require('../src/findGlobals')
 
