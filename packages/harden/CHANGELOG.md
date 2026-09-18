@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.1](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.7.0...harden-v0.7.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* **harden:** --allow-fs-tmp needs to explicitly set read and write ([#2104](https://github.com/LavaMoat/LavaMoat/issues/2104)) ([1d80119](https://github.com/LavaMoat/LavaMoat/commit/1d80119f5c628227272764dbd72d83618967af35))
+* **harden:** avoid test flakiness by relying less on one run per process ([#2103](https://github.com/LavaMoat/LavaMoat/issues/2103)) ([7014109](https://github.com/LavaMoat/LavaMoat/commit/7014109b4758454f2a1175056482b5e14e9e6f3e))
+* **harden:** improve shell-script location resolution in npm ([#2109](https://github.com/LavaMoat/LavaMoat/issues/2109)) ([9804a25](https://github.com/LavaMoat/LavaMoat/commit/9804a25d6a40851507a2b2c691b2474caf1fafec))
+
 ## [0.7.0](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.6.0...harden-v0.7.0) (2026-09-03)
 
 

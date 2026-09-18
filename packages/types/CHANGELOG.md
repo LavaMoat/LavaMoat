@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/types-v1.0.2...types-v2.0.0) (2026-09-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **types:** expand LavaMoatPolicy.include
+
+### Features
+
+* **types:** expand LavaMoatPolicy.include ([34e81a9](https://github.com/LavaMoat/LavaMoat/commit/34e81a993e2e8b713a07a4d6088ce045a088787c))
+
 ## [1.0.2](https://github.com/LavaMoat/LavaMoat/compare/types-v1.0.1...types-v1.0.2) (2026-06-25)
 
 
