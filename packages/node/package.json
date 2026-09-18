@@ -65,7 +65,7 @@
     "lavamoat-core": "^18.0.6",
     "lavamoat-tofu": "^9.0.3",
     "loggerr": "4.2.0",
-    "ses": "2.0.0",
+    "ses": "2.3.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.41.0",
     "yargs": "17.7.3"
