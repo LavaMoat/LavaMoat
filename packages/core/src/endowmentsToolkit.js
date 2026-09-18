@@ -548,7 +548,8 @@ function endowmentsToolkit({
   function copyWrappedGlobals(
     globalRef,
     target,
-    globalThisRefs = ['globalThis']
+    globalThisRefs = ['globalThis'],
+    exclude = []
   ) {
     // find the relevant endowment sources
     const globalProtoChain = getPrototypeChain(globalRef)
@@ -569,10 +570,11 @@ function endowmentsToolkit({
 
     // call all getters, in case of behavior change (such as with FireFox lazy getters)
     // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
+    //
     endowmentSources.forEach((source) => {
       const descriptors = Object.getOwnPropertyDescriptors(source)
-      Object.values(descriptors).forEach((desc) => {
-        if ('get' in desc && desc.get) {
+      Object.entries(descriptors).forEach(([key, desc]) => {
+        if ('get' in desc && desc.get && !exclude.includes(key)) {
           try {
             // calling getters can potentially throw (e.g. localStorage inside a sandboxed iframe)
             Reflect.apply(desc.get, globalRef, [])
@@ -607,11 +609,17 @@ function endowmentsToolkit({
     // expose all own properties of globalRef, including non-enumerable
     Object.entries(endowmentDescriptorsFlat)
       // ignore properties already defined on compartment global
-      .filter(([key]) => !(key in target))
       // ignore circular globalThis refs
-      .filter(([key]) => !globalThisRefs.includes(key))
+      .filter(
+        ([key]) =>
+          !(key in target) &&
+          !globalThisRefs.includes(key) &&
+          !exclude.includes(key)
+      )
       // define property on compartment global
       .forEach(([key, desc]) => {
+        // NOTE: In case you're thinking about triggering lazy getters here to avoid duplicated iteration. We'd need to hold on to the object we got them from and read back the new descriptor after triggering the getter to replace the one we've collected. That's likely more work than iterating twice.
+
         // unwrap functions, setters/getters & apply scope proxy workaround
         const wrappedPropDesc = applyEndowmentPropDescTransforms(
           desc,
@@ -884,6 +892,8 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
+ * @param {string[]} [exclude] - Optional array of property names to exclude
+ *   from copying
  * @returns {Record<PropertyKey, any>}
  */
 
