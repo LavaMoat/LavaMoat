@@ -1,8 +1,13 @@
 /**
- * @import {TestFn, ExecutionContext} from 'ava'
+ * @import {
+ *   ExecutionContext,
+ *   TestFn
+ * } from 'ava'
  */
 
-const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
+const { default: test } = /** @type {TestFn} */ (
+  /** @type {unknown} */ (require('ava'))
+)
 const { execFile } = require('node:child_process')
 const path = require('node:path')
 const { promisify } = require('node:util')

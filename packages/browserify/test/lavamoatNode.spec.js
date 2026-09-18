@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { execSync } = require('node:child_process')
 const path = require('node:path')
 const { evalBundle } = require('./util')
@@ -11,7 +11,6 @@ test('lavamoat-node compat - bundle works under lavamoat node', (t) => {
       maxBuffer: 8192 * 10000,
     })
   } catch (err) {
-     
     return t.fail(err.stderr.toString())
   }
   t.pass('bundling works under lavamoat node')

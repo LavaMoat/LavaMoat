@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { createScenarioFromScaffold, runScenario } = require('./util')
 
 test('circularDeps - multi-module circular deps dont inf loop', async (t) => {

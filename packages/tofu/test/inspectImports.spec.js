@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const deepEqual = require('deep-equal')
 const { parse, inspectImports } = require('../src/index')
 

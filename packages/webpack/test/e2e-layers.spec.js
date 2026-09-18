@@ -1,4 +1,4 @@
-const test = /** @type {import('ava').TestFn} */ (require('ava'))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { scaffold, runChunksWithSES, runScript } = require('./scaffold.js')
 const LavaMoatPlugin = require('../src/plugin.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')

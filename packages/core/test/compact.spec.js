@@ -1,6 +1,6 @@
 // @ts-check
 
-const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { compactPolicyOverride } = require('../src/compact')
 
 /**

@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const test = require('ava')
+const { default: test } = require('ava')
 const {
   createScenarioFromScaffold,
   runAndTestScenario,

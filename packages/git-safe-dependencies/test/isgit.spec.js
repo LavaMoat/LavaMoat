@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { gitInfo, isGitUrl, isGitSpecifier } = require('../src/isgit')
 
 test('isGitUrl should identify git URLs correctly', (t) => {

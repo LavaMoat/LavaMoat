@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* global abc: true, xyz, chrome */
 
-const test = require('ava')
+const { default: test } = require('ava')
 const { createScenarioFromScaffold, runScenario } = require('./util')
 
 test('globals - ensure global property this-value unwrapped', async (t) => {

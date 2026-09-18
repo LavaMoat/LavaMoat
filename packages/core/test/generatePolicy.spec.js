@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-unused-expressions, prefer-rest-params */
 const { EOL } = require('node:os')
-const test = require('ava')
+const { default: test } = require('ava')
 const { createModuleInspector } = require('../src/generatePolicy')
 
 const { createPolicyForTest, generatePolicyFromFiles } = require('./util')

@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 
 // Had to extract this part because node16 got confused and believed the sourcemapping comments inside strings. As a result, AVA would malfunction and create a snapshot called foo.js.
 const SRCMAPDEF_STRING = 'sourceMappingURL'

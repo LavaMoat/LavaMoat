@@ -1,5 +1,5 @@
 const path = require('node:path')
-const test = require('ava')
+const { default: test } = require('ava')
 const { parseForPolicy } = require('../src/parseForPolicy')
 const { runLavamoat } = require('./util')
 

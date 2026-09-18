@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const fs = require('node:fs')
 const path = require('node:path')
 const {

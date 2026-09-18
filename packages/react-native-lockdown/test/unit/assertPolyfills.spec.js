@@ -4,7 +4,7 @@
  * @import {TestFn} from 'ava'
  */
 
-const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const path = require('node:path')
 const { assertPolyfills } = require('../../src/index')
 

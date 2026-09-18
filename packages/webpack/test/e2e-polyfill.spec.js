@@ -1,4 +1,4 @@
-const test = /** @type {import('ava').TestFn} */ (require('ava'))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const path = require('node:path')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')

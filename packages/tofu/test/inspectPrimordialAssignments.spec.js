@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { parse, inspectPrimordialAssignments } = require('../src/index')
 
 function inspectPrimordialAssignmentsTest(code) {

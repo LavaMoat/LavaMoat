@@ -5,7 +5,7 @@
  * @import {LockdownSerializerConfig} from '../../src/lockdown-serializer.js'
  */
 
-const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const path = require('node:path')
 const { lockdownSerializer } = require('../../src/index')
 

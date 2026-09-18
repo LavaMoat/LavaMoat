@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { applyMigrations } = require('../src/config.js')
 
 /**

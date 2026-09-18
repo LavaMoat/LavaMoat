@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const util = require('node:util')
 const { join } = require('node:path')
 const execFile = util.promisify(require('node:child_process').execFile)

@@ -1,4 +1,4 @@
-const test = /** @type {import('ava').TestFn} */ (require('ava'))
+const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { removeMultilineComments } = require('../src/runtime/assemble')
 
 test('preserves comments inside string literals', (t) => {

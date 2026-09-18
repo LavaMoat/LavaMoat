@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const {
   utils: { mergePolicy, objToMap, mapToObj },
 } = require('../src/index')
