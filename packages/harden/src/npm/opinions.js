@@ -201,7 +201,7 @@ const definedOpinions = Object.freeze(
     {
       id: 'n_runner',
       description:
-        'Take over npm run and remove bin scripts confusion possibility and configure other limitations. [!No Windows cmd support]',
+        'Take over "npm run" and mitigate bin-scripts confusion; configure other limitations. [!No Windows cmd support]',
       level: 'strict',
       changes: [
         {
