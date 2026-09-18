@@ -63,6 +63,7 @@ for (const pm of PKGMGR_LIST) {
       cwd,
       env: {
         ...process.env,
+        PWD: cwd, // avoid it propagating from the npm test that spawned this process
         TOKEN: 'SECRET',
         BISFOR: 'Bananas',
         PATH: cleanupPathAfterNpm(process.env.PATH),
@@ -94,7 +95,7 @@ test(`runner wildcard support in scriptsConfig exits zero`, async (t) => {
 
   const result = await execFileAsync('npm', ['test'], {
     cwd,
-    env: { ...process.env },
+    env: { ...process.env, PWD: cwd },
   })
   t.log(result.stdout)
 

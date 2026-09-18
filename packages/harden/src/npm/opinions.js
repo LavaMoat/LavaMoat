@@ -201,7 +201,7 @@ const definedOpinions = Object.freeze(
     {
       id: 'n_runner',
       description:
-        'Take over npm run and remove bin scripts confusion possibility and configure other limitations.',
+        'Take over "npm run" and mitigate bin-scripts confusion; configure other limitations. [!No Windows cmd support]',
       level: 'strict',
       changes: [
         {
@@ -215,7 +215,7 @@ const definedOpinions = Object.freeze(
         {
           target: '.npmrc',
           key: 'script-shell',
-          value: './lavamoat/.runner.cjs',
+          value: '${PWD}/lavamoat/.runner.cjs',
           comment: 'Protect the runtime of calls to "npm run" scripts.',
         },
       ],

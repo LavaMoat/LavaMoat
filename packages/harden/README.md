@@ -157,6 +157,9 @@ Depending on your strictness choice, for yarn we can use the built-in `dependenc
 
 ### Script Execution Environment
 
+> [!WARNING]
+> 
+> The script-shell override `@lavamoat/harden` depends on is **unsupported in Windows' `cmd.exe`**.  Only `bash`, `zsh`, and like POSIX shells are supported.
 One of the more advanced capabilities `@lavamoat/harden` brings to the project is the hardening of the environment exposed to scripts run from `package.json` (e.g., `npm run <script>`). It offers the following controls:
 
 - Censoring of environment variables. A `lavamoat/.env.ban.json` file configures censoring environment variables that match given strings
