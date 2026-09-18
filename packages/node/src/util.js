@@ -9,6 +9,7 @@ import path from 'node:path'
 import nodeUrl from 'node:url'
 import { hrPath } from './format.js'
 import { assertAbsolutePath } from './fs.js'
+import { InvalidPolicyError } from './error.js'
 
 /**
  * @import {
@@ -420,9 +421,7 @@ export const isIncludeEntryByLocation = (value) =>
   !path.isAbsolute(value.location) &&
   ('modules' in value
     ? isArray(value.modules) &&
-      value.modules.every(
-        (value) => isNonEmptyString(value) && !path.isAbsolute(value)
-      )
+      value.modules.every((value) => isNonEmptyString(value))
     : true)
 
 /**
@@ -441,3 +440,38 @@ export const isIncludeEntryByName = (value) =>
         (value) => isNonEmptyString(value) && !path.isAbsolute(value)
       )
     : true)
+
+/**
+ * Asserts that a {@link IncludeEntryByLocation} is valid.
+ *
+ * @privateRemarks
+ * TODO: This should be part of policy validation code.
+ * @param {IncludeEntryByLocation} include Include entry
+ * @param {string} projectRoot Project root
+ * @returns {void}
+ */
+export const assertValidIncludeEntryByLocation = (include, projectRoot) => {
+  const normalizedPath = path.normalize(include.location)
+  if (normalizedPath.startsWith('..')) {
+    throw new InvalidPolicyError(
+      `Include location cannot ascend above the project root (${hrPath(projectRoot)}): ${hrPath(include.location)}`
+    )
+  }
+  if (path.isAbsolute(include.location)) {
+    throw new InvalidPolicyError(
+      `Include location cannot be an absolute path: ${hrPath(include.location)}`
+    )
+  }
+  for (const module of include.modules ?? []) {
+    if (path.isAbsolute(module)) {
+      throw new InvalidPolicyError(
+        `Include module path(s) cannot be an absolute path: ${hrPath(module)}`
+      )
+    }
+    if (path.normalize(module).startsWith('..')) {
+      throw new InvalidPolicyError(
+        `Include module path(s) cannot ascend above the location (${hrPath(include.location)}): ${hrPath(module)}`
+      )
+    }
+  }
+}

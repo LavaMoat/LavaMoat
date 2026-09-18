@@ -2,6 +2,7 @@ import test from 'ava'
 import { Volume } from 'memfs'
 import { makeReadPowers } from '../../src/compartment/power.js'
 import {
+  assertValidIncludeEntryByLocation,
   findCanonicalNameKeypath,
   hasValue,
   isBoolean,
@@ -17,6 +18,7 @@ import {
   toFileURLString,
   toKeypath,
 } from '../../src/util.js'
+import { ErrorCodes } from '../../src/error-code.js'
 
 /**
  * @import {FsInterface} from '@endo/compartment-mapper'
@@ -200,10 +202,6 @@ test('isIncludeEntryByLocation - returns false for object missing location', (t)
   t.false(isIncludeEntryByLocation({ name: 'my-package' }))
 })
 
-test('isIncludeEntryByLocation - returns false for object with absolute location', (t) => {
-  t.false(isIncludeEntryByLocation({ location: '/absolute/path' }))
-})
-
 test('isIncludeEntryByLocation - returns false for object with non-string location', (t) => {
   t.false(isIncludeEntryByLocation({ location: 123 }))
 })
@@ -215,15 +213,6 @@ test('isIncludeEntryByLocation - returns false for object with empty location', 
 test('isIncludeEntryByLocation - returns false when modules contains an empty string', (t) => {
   t.false(
     isIncludeEntryByLocation({ location: 'some/relative/path', modules: [''] })
-  )
-})
-
-test('isIncludeEntryByLocation - returns false when modules contains an absolute path', (t) => {
-  t.false(
-    isIncludeEntryByLocation({
-      location: 'some/relative/path',
-      modules: ['/absolute/module.js'],
-    })
   )
 })
 
@@ -297,6 +286,61 @@ test('isIncludeEntryByName - returns false when modules is not an array', (t) =>
 
 test('isIncludeEntryByName - returns false when modules contains non-string entries', (t) => {
   t.false(isIncludeEntryByName({ name: 'my-package', modules: [42] }))
+})
+// #endregion
+
+// #region assertValidIncludeEntryByLocation
+test('assertValidIncludeEntryByLocation - throws when location is an absolute path', (t) => {
+  t.throws(
+    () =>
+      assertValidIncludeEntryByLocation(
+        { location: '/absolute/path' },
+        '/project/root'
+      ),
+    { code: ErrorCodes.InvalidPolicy }
+  )
+})
+
+test('assertValidIncludeEntryByLocation - throws when location is a relative path that ascends above the project root', (t) => {
+  t.throws(
+    () =>
+      assertValidIncludeEntryByLocation(
+        { location: './../relative/path' },
+        '/project/root'
+      ),
+    { code: ErrorCodes.InvalidPolicy }
+  )
+})
+
+test('assertValidIncludeEntryByLocation - throws when modules contains a relative path that ascends above the location', (t) => {
+  t.throws(
+    () =>
+      assertValidIncludeEntryByLocation(
+        { location: 'some/relative/path', modules: ['./../module.js'] },
+        '/project/root'
+      ),
+    { code: ErrorCodes.InvalidPolicy }
+  )
+})
+
+test('assertValidIncludeEntryByLocation - throws when modules contains an absolute path', (t) => {
+  t.throws(
+    () =>
+      assertValidIncludeEntryByLocation(
+        { location: 'some/relative/path', modules: ['/module.js'] },
+        '/project/root'
+      ),
+    { code: ErrorCodes.InvalidPolicy }
+  )
+})
+
+test('assertValidIncludeEntryByLocation - does not throw when entry is well-formed', (t) => {
+  t.notThrows(() =>
+    assertValidIncludeEntryByLocation(
+      { location: 'some/relative/path', modules: ['module.js'] },
+      '/project/root'
+    )
+  )
 })
 // #endregion
 

@@ -257,7 +257,7 @@ export const loadAndGeneratePolicy = async (
     disabled: log.level > Loggerr.INFO,
   })
 
-  const _preload = buildPreloads(
+  const preload = buildPreloads(
     packageCompartmentMap,
     policyOverride?.include,
     { projectRoot }
@@ -295,7 +295,7 @@ export const loadAndGeneratePolicy = async (
       },
       importHook,
       log: log.debug.bind(log),
-      _preload,
+      _preload: preload,
       packageConnectionsHook,
       moduleSourceHook,
       ...options,

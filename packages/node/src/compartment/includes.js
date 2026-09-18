@@ -7,6 +7,7 @@
 
 import path from 'node:path'
 import {
+  assertValidIncludeEntryByLocation,
   isIncludeEntryByLocation,
   isIncludeEntryByName,
   isString,
@@ -42,21 +43,13 @@ export const buildAdditionalLocations = (
   { projectRoot = process.cwd() } = {}
 ) =>
   includes.reduce((acc, include) => {
+    // we only care about IncludeEntryByLocation here
     if (isIncludeEntryByLocation(include)) {
-      if (include.location.startsWith('..')) {
-        throw new InvalidPolicyError(
-          `Include location cannot ascend above the project root (${hrPath(projectRoot)}): ${hrPath(include.location)}`
-        )
-      }
+      assertValidIncludeEntryByLocation(include, projectRoot)
       const location = toFileURLString(
         path.join(projectRoot, include.location, '/')
       )
       if (include.modules?.length) {
-        if (include.modules.some((module) => module.startsWith('..'))) {
-          throw new InvalidPolicyError(
-            `Include module path(s) cannot ascend above the location (${hrPath(include.location)}): ${include.modules.join(', ')}`
-          )
-        }
         return [...acc, { location, modules: include.modules }]
       }
       return [...acc, { location }]
