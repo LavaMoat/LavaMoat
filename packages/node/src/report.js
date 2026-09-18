@@ -11,7 +11,7 @@
  * @packageDocumentation
  */
 
-import { spinner as cliSpinner } from '@lavamoat/vog'
+import { Spinner } from '@lavamoat/vog'
 import { InvalidArgumentsError } from './error.js'
 import {
   action,
@@ -26,6 +26,7 @@ import {
   hrLabel,
   hrPath,
   seconds,
+  spinner,
   success,
 } from './format.js'
 import { log as defaultLog } from './log.js'
@@ -129,13 +130,12 @@ export const reportSesViolations = (
    * @returns {void}
    */
   const printWarnings = (canonicalName, warnings) => {
-    log.warn(
-      `Package ${hrLabel(canonicalName)} contains potential SES violations at the following ${pluralize(warnings.length, 'location')}:`
-    )
+    let msg = `Package ${hrLabel(canonicalName)} contains potential SES violations at the following ${pluralize(warnings.length, 'location')}:`
 
     for (const warning of warnings) {
-      log.warn(warning)
+      msg += `\n     ${warning}`
     }
+    log.warn(msg)
   }
 
   let hasDynamicRequireViolations = false
@@ -222,12 +222,12 @@ export const createModuleInspectionProgressReporter = ({
    */
   let spinning = false
 
-  const spin = new cliSpinner.Spinner({
+  const spin = new Spinner({
     text: `${chevron} %s ${action('Inspecting')} modules…`,
     stream: process.stderr,
+    chars: ['◰', '◳', '◲', '◱'].map(spinner),
+    delay: 120,
   })
-  spin.setSpinnerString('◰◳◲◱')
-  spin.setSpinnerDelay(120)
 
   /**
    * Reports progress of the module inspection process to the console.
