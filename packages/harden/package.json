@@ -45,7 +45,7 @@
     "consola": "3.4.2",
     "semver": "^7.7.2",
     "type-fest": "4.41.0",
-    "yaml": "^2.7.1"
+    "yaml": "^2.9.0"
   },
   "publishConfig": {
     "access": "public"
