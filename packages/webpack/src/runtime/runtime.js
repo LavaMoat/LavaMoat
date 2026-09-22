@@ -128,7 +128,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
           referrerPolicy.builtin
         )
       }
-    } 
+    }
     if (referrerPolicy.packages) {
       // if an external was automatically generate by webpack and is not recognized as builtin, but allowed as a package, we still need to pass it in.
       const requestedResourceId = findResourceId(externalName)
@@ -347,8 +347,23 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't', 'b', 'j']
     // To discover more, go to https://github.com/webpack/webpack/blob/main/lib/RuntimeGlobals.js and/or look at implementations here https://github.com/webpack/webpack/tree/main/lib/runtime/
     // Looking at the runtime chunk in the built bundle is probably the fastest way to learn what these do.
+    // 'dn' (setAnonymousDefaultName, webpack >=5.107) only sets `.name` to
+    // "default" on the anonymous default export the calling module just
+    // created. It reads no module state and grants no capability, so it's
+    // safe to pass through. Absent on older webpack, where it stays undefined.
 
-    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's', 't', 'b', 'j']
+    const supportedRuntimeItems = [
+      'O',
+      'n',
+      'd',
+      'o',
+      'r',
+      's',
+      't',
+      'b',
+      'j',
+      'dn',
+    ]
     for (const item of supportedRuntimeItems) {
       policyRequire[item] = harden(__webpack_require__[item])
     }
