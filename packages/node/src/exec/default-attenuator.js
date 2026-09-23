@@ -17,8 +17,11 @@ import { AttenuationError } from '../error.js'
 import { isObjectyObject } from '../util.js'
 
 /**
+ * @import {
+ *   GlobalAttenuatorFn,
+ *   ModuleAttenuatorFn
+ * } from '@endo/compartment-mapper'
  * @import {MakeGlobalsAttenuatorOptions} from '../internal.js'
- * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {GlobalAttenuatorParams} from '../types.js'
  */
 
@@ -50,6 +53,7 @@ export const makeAttenuators = ({
   policy: { resources } = { resources: {} },
   scuttleGlobalThis = { enabled: false },
   trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+  capabilities = new Map(),
 } = {}) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
@@ -71,6 +75,7 @@ export const makeAttenuators = ({
     endowmentsToolkit({
       handleGlobalWrite: knownWritableFields.size > 0,
       knownWritableFields,
+      capabilities,
     })
 
   /** @type {object} */
