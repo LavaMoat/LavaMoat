@@ -8,7 +8,7 @@ import { getProjectDir } from './utils.js'
 const require = createRequire(import.meta.url)
 const makeRunScriptWrapper = require('../src/runner/run-script-wrapper.cjs')
 
-test('script config extends another config relative to its file', (t) => {
+test('script config extending provides a sum of options', (t) => {
   const projectRoot = getProjectDir('runner-features')
 
   const wrapper = makeRunScriptWrapper(

@@ -40,11 +40,10 @@ function makeRunScriptWrapper(
    */
   function additiveCompose(parent, config) {
     const composed = { ...parent, ...config }
-    //
     for (const key of Object.keys(parent)) {
       if (key in config) {
-        if (Array.isArray(parent[key]) && Array.isArray(config[key])) {
-          composed[key] = [...parent[key], ...config[key]]
+        if (Array.isArray(parent[key]) || Array.isArray(config[key])) {
+          composed[key] = [parent[key], config[key]].flat()
         } else if (typeof config[key] === 'object') {
           composed[key] = additiveCompose(parent[key], config[key])
         }
@@ -54,15 +53,17 @@ function makeRunScriptWrapper(
   }
 
   /**
-   * @param {string} filePath
-   * @param {number} [depth] - The recursion depth for extended configs
-   * @returns {Record<string, any>}
+   * Reads and processes a config file
+   *
+   * @param {string} filePath - The path to the config file
+   * @param {number} [depth] - The recursion depth for extend
+   * @returns {Record<string, any>} - The processed configuration object
    */
   function readScriptConfig(filePath, depth = 0) {
     const conf = readJsonFile(filePath)
     if (typeof conf !== 'object' || conf === null || depth > 10) {
       throw Error(
-        `Failed to load config. ${depth > 10 ? '(maximum extend depth exceeded)' : ''}`
+        `Failed to load config.${depth > 10 ? ' (maximum extend depth exceeded)' : ''}`
       )
     }
     const { extends: parentPath, ...config } = conf
