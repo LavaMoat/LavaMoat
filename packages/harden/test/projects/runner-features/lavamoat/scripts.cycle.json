@@ -1,0 +1,6 @@
+{
+  "extends": "./scripts.cycle.json",
+  "nodeOptions": {
+    "--permission": true
+  }
+}

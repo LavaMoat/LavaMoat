@@ -1,6 +1,6 @@
 {
+  "extends": "./scripts.permissions.json",
   "nodeOptions": {
-    "--permission": true,
     "--allow-fs-tmp": true
   }
 }
