@@ -51,6 +51,7 @@ export const makeAttenuators = ({
   policy: { resources } = { resources: {} },
   scuttleGlobalThis = { enabled: false },
   trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+  capabilities = new Map(),
 } = {}) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
@@ -72,6 +73,7 @@ export const makeAttenuators = ({
     endowmentsToolkit({
       handleGlobalWrite: knownWritableFields.size > 0,
       knownWritableFields,
+      capabilities,
     })
 
   /** @type {object} */

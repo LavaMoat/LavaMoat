@@ -254,9 +254,7 @@ export const loadPolicies = async (
    * @type {[
    *   policy: Promise<LavaMoatPolicy> | LavaMoatPolicy,
    *   policyOverride:
-   *     | Promise<LavaMoatPolicy | undefined>
-   *     | LavaMoatPolicy
-   *     | undefined,
+   *     Promise<LavaMoatPolicy | undefined> | LavaMoatPolicy | undefined,
    * ]}
    */
   const jobs = /** @type {any} */ ([])

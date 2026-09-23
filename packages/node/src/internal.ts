@@ -18,6 +18,7 @@ import type {
   GlobalPolicyValue,
   LavaMoatPolicy,
 } from '@lavamoat/types'
+import { type LockdownOptions } from 'ses'
 import type { Except, PackageJson, ValueOf } from 'type-fest'
 import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
@@ -25,6 +26,7 @@ import type {
   ConsumerCaptureFromMapOptions,
   FileUrlString,
   MergedLavaMoatPolicy,
+  WithCapabilitySources,
   WithCompact,
   WithConcurrency,
   WithFs,
@@ -261,10 +263,30 @@ export interface MakeNodeCompartmentMapResult {
 export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
 
 /**
+ * Definition of a custom capability
+ *
+ * TODO: This (or something like it) needs to live in `lavamoat-core`
+ */
+export interface CapabilityDefinition<T = unknown> {
+  ambient: boolean
+  endow: (params: {
+    options?: T
+    compartmentGlobalThis: typeof globalThis
+  }) => void
+}
+
+/**
  * Options for `makeGlobalsAttenuator()`
  */
 export type MakeGlobalsAttenuatorOptions = ComposeOptions<
-  [WithPolicy, WithScuttleGlobalThis, WithTrustRoot]
+  [
+    WithPolicy,
+    WithScuttleGlobalThis,
+    WithTrustRoot,
+    {
+      capabilities?: Map<string, CapabilityDefinition>
+    },
+  ]
 >
 
 /**
@@ -423,3 +445,29 @@ export type ViolationsAnalyzerResults = {
   strictModeViolations: ViolationLocation[]
   dynamicRequires: ViolationLocation[]
 } | null
+
+/**
+ * Options for `harden()`
+ */
+export type HardenOptions = ComposeOptions<
+  [
+    {
+      /**
+       * The _real_ `globalThis`
+       */
+      globalRef?: typeof globalThis
+
+      /**
+       * Options for {@link repairIntrinsics}
+       */
+      lockdownOptions?: LockdownOptions
+
+      /**
+       * If `true`, throw if intrinsics cannot be repaired (even if _already_
+       * repaired)
+       */
+      strict?: boolean
+    },
+    WithCapabilitySources,
+  ]
+>

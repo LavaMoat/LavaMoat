@@ -18,6 +18,7 @@ import { isTrusted, loadPolicies } from '../policy-util.js'
 import { makeAttenuators } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
+import { harden } from '../preamble.js'
 
 /**
  * @import {
@@ -49,6 +50,8 @@ export const run = async (
     readFile = nodeFs.promises.readFile,
     log = defaultLog,
     scuttleGlobalThis,
+    capabilitySources = [],
+    strictHarden = false,
     ...options
   } = {}
 ) => {
@@ -77,10 +80,12 @@ export const run = async (
 
   assertTrustRootMatchesPolicy(policy, entrypoint, trustRoot)
 
+  const { capabilities } = harden({ capabilitySources, strict: strictHarden })
   const { attenuateGlobals, attenuateModule } = makeAttenuators({
     policy,
     scuttleGlobalThis,
     trustRoot,
+    capabilities,
   })
 
   /** @type {ExecuteOptions} */

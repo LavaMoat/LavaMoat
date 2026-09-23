@@ -263,6 +263,7 @@ export type ExecuteOptions = ComposeOptions<
     WithProdOnly,
     WithPolicyOnly,
     WithProjectRoot,
+    WithCapabilitySources,
   ]
 >
 
@@ -408,8 +409,23 @@ export type RunOptions = ComposeOptions<
     WithPolicyPath,
     LoadPoliciesOptions,
     WithPolicy,
+    WithCapabilitySources,
+    {
+      /**
+       * If `true`, execution will fail if the execution environment has already
+       * been hardened.
+       */
+      strictHarden?: boolean
+    },
   ]
 >
+
+/**
+ * Options having a `capabilitySources` property
+ */
+export interface WithCapabilitySources {
+  capabilitySources?: Iterable<string>
+}
 
 /**
  * Options containing a `cwd` property
@@ -495,7 +511,7 @@ export type {
   ResourcePolicy,
   Resources as ResourcePolicyRecord,
   Resources,
-  RootPolicy
+  RootPolicy,
 } from '@lavamoat/types'
 
 export type * from './errors.js'

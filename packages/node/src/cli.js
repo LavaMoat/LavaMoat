@@ -498,6 +498,8 @@ const main = async (args = hideBin(process.argv)) => {
         stripProcessArgv(entrypoint)
 
         await run(entrypoint, {
+          // execution via the CLI expects that the environment is not yet hardened
+          strictHarden: true,
           policyOverridePath,
           trustRoot,
           prodOnly,
