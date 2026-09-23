@@ -7,6 +7,8 @@
 
 import 'ses'
 
+// call repairInstrinsics, call something else, then call hardenInstrinsics
+// see https://github.com/LavaMoat/LavaMoat/blob/772d936aefb9e256742e610e69f871bc782d1e80/packages/webpack/src/runtime/runtime.js#L17-L35
 lockdown({
   // lets code observe call stack, but easier debuggability
   errorTaming: 'unsafe',
