@@ -1,5 +1,7 @@
 {
   "nodeOptions": {
-    "--permission": true
+    "--permission": true,
+    "--allow-fs-read": ["./"],
+    "--allow-worker": false
   }
 }

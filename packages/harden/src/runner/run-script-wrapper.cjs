@@ -32,6 +32,28 @@ function makeRunScriptWrapper(
   }
 
   /**
+   * Additively composes two configuration objects. Arrays are concatenated, and
+   * nested objects are recursively merged.
+   *
+   * @param {any} parent
+   * @param {any} config
+   */
+  function additiveCompose(parent, config) {
+    const composed = { ...parent, ...config }
+    //
+    for (const key of Object.keys(parent)) {
+      if (key in config) {
+        if (Array.isArray(parent[key]) && Array.isArray(config[key])) {
+          composed[key] = [...parent[key], ...config[key]]
+        } else if (typeof config[key] === 'object') {
+          composed[key] = additiveCompose(parent[key], config[key])
+        }
+      }
+    }
+    return composed
+  }
+
+  /**
    * @param {string} filePath
    * @param {number} [depth] - The recursion depth for extended configs
    * @returns {Record<string, any>}
@@ -51,13 +73,8 @@ function makeRunScriptWrapper(
       pathJoin(filePath, '..', parentPath),
       depth + 1
     )
-    const composed = { ...parent, ...config }
-    for (const key of Object.keys(parent)) {
-      if (key in config) {
-        composed[key] = Object.assign({}, parent[key], config[key])
-      }
-    }
-    return composed
+
+    return additiveCompose(parent, config)
   }
 
   /**
