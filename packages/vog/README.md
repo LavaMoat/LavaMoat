@@ -78,12 +78,19 @@ pBar.stop()
 Courtesy of [cli-spinner][].
 
 ```typescript
-import { spinner } from '@lavamoat/vog'
+import { Spinner } from '@lavamoat/vog'
 
-const spin = new spinner.Spinner('processing.. %s')
-spin.setSpinnerString('|/-\\')
-spin.start()
-spin.stop()
+const spinner = new Spinner('processing.. %s', {
+  // supports all standard spinner options; additionally:
+
+  // characters can be customized to enable ANSI formatting
+  chars: ['|', '/', '-', '\\'],
+
+  // delay between frames in milliseconds
+  delay: 120,
+})
+spinner.start()
+spinner.stop()
 ```
 
 ### Utilities
