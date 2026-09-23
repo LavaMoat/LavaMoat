@@ -344,14 +344,10 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // It's a case-by-case basis decision.
     // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
     //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
-    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't', 'b', 'j']
-    // To discover more, go to https://github.com/webpack/webpack/blob/main/lib/RuntimeGlobals.js and/or look at implementations here https://github.com/webpack/webpack/tree/main/lib/runtime/
+// The following supportedRuntimeItems are considered harmless and are used by default
+// To discover more, go to https://github.com/webpack/webpack/blob/main/lib/runtime/RuntimeGlobals.js 
+// or look at implementations in https://github.com/webpack/webpack/tree/main/lib/runtime/
     // Looking at the runtime chunk in the built bundle is probably the fastest way to learn what these do.
-    // 'dn' (setAnonymousDefaultName, webpack >=5.107) only sets `.name` to
-    // "default" on the anonymous default export the calling module just
-    // created. It reads no module state and grants no capability, so it's
-    // safe to pass through. Absent on older webpack, where it stays undefined.
-
     const supportedRuntimeItems = [
       'O',
       'n',
@@ -362,7 +358,8 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
       't',
       'b',
       'j',
-      'dn',
+      'dn', // (webpack >=5.107) only sets `.name` to "default" on the anonymous default export
+      'ns', // wrap an exports object in a spec Module Namespace Exotic Object
     ]
     for (const item of supportedRuntimeItems) {
       policyRequire[item] = harden(__webpack_require__[item])
