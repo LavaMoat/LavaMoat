@@ -53,7 +53,7 @@ module.exports = {
             {
               scriptName,
               scriptPayload: extra.script,
-              projectRoot: extra.cwd,
+              projectRoot: project.cwd,
               pathBinMatcher: (fragment) => {
                 if (berryBin && fragment === berryBin) {
                   return true
