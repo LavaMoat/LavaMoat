@@ -18,6 +18,32 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [3.0.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.3.0...webpack-v3.0.0) (2026-09-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **node:** The API of `generatePolicy()` has changed; instead of resolving with a `LavaMoatPolicy`, it now resolves with an object having properties `policy: LavaMoatPolicy` and `hasWarnings: boolean`. This only affects programmatic consumption of `@lavamoat/node`. To migrate, destructure `policy` from the resolved object. `generatePolicy()` no longer accepts `write`/`writableFs`  options and does not write policy to disk; to write a policy, use `writePolicy `imported from `@lavamoat/node`.
+
+### Features
+
+* **node:** use @endo/parser-pipeline ([9fe2cce](https://github.com/LavaMoat/LavaMoat/commit/9fe2cceb6a969c2df9a5e5511527b7cf4825fb19))
+
+
+### Bug Fixes
+
+* **deps:** upgrade ses ([83f704a](https://github.com/LavaMoat/LavaMoat/commit/83f704acbfc175a5bc1837752b3b52e597a0d5ad))
+* **deps:** upgrade ses This upgrades `ses` to v2.3.0 across the board. ([#2111](https://github.com/LavaMoat/LavaMoat/issues/2111)) ([32d830b](https://github.com/LavaMoat/LavaMoat/commit/32d830b947c0e9a0fab4195cc9c6083e9b7b3714))
+* **webpack:** expose dn and ns utils for ESM spec compatibility on the runtime global ([#2115](https://github.com/LavaMoat/LavaMoat/issues/2115)) ([054890a](https://github.com/LavaMoat/LavaMoat/commit/054890a52ae72aa598b1c82a677f2d665a3d81f9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^1.0.2 to ^2.0.0
+    * lavamoat-core bumped from ^18.0.6 to ^19.0.0
+
 ## [2.3.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.2.4...webpack-v2.3.0) (2026-09-03)
 
 
