@@ -32,6 +32,53 @@ function makeRunScriptWrapper(
   }
 
   /**
+   * Additively composes two configuration objects. Arrays are concatenated, and
+   * nested objects are recursively merged.
+   *
+   * @param {any} parent
+   * @param {any} config
+   */
+  function additiveCompose(parent, config) {
+    const composed = { ...parent, ...config }
+    for (const key of Object.keys(parent)) {
+      if (key in config) {
+        if (Array.isArray(parent[key]) || Array.isArray(config[key])) {
+          composed[key] = [parent[key], config[key]].flat()
+        } else if (typeof config[key] === 'object') {
+          composed[key] = additiveCompose(parent[key], config[key])
+        }
+      }
+    }
+    return composed
+  }
+
+  /**
+   * Reads and processes a config file
+   *
+   * @param {string} filePath - The path to the config file
+   * @param {number} [depth] - The recursion depth for extend
+   * @returns {Record<string, any>} - The processed configuration object
+   */
+  function readScriptConfig(filePath, depth = 0) {
+    const conf = readJsonFile(filePath)
+    if (typeof conf !== 'object' || conf === null || depth > 10) {
+      throw Error(
+        `Failed to load config.${depth > 10 ? ' (maximum extend depth exceeded)' : ''}`
+      )
+    }
+    const { extends: parentPath, ...config } = conf
+    if (!parentPath) {
+      return config
+    }
+    const parent = readScriptConfig(
+      pathJoin(filePath, '..', parentPath),
+      depth + 1
+    )
+
+    return additiveCompose(parent, config)
+  }
+
+  /**
    * @param {Record<string, string>} configs
    * @param {string} scriptName
    * @returns {string | undefined}
@@ -57,6 +104,7 @@ function makeRunScriptWrapper(
    * @param {Record<string, string> | undefined} opts.scriptsConfig
    * @param {string} [opts.scriptName]
    * @param {string} opts.projectRoot
+   * @returns {{ config: Record<string, any>; name?: string }}
    */
   function readConfig({
     scriptsConfig,
@@ -73,15 +121,12 @@ function makeRunScriptWrapper(
 
     // config needs to be optional, because it's opt-in first and specifying a default turns it opt-out.
     if (!configName) {
-      return { config: {}, name: undefined }
+      return { config: {} }
     }
     const configPath = pathJoin(projectRoot, configName)
     let conf
     try {
-      conf = readJsonFile(configPath)
-      if (typeof conf !== 'object' || conf === null) {
-        throw Error(`Expected an object, got ${typeof conf}`)
-      }
+      conf = readScriptConfig(configPath)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       throw Error(

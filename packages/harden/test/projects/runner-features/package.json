@@ -11,6 +11,6 @@
   "scriptsConfig": {
     "lint:*": "lavamoat/scripts.permissions.json",
     "lint:directmatch": "lavamoat/scripts.empty.json",
-    "tmp": "lavamoat/scripts.tmp.json"
+    "tmp": "lavamoat/scripts.compose.json"
   }
 }

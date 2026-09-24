@@ -1,0 +1,8 @@
+{
+  "extends": "./scripts.permissions.json",
+  "nodeOptions": {
+    "--allow-fs-tmp": true,
+    "--allow-fs-read": ["/"],
+    "--allow-worker": true
+  }
+}
