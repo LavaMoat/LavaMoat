@@ -14,7 +14,7 @@
   },
   "keywords": [],
   "scripts": {
-    "preinstall": "echo \"Don't run npm lifecycle scripts by default! Create a .yarnrc or .npmrc and set enableScripts: false. Then, whitelist them with @lavamoat/allow-scripts\" && exit 1",
+    "preinstall": "echo \"Don't run npm lifecycle scripts by default! Set ignore-scripts=true in .npmrc (npm), ignore-scripts true in .yarnrc (Yarn v1) or enableScripts: false in .yarnrc.yml (Yarn v2+). Then, whitelist them with @lavamoat/allow-scripts\" && exit 1",
     "test": "exit 0"
   },
   "publishConfig": {
