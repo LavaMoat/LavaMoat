@@ -20,9 +20,9 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@yarnpkg/builder": "4.2.3",
-    "@yarnpkg/cli": "4.17.1",
-    "@yarnpkg/core": "4.9.0",
+    "@yarnpkg/builder": "4.2.4",
+    "@yarnpkg/cli": "4.18.1",
+    "@yarnpkg/core": "4.9.2",
     "clipanion": "3.2.1"
   }
 }
