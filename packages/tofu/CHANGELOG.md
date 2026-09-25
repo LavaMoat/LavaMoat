@@ -1,5 +1,16 @@
 # Changelog
 
+## [9.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.0.3...lavamoat-tofu-v9.0.4) (2026-09-24)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^1.0.2 to ^2.0.0
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >19.0.0
+
 ## [9.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.0.2...lavamoat-tofu-v9.0.3) (2026-06-25)
 
 
