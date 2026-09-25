@@ -5,7 +5,7 @@
 
 ### ⚠ BREAKING CHANGES
 
-* **node:** The API of `generatePolicy()` has changed; instead of resolving with a `LavaMoatPolicy`, it now resolves with an object having properties `policy: LavaMoatPolicy` and `hasWarnings: boolean`. This only affects programmatic consumption of `@lavamoat/node`. To migrate, destructure `policy` from the resolved object. `generatePolicy()` no longer accepts `write`/`writableFs`  options and does not write policy to disk; to write a policy, use `writePolicy `imported from `@lavamoat/node`.
+* **ses:** the SES upgrade should not introduce a regression in Hermes, but we are releasing as major version out of caution.
 
 ### Features
 
