@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FORCE_COLOR: '1'
+  FORCE_COLOR: "1"
 
 jobs:
   test:
@@ -24,8 +24,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - node-version: '^22.22.0'
-          - node-version: '^24.15.0'
+          - node-version: "^22.22.0"
+          - node-version: "^24.15.0"
+          - node-version: "^26.0.0"
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
