@@ -25,8 +25,11 @@ module.exports.globalPropertyNames = /** @type {const} */ ([
   'Date',
   'Error',
   'EvalError',
-  'Float32Array',
-  'Float64Array',
+  // Float16Array, Float32Array and Float64Array are deliberately absent.
+  // ses moved them out of universalPropertyNames because their NaN payload
+  // bits are a side channel, so compartments no longer receive them for
+  // free. Treating them as primordials here would hide that usage from the
+  // generated policy, leaving packages without them at runtime.
   'Function',
   'Int8Array',
   'Int16Array',
