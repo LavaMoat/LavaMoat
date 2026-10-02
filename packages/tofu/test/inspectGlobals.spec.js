@@ -14,9 +14,6 @@ test('fnToCodeBlock utility works', (t) => {
   t.is(src, `(() => {${EOL}    1 + 2 + 3${EOL}  })()`)
 })
 
-// ses moved the float typed arrays out of universalPropertyNames because their
-// NaN payload bits are a side channel, so compartments no longer receive them
-// automatically. They must be discovered so the generated policy grants them.
 testInspect(
   'detects float typed arrays, which are not primordials',
   {},
@@ -32,7 +29,6 @@ testInspect(
   }
 )
 
-// Integer typed arrays stay universally available, so they stay primordials.
 testInspect(
   'does not detect integer typed arrays, which are primordials',
   {},
