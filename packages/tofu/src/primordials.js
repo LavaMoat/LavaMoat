@@ -25,8 +25,6 @@ module.exports.globalPropertyNames = /** @type {const} */ ([
   'Date',
   'Error',
   'EvalError',
-  'Float32Array',
-  'Float64Array',
   'Function',
   'Int8Array',
   'Int16Array',

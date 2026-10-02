@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars, n/no-unsupported-features/node-builtins */
-/* global xyz: true, zzz, a, b, c, z: true, abc: true, manifest */
+/* global xyz: true, zzz, a, b, c, z: true, abc: true, manifest, Float16Array */
 
 const { EOL } = require('node:os')
 const { default: test } = require('ava')
@@ -13,6 +13,32 @@ test('fnToCodeBlock utility works', (t) => {
 
   t.is(src, `(() => {${EOL}    1 + 2 + 3${EOL}  })()`)
 })
+
+testInspect(
+  'detects float typed arrays, which are not primordials',
+  {},
+  () => {
+    const a = new Float64Array(1)
+    const b = new Float32Array(1)
+    const c = new Float16Array(1)
+  },
+  {
+    Float64Array: 'read',
+    Float32Array: 'read',
+    Float16Array: 'read',
+  }
+)
+
+testInspect(
+  'does not detect integer typed arrays, which are primordials',
+  {},
+  () => {
+    const a = new Uint8Array(1)
+    const b = new Int32Array(1)
+    const c = new BigInt64Array(1)
+  },
+  {}
+)
 
 testInspect(
   'detects global reads',

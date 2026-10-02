@@ -13,16 +13,17 @@
     "es6-module-package": "1.0.0",
     "fetch-package": "1.0.0",
     "flag-package": "1.0.0",
+    "float-typed-array-package": "1.0.0",
     "globals-package": "1.0.0",
     "loader-hack": "1.0.0",
     "message-package": "1.0.0",
     "nodejs-package": "1.0.0",
     "polyfill-package": "1.0.0",
     "prototype-poisoning-package": "1.0.0",
-    "uses-reexport-package": "1.0.0",
     "resource-hack": "1.0.0",
     "side-effects-package": "1.0.0",
     "typescript-package": "1.0.0",
-    "umd-package": "1.0.0"
+    "umd-package": "1.0.0",
+    "uses-reexport-package": "1.0.0"
   }
 }
