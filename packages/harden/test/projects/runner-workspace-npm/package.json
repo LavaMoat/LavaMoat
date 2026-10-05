@@ -1,0 +1,14 @@
+{
+  "name": "test-npm-workspace-project",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "root-default": "node -e \"console.log('ROOT_DEFAULT:' + (process.env.LAVAMOAT_RUN_CONF || ''))\""
+  },
+  "scriptsConfig": {
+    "#default": "lavamoat/scripts.loose.json"
+  }
+}

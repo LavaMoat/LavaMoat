@@ -1,7 +1,7 @@
 {
   "name": "test-pnpm-project",
   "version": "1.0.0",
-  "packageManager": "pnpm@11.0.0",
+  "packageManager": "pnpm@11.28.1",
   "optionalDependencies": {
     "@lavamoat/not-really-a-package": "github:lavamoat/not-really-a-package"
   }
