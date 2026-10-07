@@ -17,6 +17,15 @@ const diag = require('./buildtime/diagnostics.js')
 const { assertFields, progress } = require('./buildtime/utils.js')
 
 const {
+  buildReport,
+  ANALYSIS_DIR,
+  ANALYSIS_JSON_FILENAME,
+  ANALYSIS_HTML_FILENAME,
+} = require('./buildtime/analyze.js')
+const fs = require('node:fs')
+const ANALYZER_HTML_PATH = path.join(__dirname, 'buildtime', 'analyzer.html')
+
+const {
   generatePolicy,
   loadPolicy,
   stringifyPolicyReliably,
@@ -33,10 +42,10 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 /**
  * Just import
  *
- * @import {LockdownOptions} from 'ses'
- * @import {CompleteLavaMoatPluginOptions} from './buildtime/types'
- * @import {CanonicalNameMap} from '@lavamoat/aa'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {CanonicalNameMap} from "@lavamoat/aa"
+ * @import {LavaMoatPolicy} from "@lavamoat/types"
+ * @import {LockdownOptions} from "ses"
+ * @import {CompleteLavaMoatPluginOptions} from "./buildtime/types"
  */
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -369,7 +378,8 @@ class LavaMoatPlugin {
                     connections:
                       compilation.moduleGraph.getOutgoingConnections(module),
                   })),
-                  overwritePolicyWithOverride: STORE.options.generatePolicyIncludeOverrides,
+                  overwritePolicyWithOverride:
+                    STORE.options.generatePolicyIncludeOverrides,
                 })
               : loadPolicy({
                   policyFromOptions: STORE.options.policy,
@@ -602,6 +612,42 @@ class LavaMoatPlugin {
               HtmlWebpackPluginInterop:
                 !!STORE.options.HtmlWebpackPluginInterop,
             })
+          )
+        }
+
+        if (STORE.options.emitBundleAnalysis) {
+          compilation.hooks.afterProcessAssets.tap(
+            PLUGIN_NAME + '_analysis',
+            () => {
+              // Skip silently if the earlier analysis pipeline didn't run
+              // (e.g. generatePolicyOnly early-return).
+              if (
+                !STORE.identifiersForModuleIds ||
+                !STORE.runtimeOptimizedPolicy
+              ) {
+                return
+              }
+              const report = buildReport(compilation, {
+                canonicalNameMap: STORE.canonicalNameMap,
+                identifiersForModuleIds: STORE.identifiersForModuleIds,
+                unenforceableModuleIds: STORE.unenforceableModuleIds,
+                contextModuleIds: STORE.contextModuleIds,
+                runtimeOptimizedPolicy: STORE.runtimeOptimizedPolicy,
+              })
+              const jsonData = JSON.stringify(report, null, 2)
+              compilation.emitAsset(
+                `${ANALYSIS_DIR}/${ANALYSIS_JSON_FILENAME}`,
+                new RawSource(jsonData)
+              )
+              compilation.emitAsset(
+                `${ANALYSIS_DIR}/${ANALYSIS_HTML_FILENAME}`,
+                new RawSource(
+                  fs
+                    .readFileSync(ANALYZER_HTML_PATH, 'utf8')
+                    .replace('`%DATA%`', jsonData)
+                )
+              )
+            }
           )
         }
 

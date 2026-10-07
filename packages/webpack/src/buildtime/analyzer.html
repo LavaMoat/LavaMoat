@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>LavaMoat webpack analysis</title>
+    <style>
+      body {
+        font-family: monospace;
+        font-size: 11px;
+        margin: 1rem;
+        background: #fff;
+      }
+
+      * {
+        border-radius: 4px;
+        padding: 0.2rem;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+
+      .stub {
+        border: 2px solid #ccc;
+        cursor: pointer;
+      }
+
+      .stub.cyclic {
+        cursor: not-allowed;
+        font-style: italic;
+      }
+      .stub.shaken {
+        cursor: not-allowed;
+        font-style: italic;
+        color: #999;
+      }
+
+      .pill {
+        border: 2px solid transparent;
+      }
+
+      .label {
+        color: #666;
+        text-transform: uppercase;
+      }
+
+      .chunk-box {
+        border: 1px dashed #999;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1 1 260px;
+        min-width: 260px;
+      }
+
+      .module {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        align-items: flex-start;
+        border: 2px solid #ccc;
+        padding: 0.35rem;
+      }
+
+      .module-label {
+        flex-basis: 100%;
+      }
+
+      .rt-entry {
+        min-width: 200px;
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+      }
+
+      .hl {
+        outline: 3px solid orange;
+        outline-offset: 2px;
+      }
+
+      #pointer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        font-size: 2rem;
+        transition: all 0.5s ease-out;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>LavaMoat webpack analysis</h1>
+    <div class="label">Runtimes</div>
+    <div id="runtimes" class="row"></div>
+    <div class="label">Layers</div>
+    <div id="layers" class="row"></div>
+    <div class="label">Entries</div>
+    <div id="entries" class="row"></div>
+    <h2>Chunks</h2>
+    <div id="chunks" class="row"></div>
+
+    <script>
+      globalThis.REPORT = `%DATA%`
+    </script>
+
+    <div id="pointer">👉</div>
+
+    <script type="module">
+      const report = globalThis.REPORT
+      // --- tiny DOM helper -------------------------------------------------
+
+      /**
+       * H('div', { className, style, onclick }, ...children) children: strings,
+       * nodes, arrays; null/undefined/false skipped.
+       */
+      function h(tag, props, ...children) {
+        const el = document.createElement(tag)
+        if (props) {
+          if (props.className) el.className = props.className
+          if (props.style) Object.assign(el.style, props.style)
+          if (props.onclick) el.addEventListener('click', props.onclick)
+        }
+        for (const c of children.flat(Infinity)) {
+          if (c === null || c === undefined || c === false) continue
+          el.append(c.nodeType ? c : String(c))
+        }
+        return el
+      }
+
+      // --- indexes & hue maps ---------------------------------------------
+
+      const modulesById = new Map(report.modules.map((m) => [m.id, m]))
+
+      function hueMap(names) {
+        const map = new Map()
+        const n = Math.max(names.length, 1)
+        names.forEach((name, i) => {
+          map.set(name, Math.round(((i / n) * 360 + 15) % 360))
+        })
+        return map
+      }
+
+      const runtimeNames = Array.from(
+        new Set(
+          report.runtimeChunks
+            .flatMap((rc) => rc.runtime)
+            .concat(report.modules.flatMap((m) => m.runtimes))
+        )
+      ).sort()
+      // Virtual 'default' layer for modules with no layer set.
+      const layerNames = Array.from(
+        new Set(report.modules.map((m) => m.layer ?? 'default'))
+      ).sort()
+
+      const runtimeHue = hueMap(runtimeNames)
+      const layerHue = hueMap(layerNames)
+
+      const layerOf = (mod) => mod.layer ?? 'default'
+
+      const bg = (name) =>
+        runtimeHue.has(name) ? `hsl(${runtimeHue.get(name)}, 65%, 88%)` : '#fff'
+      const border = (name) =>
+        layerHue.has(name) ? `hsl(${layerHue.get(name)}, 70%, 40%)` : '#ccc'
+
+      // --- legends --------------------------------------------------------
+
+      const runtimesEl = document.getElementById('runtimes')
+      for (const rc of report.runtimeChunks) {
+        runtimesEl.append(
+          h(
+            'div',
+            { className: 'rt-entry', style: { background: bg(rc.runtime[0]) } },
+            h(
+              'div',
+              { className: 'label' },
+              '#' + rc.chunkId + '  ' + rc.runtime.join(', ')
+            ),
+            h(
+              'ul',
+              null,
+              ...rc.runtimeModules.map((name) => h('li', null, name))
+            )
+          )
+        )
+      }
+      if (layerNames.length) {
+        const layersEl = document.getElementById('layers')
+        for (const name of layerNames) {
+          layersEl.append(
+            h(
+              'span',
+              { className: 'pill', style: { borderColor: border(name) } },
+              name
+            )
+          )
+        }
+      }
+
+      // --- module rendering -----------------------------------------------
+
+      const $pointer = document.getElementById('pointer')
+      let pointerT
+      function pointTo(element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+        $pointer.style.opacity = 1
+        clearTimeout(pointerT)
+        pointerT = setTimeout(() => {
+          const rect = element.getBoundingClientRect()
+          $pointer.style.top = rect.top + 10 + 'px'
+          $pointer.style.left = rect.left - 30 + 'px'
+          pointerT = setTimeout(() => {
+            $pointer.style.opacity = 0
+          }, 3000)
+        }, 800)
+      }
+
+      function cardStyle(mod) {
+        return {
+          background: bg(mod.runtimes[0]),
+          borderColor: border(layerOf(mod)),
+        }
+      }
+
+      function label(mod) {
+        return (
+          mod.rawRequest ||
+          mod.readableIdentifier ||
+          mod.identifier ||
+          String(mod.id)
+        )
+      }
+
+      function renderModule(mod, ancestors) {
+        const next = new Set(ancestors).add(mod.id)
+        const el = h(
+          'div',
+          { className: 'module', style: cardStyle(mod) },
+          h(
+            'div',
+            { className: 'module-label' },
+            (mod.chunks.length === 0 ? '🪦' : '') + label(mod) + '  #' + mod.id
+          ),
+          h(
+            'span',
+            { className: 'lm-info' },
+            `${mod.canonicalName} 🛡️${mod.hasPolicy ? '+' : '-'}`
+          ),
+          ...mod.children.map((id) => renderStub(id, next))
+        )
+        el.dataset.mid = mod.id
+        return el
+      }
+
+      function renderStub(id, ancestors) {
+        const child = modulesById.get(id)
+        if (!child) {
+          const missing = h('span', { className: 'stub cyclic' }, '?? ' + id)
+          missing.dataset.mid = id
+          return missing
+        }
+        const cyclic = ancestors.has(id)
+        const stub = h(
+          'span',
+          {
+            className: cyclic ? 'stub cyclic' : 'stub',
+            style: cardStyle(child),
+            onclick: cyclic
+              ? undefined
+              : (e) => {
+                  e.stopPropagation()
+                  const currentChunk =
+                    stub.closest('[data-chunk]')?.dataset.chunk
+                  const home = homeChunkFor(child)
+                  if (home !== null && String(home) === currentChunk) {
+                    // same chunk — expand in place, replacing the stub
+                    stub.replaceWith(renderModule(child, ancestors))
+                    expandedIds.add(child.id)
+                  } else {
+                    // different chunk — render into the home chunk box
+                    expandInto(child, new Set())
+                  }
+                },
+          },
+          label(child)
+        )
+        stub.dataset.mid = id
+        return stub
+      }
+
+      // --- chunk boxes ----------------------------------------------------
+
+      const chunksEl = document.getElementById('chunks')
+      /** @type {Map<string | number, HTMLElement>} */
+      const chunkBoxes = new Map()
+      for (const chunk of report.chunks) {
+        if (chunk.id === null || chunk.id === undefined) continue
+        const box = h(
+          'div',
+          {
+            className: 'chunk-box',
+            style: { background: bg(chunk.runtime[0]) },
+          },
+          h(
+            'div',
+            { className: 'label' },
+            'chunk: ' +
+              (chunk.name ?? '') +
+              ' #' +
+              chunk.id +
+              (chunk.hasRuntime ? ' [runtime]' : '')
+          )
+        )
+        box.dataset.chunk = String(chunk.id)
+        chunksEl.append(box)
+        chunkBoxes.set(chunk.id, box)
+      }
+
+      function homeChunkFor(mod) {
+        for (const c of mod.chunks) {
+          if (chunkBoxes.has(c)) return c
+        }
+        return null
+      }
+
+      // --- expansion registry --------------------------------------------
+
+      const expandedIds = new Set()
+
+      function expandInto(mod, ancestors) {
+        if (expandedIds.has(mod.id)) {
+          // find the rendered module and scroll to it
+          const rendered = document.querySelector(
+            '.module[data-mid="' + CSS.escape(mod.id) + '"]'
+          )
+          if (rendered) {
+            pointTo(rendered)
+          }
+          return
+        }
+        expandedIds.add(mod.id)
+        const home = homeChunkFor(mod)
+        const container = home !== null ? chunkBoxes.get(home) : chunksEl
+        const rendered = renderModule(mod, ancestors)
+        container.append(rendered)
+        pointTo(rendered)
+      }
+
+      // --- entries --------------------------------------------------------
+
+      function entryModules(entry) {
+        return (entry.entryModules || [])
+          .map((id) => modulesById.get(id))
+          .filter(Boolean)
+      }
+
+      for (const entry of report.entries) {
+        for (const m of entryModules(entry)) {
+          expandInto(m, new Set())
+        }
+      }
+
+      // --- entry stubs (hoverable pointers to roots) ---------------------
+
+      const entriesEl = document.getElementById('entries')
+      for (const entry of report.entries) {
+        for (const m of entryModules(entry)) {
+          entriesEl.append(renderStub(m.id, new Set(), false))
+        }
+      }
+
+      // --- hover highlight of same module id ------------------------------
+
+      let currentMid = null
+      document.body.addEventListener('mouseover', (e) => {
+        const el = e.target.closest?.('[data-mid]')
+        const mid = el ? el.dataset.mid : null
+        if (mid === currentMid) return
+        if (currentMid !== null) {
+          document
+            .querySelectorAll('[data-mid="' + CSS.escape(currentMid) + '"]')
+            .forEach((x) => x.classList.remove('hl'))
+        }
+        currentMid = mid
+        if (mid !== null) {
+          document
+            .querySelectorAll('[data-mid="' + CSS.escape(mid) + '"]')
+            .forEach((x) => x.classList.add('hl'))
+        }
+      })
+    </script>
+  </body>
+</html>
