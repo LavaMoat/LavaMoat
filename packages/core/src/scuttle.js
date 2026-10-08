@@ -1,13 +1,17 @@
 /**
  * @typedef {object} LavaMoatScuttleOpts Options for scuttling `globalThis`.
  * @property {boolean} enabled Whether scuttling is enabled or not.
- * @property {Array<string | RegExp>} [exceptions] List of properties to exclude from scuttling.
- * @property {string} [scuttlerName] Name of the scuttler function to use which is expected to be found as a property on the global object (e.g. if scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
+ * @property {(string | RegExp)[]} [exceptions] List of properties to exclude
+ *   from scuttling.
+ * @property {string} [scuttlerName] Name of the scuttler function to use which
+ *   is expected to be found as a property on the global object (e.g. if
+ *   scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
  */
 
 /**
  * @typedef {object} GlobalRef Reference to the global object
- * @property {Record<PropertyKey, unknown>} [globalThis] Reference to the global object.
+ * @property {Record<PropertyKey, unknown>} [globalThis] Reference to the global
+ *   object.
  */
 
 const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
@@ -40,19 +44,28 @@ const { getPrototypeOf } = Reflect
 
 const { warn } = console
 
+const uncurryThis = Function.prototype.bind.bind(Function.prototype.call)
+const stringSplit = uncurryThis(String.prototype.split)
+
 function generateInvokers(prop) {
   return { get, set }
   function set() {
     warn(
       `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-        'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
+        'To learn more visit https://github.com/LavaMoat/LavaMoat/issues/2127.'
     )
   }
   function get() {
-    throw new Error(
+    const err = new Error('')
+    const msg =
       `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-        'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
-    )
+      'To learn more visit https://github.com/LavaMoat/LavaMoat/issues/2127.'
+
+    warn(msg) // always warn, in case error gets swallowed
+    if (err.stack && stringSplit(err.stack, '\n').length > 2) {
+      err.message = msg
+      throw err
+    }
   }
 }
 
@@ -81,8 +94,8 @@ function scuttle(globalRef, opts) {
 
 /**
  * @param {GlobalRef} globalRef - Reference to the global object.
- * @param {LavaMoatScuttleOpts | boolean} originalOpts - Scuttling options. Accepts
- *   `true` for backwards compatibility.
+ * @param {LavaMoatScuttleOpts | boolean} originalOpts - Scuttling options.
+ *   Accepts `true` for backwards compatibility.
  * @returns {LavaMoatScuttleOpts} - Final scuttling options.
  */
 function generateScuttleOpts(globalRef, originalOpts = create(null)) {
