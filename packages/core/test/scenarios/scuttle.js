@@ -64,3 +64,15 @@ module.exports = [
     return scenario
   },
 ]
+
+// TODO: remove eventually.
+// Because of https://github.com/nodejs/node/issues/66607
+// (fixed in: https://github.com/nodejs/node/pull/66609 - currently awaiting review)
+// we cannot observe the errors thrown from getters.
+// Therefore, I'm temporarily disabling the second test in node 26
+if (
+  process.versions.node.startsWith('26') &&
+  Date.now() < new Date('2026-11-15')
+) {
+  module.exports = module.exports.slice(0, 1)
+}
