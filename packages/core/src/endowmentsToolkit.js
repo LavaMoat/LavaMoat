@@ -26,6 +26,11 @@ module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
+// List of global properties that have lazy getters and should be avoided when
+// creating a copy of all globals. These tend to be lazy-loaded to avoid heavy
+// work during initialization or may cause side effects if accessed prematurely.
+const GLOBAL_LAZY_GETTERS_TO_AVOID_HITTING = ['localStorage', 'sessionStorage']
+
 /**
  * Returns a compy of endowmentsToolkit initialized on provided configuration.
  *
@@ -571,8 +576,12 @@ function endowmentsToolkit({
     // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
     endowmentSources.forEach((source) => {
       const descriptors = Object.getOwnPropertyDescriptors(source)
-      Object.values(descriptors).forEach((desc) => {
-        if ('get' in desc && desc.get) {
+      Object.entries(descriptors).forEach(([key, desc]) => {
+        if (
+          'get' in desc &&
+          desc.get &&
+          !GLOBAL_LAZY_GETTERS_TO_AVOID_HITTING.includes(key)
+        ) {
           try {
             // calling getters can potentially throw (e.g. localStorage inside a sandboxed iframe)
             Reflect.apply(desc.get, globalRef, [])
@@ -607,11 +616,12 @@ function endowmentsToolkit({
     // expose all own properties of globalRef, including non-enumerable
     Object.entries(endowmentDescriptorsFlat)
       // ignore properties already defined on compartment global
-      .filter(([key]) => !(key in target))
       // ignore circular globalThis refs
-      .filter(([key]) => !globalThisRefs.includes(key))
+      .filter(([key]) => !(key in target) && !globalThisRefs.includes(key))
       // define property on compartment global
       .forEach(([key, desc]) => {
+        // NOTE: In case you're thinking about triggering lazy getters here to avoid duplicated iteration. We'd need to hold on to the object we got them from and read back the new descriptor after triggering the getter to replace the one we've collected. That's likely more work than iterating twice.
+
         // unwrap functions, setters/getters & apply scope proxy workaround
         const wrappedPropDesc = applyEndowmentPropDescTransforms(
           desc,

@@ -18,17 +18,19 @@ const { applySourceTransforms } = require('../src/sourceTransforms.js')
 const { hasOwn } = Object
 
 /**
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {ExecutionContext} from 'ava'
+ * @import {MakeDirectoryOptions} from 'node:fs'
  * @import {ParseForPolicyOpts} from '../src/parseForPolicy'
- * @import {NormalizedBuiltin,
+ * @import {
+ *   NormalizedBuiltin,
  *   NormalizedScenario,
  *   NormalizedScenarioJSFile,
  *   Scenario,
  *   ScenarioCheckErrorFn,
  *   ScenarioCheckResultFn,
- *   ScenarioFile} from './scenario'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
- * @import {MakeDirectoryOptions} from 'node:fs'
- * @import {ExecutionContext} from 'ava'
+ *   ScenarioFile
+ * } from './scenario'
  */
 
 /**
@@ -112,7 +114,11 @@ function createScenarioFromScaffold({
     }
   },
   checkResult = async (t, result, scenario) => {
-    if (scenario.testType === 'truthy') {
+    if (scenario.expectedFailure) {
+      t.fail(
+        `Scenario was expected to fail but provided a result instead: ${result}`
+      )
+    } else if (scenario.testType === 'truthy') {
       t.assert(
         result,
         `${scenario.name} - scenario gives expected truthy result`
@@ -616,7 +622,7 @@ function prepareModuleInitializerArgs(
  */
 function evaluateWithSourceUrl(filename, content, context) {
   const vmContext = createContext()
-  const vmGlobalThis = runInContext('this', vmContext)
+  const vmGlobalThis = runInContext('globalThis', vmContext)
   const vmFeralFunction = vmGlobalThis.Function
 
   Object.defineProperties(
@@ -632,7 +638,10 @@ function evaluateWithSourceUrl(filename, content, context) {
   // creating actual dom nodes that can leak the real global object is not possible,
   // therefore there is no way to access the real global object otherwise, but since we
   // have to (for the scuttling tests) - we intentionally export this util func to solve this:
-  vmGlobalThis.getTrueGlobalThisForTestsOnly = () => vmGlobalThis
+  Object.defineProperty(vmGlobalThis, 'getTrueGlobalThisForTestsOnly', {
+    value: () => vmGlobalThis,
+    configurable: false,
+  })
   // perform eval
   let result
   try {
@@ -643,6 +652,17 @@ function evaluateWithSourceUrl(filename, content, context) {
   }
   // pull out test result value from context (not always used)
   return { result, vmGlobalThis, vmContext, vmFeralFunction }
+}
+
+function getFreshGlobalThis() {
+  const vmContext = createContext()
+  const vmGlobalThis = runInContext('globalThis', vmContext)
+  const newGlobal = {}
+  Object.defineProperties(
+    newGlobal,
+    Object.getOwnPropertyDescriptors(vmGlobalThis)
+  )
+  return newGlobal
 }
 
 /**
@@ -759,6 +779,7 @@ module.exports = {
   prepareScenarioOnDisk,
   convertOptsToArgs,
   evaluateWithSourceUrl,
+  getFreshGlobalThis,
   createHookedConsole,
   fillInFileDetails,
   functionToString,
