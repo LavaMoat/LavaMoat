@@ -61,7 +61,14 @@ function convertOptsToArgs(scenario) {
  */
 async function runLavamoat({ args = [], cwd = process.cwd() } = {}) {
   const lavamoatPath = require.resolve('../src/cli')
-  const output = await execFile(lavamoatPath, args, { cwd })
+  const output = await execFile(lavamoatPath, args, {
+    cwd,
+    env: {
+      ...process.env,
+      // Force the output to be clean even when warnings are printed
+      // NODE_OPTIONS: `--disable-warning=ExperimentalWarning`,
+    },
+  })
   return { output }
 }
 
