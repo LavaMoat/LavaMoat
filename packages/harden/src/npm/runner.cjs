@@ -24,7 +24,22 @@ if (!scriptName) {
   )
 }
 
+const potentialRoot = path.resolve(__dirname, '..')
 const pkgJsonFolder = path.dirname(pkgJsonPath)
+
+// if potentialRoot is parent of pkgJsonFolder, check if package.json and lavamoat folder exist in potentialRoot and use that as projectRoot
+let projectRoot = pkgJsonFolder
+if (
+  pkgJsonFolder !== potentialRoot &&
+  pkgJsonFolder.startsWith(potentialRoot)
+) {
+  const potentialPkgJson = path.join(potentialRoot, 'package.json')
+  const potentialLavaMoat = path.join(potentialRoot, 'lavamoat')
+  if (fs.existsSync(potentialPkgJson) && fs.existsSync(potentialLavaMoat)) {
+    projectRoot = potentialRoot
+  }
+}
+
 const fallbackShell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh'
 const shellArgs = process.platform === 'win32' ? ['/d', '/s', '/c'] : ['-c']
 
@@ -34,7 +49,7 @@ const wrapper = makeRunScriptWrapper(
   {
     scriptName,
     scriptPayload,
-    projectRoot: pkgJsonFolder,
+    projectRoot: projectRoot,
     pathBinMatcher: (fragment) => fragment.endsWith(pathBinMatcherString),
     customizePermissionsConfig: addMandatoryReads,
     readScriptsConfig: () => {
