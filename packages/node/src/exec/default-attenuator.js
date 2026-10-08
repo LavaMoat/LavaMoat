@@ -54,12 +54,24 @@ export const makeAttenuators = ({
 } = {}) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
+  /** @type {Set<string>} */
+  const globalsToAvoidTouching = new Set()
+
+  // avoid touching experimental localStorage that's printing a warning when accessed
+  if ('localStorage' in globalThis) {
+    globalsToAvoidTouching.add('localStorage')
+  }
 
   // gather writable fields from policy. this is needed by `endowmentsToolkit`
   if (resources) {
     for (const resource of values(resources)) {
       if (isNonArrayObject(resource.globals)) {
         for (const [key, value] of entries(resource.globals)) {
+          const topKey = key.split('.')[0]
+          // only exclude what's not allowed
+          if (!!value && globalsToAvoidTouching.has(topKey)) {
+            globalsToAvoidTouching.delete(topKey)
+          }
           if (value === LAVAMOAT_POLICY_ITEM_WRITE) {
             knownWritableFields.add(key)
           }
@@ -67,6 +79,8 @@ export const makeAttenuators = ({
       }
     }
   }
+
+  const excludes = Array.from(globalsToAvoidTouching)
 
   const { getEndowmentsForConfig, copyWrappedGlobals, attenuateBuiltin } =
     endowmentsToolkit({
@@ -123,10 +137,12 @@ export const makeAttenuators = ({
           )
         }
         rootCompartmentGlobalThis = packageCompartmentGlobalThis
-        copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
-          'globalThis',
-          'global',
-        ])
+        copyWrappedGlobals(
+          originalGlobalThis,
+          packageCompartmentGlobalThis,
+          ['globalThis', 'global'],
+          excludes
+        )
         scuttle(originalGlobalThis, scuttleGlobalThis)
       } else {
         if (!rootCompartmentGlobalThis) {
@@ -136,10 +152,12 @@ export const makeAttenuators = ({
             )
           }
           rootCompartmentGlobalThis = new Compartment().globalThis
-          copyWrappedGlobals(originalGlobalThis, rootCompartmentGlobalThis, [
-            'globalThis',
-            'global',
-          ])
+          copyWrappedGlobals(
+            originalGlobalThis,
+            rootCompartmentGlobalThis,
+            ['globalThis', 'global'],
+            excludes
+          )
           scuttle(originalGlobalThis, {
             ...scuttleGlobalThis,
             enabled: !!scuttleGlobalThis.enabled,
