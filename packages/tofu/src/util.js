@@ -1,3 +1,5 @@
+const { matchesPattern } = require('@babel/types')
+
 module.exports = {
   getMemberExpressionNesting,
   getPathFromMemberExpressionChain,
@@ -14,6 +16,7 @@ module.exports = {
   getParents,
   isInFunctionDeclaration,
   isMemberLikeExpression,
+  isCjsExportAnnotation,
 }
 
 /**
@@ -313,4 +316,19 @@ function isInFunctionDeclaration(nodePath) {
     target = target.parentPath
   }
   return false
+}
+
+/**
+ * @param {import('@babel/types').ExpressionStatement} node
+ */
+function isCjsExportAnnotation({ expression }) {
+  return (
+    expression.type === 'LogicalExpression' &&
+    expression.operator === '&&' &&
+    expression.left.type === 'NumericLiteral' &&
+    expression.left.value === 0 &&
+    expression.right.type === 'AssignmentExpression' &&
+    expression.right.right.type === 'ObjectExpression' &&
+    matchesPattern(expression.right.left, 'module.exports')
+  )
 }

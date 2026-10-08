@@ -1,7 +1,7 @@
 'use strict'
 
 const { default: traverse } = require('@babel/traverse')
-const { isInFunctionDeclaration, isMemberLikeExpression } = require('./util')
+const { isInFunctionDeclaration, isMemberLikeExpression, isCjsExportAnnotation } = require('./util')
 
 /**
  * Types which are not references to globals
@@ -40,6 +40,12 @@ function findGlobals(ast) {
   /** @type {ReturnType<typeof findGlobals>} */
   const globals = new Map()
   traverse(ast, {
+    ExpressionStatement: (path) => {
+      // skip `0 && (module.exports = {...})` annotation emitted by bundlers for cjs-module-lexer
+      if (isCjsExportAnnotation(path.node)) {
+        path.skip()
+      }
+    },
     // ReferencedIdentifier
     Identifier: (path) => {
       // skip if not being used as reference

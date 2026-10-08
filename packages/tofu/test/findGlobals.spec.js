@@ -189,3 +189,15 @@ test('try_catch.js - the exception in a try catch block is a local', (t) => {
 test('BigInt - sees global property primordials like BigInt', (t) => {
   t.deepEqual(detect('BigInt(123)'), ['BigInt'])
 })
+
+test('cjs export annotation is ignored', (t) => {
+  t.deepEqual(
+    detect(`
+      foo();
+
+      0 && (module.exports = {
+      BreakpointResolver,
+      });`),
+    ['foo']
+  )
+})
