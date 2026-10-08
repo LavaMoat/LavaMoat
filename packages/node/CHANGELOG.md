@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.1](https://github.com/LavaMoat/LavaMoat/compare/node-v2.0.0...node-v2.0.1) (2026-10-08)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^19.0.0 to ^19.0.1
+    * lavamoat-tofu bumped from ^9.0.4 to ^9.1.0
+
 ## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/node-v1.1.0...node-v2.0.0) (2026-09-24)
 
 

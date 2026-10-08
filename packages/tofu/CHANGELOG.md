@@ -1,5 +1,24 @@
 # Changelog
 
+## [9.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.0.4...lavamoat-tofu-v9.1.0) (2026-10-08)
+
+
+### Features
+
+* **tofu:** Ignore cjs-module-lexer exports annotation ([#2129](https://github.com/LavaMoat/LavaMoat/issues/2129)) ([7ccfb1f](https://github.com/LavaMoat/LavaMoat/commit/7ccfb1f28efc475522fd03a17b0bdc9c941a1693))
+
+
+### Bug Fixes
+
+* **tofu:** stop treating float typed arrays as primordials ([#2120](https://github.com/LavaMoat/LavaMoat/issues/2120)) ([a299274](https://github.com/LavaMoat/LavaMoat/commit/a299274b20d3c85d5418cb5d6ad3a23a94980750))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >19.0.1
+
 ## [9.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.0.3...lavamoat-tofu-v9.0.4) (2026-09-24)
 
 

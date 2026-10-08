@@ -6,6 +6,20 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [19.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v19.0.0...lavamoat-core-v19.0.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **core:** Avoid disruptive errors when a scuttled global is accessed by Chrome itself ([#2126](https://github.com/LavaMoat/LavaMoat/issues/2126)) ([8c37400](https://github.com/LavaMoat/LavaMoat/commit/8c3740059c89a0c8e3e14ccd216febe08b3c3bf9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^9.0.4 to ^9.1.0
+
 ## [19.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v18.0.6...lavamoat-core-v19.0.0) (2026-09-24)
 
 
