@@ -59,6 +59,13 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         with:
           node-version: 24.x
+      - name: Synthesize changesets for dependency updates
+        if: github.event_name != 'workflow_dispatch'
+        # Must run BEFORE changesets/action: the action reads .changeset/
+        # as its very first step and bails early when the directory is empty.
+        # Files written here are untracked; changeset version consumes and
+        # deletes them, so they never appear in any committed change.
+        run: node scripts/changeset-deps.js
       - uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
         id: changesets
         if: github.event_name != 'workflow_dispatch'
