@@ -48,6 +48,29 @@ npm run changeset
 
 Changesets that describe only dependency bumps or internal-only changes can use an **empty** changeset (`npx changeset --empty`) to skip the version bump.
 
+## Dependency Updates (Renovate)
+
+Renovate PRs that bump **production** dependencies (merged as `fix(deps): ...` commits) do **not** need a hand-written changeset. The release workflow automatically synthesizes one for each affected public package before the Changesets Action runs.
+
+The synthesis step (`scripts/changeset-deps.js`) works as follows:
+
+1. It finds all `fix(deps...)` commits on `main` since the last `chore: version packages` release commit.
+2. For each such commit it inspects the `dependencies`, `peerDependencies`, and `optionalDependencies` fields of every non-private workspace `package.json` the commit touched (workspaces are discovered from the root `package.json`'s `workspaces` globs).
+3. If any runtime dep changed, a `.changeset/renovate-*.md` file is written with a `patch` bump.
+4. These files are ephemeral — they are consumed and deleted by `changeset version` and never appear in any committed change. What lands in the changelog is the bump entry with the original commit description (e.g. `Update dependency yaml to ^2.9.0 (#2113)`, automatically linkified).
+
+**What does NOT trigger a release:**
+
+- `chore(deps)` commits (e.g. dev-dependency or tooling updates).
+- Changes that touch only `devDependencies`.
+- Updates to packages marked `"private": true` in their `package.json`.
+
+To preview what would be synthesized without writing any files:
+
+```bash
+node scripts/changeset-deps.js --dry-run
+```
+
 ## A Note About Lifecycle Scripts
 
 `npm`'s `ignore-scripts` flag disables _all lifecycle scripts_ for _all packages_. This means, for example, a `prepublishOnly` script _will not automatically run_ upon an `npm publish`.
