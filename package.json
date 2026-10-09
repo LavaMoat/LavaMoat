@@ -35,8 +35,9 @@
     "release:publish": "laverna --newPkg=${npm_config_newpkg}",
     "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
     "setup": "husky; npm run rebuild",
-    "test": "npm run build && npm run test:prep && npm run test:workspaces",
+    "test": "npm run build && npm run test:prep && npm run test:workspaces && npm run test:scripts",
     "test:prep": "npm run --workspaces --if-present test:prep",
+    "test:scripts": "node --env-file=scripts/test/test.env --test scripts/test/*.test.js",
     "test:workspaces": "npm run --workspaces --if-present test",
     "watch:types": "tsc -b --watch"
   },

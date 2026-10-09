@@ -20,7 +20,7 @@ import semver from 'semver'
 import tseslint from 'typescript-eslint'
 
 /**
- * @import {Linter} from "eslint"
+ * @import {Linter} from 'eslint'
  */
 
 const rootPkg = JSON.parse(
@@ -501,6 +501,13 @@ export default defineConfig(
       '@typescript-eslint/triple-slash-reference': 'off',
       // TODO: ensure this is safe to disable
       'prefer-const': 'off',
+    },
+  },
+
+  {
+    files: ['scripts/*/*.{js,mjs,cjs}'],
+    rules: {
+      'n/hashbang': 'off',
     },
   },
 
