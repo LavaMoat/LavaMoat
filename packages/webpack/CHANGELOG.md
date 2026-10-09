@@ -18,6 +18,20 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [3.0.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v3.0.0...webpack-v3.0.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **tofu:** stop treating float typed arrays as primordials ([#2120](https://github.com/LavaMoat/LavaMoat/issues/2120)) ([a299274](https://github.com/LavaMoat/LavaMoat/commit/a299274b20d3c85d5418cb5d6ad3a23a94980750))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^19.0.0 to ^19.0.1
+
 ## [3.0.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v2.3.0...webpack-v3.0.0) (2026-09-24)
 
 

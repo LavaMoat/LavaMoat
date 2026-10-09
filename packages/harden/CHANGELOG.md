@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.0...harden-v0.8.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **yarn:** avoid attempting to run scripts on yarn update-lockfile mode install ([4d92634](https://github.com/LavaMoat/LavaMoat/commit/4d92634efa023549793cf1fb0f8beed04482153b))
+
 ## [0.8.0](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.7.0...harden-v0.8.0) (2026-09-24)
 
 

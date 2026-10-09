@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v3.0.0...preinstall-always-fail-v3.0.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* update message on preinstall-always-fail ([#2124](https://github.com/LavaMoat/LavaMoat/issues/2124)) ([faa08b9](https://github.com/LavaMoat/LavaMoat/commit/faa08b97002ab233583ed1ee3d201e2b2c95f995)), closes [#2118](https://github.com/LavaMoat/LavaMoat/issues/2118) [#655](https://github.com/LavaMoat/LavaMoat/issues/655)
+
 ## [3.0.0](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v2.1.1...preinstall-always-fail-v3.0.0) (2026-03-20)
 
 

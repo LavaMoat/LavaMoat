@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "19.0.0",
+  "version": "19.0.1",
   "description": "LavaMoat kernel and utils",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
     "@babel/types": "7.29.7",
     "@lavamoat/types": "^2.0.0",
     "json-stable-stringify": "1.3.0",
-    "lavamoat-tofu": "^9.0.4",
+    "lavamoat-tofu": "^9.1.0",
     "ses": "2.3.0"
   },
   "devDependencies": {
