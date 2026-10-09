@@ -1,5 +1,9 @@
 name: Auto Author Assign
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 on:
   pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened]
@@ -9,6 +13,7 @@ permissions: {}
 
 jobs:
   assign-author:
+    name: Assign Author
     if: github.repository == 'LavaMoat/LavaMoat'
     runs-on: ubuntu-latest
     permissions:
