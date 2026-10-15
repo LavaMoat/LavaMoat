@@ -26,6 +26,11 @@ module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
+// List of global properties that have lazy getters and should be avoided when
+// creating a copy of all globals. These tend to be lazy-loaded to avoid heavy
+// work during initialization or may cause side effects if accessed prematurely.
+const GLOBAL_LAZY_GETTERS_TO_AVOID_HITTING = ['localStorage', 'sessionStorage']
+
 /**
  * Returns a compy of endowmentsToolkit initialized on provided configuration.
  *
@@ -574,7 +579,12 @@ function endowmentsToolkit({
     endowmentSources.forEach((source) => {
       const descriptors = Object.getOwnPropertyDescriptors(source)
       Object.entries(descriptors).forEach(([key, desc]) => {
-        if ('get' in desc && desc.get && !exclude.includes(key)) {
+        if (
+          'get' in desc &&
+          desc.get &&
+          !exclude.includes(key) &&
+          !GLOBAL_LAZY_GETTERS_TO_AVOID_HITTING.includes(key)
+        ) {
           try {
             // calling getters can potentially throw (e.g. localStorage inside a sandboxed iframe)
             Reflect.apply(desc.get, globalRef, [])

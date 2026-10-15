@@ -80,4 +80,29 @@ module.exports = [
     })
     return scenario
   },
+  async () => {
+    const nodeVersion = process.versions.node
+    // This test will likely require an update when localStorage behavior changes in future Node versions
+    const messageExpectation = nodeVersion.startsWith('26')
+      ? /localStorage is not available/
+      : /Cannot read properties of undefined/
+    const scenario = createScenarioFromScaffold({
+      name: 'endowments - localStorage getter is forwarded in node26',
+      defineOne: () => {
+        localStorage.clear()
+      },
+      config: {
+        resources: {
+          one: {
+            globals: {
+              localStorage: true,
+            },
+          },
+        },
+      },
+      expectedFailure: true,
+      expectedFailureMessageRegex: messageExpectation,
+    })
+    return scenario
+  },
 ]

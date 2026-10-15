@@ -66,7 +66,7 @@ async function runLavamoat({ args = [], cwd = process.cwd() } = {}) {
     env: {
       ...process.env,
       // Force the output to be clean even when warnings are printed
-      NODE_OPTIONS: `--disable-warning=ExperimentalWarning`,
+      // NODE_OPTIONS: `--disable-warning=ExperimentalWarning`,
     },
   })
   return { output }
