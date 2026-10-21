@@ -653,6 +653,29 @@ test('copyWrappedGlobals - support other realm prototype chains', (t) => {
   )
 })
 
+test('copyWrappedGlobals - excluded getters are not copied or triggered', (t) => {
+  const { copyWrappedGlobals } = prepareTest()
+  let excludedCalls = 0
+  let includedCalls = 0
+  const source = {
+    get excluded() {
+      excludedCalls += 1
+      return 'excluded'
+    },
+    get included() {
+      includedCalls += 1
+      return 'included'
+    },
+  }
+
+  const result = copyWrappedGlobals(source, {}, [], ['excluded'])
+
+  t.false('excluded' in result)
+  t.is(excludedCalls, 0)
+  t.is(includedCalls, 1)
+  t.is(result.included, 'included')
+})
+
 test('copyWrappedGlobals - copy from prototype too', (t) => {
   'use strict'
   const { copyWrappedGlobals } = prepareTest()
