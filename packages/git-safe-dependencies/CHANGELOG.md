@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v1.0.3...git-safe-dependencies-v1.0.4) (2026-10-22)
+
+
+### Bug Fixes
+
+* add Node.js v26.0.0 to engines ([1b115cd](https://github.com/LavaMoat/LavaMoat/commit/1b115cd2b69a34aa9c3b2206424231a3e9964086))
+
 ## [1.0.3](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v1.0.2...git-safe-dependencies-v1.0.3) (2026-09-24)
 
 

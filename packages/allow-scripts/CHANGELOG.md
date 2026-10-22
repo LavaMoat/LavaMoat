@@ -6,6 +6,20 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [5.1.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.1.0...allow-scripts-v5.1.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* add Node.js v26.0.0 to engines ([1b115cd](https://github.com/LavaMoat/LavaMoat/commit/1b115cd2b69a34aa9c3b2206424231a3e9964086))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.1 to ^5.0.2
+
 ## [5.1.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v5.0.2...allow-scripts-v5.1.0) (2026-06-25)
 
 
