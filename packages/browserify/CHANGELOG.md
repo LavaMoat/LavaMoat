@@ -33,6 +33,24 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [20.0.10](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v20.0.9...lavamoat-browserify-v20.0.10) (2026-10-22)
+
+
+### Bug Fixes
+
+* add Node.js v26.0.0 to engines ([1b115cd](https://github.com/LavaMoat/LavaMoat/commit/1b115cd2b69a34aa9c3b2206424231a3e9964086))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.1 to ^5.0.2
+    * @lavamoat/lavapack bumped from ^9.0.2 to ^9.0.3
+    * lavamoat-core bumped from ^19.0.1 to ^19.0.2
+  * devDependencies
+    * lavamoat bumped from 11.1.7 to 11.1.8
+
 ## [20.0.9](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v20.0.8...lavamoat-browserify-v20.0.9) (2026-10-08)
 
 

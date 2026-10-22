@@ -19,6 +19,23 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [11.1.8](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.1.7...lavamoat-v11.1.8) (2026-10-22)
+
+
+### Bug Fixes
+
+* add Node.js v26.0.0 to engines ([1b115cd](https://github.com/LavaMoat/LavaMoat/commit/1b115cd2b69a34aa9c3b2206424231a3e9964086))
+* avoid touching experimental localStorage API, fix scuttling tests ([5d65bff](https://github.com/LavaMoat/LavaMoat/commit/5d65bfff756561b72def44404b17ad421a55955a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.1 to ^5.0.2
+    * lavamoat-core bumped from ^19.0.1 to ^19.0.2
+    * lavamoat-tofu bumped from ^9.1.0 to ^9.1.1
+
 ## [11.1.7](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v11.1.6...lavamoat-v11.1.7) (2026-10-08)
 
 

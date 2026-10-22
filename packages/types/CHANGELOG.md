@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/LavaMoat/LavaMoat/compare/types-v2.0.0...types-v2.0.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* add Node.js v26.0.0 to engines ([1b115cd](https://github.com/LavaMoat/LavaMoat/commit/1b115cd2b69a34aa9c3b2206424231a3e9964086))
+
 ## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/types-v1.0.2...types-v2.0.0) (2026-09-24)
 
 
