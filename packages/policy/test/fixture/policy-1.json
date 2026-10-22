@@ -1,0 +1,20 @@
+{
+  "entry": {
+    "builtin": {
+      "util.format": true
+    },
+    "globals": {
+      "console.log": true
+    }
+  },
+  "resources": {
+    "lard-o-matic": {
+      "builtin": {
+        "util.format": true
+      },
+      "globals": {
+        "console.log": true
+      }
+    }
+  }
+}
