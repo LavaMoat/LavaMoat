@@ -35,7 +35,7 @@
   ],
   "scripts": {
     "lint:deps": "depcheck",
-    "test": "ava",
+    "test": "env; ava",
     "test:prep": "corepack enable --install-directory=$(dirname $(which node))",
     "test:wizard": "cd test/projects/npm && node ../../../src/cli.js wizard"
   },
