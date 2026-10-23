@@ -1,0 +1,10 @@
+import:
+  - '@lavamoat/dictionary'
+  - '@cspell/dict-people-names'
+ignorePaths:
+  - 'packages/*/test/**/fixture*/**'
+  - 'packages/core/lib/**'
+  - 'packages/node/test/unit/json-fixture/**'
+  - 'packages/lavapack/src/runtime.js'
+dictionaries:
+  - people-names

@@ -1,0 +1,39 @@
+{
+  "name": "@lavamoat/dictionary",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "LavaMoat's CSpell Dictionary",
+  "repository": {
+    "directory": "packages/dictionary",
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git"
+  },
+  "homepage": "https://lavamoat.github.io",
+  "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
+  "author": "LavaMoat Project",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.5.1 || ^24.0.0 || ^26.0.0",
+    "npm": ">=9.0.0"
+  },
+  "exports": {
+    ".": "./cspell-lavamoat.config.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "cspell-lavamoat.config.json",
+    "src"
+  ],
+  "keywords": [
+    "CSpell",
+    "LavaMoat"
+  ],
+  "devDependencies": {
+    "@cspell/cspell-tools": "10.4.0",
+    "yaml": "2.9.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

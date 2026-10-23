@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "description": "LavaMoat Project Dictionary",
+  "dictionaries": ["lavamoat", "lavamoat-usernames", "lavamoat-corrections"],
+  "dictionaryDefinitions": [
+    {
+      "description": "LavaMoat Words Dictionary",
+      "kind": "words",
+      "name": "lavamoat",
+      "path": "./dict/lavamoat.txt"
+    },
+    {
+      "description": "LavaMoat Usernames Dictionary",
+      "kind": "words",
+      "name": "lavamoat-usernames",
+      "path": "./dict/lavamoat-usernames.txt"
+    },
+    {
+      "description": "LavaMoat Corrections Dictionary",
+      "kind": "suggest-words",
+      "name": "lavamoat-corrections",
+      "path": "./dict/lavamoat-corrections.txt"
+    }
+  ],
+  "ignorePaths": [
+    "**/policy*.json",
+    "**/package.json",
+    "**/package-lock.json",
+    "**/tsconfig*.json",
+    "**/dist/**",
+    "**/.git/**",
+    "**/*.tsbuildinfo",
+    "**/CHANGELOG.md",
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/snapshots/**/*.md",
+    "**/.gitignore"
+  ],
+  "ignoreRegExpList": [
+    "\\S+\\.[mc]?[jt]s",
+    "@\\S+",
+    "\\b([A-Z]{2,}_)+[A-Z]{2,}\\b",
+    "\\b\\w+(rc|js|policy|ify)\\b",
+    "\\b(auto)\\w+\\b"
+  ],
+  "name": "@lavamoat/dictionary",
+  "overrides": [
+    {
+      "filename": ["**/*.{js,mjs,cjs,ts,mjs,cts}"],
+      "ignoreRegExpList": [
+        "\\s+from\\s+'.+';?$",
+        "\\s+from\\s+\".+\";?$",
+        "require\\('.+'\\);?$",
+        "require\\(\".+\"\\);?$"
+      ]
+    },
+    {
+      "caseSensitive": true,
+      "flagWords": ["NPM"],
+      "filename": ["**/*.{md,mdx}"]
+    }
+  ],
+  "readonly": true
+}

@@ -1,0 +1,13 @@
+ignorePaths:
+  - dict
+  - CHANGELOG.md
+import:
+  - '../../cspell.config.yml'
+  - './cspell-lavamoat.config.json'
+patterns:
+  - name: term-comment
+    pattern: '/(?<!^)#.*/gm'
+overrides:
+  - filename: 'src/*.txt'
+    ignoreRegExpList:
+      - term-comment
