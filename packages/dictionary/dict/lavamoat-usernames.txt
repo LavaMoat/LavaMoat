@@ -1,0 +1,9 @@
+
+# cspell-tools: keep-case no-split
+
+boneskull
+kriskowal
+kumavis
+markm
+naugtur
+toshimaru
