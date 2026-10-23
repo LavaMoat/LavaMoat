@@ -235,20 +235,22 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
 }
 
 const compartmentMap = new Map()
+const resourceIdByModuleId = new Map()
+for (const [resourceId, moduleIds] of LAVAMOAT.idmap) {
+  for (const moduleId of moduleIds) {
+    // Preserve the original lookup's first-match behavior for duplicate IDs.
+    if (!resourceIdByModuleId.has(moduleId)) {
+      resourceIdByModuleId.set(moduleId, resourceId)
+    }
+  }
+}
 /**
  * Finds the resource ID for a given module ID.
  *
- * @param {string} moduleId
+ * @param {string | number} moduleId
  * @returns {string | undefined}
  */
-const findResourceId = (moduleId) => {
-  const found = LAVAMOAT.idmap.find(([, moduleIds]) =>
-    moduleIds.includes(moduleId)
-  )
-  if (found) {
-    return found[0]
-  }
-}
+const findResourceId = (moduleId) => resourceIdByModuleId.get(moduleId)
 
 /**
  * @callback WebpackRequire
