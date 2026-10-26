@@ -1,3 +1,5 @@
+// cspell:ignore moducreate, resolverle
+
 /* eslint no-eval: 0 */
 const fs = require('node:fs')
 const path = require('node:path')

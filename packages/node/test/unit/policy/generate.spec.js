@@ -1,3 +1,5 @@
+// cspell:ignore webpackish, pantspack, jorts, winken, blinken, paperino, topolino, blurgh, blurmph
+
 import '../../../src/preamble.js'
 
 import test from 'ava'

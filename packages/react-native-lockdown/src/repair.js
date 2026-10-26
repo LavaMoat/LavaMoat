@@ -1,4 +1,5 @@
 /// <reference types="ses" />
+// cspell:ignore hermesc
 
 /**
  * Repair JS intrinsics

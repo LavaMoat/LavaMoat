@@ -1,3 +1,5 @@
+// cspell:ignore webpackish, pantspack, scripty
+
 import '../../src/preamble.js'
 
 import test from 'ava'

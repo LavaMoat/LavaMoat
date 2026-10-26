@@ -6,7 +6,7 @@ Named after a type of lava: ʻAʻā https://volcanoes.usgs.gov/vsc/glossary/aa.h
 
 #### goals
 
-- name that does not soley rely on the package of unknown provenance's self-determined name
+- name that does not solely rely on the package of unknown provenance's self-determined name
 - consistent across platform and package manager
 - consistent whether only prod dependencies or dev and prod dependencies are installed
 

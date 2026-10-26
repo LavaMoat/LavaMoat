@@ -36,7 +36,7 @@ async function scuttle(t, scuttleGlobalThis, globals) {
   }
   // force webpack into creating chunks so that testing chunkApp globals is possible
   webpackConfig.optimization.runtimeChunk = 'single'
-  // specify the chunk global namefor tests
+  // specify the chunk global name for tests
   webpackConfig.output.chunkLoadingGlobal = 'webpackChunkTEST'
 
   await t.notThrowsAsync(async () => {
@@ -69,7 +69,7 @@ async function scuttleViaRuntimeConf(t, scuttleGlobalThis, globals) {
   }
   // force webpack into creating chunks so that testing chunkApp globals is possible
   webpackConfig.optimization.runtimeChunk = 'single'
-  // specify the chunk global namefor tests
+  // specify the chunk global name for tests
   webpackConfig.output.chunkLoadingGlobal = 'webpackChunkTEST'
 
   await t.notThrowsAsync(async () => {

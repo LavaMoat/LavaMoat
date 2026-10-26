@@ -20,7 +20,7 @@ import semver from 'semver'
 import tseslint from 'typescript-eslint'
 
 /**
- * @import {Linter} from "eslint"
+ * @import {Linter} from 'eslint'
  */
 
 const rootPkg = JSON.parse(

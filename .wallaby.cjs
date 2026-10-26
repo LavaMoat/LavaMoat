@@ -1,3 +1,5 @@
+// cspell:ignore onsave
+
 /**
  * WallabyJS configuration file
  *

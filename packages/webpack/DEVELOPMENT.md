@@ -19,7 +19,7 @@ Implemented capabilities:
 - [x] policy generation built into the plugin
 - [x] research potential concatenateModules support
 - [ ] paranoid mode checks
-- [ ] researching and covering oher `__webpack_require__.*` functions maybe?
+- [ ] researching and covering other `__webpack_require__.*` functions maybe?
   - [ ] Module Federation depends on some of the `__webpack_require__.*`. We're open to contributions or collaboration on carefully enabling it.
 - [ ] ecosystem compatibility quirks we're yet to find
 
@@ -46,7 +46,7 @@ List of what to cover ordered by priority
 ### package identifiers
 
 We use @lavamoat/aa to identify packages for the policy.
-As part of this plugin we'll need to identify modules in a compatible way and then work the policy into the bundle runtime.  
+As part of this plugin we'll need to identify modules in a compatible way and then work the policy into the bundle runtime.
 At that point, when everything i bundled, there's no point in maintaining full identifiers, so they can be replaced with numbers to occupy less space.
 
 ```mermaid
@@ -70,6 +70,6 @@ w --> b[use short identifiers in the bundle and inlined policy]
 Things it could check in paranoid mode
 
 - use other hooks to check if the number of bundle entries equals the number of entries processed by the wrapper
-- add a local reference before the with blocks and a function within to look it up and alert if it can be found - should trigger if a transform or plugin action breaks the withproxies. This would be best implemented by the plugin injecting a tiny module with the source to do this.
+- add a local reference before the with blocks and a function within to look it up and alert if it can be found - should trigger if a transform or plugin action breaks the with proxies. This would be best implemented by the plugin injecting a tiny module with the source to do this.
 - allow optionally importing a canary package that tries to escape (kinda overlaps with above, but could use more methods)
-- run an AST on the final bundle to identify the scopes without the `with` blocks (after all minitication etc.)
+- run an AST on the final bundle to identify the scopes without the `with` blocks (after all minification etc.)

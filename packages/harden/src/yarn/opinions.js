@@ -1,3 +1,5 @@
+// cspell:ignore filterenv, hardenrun, nonpm
+
 /** @import {Opinion} from '../tools/types.js' */
 import { applyLatestVersion, assertDevEngines } from '../tools/versions.js'
 import { buildAllowlistChanges } from './yarn-build-allowlist.js'

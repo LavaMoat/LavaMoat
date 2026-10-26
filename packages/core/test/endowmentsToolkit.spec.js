@@ -1,3 +1,5 @@
+// cspell:ignore yabbadabbadoo, mymod
+
 const { default: test } = require('ava')
 const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
@@ -608,7 +610,7 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   t.is(resultGlobal.abc.bind(xyz)(), xyz)
 })
 
-test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', (t) => {
+test(`getEndowmentsForConfig - ensure setTimeout calls don't trigger illegal invocation`, (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = prepareTest()

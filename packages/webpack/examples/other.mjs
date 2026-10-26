@@ -2,4 +2,4 @@ export const thing = (x) => {
   return x + 1
 }
 
-export const treeshakeable = 13371337
+export const treeshakable = 13371337

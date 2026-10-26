@@ -27,15 +27,17 @@ const {
 } = require('./constants')
 
 /**
- * @import {DebugInfo,
+ * @import {ParseResult} from '@babel/parser'
+ * @import {File} from '@babel/types'
+ * @import {
+ *   DebugInfo,
  *   LavamoatModuleRecord,
  *   LavaMoatPolicy,
  *   LavaMoatPolicyDebug,
  *   ResourcePolicy,
  *   Resources,
- *   SesCompat} from '@lavamoat/types'
- * @import {ParseResult} from '@babel/parser'
- * @import {File} from '@babel/types'
+ *   SesCompat
+ * } from '@lavamoat/types'
  */
 
 const rootSlug = '$root$'
@@ -345,7 +347,7 @@ function createModuleInspector(opts) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
       moduleDebug.globals = mapToObj(foundGlobals)
     }
-    // agregate globals
+    // aggregate globals
     if (!packageToGlobals.has(packageName)) {
       packageToGlobals.set(packageName, new Map())
     }
@@ -510,7 +512,7 @@ function createModuleInspector(opts) {
       resources[packageName] = packagePolicy
     })
 
-    // append serializeable debug info
+    // append serializable debug info
     if (includeDebugInfo) {
       // this is here because we should be using semicolons :D
       // prettier-ignore

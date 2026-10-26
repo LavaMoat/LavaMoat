@@ -1,3 +1,5 @@
+// cspell:ignore notsymlink
+
 const { realpathSync, lstatSync } = require('node:fs')
 const { unlink } = require('node:fs/promises')
 const path = require('node:path')
@@ -65,7 +67,7 @@ if (process.platform === 'darwin') {
           results['isSymlink(symlink)'],
           results['realpathSync(symlink)'],
           0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
-          // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
+          // The ratio is under 0.2 on linux and windows, slightly above that on mac in GH actions
           // Setting to 0.5 to avoid flakiness
         ),
         'expected isSymlink(symlink) to be much faster than realpathSync(symlink)'
@@ -75,7 +77,7 @@ if (process.platform === 'darwin') {
           results['isSymlink(notsymlink)'],
           results['realpathSync(notsymlink)'],
           0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
-          // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
+          // The ratio is under 0.2 on linux and windows, slightly above that on mac in GH actions
           // Setting to 0.5 to avoid flakiness
         ),
         'expected isSymlink(notsymlink) to be much faster than realpathSync(notsymlink)'

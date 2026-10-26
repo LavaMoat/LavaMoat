@@ -13,7 +13,7 @@ const {
   runAndTestScenario,
 } = require('lavamoat-core/test/util')
 
-test('basic - browserify bundle doesnt inject global', async (t) => {
+test(`basic - browserify bundle doesn't inject global`, async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
   const browserifyGlobalPolyfill =
     'typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {}'
@@ -21,7 +21,7 @@ test('basic - browserify bundle doesnt inject global', async (t) => {
   t.false(hasGlobalInjection, 'did not inject "global" ref')
 })
 
-test('basic - browserify bundle doesnt inject global in deps', async (t) => {
+test(`basic - browserify bundle doesn't inject global in deps`, async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = require('two')

@@ -11,13 +11,13 @@ const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
-// these are the reccomended arguments for lavaMoat to work well with browserify
+// these are the recommended arguments for lavaMoat to work well with browserify
 const recommendedArgs = {
   // this option helps with parsing global usage
   insertGlobalVars: {
     global: false,
   },
-  // this option prevents creating unnecesary psuedo-dependencies
+  // this option prevents creating unnecessary pseudo-dependencies
   // where packages appear to rely on other packages because they
   // are using each other for code deduplication
   // this also breaks bify-package-factor and related tools
@@ -315,7 +315,7 @@ function createLavamoatPacker(configuration = {}) {
   return customPack
 }
 
-// FIXME: replace with modern policy validation 
+// FIXME: replace with modern policy validation
 function validatePolicy(policy) {
   if (typeof policy !== 'object') {
     throw new Error(

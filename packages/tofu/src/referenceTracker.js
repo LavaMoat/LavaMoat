@@ -67,9 +67,11 @@ function expandUsage(targetPath) {
    * @type {ReferenceLinkage[]}
    */
   const nodes = []
-  /** @type {import('@babel/traverse').NodePath<
-  import('@babel/types').Node
->[]} */
+  /**
+   * @type {import('@babel/traverse').NodePath<
+   *   import('@babel/types').Node
+   * >[]}
+   */
   const leaves = []
 
   walkUsage(targetPath, { onNode, onLeaf })
@@ -170,10 +172,10 @@ class RefOutOfScopeError extends Error {
   static isRefOutOfScopeError(err) {
     return Boolean(
       err &&
-        (err instanceof RefOutOfScopeError ||
-          (typeof err === 'object' &&
-            'code' in err &&
-            err.code === RefOutOfScopeError.code))
+      (err instanceof RefOutOfScopeError ||
+        (typeof err === 'object' &&
+          'code' in err &&
+          err.code === RefOutOfScopeError.code))
     )
   }
 }
@@ -258,9 +260,11 @@ const usageDetectors = {
       }
       case 'ReturnStatement': {
         return usageDetectors[targetPath.parent.type](
-          /** @type {import('@babel/traverse').NodePath<
-  import('@babel/types').ReturnStatement
->} */ (targetPath.parentPath)
+          /**
+           * @type {import('@babel/traverse').NodePath<
+           *   import('@babel/types').ReturnStatement
+           * >}
+           */ (targetPath.parentPath)
         )
       }
       case 'FunctionDeclaration': {
@@ -374,7 +378,7 @@ function tracePathToUsages(targetPath) {
 function makeReferenceLinkageForIdentifier(targetPath) {
   if (targetPath.node.type !== 'Identifier') {
     throw new Error(
-      `makeReferenceLinkageForIdentifier - only supports type Identiter, got "${targetPath.node.type}"`
+      `makeReferenceLinkageForIdentifier - only supports type Identifier, got "${targetPath.node.type}"`
     )
   }
   switch (targetPath.parent.type) {

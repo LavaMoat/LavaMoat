@@ -41,8 +41,8 @@ module.exports = {
       runChecks: true,
       diagnosticsVerbosity: 1,
       HtmlWebpackPluginInterop: true,
-      // scuttleGlobalThis: { 
-      //   enabled: true, 
+      // scuttleGlobalThis: {
+      //   enabled: true,
       //   exceptions: ['Proxy', /Uint[0-9]+Array/]
       // },
     }),
@@ -56,7 +56,7 @@ module.exports = {
   ],
   module: {
     rules: [
-      // Warning - this loader reads all files in the project, not jsut the ones that are imported. I didn't want to dive further into fixing the config.
+      // Warning - this loader reads all files in the project, not just the ones that are imported. I didn't want to dive further into fixing the config.
       // Other than that quirk it just works
       // {
       //   test: /\.ts$/,

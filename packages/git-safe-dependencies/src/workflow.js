@@ -92,7 +92,7 @@ exports.validateWorkflows = async function (workflowsDir = defaultDir) {
           if (info.isTag) {
             tagConversionTip = `use: ${action}@${info.commit} #${version}`
           } else {
-            tagConversionTip = `the commit hash under ${version} is ${info.commit} but doublecheck if that's what you wanted`
+            tagConversionTip = `the commit hash under ${version} is ${info.commit} but double-check if that's what you wanted`
           }
         }
       } catch (e) {
