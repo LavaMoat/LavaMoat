@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/streetsidesoftware/cspell/main/packages/cspell-tools/cspell-tools.config.schema.json
+
+targets:
+  - name: 'lavamoat'
+    sources:
+      - filename: 'src/lavamoat.txt'
+    format: 'plaintext'
+    targetDirectory: './dict'
+    generateNonStrict: false
+    removeDuplicates: true
+    sort: true
+  - name: 'lavamoat-usernames'
+    sources:
+      - filename: 'src/lavamoat-usernames.txt'
+    format: 'plaintext'
+    targetDirectory: './dict'
+    generateNonStrict: false
+    removeDuplicates: true
+    sort: true
+  - name: 'lavamoat-corrections'
+    sources:
+      - filename: 'src/lavamoat-corrections.txt'
+    format: 'plaintext'
+    targetDirectory: './dict'
+    generateNonStrict: false
+    removeDuplicates: true
+    sort: true
