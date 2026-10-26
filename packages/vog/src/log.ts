@@ -5,7 +5,12 @@
  * @see {@link https://www.npmjs.com/package/consola consola}
  */
 
-import { type ConsolaOptions, createConsola, LogLevels } from 'consola'
+import {
+  type ConsolaInstance,
+  type ConsolaOptions,
+  createConsola,
+  LogLevels,
+} from 'consola'
 
 const { freeze } = Object
 
@@ -49,12 +54,12 @@ const log = createConsola({
   stdout: process.stderr,
 })
 
-export type Logger = typeof log
-
 export {
+  createConsola as createLogger,
   log as defaultLog,
   defaultOptions as defaultLoggerOptions,
   log,
   LogLevels,
-  type ConsolaOptions,
+  type ConsolaOptions as LoggerOptions,
+  type ConsolaInstance as Logger,
 }
