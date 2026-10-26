@@ -437,7 +437,7 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
         moduleInitializer: moduleRecord.moduleInitializer,
       }
       // append the source or prepare the precompiledInitializer
-      const intializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(
+      const initializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(
         moduleRecord.content
       )}\n})`
       if (runWithPrecompiledModules) {
@@ -446,13 +446,13 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
           with (this.globalThis) {
             return function() {
               'use strict';
-              return ${intializerSource}
+              return ${initializerSource}
             };
           }
           }
         `)
       } else {
-        moduleData.source = intializerSource
+        moduleData.source = initializerSource
       }
       return moduleData
     },

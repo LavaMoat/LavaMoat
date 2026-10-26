@@ -132,7 +132,7 @@ export const makeAttenuators = ({
         if (!rootCompartmentGlobalThis) {
           if (trustRoot) {
             throw new AttenuationError(
-              'Intializing an anonymous root compartment globalThis for trusted root is not allowed; this is a bug'
+              'Initializing an anonymous root compartment globalThis for trusted root is not allowed; this is a bug'
             )
           }
           rootCompartmentGlobalThis = new Compartment().globalThis

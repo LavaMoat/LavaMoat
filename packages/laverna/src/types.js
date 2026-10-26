@@ -1,8 +1,8 @@
 /**
  * @import {Dirent} from 'fs'
+ * @import {GlobOptionsWithFileTypesTrue} from 'glob'
  * @import {SpawnOptions} from 'node:child_process'
  * @import {EventEmitter} from 'node:events'
- * @import {GlobOptionsWithFileTypesTrue} from 'glob'
  */
 
 /**
@@ -55,13 +55,15 @@
  * @typedef {(json: string) => any} ParseJsonFn
  */
 /**
- * A loosey-gooesy `fs.promises` implementation
+ * A loosey-goosey `fs.promises` implementation
  *
  * @typedef {{
- *   [K in keyof Pick<
- *     typeof import('node:fs/promises'),
- *     'lstat' | 'readdir' | 'readlink' | 'realpath' | 'readFile'
- *   >]: (...args: any[]) => Promise<any>
+ *   [
+ *     K in keyof Pick<
+ *       typeof import('node:fs/promises'),
+ *       'lstat' | 'readdir' | 'readlink' | 'realpath' | 'readFile'
+ *     >
+ *   ]: (...args: any[]) => Promise<any>
  * }} MinimalFsPromises
  */
 
@@ -131,7 +133,6 @@
  * @param {string} pkgName
  * @param {string} cwd
  * @returns {Promise<string[]>}
- * @this {Laverna}
  */
 
 /**
