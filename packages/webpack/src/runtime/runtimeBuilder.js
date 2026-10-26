@@ -1,3 +1,5 @@
+// cspell:ignore ctxm, idmap
+
 const { RUNTIME_KEY } = require('../ENUM.json')
 const diag = require('../buildtime/diagnostics.js')
 const { assembleRuntime, prepareSource } = require('./assemble.js')
@@ -88,7 +90,7 @@ module.exports = {
         'clearTimeout', // LoadScriptRuntimeModule.js
         'document', // LoadScriptRuntimeModule.js, AutoPublicPathRuntimeModule.js
         'trustedTypes', // GetTrustedTypesPolicyRuntimeModule.js
-        'self', // webpacks own code references it
+        'self', // webpack's own code references it
         'importScripts', // chunk loading in workers
       ]
       return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};

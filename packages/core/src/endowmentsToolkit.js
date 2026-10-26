@@ -8,7 +8,7 @@
  * module has been written so that it required directly or copied and added to
  * the template with a small wrapper.
  *
- * The `PackagePolicy` uses a period-deliminated path notation to pull out deep
+ * The `PackagePolicy` uses a period-delimited path notation to pull out deep
  * values from objects. These utilities help create an object populated with
  * only the deep properties specified in the `PackagePolicy`.
  *
@@ -18,7 +18,7 @@
 /**
  * WARNING: This module is used directly by the runtime in webpack plugin which
  * uses simple shimming to assemble modules. It doesn't bundle properly. This
- * file cannot reqire any files or packages.
+ * file cannot require any files or packages.
  */
 
 module.exports = endowmentsToolkit
@@ -32,7 +32,7 @@ module.exports._test = { instrumentDynamicValueAtPath }
 const GLOBAL_LAZY_GETTERS_TO_AVOID_HITTING = ['localStorage', 'sessionStorage']
 
 /**
- * Returns a compy of endowmentsToolkit initialized on provided configuration.
+ * Returns a copy of endowmentsToolkit initialized on provided configuration.
  *
  * @param {object} opts
  * @param {DefaultWrapperFn} [opts.createFunctionWrapper]
@@ -94,7 +94,7 @@ function endowmentsToolkit({
     Object.entries(packagePolicy.globals).forEach(
       ([path, packagePolicyValue]) => {
         const pathParts = path.split('.')
-        // disallow dunder proto in path
+        // disallow dunderproto in path
         const pathContainsDunderProto = pathParts.some(
           (pathPart) => pathPart === '__proto__'
         )
@@ -283,7 +283,7 @@ function endowmentsToolkit({
     // if target already has a value, it must be extensible
     const targetPropDesc = Reflect.getOwnPropertyDescriptor(targetRef, nextPart)
     if (targetPropDesc) {
-      // dont attempt to extend a getter or trigger a setter
+      // don't attempt to extend a getter or trigger a setter
       if (!('value' in targetPropDesc)) {
         throw new Error(
           `unable to copy on to targetRef, targetRef has a getter at "${currentPath}"`
@@ -360,7 +360,7 @@ function endowmentsToolkit({
       Reflect.defineProperty(targetRef, nextPart, sourcePropDesc)
       return
     }
-    // otherwise add workaround for functions to swap back to the sourceal "this" reference
+    // otherwise add workaround for functions to swap back to the source "this" reference
     /**
      * @template T
      * @param {T} thisValue
@@ -563,7 +563,7 @@ function endowmentsToolkit({
       (globalProtoChainEntry) => globalProtoChainEntry === Object.prototype
     )
     // "Why would a global have no reference in prototype chain that matches Object.prototype?" you might ask.
-    // It's when the global is partially from a different Realm. And that's possible in extension contentscript in FireFox
+    // It's when the global is partially from a different Realm. And that's possible in extension content script in FireFox
     const noSharedPrototype = commonPrototypeIndex === -1
     if (noSharedPrototype) {
       // take the entire prototype chain
@@ -815,8 +815,7 @@ function instrumentDynamicValueAtPath(
 /**
  * @import {
  *   ContextTestFn,
- *   SomeFunction,
- *   SomeParameters
+ *   SomeFunction
  * } from './internal.js'
  */
 

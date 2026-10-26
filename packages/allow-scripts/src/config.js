@@ -83,7 +83,7 @@ const DEFAULT_LIFECYCLE_EVENTS = ['preinstall', 'install', 'postinstall']
  * @param {string} args.rootDir
  * @param {string[]} [args.lifecycleEvents] - Which script names to consider
  * @param {boolean} [args.skipVersions] - Whether to skip versioning in patterns
- * @returns {Promise<PkgConfs>}
+ * @returns {Promise<PkgConfigs>}
  */
 async function loadAllPackageConfigurations({
   rootDir,

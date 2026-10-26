@@ -1,3 +1,5 @@
+<!-- cspell:ignore moco -->
+
 # LavaMoat
 
 ![LavaMoat](./assets/lavamoat-logo.png 'LavaMoat logo')
@@ -14,7 +16,7 @@ In order to help mitigate the risk of such an attack we are building a suite of 
 
 ## [Watch the introduction video](https://www.youtube.com/watch?v=Z5Bz0DYga1k)
 
-### How to secure your app against supplychain attacks
+### How to secure your app against supply chain attacks
 
 1. disable/allow dependency lifecycle scripts (eg. "postinstall") via [@lavamoat/allow-scripts][LavamoatAllowScripts]
 2. run your server or build process in [lavamoat-node][LavamoatNode]
@@ -43,7 +45,7 @@ The LavaMoat runtime reduces the supply chain risk by:
 
 Both are provided by [SES][SesGithub] containers. Platform API access is granted by a policy file that LavaMoat can generate and allow the project to selectively customize. All details of policy file structure are documented in the [Policy file explained][PolicyDoc] doc.
 
-#### SecureEcmaScript (SES)
+#### SecureECMAScript (SES)
 
 [SES][SesGithub] is the sandbox used in LavaMoat. See SES's [secure computing guide][SesComputingGuide] to learn more about the risks of untrusted javascript.
 
@@ -79,13 +81,13 @@ LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
 LavaMoat offers further (yet advanced) security enhancement to LavaMoat protection which is known as `scuttling` - an optional feature which is turned off by default and can enhance the security LavaMoat will apply to your application. Before using it, make sure to get yourself familiar with it and with the implications of using it by reading its [doc file][ScuttlingDoc].
 
-## Further reading on software supplychain security
+## Further reading on software supply chain security
 
 ### Articles
 
 - [HackerNoon - I’m harvesting credit card numbers and passwords from your site. Here’s how](https://medium.com/hackernoon/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5)
 - [Agoric - POLA Would Have Prevented the Event-Stream Incident](https://medium.com/agoric/pola-would-have-prevented-the-event-stream-incident-45653ecbda99)
-- [Snyk - Why npm lockfiles can be a security blindspot for injecting malicious modules](https://snyk.io/blog/why-npm-lockfiles-can-be-a-security-blindspot-for-injecting-malicious-modules/)
+- [Snyk - Why npm lockfiles can be a security blind spot for injecting malicious modules](https://snyk.io/blog/why-npm-lockfiles-can-be-a-security-blindspot-for-injecting-malicious-modules/)
 - [Bytecode Alliance - Building a secure by default, composable future for WebAssembly](https://bytecodealliance.org/articles/announcing-the-bytecode-alliance)
 
 ### Videos
@@ -93,14 +95,14 @@ LavaMoat offers further (yet advanced) security enhancement to LavaMoat protecti
 - [Making 'npm install' Safe - Kate Sills - QCon 2020 ~40min](https://www.infoq.com/presentations/npm-install/)
 - [JavaScript Supply Chain Security - Adam Baldwin - LocoMocoSec 2019 ~25min](https://www.youtube.com/watch?v=HDo2iOlkbyc)
 - [Analysis of an exploited npm package – Jarrod Overson - Amsterdam JSNation Conference 2019 ~25min](https://www.youtube.com/watch?v=cvtt8TexqbU)
-- [How Malicious NPM Packages Make Your Apps Vulnerable - SnykLive stream 2022 ~1h](https://youtu.be/STC_ubJNiMs?t=287)
+- [How Malicious npm Packages Make Your Apps Vulnerable - SnykLive stream 2022 ~1h](https://youtu.be/STC_ubJNiMs?t=287)
 - [Object-capability security for JavaScript applications - KU Leuven Cybersecurity seminar 2022 ~1h](https://www.youtube.com/watch?v=bc6JzoCkCE0)
 
 ## Supporters
 
 Made with love by [MetaMask](https://github.com/metamask/)
 
-Funded by [ConsenSys](https://github.com/consensys)
+Funded by [Consensys](https://github.com/consensys)
 
 Runs on [Agoric](https://github.com/agoric/)
 

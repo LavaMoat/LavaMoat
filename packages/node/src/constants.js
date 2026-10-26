@@ -106,7 +106,7 @@ export const ENDO_POLICY_ENTRY = 'entry'
 export const ENDO_POLICY_RESOURCES = 'resources'
 
 /**
- * The `noGlobalFreeze` prop of an Endo packge policy
+ * The `noGlobalFreeze` prop of an Endo package policy
  */
 export const ENDO_PKG_POLICY_NO_GLOBAL_FREEZE = 'noGlobalFreeze'
 

@@ -1,14 +1,8 @@
 // @ts-check
 
 /**
- * @import {
- *   LavaMoatPolicy,
- *   LavaMoatPolicyDebug
- * } from '@lavamoat/types'
- * @import {
- *   ExecutionContext,
- *   TestFn
- * } from 'ava'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {ExecutionContext} from 'ava'
  */
 
 const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
@@ -422,7 +416,7 @@ test(
 )
 
 test(
-  'include - ByName dedup is order-independent for modules',
+  'include - ByName dedupe is order-independent for modules',
   testMergePolicy,
   { resources: {}, include: [{ name: 'pkg', modules: ['./a.js', './b.js'] }] },
   { resources: {}, include: [{ name: 'pkg', modules: ['./b.js', './a.js'] }] },
@@ -608,7 +602,7 @@ test('mutation - merged policy contains no references to original objects', (t) 
   }
 })
 
-test('mutation - does not mutate policy when resource has dedup-able globals', (t) => {
+test('mutation - does not mutate policy when resource has dedupe-able globals', (t) => {
   /** @type {LavaMoatPolicy} */
   const policy = {
     resources: {

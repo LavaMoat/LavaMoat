@@ -90,7 +90,7 @@
     Object.freeze(kernel)
     return kernel
 
-    // this function instantiaties a module from a moduleId.
+    // this function instantiates a module from a moduleId.
     // 1. loads the module metadata and policy
     // 2. prepares the execution environment
     // 3. instantiates the module, recursively instantiating dependencies
@@ -173,7 +173,7 @@
       const moduleId = getRelativeModuleId(parentModuleId, requestedName)
 
       // browserify goop:
-      // recursive requires dont hit cache so it inf loops, so we shortcircuit
+      // recursive requires don't hit cache so it inf loops, so we short-circuit
       // this only seems to happen with a few browserify builtins (nodejs builtin module polyfills)
       // we could likely allow any requestedName since it can only refer to itself
       if (moduleId === parentModuleId) {
@@ -229,7 +229,7 @@
             throw new Error(`LavaMoat - "native" module type not permitted for package "${packageName}", module "${moduleId}"`)
           }
         } else if (moduleData.type !== 'builtin') {
-          // builtin module types dont have policy configurations
+          // builtin module types don't have policy configurations
           // but the packages that can import them are constrained elsewhere
           // here we just ensure that the module type is the only other type with a external moduleInitializer
           throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${packageName}", module "${moduleId}"`)
