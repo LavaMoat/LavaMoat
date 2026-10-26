@@ -63,14 +63,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/prepare
+      - uses: $/.github/actions/prepare
         with:
           node-version: 24.x
       - run: npm run build
       - id: pack
         run: |
           paths="${NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED}"
-          outdir='${{ runner.temp }}/lavamoat-pack'
+          outdir="${RUNNER_TEMP}/lavamoat-pack"
           mkdir -p "$outdir"
           readarray -t workspace_args < <(jq -r '.[] | "--workspace=" + .' <<< "$paths")
           echo "Packing workspaces: ${workspace_args[*]}"
@@ -81,6 +81,7 @@ jobs:
         shell: bash
         env:
           NEEDS_RELEASE_PLEASE_OUTPUTS_PATHS_RELEASED: ${{ needs.release-please.outputs.paths_released }}
+          RUNNER_TEMP: ${{ runner.temp }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: lavamoat-pack
@@ -108,10 +109,10 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24.16.0
-      - run: npm install -g 'npm@^11.15.0'
+      - run: npm install -g 'npm@^11.15.0' # zizmor: ignore[adhoc-packages]
       - run: |
           files="${NEEDS_PACK_OUTPUTS_FILES}"
-          pkgdir='${{ runner.temp }}/lavamoat-tarballs'
+          pkgdir="${RUNNER_TEMP}/lavamoat-tarballs"
           while IFS= read -r filename; do
             echo "Publishing $filename to staging registry..."
             npm stage publish "$pkgdir/$filename" --provenance --ignore-scripts --access=public --registry=https://registry.npmjs.org
@@ -119,3 +120,4 @@ jobs:
         shell: bash
         env:
           NEEDS_PACK_OUTPUTS_FILES: ${{ needs.pack.outputs.files }}
+          RUNNER_TEMP: ${{ runner.temp }}
