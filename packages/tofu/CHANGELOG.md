@@ -1,5 +1,21 @@
 # Changelog
 
+## [9.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.1.0...lavamoat-tofu-v9.1.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* add Node.js v26.0.0 to engines ([1b115cd](https://github.com/LavaMoat/LavaMoat/commit/1b115cd2b69a34aa9c3b2206424231a3e9964086))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^2.0.0 to ^2.0.1
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >19.0.2
+
 ## [9.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v9.0.4...lavamoat-tofu-v9.1.0) (2026-10-08)
 
 
