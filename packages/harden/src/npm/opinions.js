@@ -1,6 +1,10 @@
 /** @import {Opinion} from '../tools/types.js' */
 import { buildAllowlistChanges } from './build-allowlist.js'
 import { bundleRunner } from '../runner/runner-bundler.js'
+// @ts-expect-error ships without types
+import mapWorkspaces from '@npmcli/map-workspaces'
+import { join, relative } from 'node:path'
+import { symlinkSync } from 'node:fs'
 
 /** @satisfies {readonly Opinion[]} */
 const definedOpinions = Object.freeze(
@@ -201,7 +205,7 @@ const definedOpinions = Object.freeze(
     {
       id: 'n_runner',
       description:
-        'Take over "npm run" and mitigate bin-scripts confusion; configure other limitations. [!No Windows cmd support]',
+        'Take over npm run and remove bin scripts confusion possibility and configure other limitations.',
       level: 'strict',
       changes: [
         {
@@ -224,6 +228,25 @@ const definedOpinions = Object.freeze(
         return results.length === 0
       },
       execute: async (changes, facts, decisions) => {
+        if (facts.packageJson?.workspaces) {
+          const workspaces = await mapWorkspaces({
+            cwd: facts.cwd,
+            pkg: facts.packageJson,
+          })
+          for (const workspace of workspaces.values()) {
+            // compare workspace string to facts.cwd and create relative path
+            const projectPathRelativeToWorkspace = relative(
+              workspace,
+              facts.cwd
+            )
+            symlinkSync(
+              join(projectPathRelativeToWorkspace, 'lavamoat'),
+              join(workspace, 'lavamoat'),
+              'dir'
+            )
+          }
+        }
+
         const filterEnv = await decisions.askToHarden(
           {
             id: 'n_filterenv',

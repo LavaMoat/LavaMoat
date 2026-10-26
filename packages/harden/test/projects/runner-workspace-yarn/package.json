@@ -1,0 +1,22 @@
+{
+  "name": "test-yarn-workspace-project",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "root-default": "node -e \"console.log('ROOT_DEFAULT:' + (process.env.LAVAMOAT_RUN_CONF || ''))\""
+  },
+  "packageManager": "yarn@4.16.0",
+  "devEngines": {
+    "packageManager": {
+      "name": "yarn",
+      "version": ">=4.16.0",
+      "onFail": "error"
+    }
+  },
+  "scriptsConfig": {
+    "#default": "lavamoat/scripts.loose.json"
+  }
+}

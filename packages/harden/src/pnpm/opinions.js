@@ -36,7 +36,7 @@ const definedOpinions = Object.freeze(
         {
           target: 'package.json',
           key: 'packageManager',
-          value: 'pnpm@11.0.0',
+          value: 'pnpm@11.28.1', // minimal version that correctly supports shell runner in workspaces
           ifNotExist: true,
         },
         // NOTE: pnpm doesn't allow both devEngines and packageManager to be set
@@ -75,7 +75,7 @@ const definedOpinions = Object.freeze(
         if (facts.packageJson?.packageManager) {
           return assertPackageManager({
             actual: facts.packageJson?.packageManager,
-            expected: 'pnpm@>=11.0.0',
+            expected: 'pnpm@>=11.28.1',
           })
           // @ts-expect-error: incomplete PackageJson type
         } else if (facts.packageJson?.devEngines?.packageManager?.version) {
@@ -84,7 +84,7 @@ const definedOpinions = Object.freeze(
             expected: {
               packageManager: {
                 name: 'pnpm',
-                version: '>=11.0.0',
+                version: '>=11.28.1',
               },
             },
           })
