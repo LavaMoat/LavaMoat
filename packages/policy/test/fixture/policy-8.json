@@ -1,0 +1,51 @@
+{
+  "resources": {
+    "@ethereumjs/util>@ethereumjs/rlp": {
+      "globals": {
+        "TextEncoder": true
+      }
+    },
+    "@ethereumjs/util": {
+      "globals": {
+        "console.warn": true,
+        "fetch": true
+      },
+      "packages": {
+        "@ethereumjs/util>@ethereumjs/rlp": true,
+        "@ethereumjs/util>ethereum-cryptography": true
+      }
+    },
+    "@ethereumjs/util>ethereum-cryptography>@noble/curves": {
+      "globals": {
+        "TextEncoder": true
+      },
+      "packages": {
+        "@ethereumjs/util>ethereum-cryptography>@noble/hashes": true
+      }
+    },
+    "@ethereumjs/util>ethereum-cryptography>@noble/hashes": {
+      "globals": {
+        "TextDecoder": true,
+        "TextEncoder": true,
+        "crypto": true
+      }
+    },
+    "@ethereumjs/util>ethereum-cryptography": {
+      "globals": {
+        "TextDecoder": true
+      },
+      "packages": {
+        "@ethereumjs/util>ethereum-cryptography>@noble/curves": true,
+        "@ethereumjs/util>ethereum-cryptography>@noble/hashes": true
+      }
+    },
+    "fast-json-patch": {
+      "globals": {
+        "addEventListener": true,
+        "clearTimeout": true,
+        "removeEventListener": true,
+        "setTimeout": true
+      }
+    }
+  }
+}
