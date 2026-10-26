@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.1...harden-v0.8.2) (2026-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency semver to ^7.8.4 ([#2112](https://github.com/LavaMoat/LavaMoat/issues/2112)) ([761f969](https://github.com/LavaMoat/LavaMoat/commit/761f9691bdf5e3527fde2e0aa82cb65b32ab40a9))
+
 ## [0.8.1](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.0...harden-v0.8.1) (2026-10-08)
 
 
