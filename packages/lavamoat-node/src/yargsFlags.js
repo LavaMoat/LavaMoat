@@ -1,3 +1,5 @@
+// cspell:ignore policydebug
+
 module.exports = (yargs, defaults) => {
   yargs.positional('entryPath', {
     describe:

@@ -152,11 +152,12 @@ exports.Laverna = class Laverna {
         // it doesn't appear that the type of a rejection from a
         // promisify'd `exec` is surfaced in the node typings
         // anywhere.
-        const err = /**
-         * @type {ExecFileException & {
-         *   stdout: string
-         * }}
-         */ (e)
+        const err =
+          /**
+           * @type {ExecFileException & {
+           *   stdout: string
+           * }}
+           */ (e)
 
         // when called with `--json`, you get a JSON error.
         // this could also be handled in a catch() chained to the `exec` promise
@@ -426,7 +427,7 @@ exports.Laverna = class Laverna {
       await publisher.publish(pkgNames)
       console.error(`${OK} Done!`)
     } else {
-      console.error(`${ERR} Aborted; no packages haved been published.`)
+      console.error(`${ERR} Aborted; no packages have been published.`)
     }
   }
 

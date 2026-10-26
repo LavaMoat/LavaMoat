@@ -49,7 +49,7 @@ function getMemberExpressionNesting(identifierNode, parents) {
     : identifierNode
   const topmostMemberIndex = parents.indexOf(topmostMember)
   if (topmostMemberIndex < 1) {
-    throw Error('unnexpected value for memberTopIndex')
+    throw Error('unexpected value for memberTopIndex')
   }
   const topmostMemberParentIndex = topmostMemberIndex - 1
   const parentOfMembershipChain = parents[topmostMemberParentIndex]
@@ -152,7 +152,7 @@ function reduceToTopmostApiCalls(globalsConfig) {
     const parents = parentParts.map((_, index) =>
       parentParts.slice(0, index + 1).join('.')
     )
-    // dont include this if a parent appears in the array
+    // don't include this if a parent appears in the array
     const parentsAlreadyInArray = parents.some((parent) =>
       allPaths.includes(parent)
     )
@@ -166,7 +166,7 @@ function reduceToTopmostApiCalls(globalsConfig) {
  * If array contains 'x' and 'x.y' just keep 'x'
  *
  * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} globalsConfig
- * @returns {{ path: string, parent: string }[]}
+ * @returns {{ path: string; parent: string }[]}
  */
 function validateHierarchy(globalsConfig) {
   const truthyPaths = Array.from(globalsConfig.keys())
@@ -183,10 +183,8 @@ function validateHierarchy(globalsConfig) {
     const parents = parentParts.map((_, index) =>
       parentParts.slice(0, index + 1).join('.')
     )
-    // dont include this if a parent appears in the array
-    const parent = parents.find((parent) =>
-      truthyPaths.includes(parent)
-    )
+    // don't include this if a parent appears in the array
+    const parent = parents.find((parent) => truthyPaths.includes(parent))
     if (parent) {
       acc.push({
         path,
@@ -194,7 +192,7 @@ function validateHierarchy(globalsConfig) {
       })
     }
     return acc
-  }, /** @type {{ path: string, parent: string }[]} */ ([]))
+  }, /** @type {{ path: string; parent: string }[]} */ ([]))
 }
 
 /**
@@ -217,7 +215,7 @@ function reduceToTopmostApiCallsFromStrings(keyPathStrings) {
     const parents = parentParts.map((_, index) =>
       parentParts.slice(0, index + 1).join('.')
     )
-    // dont include this if a parent appears in the array
+    // don't include this if a parent appears in the array
     const parentsAlreadyInArray = parents.some((parent) =>
       allPaths.includes(parent)
     )

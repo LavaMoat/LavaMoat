@@ -10,7 +10,7 @@ function createFreshRealmCompartment() {
   if (!sesCompartmentSrc) {
     sesCompartmentSrc = getSesShimSrc()
   }
-  // create a seperate realm for running code
+  // create a separate realm for running code
   const context = vm.createContext()
   // circular ref (used when globalThis is not present)
   const needsGlobalThisPath = vm.runInContext(
@@ -20,7 +20,7 @@ function createFreshRealmCompartment() {
   if (needsGlobalThisPath) {
     context.globalThis = context
   }
-  // run the ses compartment shim, but dont call lockdown
+  // run the ses compartment shim, but don't call lockdown
   vm.runInContext(sesCompartmentSrc, context)
   // create the compartment in the other realm
   const compartment = vm.runInContext('new Compartment()', context)

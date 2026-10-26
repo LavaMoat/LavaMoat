@@ -1,3 +1,5 @@
+// cspell:ignore Dynamicchunk
+
 const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
@@ -120,7 +122,7 @@ test('webpack/hack-dynamic - bundle1 contains context module entry for the hack 
   t.regex(t.context.bundle1, /\.\/hack.js.:[0-9]+/)
 })
 
-test('webpack/hack-dynamic - stealer uses dynamic import with context module to byppass policy and fails', async (t) => {
+test('webpack/hack-dynamic - stealer uses dynamic import with context module to bypass policy and fails', async (t) => {
   let FLAG, TEST_FINISHED
 
   const done = new Promise((resolve, reject) => {

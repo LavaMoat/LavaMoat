@@ -1,3 +1,5 @@
+// cspell:ignore workspaceless
+
 const { default: test } = require('ava')
 const { promisify } = require('node:util')
 const execFile = promisify(require('node:child_process').execFile)
@@ -150,12 +152,13 @@ async function runCli(t, argsOrOpts, maybeOpts = {}) {
       ...execResult,
     }
   } catch (e) {
-    const err = /**
-     * @type {import('node:child_process').ExecFileException & {
-     *   stderr: string
-     *   stdout: string
-     * }}
-     */ (e)
+    const err =
+      /**
+       * @type {import('node:child_process').ExecFileException & {
+       *   stderr: string
+       *   stdout: string
+       * }}
+       */ (e)
     result = Object.assign(err, {
       cmd: err.cmd ?? `${process.execPath} ${LAVERNA_SCRIPT} ${args.join(' ')}`,
       opts,

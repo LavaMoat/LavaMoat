@@ -29,7 +29,7 @@
   const moduleRegistry = new Map()
   const moduleCache = new Map()
 
-  // create a lavamoat pulic API for loading modules over multiple files
+  // create a lavamoat public API for loading modules over multiple files
   const LavaPack = Object.freeze({
     loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),

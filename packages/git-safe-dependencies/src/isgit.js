@@ -1,3 +1,5 @@
+// cspell:ignore gitinfo
+
 const gitinfo = require('hosted-git-info')
 
 const gitUrlRegex =
@@ -11,7 +13,8 @@ const isUnsafeUrl = (url) =>
 
 const isGitUrl = (url) => gitUrlRegex.test(url)
 const isGHRepoSpecifier = (specifier) =>
-  !specifier.startsWith('npm:') && (specifier.startsWith('github:') || /^[^/@]+\/[^/]+$/.test(specifier))  
+  !specifier.startsWith('npm:') &&
+  (specifier.startsWith('github:') || /^[^/@]+\/[^/]+$/.test(specifier))
 
 exports.isCommitHash = (c) => commitRegEx.test(c)
 

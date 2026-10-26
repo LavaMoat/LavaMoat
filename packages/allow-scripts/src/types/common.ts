@@ -65,7 +65,7 @@ declare global {
 
   export interface SavePackageConfigurationsParams {
     rootDir: string
-    conf: PkgConfs
+    conf: PkgConfigs
   }
 
   export interface GetOptionsForBinParams {
@@ -80,7 +80,7 @@ declare global {
     noMemoization?: boolean
   }
 
-  export interface PkgConfs {
+  export interface PkgConfigs {
     packageJson: LavamoatPackageJson
     configs: {
       lifecycle: ScriptsConfig

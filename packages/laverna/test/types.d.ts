@@ -483,7 +483,7 @@ declare module 'node:test' {
      * });
      * ```
      *
-     * Alternativelly, the `.tick` function can be called many times
+     * Alternatively, the `.tick` function can be called many times
      *
      * ```js
      * import assert from 'node:assert';
@@ -550,14 +550,14 @@ declare module 'node:test' {
   }
 
   export {
-    MockFunctionOptions,
-    MockMethodOptions,
     Mock,
-    MockTracker,
     mock,
     MockFunctionCall,
     MockFunctionContext,
-    Timer,
+    MockFunctionOptions,
+    MockMethodOptions,
     MockTimers,
+    MockTracker,
+    Timer,
   }
 }

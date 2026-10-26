@@ -17,7 +17,7 @@ test('Run scenarios with precompiled modules', async (t) => {
 })
 
 // not supported for now
-// test('Run scenarios WITOUT precompiled modules', async (t) => {
+// test('Run scenarios WITHOUT precompiled modules', async (t) => {
 //   for await (const scenario of loadScenarios()) {
 //     console.log(`Running Browserify Scenario: ${scenario.name}`)
 //     await runAndTestScenario(t, scenario, ({ scenario }) => runScenario({ scenario, bundleWithPrecompiledModules: false }))

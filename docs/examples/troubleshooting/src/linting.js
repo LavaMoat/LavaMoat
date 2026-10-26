@@ -1,3 +1,5 @@
+// cspell:ignore dynamicre
+
 const dynamicre = require('@example/dynamicre')
 
 require('eslint-plugin-security') //It's been required, so should be available later

@@ -1,3 +1,5 @@
+// cspell:ignore nomap
+
 // modified from browser-pack
 // changes:
 // - breakout generateModuleInitializer
@@ -61,7 +63,7 @@ function createPacker({
   scuttleGlobalThis = {},
   scuttleGlobalThisExceptions,
 } = {}) {
-  // stream/parser wrapping incase raw: false
+  // stream/parser wrapping in case raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
     function (buf, _, next) {
@@ -191,7 +193,7 @@ function createPacker({
       return x !== undefined
     })
 
-    // filter the policy removing packages that arent included
+    // filter the policy removing packages that aren't included
     let minimalPolicy = { resources: {} }
     if (prunePolicy) {
       Object.entries(policy.resources || {})
@@ -255,7 +257,7 @@ function createPacker({
     const relativeFilePath = file && path.relative(basedir, file)
     // for now, ignore new sourcemap and just append original filename
     // serialize final module entry
-    const jsonSerializeableData = {
+    const jsonSerializableData = {
       // id,
       package: packageName,
       file: relativeFilePath,
@@ -267,7 +269,7 @@ function createPacker({
       deps
     )}, ${moduleInitializer}, {`
     // add metadata
-    Object.entries(jsonSerializeableData).forEach(([key, value]) => {
+    Object.entries(jsonSerializableData).forEach(([key, value]) => {
       // skip missing values
       if (value === undefined) {
         return

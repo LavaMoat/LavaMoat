@@ -1,3 +1,5 @@
+// cspell:ignore nonpm, filterenv, hardenrun, upath
+
 import {
   applyLatestVersion,
   assertDevEngines,

@@ -33,7 +33,7 @@ test('inspectPrimordialAssignments - assignment to frozen primordial', (t) => {
   t.is(results.length, 1)
 })
 
-test('inspectPrimordialAssignments - primordial potential false positive - instrinsic', (t) => {
+test('inspectPrimordialAssignments - primordial potential false positive - intrinsic', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     window.Array === Array
   `)

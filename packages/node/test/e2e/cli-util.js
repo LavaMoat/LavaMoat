@@ -97,10 +97,10 @@ export const runCLI = async (
    *
    * This value is saved in the snapshot `.md` file (it's in the assertion
    * failure message), so we should strip absolute paths since they will differ
-   * between dev envrionments.
+   * between dev environments.
    *
    * - Since `cwd` could be anything depending on the dev environment and relative
-   *   planetary positions, it doesn't belong in the snapshot; we only ouptut to
+   *   planetary positions, it doesn't belong in the snapshot; we only output to
    *   the log.
    * - `/path/to/node ${CLI_PATH}` is replaced with `lavamoat` for logging
    *   purposes.

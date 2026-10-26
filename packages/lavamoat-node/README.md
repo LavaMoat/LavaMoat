@@ -1,4 +1,10 @@
+<!-- cspell:ignore policydebug -->
+
 # LavaMoat Node - a runtime for running LavaMoat-protected NodeJS applications
+
+> [!WARNING] This Package is Deprecated
+>
+> The replacement for this package is [@lavamoat/node](https://github.com/LavaMoat/LavaMoat/tree/main/packages/node).
 
 `lavamoat` is a NodeJS runtime where modules are defined in [SES][SesGithub] Compartments. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supply chain attacks".
 
@@ -23,7 +29,7 @@ _Before you use lavamoat runtime protections, make sure you've set up allow-scri
 
 Use one of:
 
-```
+```shell
 npm i lavamoat
 yarn add lavamoat
 ```
@@ -45,7 +51,7 @@ yarn add lavamoat
 
 ### All options
 
-```
+```text
 lavamoat <entryPath> [Options]
 
 Positionals:
@@ -101,7 +107,7 @@ Options:
 
 To pass arguments to the script without revealing lavamoat-specific arguments, use `--` like so:
 
-```
+```shell
  lavamoat index.js --override './policies/policy-override.json' -- --arg-for-index=1
 ```
 
@@ -111,7 +117,7 @@ By default, the `resolve` package is used to resolve packages from node_modules.
 
 In modern versions of Node.js you can switch to the built-in `createRequire().resolve` implementation, but its default to resolve symlinks to target paths is incompatible with enforcing lavamoat policy.
 To opt-in to use native resolve, set `LAVAMOAT_RESOLVE_NATIVE=1` and it will fall back to `resolve` package when the result is not compatible.
-You can also opt-in by telling Node.js to preserve symplinks: `NODE_PRESERVE_SYMLINKS=1` - which automatically switches lavamoat to the native resolver as well and doesn't hit the fallback for symlinked packages.
+You can also opt-in by telling Node.js to preserve symlinks: `NODE_PRESERVE_SYMLINKS=1` - which automatically switches lavamoat to the native resolver as well and doesn't hit the fallback for symlinked packages.
 If you're using pnpm, you'll probably get the best results from this option.
 
 To get a trace of which resolution was used in the CWD of your app, also set `LAVAMOAT_DEBUG_RESOLVE=1`
@@ -134,8 +140,8 @@ Automatically searches for policy files inside `./lavamoat/node/`.
 
 This uses the override policy specified at `./policies/policy-override.json`.
 
-```
-$ lavamoat index.js --override './policies/policy-override.json'
+```shell
+lavamoat index.js --override './policies/policy-override.json'
 ```
 
 ## Tips

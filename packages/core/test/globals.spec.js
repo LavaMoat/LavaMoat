@@ -1,3 +1,4 @@
+// cspell:ignore beepboop
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* global abc: true, xyz, chrome */
 
@@ -107,7 +108,7 @@ test('globals - ensure circular refs on package compartment global', async (t) =
   t.is(testResult, true, 'xyz references globalThis')
 })
 
-test('globals - ensure setTimeout calls dont trigger illegal invocation', async (t) => {
+test(`globals - ensure setTimeout calls don't trigger illegal invocation`, async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {
       const one = require('one')
@@ -194,7 +195,7 @@ test('globals - endowing bind on a function', async (t) => {
 
 test('globals - endowing properties on the globalThis prototype chain', async (t) => {
   'use strict'
-  // window.addEventListener is defined deep in the protoype chain
+  // window.addEventListener is defined deep in the prototype chain
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = globalThis.abc()

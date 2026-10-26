@@ -1,4 +1,9 @@
-/** @import {Generator, NormalModule} from 'webpack' */
+/**
+ * @import {
+ *   Generator,
+ *   NormalModule
+ * } from 'webpack'
+ */
 /** @import {ProgressAPI} from './utils.js' */
 /** @typedef {import('webpack').sources.Source} Source */
 
@@ -69,7 +74,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
     )
   }
 
-  let wrappingEnabed = false
+  let wrappingEnabled = false
 
   return {
     /**
@@ -77,7 +82,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
      * @param {(path: string) => string | undefined} options.getIdentifierForPath
      */
     enableGeneratorWrapping({ getIdentifierForPath }) {
-      wrappingEnabed = true
+      wrappingEnabled = true
       identifierResolver = getIdentifierForPath
 
       return { tooEarly }
@@ -103,7 +108,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
        */
       generator.generate = function (module, options) {
         diag.rawDebug(5, {
-          wrappingEnabed,
+          wrappingEnabled,
           module,
           options,
         })
@@ -128,7 +133,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           return originalGeneratedSource
         }
 
-        if (!wrappingEnabed) {
+        if (!wrappingEnabled) {
           tooEarly.push(module.request || module.rawRequest)
           return originalGeneratedSource
         } else if (!PROGRESS.done('pathsProcessed')) {
