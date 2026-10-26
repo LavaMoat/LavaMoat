@@ -1,3 +1,5 @@
+// cspell:ignore eventsetter
+
 exports.repairs = [
   {
     target: ['MessageEvent', 'addEventListener'],

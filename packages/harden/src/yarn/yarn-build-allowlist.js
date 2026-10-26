@@ -1,3 +1,5 @@
+// cspell:ignore noallowlist
+
 import {
   ensureWorkspaceInitialized,
   findPackagesWithScripts,

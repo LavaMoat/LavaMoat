@@ -28,7 +28,7 @@ npm install @lavamoat/vog
 
 ### Logging
 
-`@lavamoat/vog` provides a pre-configured stderr-only logger (`log`) and the abililty to create custom loggers:
+`@lavamoat/vog` provides a pre-configured stderr-only logger (`log`) and the ability to create custom loggers:
 
 ```typescript
 import { log } from '@lavamoat/vog'

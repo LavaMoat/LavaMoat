@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// cspell:ignore nargs
+
 /**
  * Main CLI entry point
  *
@@ -135,7 +137,7 @@ const main = async (args = hideBin(process.argv)) => {
    * It is too painful to use `yargs`'s types to determine the shape of the
    * expected options, so it needs to be done manually and kept in sync.
    * `entrypoint` is the only property here which is specific to a command; it
-   * just so happens that both commands have idential `entrypoint` arguments
+   * just so happens that both commands have identical `entrypoint` arguments
    * (positionals). All _other_ properties are defined as global options; if
    * _all_ properties were global, this could just live in global middleware.
    *

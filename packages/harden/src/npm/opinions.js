@@ -1,3 +1,5 @@
+// cspell:ignore allowscripts, noscripts, strictgit, nogit, noremote, filterenv, hardenrun
+
 /** @import {Opinion} from '../tools/types.js' */
 import { buildAllowlistChanges } from './build-allowlist.js'
 import { bundleRunner } from '../runner/runner-bundler.js'

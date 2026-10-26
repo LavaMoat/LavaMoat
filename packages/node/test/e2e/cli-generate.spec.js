@@ -1,3 +1,5 @@
+// cspell:ignore webpackish, pantspack
+
 import '../../src/preamble.js'
 // eslint-disable-next-line ava/use-test
 import anyTest from 'ava'

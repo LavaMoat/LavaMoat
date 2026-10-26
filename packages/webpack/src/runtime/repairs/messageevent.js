@@ -4,14 +4,14 @@ const { call } = Function.prototype
 const messageToGlobalMap = new WeakMap()
 /** @type {any & { window: any | undefined }} */
 const theRealGlobalThis = globalThis
-// TODO: enabe after further testing:
+// TODO: enable after further testing:
 // const realms = new Map()
 // realms.set(globalThis.top || {}, 'top')
 // realms.set(globalThis.parent || {}, 'parent')
 // realms.set(globalThis.opener || {}, 'opener')
 
 const mep = MessageEvent.prototype
-// eslint-disable-next-line no-undef
+
 const lastResortGlobal = new Compartment().globalThis
 
 const original = Object.getOwnPropertyDescriptor(mep, 'source')
@@ -22,7 +22,7 @@ if (original && original.get) {
     ...original,
     get() {
       const w = sourceGetter(this)
-      // How the hell would globalThis !== globalThis.window? Ask FF contentscripts
+      // How the hell would globalThis !== globalThis.window? Ask FF content scripts
       if (w === theRealGlobalThis || w === theRealGlobalThis.window) {
         return messageToGlobalMap.get(this) || lastResortGlobal
         // } else if (w && typeof w === 'object' && realms.has(w)) {

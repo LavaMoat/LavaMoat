@@ -1,3 +1,5 @@
+// cspell:ignore resourcessssss, packagesssss, globalsss
+
 const { createScenarioFromScaffold } = require('../util.js')
 
 // const configOverride = {
@@ -47,7 +49,7 @@ module.exports = [
   // },
   async () => {
     const scenario = createScenarioFromScaffold({
-      name: 'config - dunder proto not allowed in globals path',
+      name: 'config - dunderproto not allowed in globals path',
       config: {
         resources: {
           one: {

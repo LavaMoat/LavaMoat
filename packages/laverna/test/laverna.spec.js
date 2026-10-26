@@ -1,3 +1,5 @@
+// cspell:ignore fkdj, meeeee
+
 /**
  * This tests the `publish` script.
  *
@@ -8,9 +10,13 @@
  */
 
 /**
- * @import {SpawnFn, LavernaOptions, LavernaCapabilities} from '../src/types'
  * @import {TestFn} from 'ava'
  * @import {SpawnOptions} from 'node:child_process'
+ * @import {
+ *   LavernaCapabilities,
+ *   LavernaOptions,
+ *   SpawnFn
+ * } from '../src/types'
  */
 
 const kleur = require('kleur')
@@ -507,7 +513,7 @@ test('publishWorkspaces - other read failure', async (t) => {
   )
 })
 
-test('publishWorkspaces - unparseable workspace package.json', async (t) => {
+test('publishWorkspaces - unparsable workspace package.json', async (t) => {
   const { fs } = memfs({
     '/': {
       'package.json': DEFAULT_ROOT_PKG_JSON,

@@ -1,3 +1,5 @@
+// cspell:ignore haay, wuurl
+
 const { performHash } = require('b')
 
 module.exports = {

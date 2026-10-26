@@ -84,8 +84,8 @@ export interface WithProdOnly {
  */
 export interface WithIsBuiltin {
   /**
-   * A function which returns `true` if the given specfifier references a
-   * builtin module.
+   * A function which returns `true` if the given specifier references a builtin
+   * module.
    *
    * Used during policy generation.
    */
@@ -495,7 +495,7 @@ export type {
   ResourcePolicy,
   Resources as ResourcePolicyRecord,
   Resources,
-  RootPolicy
+  RootPolicy,
 } from '@lavamoat/types'
 
 export type * from './errors.js'

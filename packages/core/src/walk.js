@@ -7,7 +7,10 @@ module.exports = { walk, eachNodeInTree }
 
 /**
  * @import {LavamoatModuleRecord} from '@lavamoat/types'
- * @import {ImportHookFn, ShouldImportFn} from './parseForPolicy'
+ * @import {
+ *   ImportHookFn,
+ *   ShouldImportFn
+ * } from './parseForPolicy'
  */
 
 /**
@@ -50,7 +53,7 @@ async function walk({
  * @param {Set<string>} [options.visitedSpecifiers]
  * @returns {AsyncIterableIterator<LavamoatModuleRecord>}
  */
-// NOTE: i think this is depth first in a way that doesnt take advantage of concurrency
+// NOTE: i think this is depth first in a way that doesn't take advantage of concurrency
 async function* eachNodeInTree({
   moduleSpecifier,
   importHook,
@@ -75,7 +78,7 @@ async function* eachNodeInTree({
     if (!shouldImport(childSpecifier, moduleSpecifier)) {
       continue
     }
-    // dont revisit specifiers
+    // don't revisit specifiers
     if (visitedSpecifiers.has(childSpecifier)) {
       continue
     }

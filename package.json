@@ -24,7 +24,7 @@
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:lockfile": "node scripts/lint-lockfile.js",
-    "lint:spelling": "cspell lint --dot --no-exit-code .",
+    "lint:spelling": "cspell lint --dot .",
     "lint:staged": "lint-staged --config ./.config/lint-staged.config.js",
     "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
     "rebuild:types": "npm run clean:types && npm run build:types",

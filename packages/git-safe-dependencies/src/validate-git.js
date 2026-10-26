@@ -2,7 +2,6 @@ const { isGitUrl, gitInfo, isCommitHash } = require('./isgit')
 const cache = require('./cache')
 
 const fetchRetry5xx = (url, options = {}, retries = 1) => {
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins
   return fetch(url, options).then((res) => {
     if (res.status >= 500 && res.status < 600 && retries > 0) {
       return fetchRetry5xx(url, options, retries - 1)
@@ -76,7 +75,7 @@ const tag2commit = async (user, project, tag) => {
 
 class ValidateGitUrl {
   constructor({ packages, cacheOnDisk = true } = {}) {
-    // TODO: instantiate properly, this is a temporary cludge to minimize memory leaks in case it's used programatically.
+    // TODO: instantiate properly, this is a temporary kludge to minimize memory leaks in case it's used programmatically.
     if (cacheOnDisk) {
       githubCache = cache.init('gh')
     } else if (githubCache === cache) {

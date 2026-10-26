@@ -1,4 +1,6 @@
-some notes
+<!-- cspell:ignore sesify, sesified, uideps -->
+
+# some notes
 
 - bundler plugins
   - two phases: generate config, generate build
@@ -7,7 +9,7 @@ some notes
     - passed directly to moduleInitializer (untrusted code)
     - calls requireRelative with parentModule context added
   - requireRelative
-    - translates the "requestedName" (eg relative path) to a moduleId (webpack doesnt need this, it rewrites the source to use the moduleId directly)
+    - translates the "requestedName" (eg relative path) to a moduleId (webpack doesn't need this, it rewrites the source to use the moduleId directly)
     - handles weird browserify-specific recursive lookups (eg buffer, timers)
     - calls internalRequire
     - uses the module config's protectExportsRequireTime
@@ -16,10 +18,10 @@ some notes
 - known / potential issues
 
   - sneaky setting of packageName by dir hacks?
-  - magicCopy doesnt walk the full prototype graph
+  - magicCopy doesn't walk the full prototype graph
   - perf overhead
-  - doesnt solve architectural weaknesses
-  - doesnt enforce disabling scripts (yet!)
+  - doesn't solve architectural weaknesses
+  - doesn't enforce disabling scripts (yet!)
 
 - [ ] review the audit
   - [ ] easy
@@ -64,7 +66,7 @@ another list of todos
 - [ ] module mappings
   - [ ] requestedName -> moduleId
   - [ ] moduleId -> { packageName, path }
-- [ ] idea: maybe encode dep graph (and cache) as weakmap pointers so they disappear as `require` ref is dropped
+- [ ] idea: maybe encode dep graph (and cache) as WeakMap pointers so they disappear as `require` ref is dropped
 - [ ] document browserify usage
 
 - [ ] using `--writeAutoConfig` should create a valid build using the generated config
@@ -73,9 +75,9 @@ exportsProtection strategies
 
 - [ ] harden strategy
   - tests
-- [ ] fresh eval/instantion doesnt require magicCopy
+- [ ] fresh eval/instantiation doesn't require magicCopy
 
-### summary of components
+## summary of components
 
 - Config
 
@@ -85,7 +87,7 @@ exportsProtection strategies
   - user config overrides
   - config
 
-    - agoric prototype: https://github.com/erights/legacy-todo/blob/master/manifest.json
+    - Agoric prototype: https://github.com/erights/legacy-todo/blob/master/manifest.json
       - per-package:
         - modules
         - globals
@@ -109,7 +111,7 @@ exportsProtection strategies
 ### recent notes + todo
 
 - importer can decorate: common
-- importer can see late sets: uncommonn
+- importer can see late sets: uncommon
 
 SES
 
@@ -140,16 +142,16 @@ SES
 - also interested in doing deeper dep analysis for dep dashboard
   - draw lines for global writes to global reads
 
-debug bundle sesh in metamask
+debug bundle session in metamask
 
 - ??
   -- in sentry deps, mod.require is undefined. `module.require` appears in node
   maybe fine, as we already use this in browserify and its not supported
 
-  - "obs-store" doesnt have localStorage access despite use?
+  - "obs-store" doesn't have localStorage access despite use?
   - [x] setTimeout not whitelisted for package "process"
     - problem: packageName is "\_process"
-  - ui <root> deps maps "react-dom" to "react-dom", not moduleId (why?)
+  - ui `<root>` deps maps "react-dom" to "react-dom", not moduleId (why?)
     - external deps (uideps bundle)
   - metamask minifying the whole bundle, including kernel?
 
@@ -180,10 +182,10 @@ debug bundle sesh in metamask
   - [ ] options
     - [ ] conflicts when autogen + config is specified
     - [ ] use autogen config in output
-    - [ ] investigate "unfrozen" reccomendation reasoning
+    - [ ] investigate "unfrozen" recommendation reasoning
   - [ ] DevEx
     - [ ] seems to break on live reload
-      - doesnt seem to get new config on reload?
+      - doesn't seem to get new config on reload?
       - reload on config change only works once?
 - [x] babel-thing (obsolete due to fix in SES)
 
@@ -193,39 +195,39 @@ debug bundle sesh in metamask
 - metamask
   - [x] "content-hash" current version contains reserved word "package"
   - [x] sentry does weird shit, maybe remove it for now
-  - [x] inpage, cleanContextForImports called before var dec? (due to error?)
+  - [x] in page, cleanContextForImports called before var dec? (due to error?)
   - [x] transforming ui with babel-thing
-  - [ ] shouldnt need regeneratorRuntime ?
+  - [ ] shouldn't need regeneratorRuntime ?
     - getting it in eth-json-rpc-middleware / json-rpc-engine
   - [ ] aes-js (old ver) modifies Array.prototype
         dep paths:
-        <root>
+        `<root>`
         eth-hd-keyring
         eth-simple-keyring
         gaba
         ethereumjs-wallet
         aes-js
 
-# older bundleEntryForModule
+## older bundleEntryForModule
 
 todo
 
 - [x] shared instances of modules
-  - [x] revert the seperation of eval / global injection
-- [x] make config like agoric prototype
+  - [x] revert the separation of eval / global injection
+- [x] make config like Agoric prototype
   - [x] config is json
   - [x] global-grabbing engine needs to move to sesify prelude
 - [x] update SES
   - [x] some issue with prelude or SES kernel running in strict mode
 - [x] shared instances of modules
-  - [x] revert the seperation of eval / global injection
+  - [x] revert the separation of eval / global injection
   - [x] update cache key generator
 - [x] mark question: while `this` is container global, `self` is undefined
 - [x] fix globalRefs
   - [x] fix objCheckSelf
   - [x] fix objCheckGlobal
 - [x] new config
-  - [x] make config like agoric prototype
+  - [x] make config like Agoric prototype
   - [x] config is json
   - [x] config -> endowments in sesify prelude
   - [x] need tests that generate config then use it
@@ -240,7 +242,7 @@ todo
   - [ ] defensibility/hardening options
     - [x] magic copy
     - [x] kowtow
-    - [x] return raw if same package (dont defense)
+    - [x] return raw if same package (don't defense)
     - [ ] @agoric/harden
       - ? metamask error hardening proto chain
   - [ ] enforce configuration
@@ -270,7 +272,7 @@ if autogen config
 - generate config then unpause browserPack
 - back pressure could cause a dead lock (?)
 
-# sesify prelude/kernel
+## sesify prelude/kernel
 
 - [x] pass custom endowments at require time
 - [x] pass custom endowments at config time
@@ -294,17 +296,17 @@ if autogen config
 - [x] cleanup prelude
 - [x] is global caching safe? (no)
 - [x] try using the frozen realm + container architecture
-- [x] battletest via metamask
+- [x] battle-test via metamask
 
   - [x] background boot works : )
   - [x] sent first tx for background-only sesified
-  - [x] contentscript doesnt?
+  - [x] content script doesn't?
   - [x] find sane default endowments
 
 - [ ] support granular config
   - [x] actually expose api from granular config
   - [x] ensure we keep the "this" context, esp for deepGets
-  - [ ] ensure we dont break Constructors with our "this" fix
+  - [ ] ensure we don't break Constructors with our "this" fix
 - [x] browserify insertGlobal is ruining the parsing of properties on global
 - [ ] sourcemaps
 
@@ -312,14 +314,14 @@ if autogen config
   - [ ] needs to work when there are no existing sourcemaps
   - [x] config to specify inline or file
   - [x] config to dump map somewhere file
-  - [?] ahhhhh nested inline sourcemaps?? not my problem??
+  - [?] nested inline sourcemaps?? not my problem??
 
 - [x] (external) allow less restrictive sandboxing modes (prototype.toString())
 - [x] (external) closer control over global? pass in "window" such that (window.Object === Object)
 
 - [?] browserify the prelude
 
-# tofu parser
+## tofu parser
 
 - [x] mvp
   - [x] analyze required files for platform API usage
@@ -329,7 +331,7 @@ if autogen config
 - [ ] not terrible
   - [x] more granular autogen config
     - [x] detect API usage on global
-    - [x] dont pass window if no property accessed
+    - [x] don't pass window if no property accessed
     - [x] granularity on certain apis, e.g. document
     - [x] raise platform api granularity to common denominator (e.g. dedupe "location" and "location.href"), including defaultGlobals
     - [?] maybe limit granularity to actual platform API surface (e.g. not "location.href.indexOf")
@@ -337,18 +339,18 @@ if autogen config
       - bc declaring the global object and passing it into a closure causes acorn-globals to ignore the uses of the global var
   - [x] user config defaultGlobals
   - [?] location and document.location is redundant
-  - [x] location and location.href trigers page reload < !!! wow ouch !!! >
+  - [x] location and location.href triggers page reload < !!! wow ouch !!! >
   - [x] easy user override
     - [x] likely need revDeps pointers at run time
   - [x] use SES.confine instead of realm.evaluate
   - [x] update ses
 
-# audit
+## audit
 
 - [ ] basic safety review
 - [ ] LA audit
 
-# devx
+## devEx
 
 - [ ] use autogen config if set to generate ?
 - [ ] cli support (?)
@@ -359,20 +361,20 @@ if autogen config
   - metamask sourcemaps are already a mess
   - then sesify sourcemaps get a bit worse
 
-# idea icebox
+## idea icebox
 
 - [ ] permissions as higher abstractions (network, persistence, DOM)
 - [ ] permissions sorted by risk (?)
 
-# the big ones
+## the big ones
 
 - [x] autogen granularity
 - [x] sourcemaps
-- [x] do call with agoric/MM
+- [x] do call with Agoric/MM
 - [x] (external) SES prototype.toString etc
 - [ ] perf
 
-# make perf better
+## make perf better
 
 - reduce instantiations
   - allow module cache under certain conditions
@@ -382,27 +384,27 @@ if autogen config
 - improve instantiation perf
   - transform src with endowments injection (build time slow down)
 
-# dangers of module cache
+## dangers of module cache
 
 - mutating the exports
 - cant be done if it includes unhardenables (?)
 
-### cli testing
+## cli testing
 
 eval in sesify bundle
 
-```
+```shell
 echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<root>":{"globals":{"console":true,"process":true}}}}' ] | node
 ```
 
 eval in ses
 
-```
+```shell
 node -p "try { require('ses').makeSESRootRealm().evaluate('const x = {}; x.hasOwnProperty = ()=>{}') } catch (err) { console.log(err.message) }"
 ```
 
 npm bug workaround
 
-```
+```shell
 npm unlink sesify && npm i && npm link sesify
 ```

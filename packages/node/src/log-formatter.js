@@ -51,17 +51,17 @@ export function createFormatter() {
 
     // dim and trim all but first line
     lines = lines.map((s) => chalk.grey(s))
-    const finallines = [firstLine, ...lines].join('\n')
+    const finalLines = [firstLine, ...lines].join('\n')
 
     // format details
     const details = Object.keys(data).reduce((str, key) => {
-      // dont display the message or error in details
+      // don't display the message or error in details
       if (key !== 'msg' && key !== 'err') {
         str += `\n  ${chalk.grey('-')} ${key}: ${util.inspect(data[key], { colors: true })}`
       }
       return str
     }, '')
 
-    return `${l} ${chalk.grey('›')} ${finallines} ${details}\n`
+    return `${l} ${chalk.grey('›')} ${finalLines} ${details}\n`
   }
 }

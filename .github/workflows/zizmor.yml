@@ -1,3 +1,5 @@
+# cspell:ignore SARIF
+
 name: Workflow security audit
 
 # Static analysis of GitHub Actions workflows using zizmor

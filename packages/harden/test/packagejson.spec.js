@@ -1,3 +1,5 @@
+// cspell:ignore pkgjson
+
 import test from 'ava'
 import { mkdtemp, writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'

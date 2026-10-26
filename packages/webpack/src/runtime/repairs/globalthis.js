@@ -20,7 +20,7 @@ function getPrototypeChain(value) {
   return protoChain
 }
 /**
- * For odd sandboxing situations including Firefox contentscript environment,
+ * For odd sandboxing situations including Firefox content script environment,
  * where the globalThis is a sandbox with a truncated prototype chain that
  * magically inherits properties from a hidden part of the prototype chain.
  *

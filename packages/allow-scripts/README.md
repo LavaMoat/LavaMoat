@@ -1,3 +1,5 @@
+<!-- cspell:ignore rezeplayer -->
+
 # @lavamoat/allow-scripts
 
 A tool for running only the dependency lifecycle hooks specified in an _allowlist_.

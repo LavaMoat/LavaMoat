@@ -33,10 +33,10 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 /**
  * Just import
  *
- * @import {LockdownOptions} from 'ses'
- * @import {CompleteLavaMoatPluginOptions} from './buildtime/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {LockdownOptions} from 'ses'
+ * @import {CompleteLavaMoatPluginOptions} from './buildtime/types'
  */
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -205,7 +205,7 @@ class LavaMoatPlugin {
     //     const dir = path.dirname(id);
     //     const moduleName = path.basename(id);
 
-    //     // Call the resolver with the appropriatewindows arguments
+    //     // Call the resolver with the appropriate Windows arguments
     //     return resolver(options, dir, moduleName);
     //   };
     // }
@@ -251,7 +251,7 @@ class LavaMoatPlugin {
         if (FORCED_CONFIG.length > 0) {
           STORE.mainCompilationWarnings.push(
             new WebpackError(
-              'LavaMoatPlugin: Following options had to be overriden for security: ' +
+              'LavaMoatPlugin: Following options had to be overridden for security: ' +
                 FORCED_CONFIG.join(', ')
             )
           )
@@ -369,7 +369,8 @@ class LavaMoatPlugin {
                     connections:
                       compilation.moduleGraph.getOutgoingConnections(module),
                   })),
-                  overwritePolicyWithOverride: STORE.options.generatePolicyIncludeOverrides,
+                  overwritePolicyWithOverride:
+                    STORE.options.generatePolicyIncludeOverrides,
                 })
               : loadPolicy({
                   policyFromOptions: STORE.options.policy,
@@ -437,7 +438,7 @@ class LavaMoatPlugin {
             )
             STORE.externals = moduleData.externals
             // narrow down the policy and map to module identifiers
-            // TODO: theoretically policy could be optimized per chunk, but configuring webpack to emit a runtime chunk or have separate builds seems better for most usecases.
+            // TODO: theoretically policy could be optimized per chunk, but configuring webpack to emit a runtime chunk or have separate builds seems better for most use-cases.
             STORE.runtimeOptimizedPolicy =
               identifierLookup.getTranslatedPolicy()
 

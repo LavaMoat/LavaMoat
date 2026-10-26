@@ -237,7 +237,7 @@ function processOnePackageInLogicalTree(
     if (comparePackageLogicalPaths(childLogicalPath, theCurrentBest) < 0) {
       // debug: log extraneous path traversals
       // if (theCurrentBest !== undefined) {
-      //   console.log(`extraneous "${childPackageDir}"\n  current "${theCurrentBest}"\n  preferd "${childLogicalPath}"`)
+      //   console.log(`extraneous "${childPackageDir}"\n  current "${theCurrentBest}"\n  preferred "${childLogicalPath}"`)
       // }
       // set as the new best so far
       preferredPackageLogicalPathMap.set(childPackageDir, childLogicalPath)
@@ -270,7 +270,7 @@ function getPackageNameForModulePath(canonicalNameMap, modulePath) {
   }
   const packageName = /** @type {string} */ (canonicalNameMap.get(packageDir))
   const relativeToPackageDir = path.relative(packageDir, modulePath)
-  // files should never be associated with a package directory across a package boundary (as tested via the presense of "node_modules" in the path)
+  // files should never be associated with a package directory across a package boundary (as tested via the presence of "node_modules" in the path)
   if (relativeToPackageDir.includes('node_modules')) {
     throw new Error(
       `LavaMoat - Encountered unknown package directory "${relativeToPackageDir}" for file "${modulePath}"`
