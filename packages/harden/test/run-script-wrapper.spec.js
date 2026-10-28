@@ -20,12 +20,13 @@ test('script config extending provides a sum of options', (t) => {
       customizePermissionsConfig: (config) => {
         composedNodeOptions = config
       },
-      readScriptsConfig: () => ({
-        lint: 'lavamoat/scripts.compose.json',
+      readPackageJson: () => ({
+        scriptsConfig: { lint: 'lavamoat/scripts.compose.json' },
       }),
     },
     {
       readFileSync: fs.readFileSync,
+      existsSync: fs.existsSync,
       pathJoin: path.join,
       pathDelimiter: path.delimiter,
       tmpdir: os.tmpdir,
@@ -69,12 +70,13 @@ test('script config extending breaks cycles', (t) => {
       projectRoot,
       pathBinMatcher: () => false,
       customizePermissionsConfig: (config) => config,
-      readScriptsConfig: () => ({
-        lint: 'lavamoat/scripts.cycle.json',
+      readPackageJson: () => ({
+        scriptsConfig: { lint: 'lavamoat/scripts.cycle.json' },
       }),
     },
     {
       readFileSync: fs.readFileSync,
+      existsSync: fs.existsSync,
       pathJoin: path.join,
       pathDelimiter: path.delimiter,
       tmpdir: os.tmpdir,
@@ -90,4 +92,52 @@ test('script config extending breaks cycles', (t) => {
     },
     { message: /maximum extend depth exceeded/ }
   )
+})
+
+test('bin overrides are prepared once and prepended to PATH', (t) => {
+  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'harden-binov-'))
+  t.teardown(() => fs.rmSync(projectRoot, { recursive: true, force: true }))
+  const overrideDir = path.join(projectRoot, 'node_modules', '.bin_override')
+
+  /** @type {{ dependencies: string[]; overrideDir: string }[]} */
+  const calls = []
+  const makeWrapper = () =>
+    makeRunScriptWrapper(
+      {
+        projectRoot,
+        pathBinMatcher: () => false,
+        customizePermissionsConfig: () => {},
+        readPackageJson: () => ({
+          dependencies: { a: '1' },
+          devDependencies: { b: '1' },
+        }),
+        prepareBinOverrides: (params) => {
+          calls.push(params)
+          fs.mkdirSync(params.overrideDir)
+        },
+      },
+      {
+        readFileSync: fs.readFileSync,
+        existsSync: fs.existsSync,
+        pathJoin: path.join,
+        pathDelimiter: path.delimiter,
+        tmpdir: os.tmpdir,
+        realpathSync: fs.realpathSync,
+        lstatSync: fs.lstatSync,
+        readlinkSync: fs.readlinkSync,
+      }
+    )
+
+  const noNodeModules = makeWrapper().processEnv({ PATH: '/usr/bin' })
+  t.is(calls.length, 0, 'skipped when node_modules is missing')
+  t.is(noNodeModules.PATH, '/usr/bin')
+
+  fs.mkdirSync(path.join(projectRoot, 'node_modules'))
+  const first = makeWrapper().processEnv({ PATH: '/usr/bin' })
+  t.deepEqual(calls, [{ dependencies: ['a', 'b'], overrideDir }])
+  t.is(first.PATH, [overrideDir, '/usr/bin'].join(path.delimiter))
+
+  const nested = makeWrapper().processEnv({ PATH: first.PATH })
+  t.is(calls.length, 1, 'skipped when the dir already exists')
+  t.is(nested.PATH, first.PATH, 'not duplicated in nested runs')
 })

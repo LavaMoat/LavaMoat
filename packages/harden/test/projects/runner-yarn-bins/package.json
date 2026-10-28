@@ -1,0 +1,25 @@
+{
+  "name": "test-yarn-bins-project",
+  "version": "1.0.0",
+  "packageManager": "yarn@4.16.0",
+  "devEngines": {
+    "packageManager": {
+      "name": "yarn",
+      "version": ">=4.16.0",
+      "onFail": "error"
+    }
+  },
+  "scripts": {
+    "a": "echo Absolutely",
+    "b": "echo $BISFOR",
+    "test": "yarn run a && yarn run b && echo stealing: ${TOKEN:-}"
+  },
+  "dependencies": {
+    "@lavamoat/allow-scripts": "5.1.0",
+    "@lavamoat/node": "2.0.1",
+    "lavamoat-core": "19.0.1"
+  },
+  "scriptsConfig": {
+    "#default": "lavamoat/scripts.loose.json"
+  }
+}
