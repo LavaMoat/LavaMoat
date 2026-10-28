@@ -12,10 +12,12 @@ function makeRunScriptWrapper(
     projectRoot,
     pathBinMatcher,
     customizePermissionsConfig,
-    readScriptsConfig,
+    readPackageJson,
+    prepareBinOverrides,
   },
   {
     readFileSync,
+    existsSync,
     pathJoin,
     pathDelimiter,
     tmpdir,
@@ -363,11 +365,51 @@ function makeRunScriptWrapper(
     return filteredFragments.join(pathDelimiter)
   }
 
+  /**
+   * Lets the package manager adapter create `node_modules/.bin_override` with
+   * links that pin known bin names. Returns the dir if it should go first in
+   * PATH.
+   *
+   * @param {Record<string, any>} pkgJson
+   * @returns {string | undefined}
+   */
+  function binOverrides(pkgJson) {
+    if (!prepareBinOverrides) {
+      return
+    }
+    const nodeModules = pathJoin(projectRoot, 'node_modules')
+    const overrideDir = pathJoin(nodeModules, '.bin_override')
+    // Skip if already created (a clean install removes it) or if running
+    // under permissions - a nested run where fs access to even check
+    // might be limited.
+    if (
+      !process.permission &&
+      !existsSync(overrideDir) &&
+      existsSync(nodeModules)
+    ) {
+      try {
+        prepareBinOverrides({
+          dependencies: Object.keys({
+            ...pkgJson.dependencies,
+            ...pkgJson.devDependencies,
+          }),
+          overrideDir,
+        })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        console.error(
+          `[LavaMoat] Warning: Failed to create ${overrideDir}: ${message}`
+        )
+      }
+    }
+    return existsSync(overrideDir) ? overrideDir : undefined
+  }
+
   return {
     processEnv: (existingEnv) => {
-      const scriptsConfig = readScriptsConfig(projectRoot)
+      const pkgJson = readPackageJson(projectRoot) || {}
       const { config, name: configName } = readConfig({
-        scriptsConfig,
+        scriptsConfig: pkgJson.scriptsConfig,
         scriptName,
         projectRoot,
       })
@@ -376,13 +418,24 @@ function makeRunScriptWrapper(
       // might expose it as 'Path' instead of 'PATH'. Checking both ensures it doesn't get wiped out.
 
       const existingPath = existingEnv.PATH || existingEnv.Path || ''
+      const overrideDir = binOverrides(pkgJson)
+      let PATH = envPathOpinions(existingPath)
+      // nested runs already have overrideDir in PATH
+      if (
+        overrideDir &&
+        !`${pathDelimiter}${PATH}${pathDelimiter}`.includes(
+          `${pathDelimiter}${overrideDir}${pathDelimiter}`
+        )
+      ) {
+        PATH = `${overrideDir}${pathDelimiter}${PATH}`
+      }
 
       const lavamoatDir = pathJoin(projectRoot, 'lavamoat')
 
       const fixedEnv = {
         ...filterEnv(existingEnv, lavamoatDir),
         LAVAMOAT_RUN_CONF: configName,
-        PATH: envPathOpinions(existingPath),
+        PATH,
         NODE_OPTIONS: installNodeOptions(config.nodeOptions, existingEnv),
       }
       return fixedEnv
