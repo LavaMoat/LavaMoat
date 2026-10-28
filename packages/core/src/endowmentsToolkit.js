@@ -1,7 +1,4 @@
 // @ts-check
-/// <reference types="ses" />
-/* global Compartment */
-
 /**
  * Utilities for generating the endowments object based on a `globalRef` and a
  * {@link LMPolicy.PackagePolicy}.
@@ -21,6 +18,19 @@
  * WARNING: This module is used directly by the runtime in webpack plugin which
  * uses simple shimming to assemble modules. It doesn't bundle properly. This
  * file cannot reqire any files or packages.
+ */
+
+/**
+ * The original `Function` constructor, captured before SES `repairIntrinsics()`
+ * replaces it with a tamed version. We use it to compile capability sources so
+ * their free variables resolve against the real global object rather than any
+ * SES-managed one. This module must therefore be evaluated before
+ * `repairIntrinsics()`.
+ */
+const FeralFunction = Function
+
+/**
+ * @import {CapabilitiesPolicy} from '@lavamoat/types'
  */
 
 module.exports = endowmentsToolkit
@@ -683,23 +693,26 @@ function endowmentsToolkit({
   }
 }
 /**
- * Evaluates capability sources in isolated Compartments and collects registered
- * repairs and capability definitions.
+ * Evaluates capability sources and collects registered repairs and capability
+ * definitions.
  *
- * Each source is evaluated in a fresh Compartment endowed with `repair`,
- * `defineCapability`, and any additional `globals`. Repair callbacks are
- * wrapped to pass `globalRef` when executed. Duplicate capability names across
- * sources result in an error.
+ * Each source is evaluated as strict-mode code in a "feral" `Function` (i.e.,
+ * _not_ confined to a Compartment). `repair`, `defineCapability`, and any
+ * additional `globals` are passed as formal parameters so they are directly in
+ * scope for the source. Free variables that don't match a parameter name fall
+ * through to the real global object. Repair callbacks are wrapped to pass
+ * `globalRef` when executed. Duplicate capability names across sources result
+ * in an error.
  *
- * NOTE: This function relies on `Compartment` being available as a global,
- * which is provided by SES at runtime.
+ * May be called after SES `repairIntrinsics()`, as long as this module was
+ * loaded before it.
  *
  * @param {object} opts
  * @param {string[]} opts.sources - Array of capability source texts to evaluate
  * @param {object} opts.globalRef - The real globalThis reference passed to
  *   repair callbacks when executed
- * @param {object} [opts.globals] - Additional globals to expose in each
- *   Compartment alongside `repair` and `defineCapability`
+ * @param {object} [opts.globals] - Additional globals to expose to each source
+ *   alongside `repair` and `defineCapability`
  * @returns {{ repairs: Function[]; capabilities: Map<string, object> }}
  */
 function evaluateCapabilities({ sources, globalRef, globals = {} }) {
@@ -729,14 +742,21 @@ function evaluateCapabilities({ sources, globalRef, globals = {} }) {
       capabilities.set(name, definition)
     }
 
-    const compartment = new Compartment({
-      ...globals,
-      repair,
-      defineCapability,
-    })
+    // Named entries become formal parameters of the compiled function so
+    // their identifiers are directly in scope for `source`. `repair` and
+    // `defineCapability` are listed last so a caller-supplied `globals`
+    // object cannot shadow them.
+    /** @type {Record<string, any>} */
+    const scope = { ...globals, repair, defineCapability }
+    const scopeNames = Object.keys(scope)
+    const scopeValues = scopeNames.map((name) => scope[name])
 
     try {
-      compartment.evaluate(source)
+      const evaluate = new FeralFunction(
+        ...scopeNames,
+        `'use strict';\n${source}`
+      )
+      evaluate(...scopeValues)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       throw new Error(
@@ -947,8 +967,8 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
- * @param {Record<string, any[]>} [rootCapabilities] - Capabilities to apply to
- *   the root compartment, keyed by name with options arrays as values
+ * @param {CapabilitiesPolicy} [rootCapabilities] - Capabilities to apply to the
+ *   root compartment, keyed by name with options arrays as values
  * @returns {Record<PropertyKey, any>}
  */
 
