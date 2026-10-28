@@ -218,7 +218,6 @@ export const makeAttenuators = ({
     }
 
     attenuateGlobals_(policy, originalGlobalThis, packageCompartmentGlobalThis)
-    return
   }
 
   /**
