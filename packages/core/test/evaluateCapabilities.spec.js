@@ -1,6 +1,4 @@
 const test = require('ava')
-// Load SES to make Compartment available as a global
-require('ses')
 const { evaluateCapabilities } = require('../src/endowmentsToolkit.js')
 
 test('single defineCapability call registers capability in map', (t) => {
@@ -74,7 +72,17 @@ test('capability source that throws at evaluation time produces error with conte
   t.regex(err.message, /bad capability source/)
 })
 
-test('extra globals are available in the capability Compartment', (t) => {
+test('capability source is evaluated in strict mode', (t) => {
+  const source = `defineCapability('cap', { thisValue: this, strict: (function () { return this === undefined })() })`
+  const { capabilities } = evaluateCapabilities({
+    sources: [source],
+    globalRef: {},
+  })
+  t.is(capabilities.get('cap').thisValue, undefined)
+  t.true(capabilities.get('cap').strict)
+})
+
+test('extra globals are available to the capability source', (t) => {
   const sentinel = { isSentinel: true }
   const source = `defineCapability('cap', { result: myGlobal })`
   const { capabilities } = evaluateCapabilities({
