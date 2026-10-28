@@ -17,10 +17,8 @@ import { AttenuationError } from '../error.js'
 import { isObjectyObject } from '../util.js'
 
 /**
- * @import {
- *   GlobalAttenuatorFn,
- *   ModuleAttenuatorFn
- * } from '@endo/compartment-mapper'
+ * @import {GlobalAttenuatorFn,
+ *   ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {MakeGlobalsAttenuatorOptions} from '../internal.js'
  * @import {GlobalAttenuatorParams} from '../types.js'
  */
@@ -102,7 +100,7 @@ export const makeAttenuators = ({
    * @see {@link deferredAttenuations}
    */
   const attenuateGlobals = (
-    [policy],
+    policy,
     originalGlobalThis,
     packageCompartmentGlobalThis
   ) => {
@@ -112,25 +110,27 @@ export const makeAttenuators = ({
      * @type {GlobalAttenuatorFn<GlobalAttenuatorParams>}
      */
     const attenuateGlobals_ = (
-      [policy],
+      [globalsPolicy, capabilitiesPolicy],
       originalGlobalThis,
       packageCompartmentGlobalThis
     ) => {
-      if (!policy) {
+      if (!globalsPolicy && !capabilitiesPolicy) {
         return
       }
 
-      if (policy === ENDO_POLICY_ITEM_ROOT) {
+      if (globalsPolicy === ENDO_POLICY_ITEM_ROOT) {
         if (rootCompartmentGlobalThis) {
           throw new AttenuationError(
             'Root compartment globalThis already initialized; this is a bug'
           )
         }
         rootCompartmentGlobalThis = packageCompartmentGlobalThis
-        copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
-          'globalThis',
-          'global',
-        ])
+        copyWrappedGlobals(
+          originalGlobalThis,
+          packageCompartmentGlobalThis,
+          ['globalThis', 'global'],
+          capabilitiesPolicy
+        )
         scuttle(originalGlobalThis, scuttleGlobalThis)
       } else {
         if (!rootCompartmentGlobalThis) {
@@ -167,7 +167,7 @@ export const makeAttenuators = ({
            * `GlobalPolicy`. Below, we're creating a phony `ResourcePolicy` to
            * make it fit.
            */
-          { globals: policy },
+          { globals: globalsPolicy, capabilities: capabilitiesPolicy },
           // Not sure if it works, but with this as a 3rd argument, in theory,
           // each compartment would unwrap functions to the root compartment's
           // globalThis, where all copied functions are set up to unwrap to actual
@@ -192,10 +192,11 @@ export const makeAttenuators = ({
 
     // an untrusted root will not have a ENDO_POLICY_ITEM_ROOT policy, so we
     // don't need to defer attenuations until rootCompartmentGlobalThis is set.
+    const [globalsPolicy] = policy
     if (trustRoot && !rootCompartmentGlobalThis) {
-      if (policy === ENDO_POLICY_ITEM_ROOT) {
+      if (globalsPolicy === ENDO_POLICY_ITEM_ROOT) {
         attenuateGlobals_(
-          [policy],
+          policy,
           originalGlobalThis,
           packageCompartmentGlobalThis
         )
@@ -207,7 +208,7 @@ export const makeAttenuators = ({
         deferredAttenuations.push(
           attenuateGlobals_.bind(
             null,
-            [policy],
+            policy,
             originalGlobalThis,
             packageCompartmentGlobalThis
           )
@@ -216,11 +217,8 @@ export const makeAttenuators = ({
       return
     }
 
-    attenuateGlobals_(
-      [policy],
-      originalGlobalThis,
-      packageCompartmentGlobalThis
-    )
+    attenuateGlobals_(policy, originalGlobalThis, packageCompartmentGlobalThis)
+    return
   }
 
   /**

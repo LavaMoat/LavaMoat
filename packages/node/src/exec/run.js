@@ -15,18 +15,17 @@ import { hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
+import { harden } from '../preamble.js'
+import { loadCapabilitySources } from './capabilities.js'
 import { makeAttenuators } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
-import { harden } from '../preamble.js'
 
 /**
- * @import {
- *   ExecuteOptions,
+ * @import {ExecuteOptions,
  *   LoadPoliciesOptions,
  *   MergedLavaMoatPolicy,
- *   RunOptions
- * } from '../types.js'
+ *   RunOptions} from '../types.js'
  */
 
 /**
@@ -79,6 +78,16 @@ export const run = async (
   const endoPolicy = await toEndoPolicy(policy, { projectRoot })
 
   assertTrustRootMatchesPolicy(policy, entrypoint, trustRoot)
+
+  /** @type {string[]} */
+  let policyCapabilitySources = []
+  if (policy.use?.length && options.policyPath) {
+    policyCapabilitySources = await loadCapabilitySources(
+      policy,
+      options.policyPath
+    )
+  }
+  capabilitySources = [...capabilitySources, ...policyCapabilitySources]
 
   const { capabilities } = harden({ capabilitySources, strict: strictHarden })
   const { attenuateGlobals, attenuateModule } = makeAttenuators({

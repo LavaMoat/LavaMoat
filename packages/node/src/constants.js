@@ -131,6 +131,11 @@ export const ENDO_PKG_POLICY_OPTIONS = 'options'
 export const ENDO_PKG_POLICY_PACKAGES = 'packages'
 
 /**
+ * Name of the `capabilities` property of a `LavaMoatPackagePolicy`
+ */
+export const ENDO_PKG_POLICY_CAPABILITIES = 'capabilities'
+
+/**
  * Flag for root policy item in a LavaMoat policy
  */
 export const LAVAMOAT_PKG_POLICY_ROOT = '$root$'
