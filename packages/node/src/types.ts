@@ -32,7 +32,6 @@ import type { PathLike, Stats } from 'node:fs'
 import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
   ATTENUATORS_COMPARTMENT,
-  ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
   LAVAMOAT_PKG_POLICY_ROOT,
   MERGED_POLICY_FIELD,
@@ -243,12 +242,6 @@ export type ConsumerCaptureFromMapOptions = Except<
 >
 
 /**
- * "Writable" identifier for a LavaMoat global policy item in the context of an
- * Endo policy
- */
-export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
-
-/**
  * A module source type
  */
 export type SourceType = typeof SOURCE_TYPE_MODULE | typeof SOURCE_TYPE_SCRIPT
@@ -391,8 +384,7 @@ export type LavaMoatEndoPolicy = EndoPolicy<
 export type LavaMoatEndoRootPolicy = typeof ENDO_POLICY_ITEM_ROOT
 
 /**
- * Like Endo's `PropertyPolicy`, but can be a {@link EndoWritePolicy} instead of
- * just `boolean`.
+ * Like Endo's `PropertyPolicy`, but for LavaMoat's global policy items
  */
 export type LavaMoatEndoWritablePropertyPolicy = GlobalPolicy
 
