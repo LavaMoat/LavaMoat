@@ -40,6 +40,7 @@ const { create, entries, fromEntries } = Object
  *   ResourcePolicy
  * } from '@lavamoat/types'
  * @import {
+ *   GlobalAttenuatorParams,
  *   LavaMoatEndoPackagePolicy,
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
@@ -164,9 +165,20 @@ const convertToEndoPackagePolicyPackages = (item) => {
  * attenuator.
  *
  * @param {GlobalPolicy} [item] - A value in `ResourcePolicy`
- * @returns {LavaMoatEndoPackagePolicy['globals']}
+ * @param {ResourcePolicy['capabilities']} [capabilities] - A value in
+ *   `ResourcePolicy`
+ * @returns {GlobalAttenuatorParams | undefined}
  */
-const convertToEndoPackagePolicyGlobals = (item) => (!item ? undefined : [item])
+const convertToEndoPackagePolicyGlobals = (item, capabilities) => {
+  /** @type {GlobalAttenuatorParams | undefined} */
+  let result
+  if (item) {
+    result = capabilities ? [item, capabilities] : [item]
+  } else if (capabilities) {
+    result = [undefined, capabilities]
+  }
+  return result
+}
 
 /**
  * Converts LavaMoat `ResourcePolicy` to Endo's `PackagePolicyOptions`
@@ -206,9 +218,10 @@ const convertToEndoPackagePolicy = (resources) => {
       resources.packages
     )
   }
-  if (resources.globals) {
+  if (resources.globals || resources.capabilities) {
     pkgPolicy[ENDO_PKG_POLICY_GLOBALS] = convertToEndoPackagePolicyGlobals(
-      resources.globals
+      resources.globals,
+      resources.capabilities
     )
   }
   if (resources.builtin) {

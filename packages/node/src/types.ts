@@ -19,7 +19,12 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { LavaMoatPolicy, Resources } from '@lavamoat/types'
+import type {
+  CapabilitiesPolicy,
+  GlobalPolicy,
+  LavaMoatPolicy,
+  Resources,
+} from '@lavamoat/types'
 import type { IsBuiltinFn, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
@@ -337,7 +342,9 @@ export interface GeneratePolicyResult {
 /**
  * Params to LavaMoat's global attenuator
  */
-export type GlobalAttenuatorParams = [LavaMoatEndoGlobalPolicyItem]
+export type GlobalAttenuatorParams =
+  | [LavaMoatEndoGlobalPolicyItem]
+  | [LavaMoatEndoGlobalPolicyItem | undefined, CapabilitiesPolicy]
 
 /**
  * Extends Endo's `PolicyItem` with the special {@link LavaMoatEndoRootPolicy}
@@ -385,10 +392,7 @@ export type LavaMoatEndoRootPolicy = typeof ENDO_POLICY_ITEM_ROOT
  * Like Endo's `PropertyPolicy`, but can be a {@link EndoWritePolicy} instead of
  * just `boolean`.
  */
-export type LavaMoatEndoWritablePropertyPolicy = Record<
-  string,
-  EndoWritePolicy | boolean
->
+export type LavaMoatEndoWritablePropertyPolicy = GlobalPolicy
 
 /**
  * Options for _our_ `makeReadPowers()` function
