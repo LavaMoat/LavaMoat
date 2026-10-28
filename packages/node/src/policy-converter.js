@@ -36,7 +36,6 @@ const { create, entries, fromEntries } = Object
  * @import {GlobalPolicy,
  *   PackagePolicy,
  *   ResourcePolicy,
- *   CapabilitiesPolicy,
  *   LavaMoatPolicy} from '@lavamoat/types'
  * @import {LavaMoatEndoPackagePolicy,
  *   LavaMoatEndoPackagePolicyOptions,
@@ -46,8 +45,7 @@ const { create, entries, fromEntries } = Object
  *   MergedLavaMoatPolicy,
  *   ToEndoPolicyOptionsWithoutPolicyOverride,
  *   UnmergedLavaMoatPolicy,
- * GlobalAttenuatorParams,
- * LavaMoatEndoGlobalPolicyItem} from './types.js'
+ *   GlobalAttenuatorParams} from './types.js'
  */
 
 /**
