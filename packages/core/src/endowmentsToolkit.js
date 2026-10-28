@@ -29,7 +29,9 @@
  */
 const FeralFunction = Function
 
-/** @typedef {import('@lavamoat/types/capability').CapabilityDefinition} RegisteredCapability */
+/**
+ * @import {CapabilitiesPolicy} from '@lavamoat/types'
+ */
 
 module.exports = endowmentsToolkit
 module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
@@ -45,7 +47,8 @@ module.exports._test = { instrumentDynamicValueAtPath }
  * @param {boolean} [opts.handleGlobalWrite]
  * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
  *   mutated later
- * @param {Map<string, RegisteredCapability>} [opts.capabilities]
+ * @param {Map<string, { ambient: boolean; endow: Function }>} [opts.capabilities]
+ *   -
  *
  *   Registered capabilities from evaluateCapabilities
  */
@@ -55,11 +58,11 @@ function endowmentsToolkit({
   knownWritableFields = new Set(),
   capabilities = new Map(),
 } = {}) {
-  // Split capabilities into ambient (auto-applied, not implemented yet) and local
+  // Split capabilities into ambient (auto-applied in Phase 2) and local
   // (applied only when listed in package policy).
-  /** @type {Map<string, RegisteredCapability>} */
+  /** @type {Map<string, { ambient: boolean; endow: Function }>} */
   const ambientCapabilities = new Map()
-  /** @type {Map<string, RegisteredCapability>} */
+  /** @type {Map<string, { ambient: boolean; endow: Function }>} */
   const localCapabilities = new Map()
   for (const [name, def] of capabilities) {
     if (def.ambient) {
@@ -95,7 +98,7 @@ function endowmentsToolkit({
    *   unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to
    *   replace (default: targetRef)
-   * @returns {Partial<T> & Record<string, unknown>} - The targetRef
+   * @returns {Partial<T>} - The targetRef
    */
   function getEndowmentsForConfig(
     sourceRef,
@@ -103,7 +106,7 @@ function endowmentsToolkit({
     unwrapTo,
     unwrapFrom
   ) {
-    /** @type {Partial<T> & Record<string, unknown>} */
+    /** @type {object} */
     let endowments = {}
 
     if (packagePolicy.globals) {
@@ -197,7 +200,7 @@ function endowmentsToolkit({
    * @param {object} [unwrapFrom]
    * @param {string[]} [explicitlyBanned]
    * @param {Set<string>} [allowedWriteFields]
-   * @returns {Partial<T> & Record<string, unknown>}
+   * @returns {Partial<T>}
    */
   function makeMinimalViewOfRef(
     sourceRef,
@@ -207,7 +210,7 @@ function endowmentsToolkit({
     explicitlyBanned = [],
     allowedWriteFields = new Set()
   ) {
-    /** @type {Partial<T> & Record<string, unknown>} */
+    /** @type {object} */
     const targetRef = {}
     paths.forEach((path) => {
       const pathParts = path.split('.')
@@ -708,15 +711,14 @@ function endowmentsToolkit({
  * @param {string[]} opts.sources - Array of capability source texts to evaluate
  * @param {object} opts.globalRef - The real globalThis reference passed to
  *   repair callbacks when executed
- * @returns {{
- *   repairs: Function[]
- *   capabilities: Map<string, RegisteredCapability>
- * }}
+ * @param {object} [opts.globals] - Additional globals to expose to each source
+ *   alongside `repair` and `defineCapability`
+ * @returns {{ repairs: Function[]; capabilities: Map<string, object> }}
  */
-function evaluateCapabilities({ sources, globalRef }) {
+function evaluateCapabilities({ sources, globalRef, globals = {} }) {
   /** @type {Function[]} */
   const repairs = []
-  /** @type {Map<string, RegisteredCapability>} */
+  /** @type {Map<string, object>} */
   const capabilities = new Map()
 
   sources.forEach((source, index) => {
@@ -729,7 +731,7 @@ function evaluateCapabilities({ sources, globalRef }) {
 
     /**
      * @param {string} name
-     * @param {RegisteredCapability} definition
+     * @param {any} definition
      */
     const defineCapability = (name, definition) => {
       if (capabilities.has(name)) {
@@ -740,12 +742,21 @@ function evaluateCapabilities({ sources, globalRef }) {
       capabilities.set(name, definition)
     }
 
+    // Named entries become formal parameters of the compiled function so
+    // their identifiers are directly in scope for `source`. `repair` and
+    // `defineCapability` are listed last so a caller-supplied `globals`
+    // object cannot shadow them.
+    /** @type {Record<string, any>} */
+    const scope = { ...globals, repair, defineCapability }
+    const scopeNames = Object.keys(scope)
+    const scopeValues = scopeNames.map((name) => scope[name])
+
     try {
-      new FeralFunction(
-        'repair',
-        'defineCapability',
+      const evaluate = new FeralFunction(
+        ...scopeNames,
         `'use strict';\n${source}`
-      )(repair, defineCapability)
+      )
+      evaluate(...scopeValues)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       throw new Error(
@@ -878,9 +889,7 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
 }
 
 /**
- * @import {ContextTestFn,
- *   SomeFunction,
- *   SomeParameters} from './internal.js'
+ * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
  */
 
 /**
@@ -958,9 +967,8 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
- * @param {LMPolicy.ResourcePolicy['capabilities']} [rootCapabilities] -
- *   Capabilities to apply to the root compartment, keyed by name with options
- *   arrays as values
+ * @param {CapabilitiesPolicy} [rootCapabilities] - Capabilities to apply to the
+ *   root compartment, keyed by name with options arrays as values
  * @returns {Record<PropertyKey, any>}
  */
 

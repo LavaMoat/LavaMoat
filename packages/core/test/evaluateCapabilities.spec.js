@@ -73,64 +73,22 @@ test('capability source that throws at evaluation time produces error with conte
 })
 
 test('capability source is evaluated in strict mode', (t) => {
-  const source = `
-    const thisValue = this
-    const strict = (function () { return this === undefined })()
-    defineCapability('cap', {
-      ambient: false,
-      endow({ endowments }) {
-        endowments.thisValue = thisValue
-        endowments.strict = strict
-      },
-    })
-  `
+  const source = `defineCapability('cap', { thisValue: this, strict: (function () { return this === undefined })() })`
   const { capabilities } = evaluateCapabilities({
     sources: [source],
     globalRef: {},
   })
-  const endowments = {}
-  capabilities.get('cap').endow({
-    options: [],
-    endowments,
-    compartmentGlobalThis: {},
-    rootCompartmentGlobalThis: {},
-  })
-  t.is(endowments.thisValue, undefined)
-  t.true(endowments.strict)
+  t.is(capabilities.get('cap').thisValue, undefined)
+  t.true(capabilities.get('cap').strict)
 })
 
 test('extra globals are available to the capability source', (t) => {
   const sentinel = { isSentinel: true }
-  const compartmentGlobalThis = {}
-  const rootCompartmentGlobalThis = {}
-  const source = `defineCapability('cap', {
-    ambient: false,
-    endow({
-      options,
-      endowments,
-      compartmentGlobalThis,
-      rootCompartmentGlobalThis,
-    }) {
-      endowments.result = myGlobal
-      endowments.option = options[0]
-      endowments.compartmentGlobalThis = compartmentGlobalThis
-      endowments.rootCompartmentGlobalThis = rootCompartmentGlobalThis
-    },
-  })`
-  globalThis.myGlobal = sentinel // has access to an actual global
+  const source = `defineCapability('cap', { result: myGlobal })`
   const { capabilities } = evaluateCapabilities({
     sources: [source],
     globalRef: {},
+    globals: { myGlobal: sentinel },
   })
-  const endowments = {}
-  capabilities.get('cap').endow({
-    options: [sentinel],
-    endowments,
-    compartmentGlobalThis,
-    rootCompartmentGlobalThis,
-  })
-  t.is(endowments.result, sentinel)
-  t.is(endowments.option, sentinel)
-  t.is(endowments.compartmentGlobalThis, compartmentGlobalThis)
-  t.is(endowments.rootCompartmentGlobalThis, rootCompartmentGlobalThis)
+  t.is(capabilities.get('cap').result, sentinel)
 })
