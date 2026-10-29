@@ -12,6 +12,7 @@ const { applySourceTransforms } = require('./sourceTransforms')
 const { makeInitStatsHook } = require('./makeInitStatsHook')
 const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const endowmentsToolkit = require('./endowmentsToolkit')
+const testCapability = require('./testCapability')
 const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 const { MODULE_REFS, DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
 
@@ -36,4 +37,5 @@ module.exports = {
   makeInitStatsHook,
   codeSampleFromAstNode,
   endowmentsToolkit,
+  testCapability,
 }

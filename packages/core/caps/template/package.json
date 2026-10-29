@@ -1,0 +1,10 @@
+{
+  "name": "@myorg/capability-1",
+  "main": "./index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "lavamoat-core": "latest"
+  }
+}
