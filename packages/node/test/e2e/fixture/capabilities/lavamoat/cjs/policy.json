@@ -1,0 +1,20 @@
+{
+  "resources": {
+    "console-a": {
+      "globals": {
+        "console": true
+      }
+    },
+    "console-b": {
+      "capabilities": {
+        "prefix-log": []
+      },
+      "globals": {
+        "console": true
+      }
+    }
+  },
+  "use": [
+    "./capabilities.cjs"
+  ]
+}
