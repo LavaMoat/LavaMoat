@@ -7,14 +7,13 @@ require('ses')
 repairIntrinsics({ errorTaming: 'unsafe' })
 
 test('capability sources evaluate after repairIntrinsics()', (t) => {
-  const globalRef = {}
+  const globalRef = { myGlobal: 42 }
   const { repairs, capabilities } = evaluateCapabilities({
     sources: [
       `repair((g) => { g.repaired = true })
        defineCapability('cap', { result: myGlobal, realArray: Array })`,
     ],
     globalRef,
-    globals: { myGlobal: 42 },
   })
   repairs.forEach((repair) => repair())
   t.true(globalRef.repaired)

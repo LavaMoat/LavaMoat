@@ -43,10 +43,7 @@ class VirtualRuntimeModule extends RuntimeModule {
   }
 }
 
-/**
- * @import {LavaMoatChunkRuntimeConfiguration,
- *   LavaMoatPluginOptions} from '../buildtime/types'
- */
+/** @import {CompleteLavaMoatPluginOptions, LavaMoatChunkRuntimeConfiguration} from '../buildtime/types' */
 /** @import {LavaMoatPolicy} from '@lavamoat/types' */
 /** @import {RuntimeFragment} from './assemble.js' */
 /** @import {Chunk} from 'webpack' */
@@ -69,7 +66,8 @@ module.exports = {
    * Builds the LavaMoat runtime configuration and generates runtime source code
    *
    * @param {Object} params The parameters object
-   * @param {LavaMoatPluginOptions} params.options Runtime configuration options
+   * @param {CompleteLavaMoatPluginOptions} params.options Runtime configuration
+   *   options
    */
   runtimeBuilder({ options }) {
     /**
