@@ -7,16 +7,30 @@ require('ses')
 repairIntrinsics({ errorTaming: 'unsafe' })
 
 test('capability sources evaluate after repairIntrinsics()', (t) => {
-  const globalRef = { myGlobal: 42 }
+  const globalRef = {}
+  globalThis.myGlobal = 42 // actual globals are reachable
   const { repairs, capabilities } = evaluateCapabilities({
     sources: [
       `repair((g) => { g.repaired = true })
-       defineCapability('cap', { result: myGlobal, realArray: Array })`,
+       defineCapability('cap', {
+         ambient: false,
+         endow({ endowments }) {
+           endowments.result = myGlobal
+           endowments.realArray = Array
+         },
+       })`,
     ],
     globalRef,
   })
   repairs.forEach((repair) => repair())
   t.true(globalRef.repaired)
-  t.is(capabilities.get('cap').result, 42)
-  t.is(capabilities.get('cap').realArray, Array)
+  const endowments = {}
+  capabilities.get('cap').endow({
+    options: [],
+    endowments,
+    compartmentGlobalThis: {},
+    rootCompartmentGlobalThis: {},
+  })
+  t.is(endowments.result, 42)
+  t.is(endowments.realArray, Array)
 })

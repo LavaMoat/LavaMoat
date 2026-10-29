@@ -29,11 +29,7 @@
  */
 const FeralFunction = Function
 
-/**
- * @typedef {object} RegisteredCapability
- * @property {boolean} ambient
- * @property {Function} endow
- */
+/** @typedef {import('@lavamoat/types/capability').CapabilityDefinition} RegisteredCapability */
 
 module.exports = endowmentsToolkit
 module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
@@ -99,7 +95,7 @@ function endowmentsToolkit({
    *   unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to
    *   replace (default: targetRef)
-   * @returns {Partial<T>} - The targetRef
+   * @returns {Partial<T> & Record<string, unknown>} - The targetRef
    */
   function getEndowmentsForConfig(
     sourceRef,
@@ -107,7 +103,7 @@ function endowmentsToolkit({
     unwrapTo,
     unwrapFrom
   ) {
-    /** @type {object} */
+    /** @type {Partial<T> & Record<string, unknown>} */
     let endowments = {}
 
     if (packagePolicy.globals) {
@@ -201,7 +197,7 @@ function endowmentsToolkit({
    * @param {object} [unwrapFrom]
    * @param {string[]} [explicitlyBanned]
    * @param {Set<string>} [allowedWriteFields]
-   * @returns {Partial<T>}
+   * @returns {Partial<T> & Record<string, unknown>}
    */
   function makeMinimalViewOfRef(
     sourceRef,
@@ -211,7 +207,7 @@ function endowmentsToolkit({
     explicitlyBanned = [],
     allowedWriteFields = new Set()
   ) {
-    /** @type {object} */
+    /** @type {Partial<T> & Record<string, unknown>} */
     const targetRef = {}
     paths.forEach((path) => {
       const pathParts = path.split('.')
