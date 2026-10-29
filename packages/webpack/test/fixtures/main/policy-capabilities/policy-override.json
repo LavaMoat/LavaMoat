@@ -3,7 +3,8 @@
   "resources": {
     "$root$": {
       "capabilities": {
-        "prefix-log": ["[TEST-PREFIX]"]
+        "prefix-log": ["[TEST-PREFIX]"],
+        "repair-marker": []
       }
     }
   }

@@ -71,3 +71,88 @@ test('webpack/capabilities - capability only applies to resources that list it',
     'At least one prefixed call expected from $root$'
   )
 })
+
+test('webpack/capabilities - repair callback runs before hardenIntrinsics and mutations persist', (t) => {
+  const { context } = runScriptWithSES(t.context.bundle, {
+    console: { log() {}, warn() {}, error() {} },
+  })
+  // repair() set __capRepairRan on globalThis before hardening
+  t.is(
+    context.__capRepairRan,
+    true,
+    'repair callback should have mutated globalThis'
+  )
+})
+
+test('webpack/capabilities - repair-marker endow receives value set during repair phase', (t) => {
+  const logged = []
+  runScriptWithSES(t.context.bundle, {
+    console: {
+      log(...args) {
+        logged.push(args)
+      },
+      warn() {},
+      error() {},
+    },
+  })
+  // prefix-log is also active, so the log is prefixed
+  const markerLog = logged.find(
+    (args) => args.includes('repair-marker:') && args.includes('repaired')
+  )
+  t.truthy(
+    markerLog,
+    `Expected repair-marker endow to provide 'repaired', got: ${JSON.stringify(logged)}`
+  )
+})
+
+test('webpack/capabilities - backwards compat: build without use still works', async (t) => {
+  // Build with the default policy (no capabilities)
+  const webpackConfig = {
+    ...makeConfig(),
+    mode: 'development',
+  }
+  const build = await scaffold(webpackConfig)
+  const bundle = build.snapshot['/dist/app.js']
+  t.truthy(bundle, 'Bundle should be produced without use field')
+  t.notThrows(() => {
+    runScriptWithSES(bundle, {
+      console: { log() {}, warn() {}, error() {} },
+    })
+  }, 'Bundle without capabilities should run without error')
+})
+
+test('webpack/capabilities - existing repairs and capabilities coexist', async (t) => {
+  const coexistPolicyLocation = path.resolve(
+    __dirname,
+    'fixtures/main/policy-cap-with-repairs'
+  )
+  const webpackConfig = {
+    ...makeConfig({ policyLocation: coexistPolicyLocation }),
+    entry: { app: './cap-logging.js' },
+    mode: 'development',
+  }
+  const build = await scaffold(webpackConfig)
+  const bundle = build.snapshot['/dist/app.js']
+
+  const logged = []
+  const { context } = runScriptWithSES(bundle, {
+    console: {
+      log(...args) {
+        logged.push(args)
+      },
+      warn() {},
+      error() {},
+    },
+  })
+
+  // capability endow ran (prefix-log applied to root)
+  const prefixed = logged.find((args) => args[0] === '[COEXIST]')
+  t.truthy(
+    prefixed,
+    `Expected prefix from capability, got: ${JSON.stringify(logged)}`
+  )
+
+  // globals-package has globalThis in policy, triggering the globalThis repair
+  // The bundle ran without error, proving repairs and capabilities coexist
+  t.truthy(context, 'Bundle with both repairs and capabilities should run')
+})

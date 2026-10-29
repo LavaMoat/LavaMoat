@@ -30,10 +30,6 @@
 const FeralFunction = Function
 
 /**
- * @import {CapabilitiesPolicy} from '@lavamoat/types'
- */
-
-/**
  * @typedef {object} RegisteredCapability
  * @property {boolean} ambient
  * @property {Function} endow
@@ -58,7 +54,7 @@ const GLOBAL_LAZY_GETTERS_TO_AVOID_HITTING = ['localStorage', 'sessionStorage']
  * @param {boolean} [opts.handleGlobalWrite]
  * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
  *   mutated later
- * @param {Map<string, RegisteredCapability>} [opts.capabilities] ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!?
+ * @param {Map<string, RegisteredCapability>} [opts.capabilities]
  *
  *   Registered capabilities from evaluateCapabilities
  */
@@ -68,7 +64,7 @@ function endowmentsToolkit({
   knownWritableFields = new Set(),
   capabilities = new Map(),
 } = {}) {
-  // Split capabilities into ambient (auto-applied in Phase 2) and local
+  // Split capabilities into ambient (auto-applied, not implemented yet) and local
   // (applied only when listed in package policy).
   /** @type {Map<string, RegisteredCapability>} */
   const ambientCapabilities = new Map()
@@ -1037,9 +1033,9 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
- * @param {CapabilitiesPolicy | false} [rootCapabilities] - Capabilities to
- *   apply to the root compartment, keyed by name with options arrays as values,
- *   or false for no capabilities
+ * @param {LMPolicy.ResourcePolicy['capabilities']} [rootCapabilities] -
+ *   Capabilities to apply to the root compartment, keyed by name with options
+ *   arrays as values
  * @returns {Record<PropertyKey, any>}
  */
 

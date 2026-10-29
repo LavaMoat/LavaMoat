@@ -191,11 +191,12 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
   if (resourceId === LAVAMOAT.root) {
     rootCompartmentGlobalThis = packageCompartmentGlobal
     const rootPolicy = LAVAMOAT.policy.resources[resourceId] || {}
+
     copyWrappedGlobals(
       theRealGlobalThis,
       rootCompartmentGlobalThis,
       globalAliases,
-      rootPolicy.capabilities
+      rootPolicy.capabilities || undefined // if capabilities was set to false, we fall back to nothing.
     )
     LAVAMOAT?.scuttling?.scuttle(
       theRealGlobalThis,
