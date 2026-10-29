@@ -22,6 +22,9 @@
       "types": "./dist/index.d.ts"
     },
     "./package.json": "./package.json",
+    "./capability": {
+      "types": "./dist/capability.d.ts"
+    },
     "./policy": {
       "require": "./dist/policy-schema/index.js",
       "types": "./dist/policy-schema/index.d.ts"

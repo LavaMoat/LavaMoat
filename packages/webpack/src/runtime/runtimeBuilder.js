@@ -183,7 +183,8 @@ const LOCKDOWN_SHIMS = [];`
       const { capabilitySources, capabilityNames } =
         require('./capabilitiesBuilder.js').buildCapabilities(
           policyData,
-          options.policyLocation
+          // TODO: consider the DX of all these alternatives.
+          options.policyLocation || options.rootDir || process.cwd()
         )
 
       /** @satisfies {readonly RuntimeFragment[]} */
