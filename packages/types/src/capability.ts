@@ -14,8 +14,11 @@
 
 /** Parameters passed to an {@link EndowCallback}. */
 export interface EndowParams {
-  /** Options array from the resource's `capabilities` policy entry. */
-  options: unknown[]
+  /**
+   * Options from the resource's `capabilities` policy entry. `false` is
+   * preserved when a capability is explicitly disabled in policy.
+   */
+  options: unknown[] | false
   /** Proposed endowments object built by `getEndowmentsForConfig`. */
   endowments: Record<string, unknown>
   /** The compartment's `globalThis`. */
