@@ -46,6 +46,11 @@ export interface CapabilityDefinition {
   endow: EndowCallback
 }
 
+export interface CapabilityIndex {
+  names: string[]
+  file: string
+}
+
 /**
  * The `repair` global available inside a Capability File.
  *
