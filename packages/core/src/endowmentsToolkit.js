@@ -33,6 +33,12 @@ const FeralFunction = Function
  * @import {CapabilitiesPolicy} from '@lavamoat/types'
  */
 
+/**
+ * @typedef {object} RegisteredCapability
+ * @property {boolean} ambient
+ * @property {Function} endow
+ */
+
 module.exports = endowmentsToolkit
 module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
 module.exports.evaluateCapabilities = evaluateCapabilities
@@ -47,8 +53,7 @@ module.exports._test = { instrumentDynamicValueAtPath }
  * @param {boolean} [opts.handleGlobalWrite]
  * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
  *   mutated later
- * @param {Map<string, { ambient: boolean; endow: Function }>} [opts.capabilities]
- *   -
+ * @param {Map<string, RegisteredCapability>} [opts.capabilities] ## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!?
  *
  *   Registered capabilities from evaluateCapabilities
  */
@@ -60,9 +65,9 @@ function endowmentsToolkit({
 } = {}) {
   // Split capabilities into ambient (auto-applied in Phase 2) and local
   // (applied only when listed in package policy).
-  /** @type {Map<string, { ambient: boolean; endow: Function }>} */
+  /** @type {Map<string, RegisteredCapability>} */
   const ambientCapabilities = new Map()
-  /** @type {Map<string, { ambient: boolean; endow: Function }>} */
+  /** @type {Map<string, RegisteredCapability>} */
   const localCapabilities = new Map()
   for (const [name, def] of capabilities) {
     if (def.ambient) {
@@ -711,14 +716,15 @@ function endowmentsToolkit({
  * @param {string[]} opts.sources - Array of capability source texts to evaluate
  * @param {object} opts.globalRef - The real globalThis reference passed to
  *   repair callbacks when executed
- * @param {object} [opts.globals] - Additional globals to expose to each source
- *   alongside `repair` and `defineCapability`
- * @returns {{ repairs: Function[]; capabilities: Map<string, object> }}
+ * @returns {{
+ *   repairs: Function[]
+ *   capabilities: Map<string, RegisteredCapability>
+ * }}
  */
-function evaluateCapabilities({ sources, globalRef, globals = {} }) {
+function evaluateCapabilities({ sources, globalRef }) {
   /** @type {Function[]} */
   const repairs = []
-  /** @type {Map<string, object>} */
+  /** @type {Map<string, RegisteredCapability>} */
   const capabilities = new Map()
 
   sources.forEach((source, index) => {
@@ -731,7 +737,7 @@ function evaluateCapabilities({ sources, globalRef, globals = {} }) {
 
     /**
      * @param {string} name
-     * @param {any} definition
+     * @param {RegisteredCapability} definition
      */
     const defineCapability = (name, definition) => {
       if (capabilities.has(name)) {
@@ -742,21 +748,12 @@ function evaluateCapabilities({ sources, globalRef, globals = {} }) {
       capabilities.set(name, definition)
     }
 
-    // Named entries become formal parameters of the compiled function so
-    // their identifiers are directly in scope for `source`. `repair` and
-    // `defineCapability` are listed last so a caller-supplied `globals`
-    // object cannot shadow them.
-    /** @type {Record<string, any>} */
-    const scope = { ...globals, repair, defineCapability }
-    const scopeNames = Object.keys(scope)
-    const scopeValues = scopeNames.map((name) => scope[name])
-
     try {
-      const evaluate = new FeralFunction(
-        ...scopeNames,
+      new FeralFunction(
+        'repair',
+        'defineCapability',
         `'use strict';\n${source}`
-      )
-      evaluate(...scopeValues)
+      )(repair, defineCapability)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       throw new Error(
@@ -889,7 +886,9 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
 }
 
 /**
- * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
+ * @import {ContextTestFn,
+ *   SomeFunction,
+ *   SomeParameters} from './internal.js'
  */
 
 /**
@@ -967,8 +966,9 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
- * @param {CapabilitiesPolicy} [rootCapabilities] - Capabilities to apply to the
- *   root compartment, keyed by name with options arrays as values
+ * @param {CapabilitiesPolicy | false} [rootCapabilities] - Capabilities to
+ *   apply to the root compartment, keyed by name with options arrays as values,
+ *   or false for no capabilities
  * @returns {Record<PropertyKey, any>}
  */
 
