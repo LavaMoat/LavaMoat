@@ -12,10 +12,8 @@ import { endowmentsToolkit } from 'lavamoat-core'
 
 /**
  * @import {LockdownOptions} from 'ses'
- * @import {
- *   CapabilityDefinition,
- *   HardenOptions
- * } from './internal.js'
+ * @import {HardenOptions} from './internal.js'
+ * @import {CapabilityDefinition} from '@lavamoat/types'
  */
 
 /**
