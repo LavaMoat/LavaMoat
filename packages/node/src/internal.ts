@@ -14,6 +14,7 @@ import type { CanonicalName } from '@endo/compartment-mapper/import.js'
 import { type findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
 import type {
   BuiltinPolicy,
+  CapabilityDefinition,
   GlobalPolicy,
   GlobalPolicyValue,
   LavaMoatPolicy,
@@ -261,19 +262,6 @@ export interface MakeNodeCompartmentMapResult {
  * Proper names of SES violation types
  */
 export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
-
-/**
- * Definition of a custom capability
- *
- * TODO: This (or something like it) needs to live in `lavamoat-core`
- */
-export interface CapabilityDefinition<T = unknown> {
-  ambient: boolean
-  endow: (params: {
-    options?: T
-    compartmentGlobalThis: typeof globalThis
-  }) => void
-}
 
 /**
  * Options for `makeGlobalsAttenuator()`
