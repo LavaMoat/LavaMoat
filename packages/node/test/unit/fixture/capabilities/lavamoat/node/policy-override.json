@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "encabulated": {
+      "capabilities": {
+        "encabulate": []
+      }
+    }
+  },
+  "use": ["./capabilities.js"]
+}

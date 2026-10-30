@@ -13,6 +13,7 @@
   "exclude": ["unit/fixture", "e2e/fixture"],
   "extends": "../../../.config/tsconfig.test.json",
   "include": ["."],
+  "files": ["unit/fixture/capabilities/lavamoat/node/capabilities.js"],
   "references": [
     {
       "path": "../src/tsconfig.json"

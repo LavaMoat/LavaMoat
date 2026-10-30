@@ -21,6 +21,7 @@ import type {
 } from '@endo/compartment-mapper'
 import type {
   CapabilitiesPolicy,
+  CapabilityIndex,
   GlobalPolicy,
   LavaMoatPolicy,
   Resources,
@@ -262,7 +263,7 @@ export type ExecuteOptions = ComposeOptions<
     WithProdOnly,
     WithPolicyOnly,
     WithProjectRoot,
-    WithCapabilitySources,
+    WithCapabilities,
   ]
 >
 
@@ -407,7 +408,7 @@ export type RunOptions = ComposeOptions<
     WithPolicyPath,
     LoadPoliciesOptions,
     WithPolicy,
-    WithCapabilitySources,
+    WithCapabilities,
     {
       /**
        * If `true`, execution will fail if the execution environment has already
@@ -419,10 +420,18 @@ export type RunOptions = ComposeOptions<
 >
 
 /**
- * Options having a `capabilitySources` property
+ * Options having Capability-related properties
  */
-export interface WithCapabilitySources {
+export interface WithCapabilities {
+  /**
+   * Sources of Capability Files
+   */
   capabilitySources?: Iterable<string>
+
+  /**
+   * Capability Indices
+   */
+  capabilityIndices?: Iterable<CapabilityIndex | CapabilityIndex[]>
 }
 
 /**

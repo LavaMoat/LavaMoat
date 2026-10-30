@@ -4,8 +4,6 @@ import test from 'ava'
 import { run } from '../../../src/exec/run.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createExecMacros } from './exec-macros.js'
-import { fileURLToPath } from 'node:url'
-import { readFileSync } from 'node:fs'
 import { loadCapabilitySources } from '../../../src/exec/capabilities.js'
 
 const { testExec, testExecForJSON } = createExecMacros(test)
@@ -206,5 +204,65 @@ test('root trust mismatch (trusted root)', async (t) => {
     {
       message: /policy expects a trusted root/,
     }
+  )
+})
+
+test.serial('capabilities', async (t) => {
+  const policyPath = new URL(
+    '../fixture/capabilities/lavamoat/node/policy.json',
+    import.meta.url
+  )
+  const result = /** @type {object} */ (
+    await run(new URL('../fixture/capabilities/app.js', import.meta.url), {
+      policyPath,
+    })
+  )
+
+  t.deepEqual(
+    { ...result },
+    { encabulated: 'encabulated', unencabulated: 'unencabulated' }
+  )
+})
+
+test.serial('capabilities - accepts `capabilitySources`', async (t) => {
+  const policyPath = new URL(
+    '../fixture/capabilities/lavamoat/node/policy.json',
+    import.meta.url
+  )
+  // loadCapabilitySources is not necessarily needed to create the array of
+  // source texts, but it's handy.
+  const capabilitySources = await loadCapabilitySources(policyPath)
+  const result = /** @type {object} */ (
+    await run(new URL('../fixture/capabilities/app.js', import.meta.url), {
+      policyPath,
+      capabilitySources,
+    })
+  )
+
+  t.deepEqual(
+    { ...result },
+    { encabulated: 'encabulated', unencabulated: 'unencabulated' }
+  )
+})
+
+test.serial('capabilities - accepts `capabilityIndices`', async (t) => {
+  const policyPath = new URL(
+    '../fixture/capabilities/lavamoat/node/policy.json',
+    import.meta.url
+  )
+  const { default: capabilityIndices } = await import(
+    '../fixture/capabilities/lavamoat/node/capabilities.js'
+  )
+
+  const result = /** @type {object} */ (
+    await run(new URL('../fixture/capabilities/app.js', import.meta.url), {
+      policyPath,
+      capabilityIndices,
+    })
+  )
+
+  t.deepEqual(
+    { ...result },
+    { encabulated: 'encabulated', unencabulated: 'unencabulated' }
   )
 })
