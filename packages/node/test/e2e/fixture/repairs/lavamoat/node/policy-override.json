@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "env-b": {
+      "globals": {
+        "process.env.FROBNICATE": false
+      }
+    }
+  },
+  "use": ["./capabilities.js"]
+}

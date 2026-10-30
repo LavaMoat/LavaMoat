@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "env-a": {
+      "globals": {
+        "process.env.ENCABULATE": true,
+        "process.env.FROBNICATE": true
+      }
+    },
+    "env-b": {
+      "globals": {
+        "process.env.ENCABULATE": true,
+        "process.env.FROBNICATE": false
+      }
+    }
+  },
+  "use": [
+    "./capabilities.js"
+  ]
+}

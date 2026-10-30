@@ -1,0 +1,12 @@
+{
+  "name": "repairs",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true,
+  "exports": "./app.js",
+  "dependencies": {
+    "env-a": "1.0.0",
+    "env-b": "1.0.0"
+  }
+}

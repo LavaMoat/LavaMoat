@@ -1,0 +1,12 @@
+{
+  "name": "capabilities",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "console-a": "1.0.0",
+    "console-b": "1.0.0"
+  }
+}
