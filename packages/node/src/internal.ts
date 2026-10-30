@@ -11,7 +11,7 @@ import type {
   ReadNowPowersProp,
 } from '@endo/compartment-mapper'
 import type { CanonicalName } from '@endo/compartment-mapper/import.js'
-import { type findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
+import type { findUnknownCanonicalNames } from '@endo/compartment-mapper/policy.js'
 import type {
   BuiltinPolicy,
   CapabilityDefinition,
@@ -19,7 +19,7 @@ import type {
   GlobalPolicyValue,
   LavaMoatPolicy,
 } from '@lavamoat/types'
-import { type LockdownOptions } from 'ses'
+import type { LockdownOptions } from 'ses'
 import type { Except, PackageJson, ValueOf } from 'type-fest'
 import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
@@ -27,7 +27,7 @@ import type {
   ConsumerCaptureFromMapOptions,
   FileUrlString,
   MergedLavaMoatPolicy,
-  WithCapabilitySources,
+  WithCapabilities,
   WithCompact,
   WithConcurrency,
   WithFs,
@@ -456,6 +456,6 @@ export type HardenOptions = ComposeOptions<
        */
       strict?: boolean
     },
-    WithCapabilitySources,
+    WithCapabilities,
   ]
 >

@@ -1,0 +1,12 @@
+{
+  "name": "capabilities",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true,
+  "exports": "./index.js",
+  "dependencies": {
+    "encabulated": "1.0.0",
+    "unencabulated": "1.0.0"
+  }
+}

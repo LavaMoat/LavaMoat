@@ -1,0 +1,21 @@
+{
+  "resources": {
+    "encabulated": {
+      "capabilities": {
+        "encabulate": [
+        ]
+      },
+      "globals": {
+        "ENCABULATE": true
+      }
+    },
+    "unencabulated": {
+      "globals": {
+        "ENCABULATE": true
+      }
+    }
+  },
+  "use": [
+    "./capabilities.js"
+  ]
+}
