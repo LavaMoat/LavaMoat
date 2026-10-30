@@ -97,9 +97,9 @@ export const createExecMacros = (test) => {
         t,
         entrypoint,
         expected,
-        { policy = DEFAULT_POLICY } = {}
+        { policy = DEFAULT_POLICY, ...options } = {}
       ) => {
-        const result = await run(entrypoint, { policy })
+        const result = await run(entrypoint, { policy, ...options })
         t.deepEqual({ .../** @type {any} */ (result) }, expected)
       },
       title: (title) =>
