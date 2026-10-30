@@ -133,6 +133,7 @@ export const runCLI = async (
        * }}
        */
       (err))
+    t?.log(`${hrCommand} failed: ${stderr}`)
   }
   return { stdout, stderr, code, hrCommand }
 }
