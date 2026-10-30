@@ -6,6 +6,7 @@ import type { ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
 import type {
   ComposeOptions,
+  RunOptions,
   WithPolicyOverridePath,
   WithPolicyPath,
 } from '../src/types.js'
@@ -91,25 +92,25 @@ export type ExitCode = ExecFileException['code']
 /**
  * Options for the `testExec` macro
  */
-export interface TestExecMacroOptions {
-  /**
-   * Policy to use when executing
-   */
-  policy?: LavaMoatPolicy
-}
+export type TestExecMacroOptions = RunOptions
 
 /**
  * Options for the `testExecForJSON` macro
  */
-export interface TestExecForJSONMacroOptions extends TestExecMacroOptions {
-  /**
-   * Path to entrypoint _within the fixture_. This must be an absolute path or
-   * URL.
-   *
-   * The default is `/index.js`.
-   */
-  jsonEntrypoint?: string | URL
-}
+export type TestExecForJSONMacroOptions = ComposeOptions<
+  [
+    TestExecMacroOptions,
+    {
+      /**
+       * Path to entrypoint _within the fixture_. This must be an absolute path
+       * or URL.
+       *
+       * The default is `/index.js`.
+       */
+      jsonEntrypoint?: string | URL
+    },
+  ]
+>
 
 /**
  * Options for the function returned by the `fixtureFinder` factory
