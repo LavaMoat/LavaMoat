@@ -1,0 +1,11 @@
+{
+  "use": ["./cap-module.js"],
+  "resources": {
+    "$root$": {
+      "capabilities": {
+        "prefix-log": ["[TEST-PREFIX]"],
+        "repair-marker": []
+      }
+    }
+  }
+}

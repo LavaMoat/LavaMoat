@@ -1,5 +1,4 @@
 // @ts-check
-
 /**
  * Utilities for generating the endowments object based on a `globalRef` and a
  * {@link LMPolicy.PackagePolicy}.
@@ -21,8 +20,20 @@
  * file cannot reqire any files or packages.
  */
 
+/**
+ * The original `Function` constructor, captured before SES `repairIntrinsics()`
+ * replaces it with a tamed version. We use it to compile capability sources so
+ * their free variables resolve against the real global object rather than any
+ * SES-managed one. This module must therefore be evaluated before
+ * `repairIntrinsics()`.
+ */
+const FeralFunction = Function
+
+/** @import {CapabilityDefinition as RegisteredCapability} from '@lavamoat/types/capability' */
+
 module.exports = endowmentsToolkit
 module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
+module.exports.evaluateCapabilities = evaluateCapabilities
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
@@ -39,12 +50,29 @@ const GLOBAL_LAZY_GETTERS_TO_AVOID_HITTING = ['localStorage', 'sessionStorage']
  * @param {boolean} [opts.handleGlobalWrite]
  * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
  *   mutated later
+ * @param {Map<string, RegisteredCapability>} [opts.capabilities]
+ *
+ *   Registered capabilities from evaluateCapabilities
  */
 function endowmentsToolkit({
   createFunctionWrapper = defaultCreateFunctionWrapper,
   handleGlobalWrite = false,
   knownWritableFields = new Set(),
+  capabilities = new Map(),
 } = {}) {
+  // Split capabilities into ambient (auto-applied, not implemented yet) and local
+  // (applied only when listed in package policy).
+  /** @type {Map<string, RegisteredCapability>} */
+  const ambientCapabilities = new Map()
+  /** @type {Map<string, RegisteredCapability>} */
+  const localCapabilities = new Map()
+  for (const [name, def] of capabilities) {
+    if (def.ambient) {
+      ambientCapabilities.set(name, def)
+    } else {
+      localCapabilities.set(name, def)
+    }
+  }
   return {
     // public API
     getEndowmentsForConfig,
@@ -72,7 +100,7 @@ function endowmentsToolkit({
    *   unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to
    *   replace (default: targetRef)
-   * @returns {Partial<T>} - The targetRef
+   * @returns {Partial<T> & Record<string, unknown>} - The targetRef
    */
   function getEndowmentsForConfig(
     sourceRef,
@@ -80,61 +108,82 @@ function endowmentsToolkit({
     unwrapTo,
     unwrapFrom
   ) {
-    if (!packagePolicy.globals) {
-      return {}
-    }
-    // validate read access from packagePolicy
-    /** @type {string[]} */
-    const whitelistedReads = []
-    /** @type {Set<string>} */
-    const allowedWriteFields = new Set()
-    /** @type {string[]} */
-    const explicitlyBanned = []
+    /** @type {Partial<T> & Record<string, unknown>} */
+    let endowments = {}
 
-    Object.entries(packagePolicy.globals).forEach(
-      ([path, packagePolicyValue]) => {
-        const pathParts = path.split('.')
-        // disallow dunder proto in path
-        const pathContainsDunderProto = pathParts.some(
-          (pathPart) => pathPart === '__proto__'
-        )
-        if (pathContainsDunderProto) {
-          throw new Error(
-            `Lavamoat - "__proto__" disallowed when creating minimal view. saw "${path}"`
+    if (packagePolicy.globals) {
+      // validate read access from packagePolicy
+      /** @type {string[]} */
+      const whitelistedReads = []
+      /** @type {Set<string>} */
+      const allowedWriteFields = new Set()
+      /** @type {string[]} */
+      const explicitlyBanned = []
+
+      Object.entries(packagePolicy.globals).forEach(
+        ([path, packagePolicyValue]) => {
+          const pathParts = path.split('.')
+          // disallow dunder proto in path
+          const pathContainsDunderProto = pathParts.some(
+            (pathPart) => pathPart === '__proto__'
           )
-        }
-        // false means no access. It's necessary so that overrides can also be used to tighten the policy
-        if (packagePolicyValue === false) {
-          explicitlyBanned.push(path)
-          return
-        }
-        whitelistedReads.push(path)
-        if (packagePolicyValue === 'write') {
-          if (handleGlobalWrite) {
-            if (pathParts.length > 1) {
-              throw new Error(
-                `LavaMoat - write access is only allowed at the top level, saw "${path}"`
-              )
-            }
-            allowedWriteFields.add(path)
+          if (pathContainsDunderProto) {
+            throw new Error(
+              `Lavamoat - "__proto__" disallowed when creating minimal view. saw "${path}"`
+            )
           }
-        } else if (packagePolicyValue !== true) {
+          // false means no access. It's necessary so that overrides can also be used to tighten the policy
+          if (packagePolicyValue === false) {
+            explicitlyBanned.push(path)
+            return
+          }
+          whitelistedReads.push(path)
+          if (packagePolicyValue === 'write') {
+            if (handleGlobalWrite) {
+              if (pathParts.length > 1) {
+                throw new Error(
+                  `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+                )
+              }
+              allowedWriteFields.add(path)
+            }
+          } else if (packagePolicyValue !== true) {
+            throw new Error(
+              `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
+            )
+          }
+        }
+      )
+      // sort by length to optimize further steps
+      whitelistedReads.sort((a, b) => a.length - b.length)
+      endowments = makeMinimalViewOfRef(
+        sourceRef,
+        whitelistedReads,
+        unwrapTo,
+        unwrapFrom,
+        explicitlyBanned,
+        allowedWriteFields
+      )
+    }
+
+    if (packagePolicy.capabilities) {
+      Object.entries(packagePolicy.capabilities).forEach(([name, options]) => {
+        const cap = localCapabilities.get(name)
+        if (!cap) {
           throw new Error(
-            `LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`
+            `LavaMoat - unknown capability "${name}" requested in package policy`
           )
         }
-      }
-    )
-    // sort by length to optimize further steps
-    whitelistedReads.sort((a, b) => a.length - b.length)
-    return makeMinimalViewOfRef(
-      sourceRef,
-      whitelistedReads,
-      unwrapTo,
-      unwrapFrom,
-      explicitlyBanned,
-      allowedWriteFields
-    )
+        cap.endow({
+          options,
+          endowments,
+          compartmentGlobalThis: unwrapFrom,
+          rootCompartmentGlobalThis: sourceRef,
+        })
+      })
+    }
+
+    return endowments
   }
 
   /**
@@ -148,7 +197,7 @@ function endowmentsToolkit({
    * @param {object} [unwrapFrom]
    * @param {string[]} [explicitlyBanned]
    * @param {Set<string>} [allowedWriteFields]
-   * @returns {Partial<T>}
+   * @returns {Partial<T> & Record<string, unknown>}
    */
   function makeMinimalViewOfRef(
     sourceRef,
@@ -158,7 +207,7 @@ function endowmentsToolkit({
     explicitlyBanned = [],
     allowedWriteFields = new Set()
   ) {
-    /** @type {object} */
+    /** @type {Partial<T> & Record<string, unknown>} */
     const targetRef = {}
     paths.forEach((path) => {
       const pathParts = path.split('.')
@@ -553,7 +602,8 @@ function endowmentsToolkit({
   function copyWrappedGlobals(
     globalRef,
     target,
-    globalThisRefs = ['globalThis']
+    globalThisRefs = ['globalThis'],
+    rootCapabilities = {}
   ) {
     // find the relevant endowment sources
     const globalProtoChain = getPrototypeChain(globalRef)
@@ -639,9 +689,95 @@ function endowmentsToolkit({
       }
       target[ref] = target
     }
+
+    // Apply root-level capabilities listed in policy
+    Object.entries(rootCapabilities).forEach(([name, options]) => {
+      const cap = localCapabilities.get(name)
+      if (!cap) {
+        throw new Error(
+          `LavaMoat - unknown capability "${name}" requested for root package`
+        )
+      }
+      cap.endow({
+        options,
+        endowments: target,
+        compartmentGlobalThis: target,
+        rootCompartmentGlobalThis: target,
+      })
+    })
+
     return target
   }
 }
+/**
+ * Evaluates capability sources and collects registered repairs and capability
+ * definitions.
+ *
+ * Each source is evaluated as strict-mode code in a "feral" `Function` (i.e.,
+ * _not_ confined to a Compartment). `repair`, `defineCapability`, and any
+ * additional `globals` are passed as formal parameters so they are directly in
+ * scope for the source. Free variables that don't match a parameter name fall
+ * through to the real global object. Repair callbacks are wrapped to pass
+ * `globalRef` when executed. Duplicate capability names across sources result
+ * in an error.
+ *
+ * May be called after SES `repairIntrinsics()`, as long as this module was
+ * loaded before it.
+ *
+ * @param {object} opts
+ * @param {string[]} opts.sources - Array of capability source texts to evaluate
+ * @param {object} opts.globalRef - The real globalThis reference passed to
+ *   repair callbacks when executed
+ * @returns {{
+ *   repairs: Function[]
+ *   capabilities: Map<string, RegisteredCapability>
+ * }}
+ */
+function evaluateCapabilities({ sources, globalRef }) {
+  /** @type {Function[]} */
+  const repairs = []
+  /** @type {Map<string, RegisteredCapability>} */
+  const capabilities = new Map()
+
+  sources.forEach((source, index) => {
+    /**
+     * @param {Function} callback
+     */
+    const repair = (callback) => {
+      repairs.push(() => callback(globalRef))
+    }
+
+    /**
+     * @param {string} name
+     * @param {RegisteredCapability} definition
+     */
+    const defineCapability = (name, definition) => {
+      if (capabilities.has(name)) {
+        throw new Error(
+          `LavaMoat - duplicate capability name "${name}" across capability sources`
+        )
+      }
+      capabilities.set(name, definition)
+    }
+
+    try {
+      new FeralFunction(
+        'repair',
+        'defineCapability',
+        `'use strict';\n${source}`
+      )(repair, defineCapability)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      throw new Error(
+        `LavaMoat - error evaluating capability source at index ${index}: ${message}`,
+        { cause: err }
+      )
+    }
+  })
+
+  return { repairs, capabilities }
+}
+
 /**
  * Util for getting the prototype chain as an array includes the provided value
  * in the result
@@ -895,6 +1031,9 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
+ * @param {LMPolicy.ResourcePolicy['capabilities']} [rootCapabilities] -
+ *   Capabilities to apply to the root compartment, keyed by name with options
+ *   arrays as values
  * @returns {Record<PropertyKey, any>}
  */
 

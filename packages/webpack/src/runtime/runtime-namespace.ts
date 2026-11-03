@@ -28,6 +28,8 @@ export interface RuntimeNamespace {
   policy: RequiredProperty<LavaMoatPolicy, 'resources'>
   ENUM: Record<string, string>
   endowmentsToolkit: typeof EndowmentsToolkitFactory
+  capabilitySources: string[]
+  capabilityNames: Record<string, number>
   defaultExport: (...args: any[]) => unknown
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   repairs: Record<string, Function>

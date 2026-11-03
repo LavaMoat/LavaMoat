@@ -43,12 +43,7 @@ class VirtualRuntimeModule extends RuntimeModule {
   }
 }
 
-/**
- * @import {
- *   LavaMoatChunkRuntimeConfiguration,
- *   LavaMoatPluginOptions
- * } from '../buildtime/types'
- */
+/** @import {CompleteLavaMoatPluginOptions, LavaMoatChunkRuntimeConfiguration} from '../buildtime/types' */
 /** @import {LavaMoatPolicy} from '@lavamoat/types' */
 /** @import {RuntimeFragment} from './assemble.js' */
 /** @import {Chunk} from 'webpack' */
@@ -71,7 +66,8 @@ module.exports = {
    * Builds the LavaMoat runtime configuration and generates runtime source code
    *
    * @param {Object} params The parameters object
-   * @param {LavaMoatPluginOptions} params.options Runtime configuration options
+   * @param {CompleteLavaMoatPluginOptions} params.options Runtime configuration
+   *   options
    */
   runtimeBuilder({ options }) {
     /**
@@ -196,6 +192,12 @@ const LOCKDOWN_SHIMS = [];`
           }
         }
       }
+      const { capabilitySources, capabilityNames } =
+        require('./capabilitiesBuilder.js').buildCapabilities(
+          policyData,
+          // TODO: consider the DX of all these alternatives.
+          options.policyLocation || options.rootDir || process.cwd()
+        )
 
       /** @satisfies {readonly RuntimeFragment[]} */
       const runtimeFragments = /** @type {const} */ ([
@@ -264,6 +266,10 @@ const LOCKDOWN_SHIMS = [];`
           name: 'repairs',
           rawSource: repairs,
         },
+        // capability implementation sources (one entry per unique file)
+        { name: 'capabilitySources', data: capabilitySources, json: true },
+        // maps each capability name to its index in capabilitySources
+        { name: 'capabilityNames', data: capabilityNames, json: true },
         // main lavamoat runtime
         {
           name: 'runtime',
