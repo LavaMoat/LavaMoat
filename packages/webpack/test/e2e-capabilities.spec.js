@@ -1,8 +1,16 @@
 // @ts-check
-const { default: test } = require('ava')
+const { default: ava } = /** @type {typeof import('ava')} */ (require('ava'))
 const path = require('node:path')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
+
+/**
+ * @typedef {object} CapabilitiesTestContext
+ * @property {Awaited<ReturnType<typeof scaffold>>} build
+ * @property {string} bundle
+ */
+
+const test = /** @type {import('ava').TestFn<CapabilitiesTestContext>} */ (ava)
 
 const policyLocation = path.resolve(
   __dirname,
@@ -10,6 +18,7 @@ const policyLocation = path.resolve(
 )
 
 test.before(async (t) => {
+  /** @type {import('webpack').Configuration} */
   const webpackConfig = {
     ...makeConfig({ policyLocation }),
     entry: { app: './cap-logging.js' },
@@ -18,7 +27,7 @@ test.before(async (t) => {
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(webpackConfig)
   }, 'Expected the capability build to succeed')
-  t.context.bundle = t.context.build.snapshot['/dist/app.js']
+  t.context.bundle = t.context.build.snapshot?.['/dist/app.js'] ?? ''
 })
 
 test('webpack/capabilities - bundle builds without error', (t) => {
@@ -26,9 +35,11 @@ test('webpack/capabilities - bundle builds without error', (t) => {
 })
 
 test('webpack/capabilities - prefix-log capability prefixes console.log output', (t) => {
+  /** @type {unknown[][]} */
   const logged = []
   const { context } = runScriptWithSES(t.context.bundle, {
     console: {
+      /** @param {...unknown} args */
       log(...args) {
         logged.push(args)
       },
@@ -51,9 +62,11 @@ test('webpack/capabilities - prefix-log capability prefixes console.log output',
 test('webpack/capabilities - capability only applies to resources that list it', (t) => {
   // globals-package accesses console directly. Its logs should NOT be prefixed
   // because only $root$ (the entry) lists the capability, not globals-package.
+  /** @type {unknown[][]} */
   const logged = []
   runScriptWithSES(t.context.bundle, {
     console: {
+      /** @param {...unknown} args */
       log(...args) {
         logged.push(args)
       },
@@ -85,9 +98,11 @@ test('webpack/capabilities - repair callback runs before hardenIntrinsics and mu
 })
 
 test('webpack/capabilities - repair-marker endow receives value set during repair phase', (t) => {
+  /** @type {unknown[][]} */
   const logged = []
   runScriptWithSES(t.context.bundle, {
     console: {
+      /** @param {...unknown} args */
       log(...args) {
         logged.push(args)
       },
@@ -107,12 +122,13 @@ test('webpack/capabilities - repair-marker endow receives value set during repai
 
 test('webpack/capabilities - backwards compat: build without use still works', async (t) => {
   // Build with the default policy (no capabilities)
+  /** @type {import('webpack').Configuration} */
   const webpackConfig = {
     ...makeConfig(),
     mode: 'development',
   }
   const build = await scaffold(webpackConfig)
-  const bundle = build.snapshot['/dist/app.js']
+  const bundle = build.snapshot?.['/dist/app.js'] ?? ''
   t.truthy(bundle, 'Bundle should be produced without use field')
   t.notThrows(() => {
     runScriptWithSES(bundle, {
@@ -126,17 +142,20 @@ test('webpack/capabilities - existing repairs and capabilities coexist', async (
     __dirname,
     'fixtures/main/policy-cap-with-repairs'
   )
+  /** @type {import('webpack').Configuration} */
   const webpackConfig = {
     ...makeConfig({ policyLocation: coexistPolicyLocation }),
     entry: { app: './cap-logging.js' },
     mode: 'development',
   }
   const build = await scaffold(webpackConfig)
-  const bundle = build.snapshot['/dist/app.js']
+  const bundle = build.snapshot?.['/dist/app.js'] ?? ''
 
+  /** @type {unknown[][]} */
   const logged = []
   const { context } = runScriptWithSES(bundle, {
     console: {
+      /** @param {...unknown} args */
       log(...args) {
         logged.push(args)
       },
