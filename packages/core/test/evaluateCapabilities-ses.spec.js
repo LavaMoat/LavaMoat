@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { evaluateCapabilities } = require('../src/endowmentsToolkit.js')
 require('ses')
 

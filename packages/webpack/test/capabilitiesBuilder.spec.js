@@ -1,5 +1,5 @@
 // @ts-check
-const test = /** @type {import('ava').TestFn} */ (require('ava'))
+const { default: test } = require('ava')
 const { writeFileSync, mkdirSync } = require('node:fs')
 const { tmpdir } = require('node:os')
 const { join } = require('node:path')

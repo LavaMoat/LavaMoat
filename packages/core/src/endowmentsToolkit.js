@@ -29,7 +29,7 @@
  */
 const FeralFunction = Function
 
-/** @typedef {import('@lavamoat/types/capability').CapabilityDefinition} RegisteredCapability */
+/** @import {CapabilityDefinition as RegisteredCapability} from '@lavamoat/types/capability' */
 
 module.exports = endowmentsToolkit
 module.exports.defaultCreateFunctionWrapper = defaultCreateFunctionWrapper
@@ -949,9 +949,11 @@ function instrumentDynamicValueAtPath(
 }
 
 /**
- * @import {ContextTestFn,
+ * @import {
+ *   ContextTestFn,
  *   SomeFunction,
- *   SomeParameters} from './internal.js'
+ *   SomeParameters
+ * } from './internal.js'
  */
 
 /**
@@ -978,8 +980,8 @@ function instrumentDynamicValueAtPath(
  */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
-   * @returns {ReturnType<T>}
    * @this {U | Record<PropertyKey, any>}
+   * @returns {ReturnType<T>}
    */
   const newValue = function () {
     'use strict'

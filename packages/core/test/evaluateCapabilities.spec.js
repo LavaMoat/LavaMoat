@@ -1,4 +1,4 @@
-const test = require('ava')
+const { default: test } = require('ava')
 const { evaluateCapabilities } = require('../src/endowmentsToolkit.js')
 
 test('single defineCapability call registers capability in map', (t) => {
