@@ -99,3 +99,48 @@ test('aa - generateIdentifierLookup translates and narrows the policy', (t) => {
   t.is(Object.keys(translatedPolicy.resources).length, 3)
   t.snapshot(translatedPolicy.resources)
 })
+
+for (const moduleId of [0, 1111, 'leftpad']) {
+  test(`aa - rejects module ID ${moduleId} at different paths`, (t) => {
+    t.throws(
+      () =>
+        generateIdentifierLookup({
+          ...lookupFixture,
+          paths: [
+            { moduleId, path: '/node_modules/leftpad/index.js' },
+            { moduleId, path: '/node_modules/fast-json-patch/index.mjs' },
+          ],
+          readableResourceIds: true,
+        }),
+      {
+        message: `Module ID ${moduleId} has been associated with multiple paths, /node_modules/leftpad/index.js and /node_modules/fast-json-patch/index.mjs`,
+      }
+    )
+  })
+}
+
+test('aa - allows multiple module IDs at the same path', (t) => {
+  const lookup = generateIdentifierLookup({
+    ...lookupFixture,
+    paths: [
+      { moduleId: 1111, path: '/node_modules/leftpad/index.js' },
+      { moduleId: 1112, path: '/node_modules/leftpad/index.js' },
+    ],
+    readableResourceIds: true,
+  })
+
+  t.deepEqual(lookup.identifiersForModuleIds, [['leftpad', [1111, 1112]]])
+})
+
+test('aa - handles a repeated module ID at the same path', (t) => {
+  const lookup = generateIdentifierLookup({
+    ...lookupFixture,
+    paths: [
+      { moduleId: 1111, path: '/node_modules/leftpad/index.js' },
+      { moduleId: 1111, path: '/node_modules/leftpad/index.js' },
+    ],
+    readableResourceIds: true,
+  })
+
+  t.deepEqual(lookup.identifiersForModuleIds, [['leftpad', [1111]]])
+})
