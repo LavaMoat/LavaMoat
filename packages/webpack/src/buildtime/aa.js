@@ -47,8 +47,11 @@ const crossReference = (neededIds, policyIds) => {
 }
 
 /**
- * @import {LavaMoatPolicy, ResourcePolicy} from '@lavamoat/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
+ * @import {
+ *   LavaMoatPolicy,
+ *   ResourcePolicy
+ * } from '@lavamoat/types'
  */
 
 /**
@@ -84,18 +87,29 @@ exports.generateIdentifierLookup = ({
   const pathsToIdentifiers = () => {
     /** @type {PathMapping} */
     const mapping = {}
+    const seen = new Map()
     for (const { path, moduleId } of paths) {
       if (path) {
-        if (mapping[path]) {
-          mapping[path].moduleIds.push(moduleId)
-          diag.rawDebug(
-            2,
-            `Duplicated moduleId at path ${path}, moduleIds: ${mapping[path].moduleIds.join(', ')}`
-          )
+        if (seen.has(moduleId)) {
+          if (seen.get(moduleId) !== path) {
+            throw new Error(
+              `Module ID ${moduleId} has been associated with multiple paths, ${seen.get(moduleId)} and ${path}`
+            )
+          }
+          // else: no need to report a known module ID, skipping.
         } else {
-          mapping[path] = {
-            aa: getPackageNameForModulePath(canonicalNameMap, path),
-            moduleIds: [moduleId],
+          seen.set(moduleId, path)
+          if (mapping[path]) {
+            mapping[path].moduleIds.push(moduleId)
+            diag.rawDebug(
+              2,
+              `Duplicated moduleId at path ${path}, moduleIds: ${mapping[path].moduleIds.join(', ')}`
+            )
+          } else {
+            mapping[path] = {
+              aa: getPackageNameForModulePath(canonicalNameMap, path),
+              moduleIds: [moduleId],
+            }
           }
         }
       }

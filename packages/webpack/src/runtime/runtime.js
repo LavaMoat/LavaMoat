@@ -56,14 +56,11 @@ values(LAVAMOAT.policy.resources).forEach((resource) => {
   }
 })
 
-const {
-  getEndowmentsForConfig,
-  copyWrappedGlobals,
-  getBuiltinForConfig,
-} = LAVAMOAT.endowmentsToolkit({
-  handleGlobalWrite: true,
-  knownWritableFields,
-})
+const { getEndowmentsForConfig, copyWrappedGlobals, getBuiltinForConfig } =
+  LAVAMOAT.endowmentsToolkit({
+    handleGlobalWrite: true,
+    knownWritableFields,
+  })
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
@@ -238,10 +235,7 @@ const compartmentMap = new Map()
 const resourceIdByModuleId = new Map()
 for (const [resourceId, moduleIds] of LAVAMOAT.idmap) {
   for (const moduleId of moduleIds) {
-    // Preserve the original lookup's first-match behavior for duplicate IDs.
-    if (!resourceIdByModuleId.has(moduleId)) {
-      resourceIdByModuleId.set(moduleId, resourceId)
-    }
+    resourceIdByModuleId.set(moduleId, resourceId)
   }
 }
 /**
@@ -346,9 +340,9 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // It's a case-by-case basis decision.
     // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
     //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
-// The following supportedRuntimeItems are considered harmless and are used by default
-// To discover more, go to https://github.com/webpack/webpack/blob/main/lib/runtime/RuntimeGlobals.js 
-// or look at implementations in https://github.com/webpack/webpack/tree/main/lib/runtime/
+    // The following supportedRuntimeItems are considered harmless and are used by default
+    // To discover more, go to https://github.com/webpack/webpack/blob/main/lib/runtime/RuntimeGlobals.js
+    // or look at implementations in https://github.com/webpack/webpack/tree/main/lib/runtime/
     // Looking at the runtime chunk in the built bundle is probably the fastest way to learn what these do.
     const supportedRuntimeItems = [
       'O',
