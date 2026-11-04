@@ -56,11 +56,9 @@ test('npm runner pins known bins via node_modules/.bin_override', async (t) => {
     },
   })
   const overrideDir = path.join(nodeModules, '.bin_override')
-  const [tsc, npm, lerna, nodeGyp, nestedPath] = stdout.trim().split('\n')
+  const [tsc, npm, nodeGyp, nestedPath] = stdout.trim().split('\n')
   t.is(tsc, 'real-tsc')
   t.is(npm, path.join(overrideDir, 'npm'))
-  // no opinion applied - lerna is not a direct dependency
-  t.is(lerna, path.join(nodeModules, '.bin', 'lerna'))
   t.not(nodeGyp, path.join(nodeModules, '.bin', 'node-gyp'))
   t.is(
     nestedPath.split(path.delimiter).filter((p) => p === overrideDir).length,
@@ -69,6 +67,10 @@ test('npm runner pins known bins via node_modules/.bin_override', async (t) => {
   )
 
   const links = await readdir(overrideDir)
+  t.false(
+    links.includes('lerna'),
+    'lerna is not overridden without a direct dependency'
+  )
   t.deepEqual(links.sort(), ['node', 'node-gyp', 'npm', 'npx', 'tsc'])
   t.regex(
     await readlink(path.join(overrideDir, 'node-gyp')),

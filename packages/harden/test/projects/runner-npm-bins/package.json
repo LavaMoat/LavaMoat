@@ -2,7 +2,7 @@
   "name": "test-npm-bins-project",
   "version": "1.0.0",
   "scripts": {
-    "bins": "tsc && command -v npm && command -v lerna && command -v node-gyp && npm run -s path",
+    "bins": "tsc && command -v npm && command -v node-gyp && npm run -s path && command -v lerna",
     "path": "echo $PATH"
   },
   "devDependencies": {
