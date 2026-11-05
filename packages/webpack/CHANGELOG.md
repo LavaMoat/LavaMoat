@@ -18,6 +18,29 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [3.0.2](https://github.com/LavaMoat/LavaMoat/compare/webpack-v3.0.1...webpack-v3.0.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* add Node.js v26.0.0 to engines ([1b115cd](https://github.com/LavaMoat/LavaMoat/commit/1b115cd2b69a34aa9c3b2206424231a3e9964086))
+* **webpack:** handle moduleID/path duplication scenarios at build time ([6aefe85](https://github.com/LavaMoat/LavaMoat/commit/6aefe85cb33f2433817f70163f53e5b3164f2228))
+* **webpack:** use public RuntimeGlobals export ([0bc2998](https://github.com/LavaMoat/LavaMoat/commit/0bc29987692fbe7920482f435504aca761186580))
+
+
+### Performance Improvements
+
+* **webpack:** index module resource lookups ([5d3f78d](https://github.com/LavaMoat/LavaMoat/commit/5d3f78d73ec0dc5fdf0ed5e5f6a3e2b3cdd5c6fa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^5.0.1 to ^5.0.2
+    * @lavamoat/types bumped from ^2.0.0 to ^2.0.1
+    * lavamoat-core bumped from ^19.0.1 to ^19.0.2
+
 ## [3.0.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v3.0.0...webpack-v3.0.1) (2026-10-08)
 
 
