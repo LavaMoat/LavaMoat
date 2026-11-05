@@ -48,7 +48,9 @@ test('webpack/null-runtime - bundle files complete', (t) => {
 test('webpack/null-runtime - bundled bootstrap has runtime without lavamoat', (t) => {
   const bundle = t.context.build.snapshot['/dist/bootstrap.js']
   t.true(
-    bundle.includes('/******/ 	__webpack_require__.m = __webpack_modules__'),
+    bundle.includes(
+      '/******/ 	__webpack_require__.d = (exports, definition) => {'
+    ),
     'Expected the bundle to contain webpack runtime code'
   )
   t.notRegex(
