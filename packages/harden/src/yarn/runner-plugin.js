@@ -35,7 +35,7 @@ module.exports = {
           if (!workspace) {
             // a script is being executed outside of a workspace context, so we
             // can't apply any custom logic.
-            // This is the case when a postinstal is running.
+            // This is the case when a postinstall is running.
 
             // "Do nothing" - return the original executor immediately
             // without running any custom plugin logic or reading manifests.

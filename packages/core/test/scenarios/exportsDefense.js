@@ -35,7 +35,7 @@ module.exports = [
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      name: 'exportsDefense - doesnt explode on null/undefined exports',
+      name: `exportsDefense - doesn't explode on null/undefined exports`,
       defineOne: () => {
         module.exports = null
       },

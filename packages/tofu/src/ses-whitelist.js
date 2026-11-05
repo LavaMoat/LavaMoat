@@ -23,9 +23,9 @@
  *     is typeof the given type. For example, {@code "Infinity"} leads to
  *     "number" and property values that fail {@code typeof "number"}.
  *     are removed.
- * <li>A string value equal to an intinsic name ("ObjectPrototype",
+ * <li>A string value equal to an intrinsic name ("ObjectPrototype",
  *     "Array", etc), in which case the property whitelisted if its
- *     value property is equal to the value of the corresponfing
+ *     value property is equal to the value of the corresponding
  *     intrinsics. For example, {@code Map.prototype} leads to
  *     "MapPrototype" and the property is removed if its value is
  *     not equal to %MapPrototype%
@@ -200,7 +200,7 @@ const whitelist = {
     assign: fn,
     // 19.1.2.2 Object.create
     create: fn,
-    // 19.1.2.3 Object.definePropertie
+    // 19.1.2.3 Object.defineProperties
     defineProperties: fn,
     // 19.1.2.4 Object.defineProperty
     defineProperty: fn,

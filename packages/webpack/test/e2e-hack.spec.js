@@ -33,7 +33,7 @@ test('webpack/hack/loader - bundle runs without reaching the FLAG', (t) => {
   )
 })
 
-test('webpack/hack/loader - doublecheck in reported excluded files', (t) => {
+test('webpack/hack/loader - double-check in reported excluded files', (t) => {
   t.notRegex(t.context.build.stdout, /excluded modules.*hack.js/s) // `s` for multiline matching
 })
 
@@ -67,7 +67,7 @@ test('webpack/hack/mismatched-curlies', async (t) => {
   } catch (err) {
     t.assert(
       err.compilationErrors[0].message.startsWith('E_VALIDATION'),
-      'Expected a validation error from erapper check'
+      'Expected a validation error from wrapper check'
     )
   }
 })

@@ -1,4 +1,5 @@
 /// <reference path="./lavamoat.d.ts" />
+// cspell:ignore ctxm, idmap
 /* global Compartment */
 /* global LAVAMOAT */
 /* global LOCKDOWN_SHIMS */
@@ -10,7 +11,7 @@ const warn = typeof console === 'object' ? console.warn : () => {}
 
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
-// It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
+// It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwhile in absence of lockdown.
 const LOCKDOWN_ON = typeof repairIntrinsics !== 'undefined'
 if (LOCKDOWN_ON) {
   repairIntrinsics(LAVAMOAT.options.lockdown)
@@ -299,7 +300,7 @@ const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
  */
 const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   if (!LOCKDOWN_ON) {
-    // Scope Terminator not being present in the output causes the wrapper closure to run a no-op instaed of the module body
+    // Scope Terminator not being present in the output causes the wrapper closure to run a no-op instead of the module body
     return create(null)
   }
 
@@ -375,7 +376,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
       }
     )
 
-    // webpack rewrites regerences to `global` to `__webpack_require__.g` in the bundle
+    // webpack rewrites references to `global` to `__webpack_require__.g` in the bundle
     policyRequire.g = compartmentMap.get(resourceId).globalThis
 
     // override nmd to limit what it can mutate
