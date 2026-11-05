@@ -27,12 +27,12 @@ import { isOptionalDependency, noop } from '../util.js'
  *   LavaMoatPolicy,
  *   PackagePolicy
  * } from '@lavamoat/types'
+ * @import {Logger} from '@lavamoat/vog'
  * @import {PackageJson} from 'type-fest'
  * @import {
  *   ModuleInspectionResult,
  *   StructuredViolationsResult
  * } from '../internal.js'
- * @import {Loggerr} from '../log.js'
  */
 
 const { keys } = Object
@@ -54,7 +54,7 @@ const { keys } = Object
  * @param {CanonicalName | undefined} params.rootUsePolicy
  * @param {Map<CanonicalName, PackagePolicy>} params.packagePoliciesMap
  * @param {Map<CanonicalName, Set<CanonicalName>>} params.seededPackagesByCanonicalName
- * @param {Loggerr} [params.log]
+ * @param {Logger} [params.log]
  * @returns {PackageConnectionsHook}
  */
 export const createPackageConnectionsHook =
@@ -96,7 +96,7 @@ export const createPackageConnectionsHook =
  * @param {Object} params
  * @param {Map<CanonicalName, PackageJson>} params.packageJsonMap
  * @param {string[]} params.warnings
- * @param {Loggerr} [params.log]
+ * @param {Logger} [params.log]
  * @param {CanonicalName | undefined} params.rootUsePolicy
  * @param {Map<FileUrlString, ModuleInspectionResult>} params.inspectionResults
  * @param {Map<CanonicalName, GlobalPolicy>} params.globalsForPackage
@@ -189,7 +189,7 @@ export const createModuleSourceHook =
  *   as the policy root
  * @param {LavaMoatPolicy} [params.policyOverride]
  * @param {Map<CanonicalName, Set<CanonicalName>>} params.seededPackagesByCanonicalName
- * @param {Loggerr} [params.log]
+ * @param {Logger} [params.log]
  * @returns {PackageDependenciesHook}
  */
 export const createPackageDependenciesHook = ({
