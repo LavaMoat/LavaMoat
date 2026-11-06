@@ -16,13 +16,20 @@ declare global {
       configOptions: MakeRunScriptWrapperConfigOptions,
       env: NodeJS.ProcessEnv
     ) => void
-    readScriptsConfig: (
-      projectRoot?: string
-    ) => Record<string, string> | undefined
+    readPackageJson: (projectRoot?: string) => Record<string, any> | undefined
+    /**
+     * Optional. Creates `overrideDir` with links for known bin names. Not
+     * called when the dir exists or the permission model is active.
+     */
+    prepareBinOverrides?: (params: {
+      dependencies: string[]
+      overrideDir: string
+    }) => void
   }
 
   type MakeRunScriptWrapperIO = {
     readFileSync: (path: string, encoding: 'utf8') => string
+    existsSync: (path: string) => boolean
     pathJoin: (...segments: string[]) => string
     pathDelimiter: string
     tmpdir: () => string

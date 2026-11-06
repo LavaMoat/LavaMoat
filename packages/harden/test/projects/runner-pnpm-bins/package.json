@@ -1,0 +1,11 @@
+{
+  "name": "test-pnpm-bins-project",
+  "version": "1.0.0",
+  "scripts": {
+    "bins": "tsc && command -v npm && command -v node-gyp && pnpm run -s path && command -v lerna",
+    "path": "echo $PATH"
+  },
+  "devDependencies": {
+    "typescript": "1.0.0"
+  }
+}
