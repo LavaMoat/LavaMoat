@@ -29,19 +29,18 @@ const consola = createConsola({
  */
 export function createVerifier({ level, packageManager, print, json = false }) {
   let verified = true
+  /** @type {string} */
+  let packageManagerUsed
   return {
     async packageManager(detected) {
-      if (!packageManager) {
-        print(
-          `--package-manager not set, detected: ${detected?.name ?? 'none'}`
+      const choice = packageManager || detected?.name
+      if (!choice) {
+        throw new Error(
+          `Could not proceed without package manager choice - use: --package-manager=name`
         )
-        if (!detected) {
-          throw new Error(
-            `Could not proceed without package manager choice - use: --package-manager=name`
-          )
-        }
       }
-      return packageManager || detected?.name || null
+      packageManagerUsed = choice
+      return packageManagerUsed || null
     },
     async shouldStart(scores, opinions) {
       /**
@@ -93,7 +92,7 @@ export function createVerifier({ level, packageManager, print, json = false }) {
           `${JSON.stringify(
             {
               level,
-              packageManager,
+              packageManager: packageManagerUsed,
               verified,
               scores: scoreByLevel,
               checks,
