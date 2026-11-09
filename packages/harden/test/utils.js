@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process'
 import { rmSync } from 'node:fs'
-import { cp, mkdtemp, readdir } from 'node:fs/promises'
+import { cp, mkdtemp, readdir, realpath } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir, platform } from 'node:os'
 import { promisify } from 'node:util'
@@ -35,16 +35,19 @@ export function getProjectDir(name) {
 }
 
 /**
- * Copies a fixture project to a temp dir and returns the temp path.
+ * Copies a fixture project to a temp dir and returns its canonical path.
  *
  * @param {import('ava').ExecutionContext<unknown>} t
  * @param {string} name
  */
 export async function copyProject(t, name) {
   if (DEBUG) {
-    return getProjectDir(name)
+    return realpath(getProjectDir(name))
   }
-  const tmp = await mkdtemp(join(tmpdir(), `harden-test-${name}-`))
+  // realpath is necessary because tmp is a symlink on mac
+  const tmp = await realpath(
+    await mkdtemp(join(tmpdir(), `harden-test-${name}-`))
+  )
   await cp(getProjectDir(name), tmp, { recursive: true })
   t.log(`--- setting up test in ${tmp}`)
   return tmp
