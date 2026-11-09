@@ -254,9 +254,7 @@ export const loadPolicies = async (
    * @type {[
    *   policy: Promise<LavaMoatPolicy> | LavaMoatPolicy,
    *   policyOverride:
-   *     | Promise<LavaMoatPolicy | undefined>
-   *     | LavaMoatPolicy
-   *     | undefined,
+   *     Promise<LavaMoatPolicy | undefined> | LavaMoatPolicy | undefined,
    * ]}
    */
   const jobs = /** @type {any} */ ([])
@@ -426,7 +424,7 @@ export const isTrusted = (policy) => {
  * @public
  */
 export const mergePolicies = (policyA, policyB) => ({
-  ...mergePolicy(policyA, policyB),
+  .../** @type {LavaMoatPolicy} */ (mergePolicy(policyA, policyB)),
   [constants.MERGED_POLICY_FIELD]: true,
 })
 
