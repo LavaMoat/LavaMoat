@@ -115,7 +115,7 @@ export interface Decisions {
     opinion: OpinionWithAlternatives,
     facts: Facts
   ) => Promise<ApplicableOpinion | null>
-  packageManager: () => Promise<string | null>
+  packageManager: (detected: DetectedPM | null) => Promise<string | null>
   askToHarden: (
     opinion: ApplicableOpinion,
     facts: Facts

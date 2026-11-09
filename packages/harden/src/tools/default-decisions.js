@@ -71,8 +71,8 @@ export function createFallbackDecisions({
       }
       return true
     },
-    async packageManager() {
-      return packageManager || null
+    async packageManager(detected) {
+      return packageManager || detected?.name || null
     },
     async shouldApplyOpinion(opinion, _facts) {
       if (opinion.id in decisionsForOpinions) {

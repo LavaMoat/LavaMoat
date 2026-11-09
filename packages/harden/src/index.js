@@ -31,7 +31,7 @@ export async function hardenDefaults(options) {
   // Determine package manager
   let pmName = options.packageManager ?? null
   if (!pmName && decisions?.packageManager) {
-    pmName = await decisions.packageManager()
+    pmName = await decisions.packageManager(detected)
   }
   if (!pmName && detected) {
     pmName = detected.name
