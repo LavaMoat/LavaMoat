@@ -30,11 +30,18 @@ const consola = createConsola({
 export function createVerifier({ level, packageManager, print, json = false }) {
   let verified = true
   return {
-    async packageManager() {
+    async packageManager(detected) {
       if (!packageManager) {
-        throw new Error(`packageManager must be provided to verifier`)
+        print(
+          `--package-manager not set, detected: ${detected?.name ?? 'none'}`
+        )
+        if (!detected) {
+          throw new Error(
+            `Could not proceed without package manager choice - use: --package-manager=name`
+          )
+        }
       }
-      return packageManager
+      return packageManager || detected?.name || null
     },
     async shouldStart(scores, opinions) {
       /**

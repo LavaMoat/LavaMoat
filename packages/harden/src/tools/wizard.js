@@ -50,14 +50,14 @@ export function createWizard({
   const decisionsForOpinions = { ...(decisionsSnapshot ?? {}) }
 
   return {
-    async packageManager() {
+    async packageManager(detected) {
       if (packageManager) {
         return packageManager
       }
       return await consola.prompt(`Which package manager are you using?`, {
         type: 'select',
         options: ['npm', 'yarn', 'pnpm'],
-        initial: packageManager,
+        initial: detected?.name ?? packageManager,
       })
     },
     async shouldStart(scores) {
