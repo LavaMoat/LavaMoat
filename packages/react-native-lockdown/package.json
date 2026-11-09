@@ -46,7 +46,7 @@
     "ses": "2.3.0"
   },
   "devDependencies": {
-    "@react-native/js-polyfills": "0.86.0"
+    "@react-native/js-polyfills": "0.88.1"
   },
   "publishConfig": {
     "access": "public"
