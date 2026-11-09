@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.0](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.1...harden-v0.9.0) (2026-11-09)
+
+
+### Features
+
+* **harden:** fall back on detected package manager more eagerly ([d69c7a0](https://github.com/LavaMoat/LavaMoat/commit/d69c7a07ba3628ded9d05d003977a63ba6cbf78f))
+
+
+### Bug Fixes
+
+* **deps:** update dependency semver to ^7.8.4 ([#2112](https://github.com/LavaMoat/LavaMoat/issues/2112)) ([761f969](https://github.com/LavaMoat/LavaMoat/commit/761f9691bdf5e3527fde2e0aa82cb65b32ab40a9))
+* **harden:** report selected package manager in harden check ([0320ecd](https://github.com/LavaMoat/LavaMoat/commit/0320ecde8ce1a438a1bf39cea0b810711589a9b4))
+
 ## [0.8.1](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.0...harden-v0.8.1) (2026-10-08)
 
 
