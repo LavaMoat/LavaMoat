@@ -6,8 +6,11 @@
 module.exports = { walk, eachNodeInTree }
 
 /**
- * @import {LavamoatModuleRecord} from '@lavamoat/types'
- * @import {ImportHookFn, ShouldImportFn} from './parseForPolicy'
+ * @import {LavamoatModuleRecord} from '@lavamoat/types/legacy'
+ * @import {
+ *   ImportHookFn,
+ *   ShouldImportFn
+ * } from './parseForPolicy'
  */
 
 /**

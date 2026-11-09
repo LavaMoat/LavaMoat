@@ -1,11 +1,13 @@
 // @ts-check
 
 /**
- * @import {LavamoatModuleRecord as LMR,
- *   DefaultModuleInitArgs,
- *   ModuleInitializer,
- *   ModuleRecordType} from '@lavamoat/types'
  * @import {File} from '@babel/types'
+ * @import {
+ *   DefaultModuleInitArgs,
+ *   LavamoatModuleRecord as LMR,
+ *   ModuleInitializer,
+ *   ModuleRecordType
+ * } from '@lavamoat/types/legacy'
  */
 
 /**

@@ -27,7 +27,7 @@ const { isArray } = Array
  *   Resolutions,
  *   ResourcePolicy,
  *   Resources
- * } from '@lavamoat/types'
+ * } from '@lavamoat/types/legacy'
  */
 
 /**
