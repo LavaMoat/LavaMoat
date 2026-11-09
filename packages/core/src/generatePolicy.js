@@ -27,15 +27,17 @@ const {
 } = require('./constants')
 
 /**
- * @import {DebugInfo,
+ * @import {ParseResult} from '@babel/parser'
+ * @import {File} from '@babel/types'
+ * @import {
+ *   DebugInfo,
  *   LavamoatModuleRecord,
  *   LavaMoatPolicy,
  *   LavaMoatPolicyDebug,
  *   ResourcePolicy,
  *   Resources,
- *   SesCompat} from '@lavamoat/types'
- * @import {ParseResult} from '@babel/parser'
- * @import {File} from '@babel/types'
+ *   SesCompat
+ * } from '@lavamoat/types/legacy'
  */
 
 const rootSlug = '$root$'
@@ -74,7 +76,7 @@ function createModuleInspector(opts) {
   /**
    * The module record for the root package. May not be used
    *
-   * @type {import('@lavamoat/types').LavamoatModuleRecord | undefined}
+   * @type {import('@lavamoat/types/legacy').LavamoatModuleRecord | undefined}
    */
   let root
 

@@ -6,7 +6,11 @@ const { eachNodeInTree } = require('./walk')
 module.exports = { parseForPolicy }
 
 /**
- * @import {LavaMoatPolicy, DefaultModuleInitArgs, LavamoatModuleRecord} from '@lavamoat/types'
+ * @import {
+ *   DefaultModuleInitArgs,
+ *   LavamoatModuleRecord,
+ *   LavaMoatPolicy
+ * } from '@lavamoat/types/legacy'
  * @import {ModuleInspector} from './generatePolicy'
  */
 

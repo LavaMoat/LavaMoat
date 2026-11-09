@@ -1,14 +1,8 @@
 // @ts-check
 
 /**
- * @import {
- *   LavaMoatPolicy,
- *   LavaMoatPolicyDebug
- * } from '@lavamoat/types'
- * @import {
- *   ExecutionContext,
- *   TestFn
- * } from 'ava'
+ * @import {LavaMoatPolicy} from '@lavamoat/types/legacy'
+ * @import {ExecutionContext} from 'ava'
  */
 
 const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))

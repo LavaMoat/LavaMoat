@@ -10,7 +10,7 @@
  *   LavaMoatPolicy,
  *   ResourcePolicy,
  *   Resources
- * } from '@lavamoat/types'
+ * } from '@lavamoat/types/legacy'
  */
 
 const { entries, keys } = Object

@@ -2,7 +2,7 @@
 
 /**
  * Utilities for generating the endowments object based on a `globalRef` and a
- * {@link LMPolicy.PackagePolicy}.
+ * {@link PackagePolicy}.
  *
  * The contents of this file will be copied into the prelude template this
  * module has been written so that it required directly or copied and added to
