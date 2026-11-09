@@ -23,6 +23,10 @@
     },
     "./package.json": "./package.json",
     "./policy": {
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./legacy": {
       "require": "./dist/policy-schema/index.js",
       "types": "./dist/policy-schema/index.d.ts"
     }
@@ -31,7 +35,8 @@
     "lint:deps": "depcheck"
   },
   "dependencies": {
-    "@babel/types": "7.29.7"
+    "@babel/types": "7.29.7",
+    "@lavamoat/policy": "^0.0.0"
   },
   "publishConfig": {
     "access": "public"

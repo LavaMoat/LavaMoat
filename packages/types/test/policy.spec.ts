@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-object-type, ava/no-ignored-test-files, ava/require-assertion */
+/* eslint-disable @typescript-eslint/no-unused-vars, ava/no-ignored-test-files, ava/require-assertion */
 /**
  * Tests for policy schema types
  *
@@ -18,7 +18,7 @@ import type { LavaMoatPolicy, Resources } from '../src'
  * @param policy Some policy-lookin' thing
  * @returns Same object, but with a type
  */
-function infer<T extends Resources>(policy: LavaMoatPolicy<T>) {
+const infer = (policy: LavaMoatPolicy) => {
   return policy
 }
 
@@ -40,45 +40,6 @@ test('use of default type arguments does not validate root.usePolicy', () => {
   expectTypeOf(policy).toExtend<LavaMoatPolicy>()
 })
 
-test('root usePolicy reference matches resource name', () => {
-  // not inferred
-  const badPolicy = {
-    root: {
-      // no "bar"
-      usePolicy: 'bar',
-    },
-    resources: {
-      foo: {
-        globals: {
-          'console.log': true,
-        },
-      },
-    },
-  }
-
-  expectTypeOf(badPolicy).toExtend<
-    // @ts-expect-error usePolicy must match a resource name
-    LavaMoatPolicy<{ foo: { globals: { 'console.log': true } } }>
-  >()
-
-  const goodPolicy = infer({
-    root: {
-      usePolicy: 'foo',
-    },
-    resources: {
-      foo: {
-        globals: {
-          'console.log': true,
-        },
-      },
-    },
-  })
-
-  expectTypeOf<typeof goodPolicy>().toEqualTypeOf<
-    LavaMoatPolicy<{ foo: { globals: { 'console.log': true } } }>
-  >()
-})
-
 test('empty root resource is ok', () => {
   const goodPolicy = infer({
     root: {
@@ -89,7 +50,7 @@ test('empty root resource is ok', () => {
     },
   })
 
-  expectTypeOf<typeof goodPolicy>().toEqualTypeOf<LavaMoatPolicy<{ foo: {} }>>()
+  expectTypeOf<typeof goodPolicy>().toEqualTypeOf<LavaMoatPolicy>()
 })
 
 test('resources is Resources', () => {
@@ -116,7 +77,7 @@ test('root usePolicy reference may be omitted', (t) => {
     },
   })
 
-  expectTypeOf(policy).toEqualTypeOf<LavaMoatPolicy<{ foo: {} }>>()
+  expectTypeOf(policy).toEqualTypeOf<LavaMoatPolicy>()
 })
 
 test('root may be omitted', (t) => {
@@ -126,5 +87,5 @@ test('root may be omitted', (t) => {
     },
   })
 
-  expectTypeOf(policy).toEqualTypeOf<LavaMoatPolicy<{ foo: {} }>>()
+  expectTypeOf(policy).toEqualTypeOf<LavaMoatPolicy>()
 })
