@@ -1,0 +1,2 @@
+## this prevents pnpm from destroying the mock
+verifyDepsBeforeRun: false

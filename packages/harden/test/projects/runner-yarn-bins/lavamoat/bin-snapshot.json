@@ -1,0 +1,5 @@
+{
+  "allow-scripts": "allow-scripts:npm",
+  "lavamoat": "node:npm",
+  "lavamoat-sort-policy": "lavamoat-core:npm"
+}

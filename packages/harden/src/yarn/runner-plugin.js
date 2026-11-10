@@ -18,8 +18,87 @@ module.exports = {
   name: '@yarnpkg/plugin-runner',
   factory: function (/** @type {NodeJS.Require} */ require) {
     const { tmpdir } = require('node:os')
+    const { scriptUtils, structUtils } = require('@yarnpkg/core')
+    const path = require('node:path')
+    const fs = require('node:fs')
     return {
       hooks: {
+        /**
+         * @type {import('@yarnpkg/core').Hooks['afterAllInstalled']}
+         */
+        afterAllInstalled: async (project, options) => {
+          if (options.mode === 'update-lockfile') {
+            return
+          }
+
+          // Pick a workspace (e.g., the root workspace, or iterate through project.workspaces)
+          const workspace = project.topLevelWorkspace
+
+          const accessibleBinaries =
+            await scriptUtils.getWorkspaceAccessibleBinaries(workspace)
+
+          /** @type {{ [binName: string]: string }} */
+          const mapping = {}
+          for (let [
+            // eslint-disable-next-line prefer-const
+            binName,
+            [pkg],
+          ] of accessibleBinaries.entries()) {
+            if (structUtils.isVirtualLocator(pkg)) {
+              pkg = structUtils.devirtualizeLocator(pkg)
+            }
+            mapping[binName] = `${pkg.name}:${pkg.reference.split(':')[0]}`
+          }
+
+          // read lavamoat/bin-snapshot.json and compare with mapping
+          const binSnapshotPath = path.resolve(
+            project.cwd,
+            'lavamoat/bin-snapshot.json'
+          )
+          /** @type {{ [binName: string]: string }} */
+          let binSnapshot = {}
+          if (fs.existsSync(binSnapshotPath)) {
+            binSnapshot = JSON.parse(fs.readFileSync(binSnapshotPath, 'utf-8'))
+          }
+
+          const forbiddenBins = new Set(['node', 'node-gyp', 'yarn', 'npm'])
+
+          let mismatch = false
+          for (const [binName, pkg] of Object.entries(mapping)) {
+            if (!binSnapshot[binName]) {
+              if (forbiddenBins.has(binName)) {
+                console.error(
+                  `[LavaMoat][CAUTION]: ${pkg} is defining a cli named: ${binName}. It looks like a bin confusion attack.`
+                )
+                mismatch = true
+              } else {
+                console.error(
+                  `[LavaMoat][INFO]: Adding new bin entry: ${binName} -> ${pkg}. Check your snapshot.`
+                )
+                binSnapshot[binName] = pkg
+              }
+              continue
+            }
+            if (binSnapshot[binName] !== pkg) {
+              console.error(
+                `[LavaMoat][ERROR] Possible bin confusion attack: ${binName} -> ${pkg}, expected ${binSnapshot[binName]}. If the change is valid, delete the old entry for ${binName} in lavamoat/bin-snapshot.json and try again.`
+              )
+              mismatch = true
+            }
+          }
+          if (mismatch) {
+            console.error(
+              `[LavaMoat][ERROR] Bin snapshot mismatch detected. Fix it before running any scripts.`
+            )
+            process.exit(1)
+          } else {
+            fs.writeFileSync(
+              binSnapshotPath,
+              JSON.stringify(binSnapshot, null, 2),
+              'utf-8'
+            )
+          }
+        },
         /** @type {WrapScriptExecutionHook} */
         wrapScriptExecution: async (
           executor,
@@ -28,8 +107,6 @@ module.exports = {
           scriptName,
           extra
         ) => {
-          const path = require('node:path')
-          const fs = require('node:fs')
           const workspace = project.tryWorkspaceByLocator(locator)
 
           if (!workspace) {
@@ -47,7 +124,7 @@ module.exports = {
           // Abundance of caution. It seems yarn is not adding
           // any node_modules/.bin locations to the PATH by default.
           const binFolder = `node_modules${path.sep}.bin`
-          const berryBin = extra.env.BERRY_BIN_FOLDER
+          // const berryBin = extra.env.BERRY_BIN_FOLDER
 
           const wrapper = makeRunScriptWrapper(
             {
@@ -55,18 +132,17 @@ module.exports = {
               scriptPayload: extra.script,
               projectRoot: project.cwd,
               pathBinMatcher: (fragment) => {
-                if (berryBin && fragment === berryBin) {
-                  return true
-                }
+                // BERRY_BIN_FOLDER is controlled by yarn and yarn prevents abuse of yarn and node commands
+                // see: https://github.com/yarnpkg/berry/blob/8f638c0806ec8f3758adb13d93567fc782f9c903/packages/yarnpkg-core/sources/scriptUtils.ts#L131-L136
+                // Therefore, we only match the binFolder to prevent artifacts from weird setups.
                 return fragment.endsWith(binFolder)
               },
               customizePermissionsConfig: addMandatoryReads,
-              readScriptsConfig: () => {
-                return pkgJson.scriptsConfig
-              },
+              readPackageJson: () => pkgJson,
             },
             {
               readFileSync: fs.readFileSync,
+              existsSync: fs.existsSync,
               pathJoin: path.join,
               pathDelimiter: path.delimiter,
               tmpdir,
