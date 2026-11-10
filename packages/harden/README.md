@@ -158,12 +158,13 @@ Depending on your strictness choice, for yarn we can use the built-in `dependenc
 ### Script Execution Environment
 
 > [!WARNING]
-> 
-> The script-shell override `@lavamoat/harden` depends on is **unsupported in Windows' `cmd.exe`**.  Only `bash`, `zsh`, and like POSIX shells are supported.
-One of the more advanced capabilities `@lavamoat/harden` brings to the project is the hardening of the environment exposed to scripts run from `package.json` (e.g., `npm run <script>`). It offers the following controls:
+>
+> The script-shell override `@lavamoat/harden` depends on is **unsupported in Windows' `cmd.exe`**. Only `bash`, `zsh`, and alike POSIX shells are supported.
+> One of the more advanced capabilities `@lavamoat/harden` brings to the project is the hardening of the environment exposed to scripts run from `package.json` (e.g., `npm run <script>`). It offers the following controls:
 
 - Censoring of environment variables. A `lavamoat/.env.ban.json` file configures censoring environment variables that match given strings
-- Rearranges `$PATH` to mitigate [bin confusion][bin-confusion]. With npm and pnpm, well-known bins like `npm`, `node`, or `tsc` are additionally pinned to their global location or a direct dependency (see [runner-bin-confusion.md](./src/npm/runner-bin-confusion.md))
+- For npm/pnpm: Rearranges `$PATH` to mitigate [bin confusion][bin-confusion]. With npm and pnpm, well-known bins like `npm`, `node`, or `tsc` are additionally pinned to their global location or a direct dependency (see [runner-bin-confusion.md](./src/npm/runner-bin-confusion.md))
+- For yarn: Keeps a snapshot of the binaries defined by your dependencies in `lavamoat/bin-snapshot.json` to detect potential bin confusion attacks and fail `yarn install`
 - Adds a `scriptsConfig` property to `package.json` where files with [Node.js Permissions][permissions] options can be selected per script with a fallback to `#default`. Example configurations are provided, but it's recommended you customize them to adhere to the [principle of least privilege][least-privilege].
 
 `scriptsConfig` matching rules:
