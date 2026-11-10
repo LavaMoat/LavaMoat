@@ -61,40 +61,42 @@ module.exports = {
             binSnapshot = JSON.parse(fs.readFileSync(binSnapshotPath, 'utf-8'))
           }
 
-          if (process.env.UPDATE_BIN_SNAPSHOT) {
-            const forbiddenBins = ['node', 'node-gyp', 'yarn', 'npm']
-            for (const bin of forbiddenBins) {
-              if (mapping[bin]) {
+          const forbiddenBins = new Set(['node', 'node-gyp', 'yarn', 'npm'])
+
+          let mismatch = false
+          for (const [binName, pkg] of Object.entries(mapping)) {
+            if (!binSnapshot[binName]) {
+              if (forbiddenBins.has(binName)) {
                 console.error(
-                  `[LavaMoat][CAUTION]: This should not be a local bin: ${bin} -> ${mapping[bin]}`
+                  `[LavaMoat][CAUTION]: ${pkg} is defining a cli named: ${binName}. It looks like a bin confusion attack.`
                 )
+                mismatch = true
+              } else {
+                console.error(
+                  `[LavaMoat][INFO]: Adding new bin entry: ${binName} -> ${pkg}. Check your snapshot.`
+                )
+                binSnapshot[binName] = pkg
               }
+              continue
             }
+            if (binSnapshot[binName] !== pkg) {
+              console.error(
+                `[LavaMoat][ERROR] Possible bin confusion attack: ${binName} -> ${pkg}, expected ${binSnapshot[binName]}. If the change is valid, delete the old entry for ${binName} in lavamoat/bin-snapshot.json and try again.`
+              )
+              mismatch = true
+            }
+          }
+          if (mismatch) {
+            console.error(
+              `[LavaMoat][ERROR] Bin snapshot mismatch detected. Fix it before running any scripts.`
+            )
+            process.exit(1)
+          } else {
             fs.writeFileSync(
               binSnapshotPath,
-              JSON.stringify(mapping, null, 2),
+              JSON.stringify(binSnapshot, null, 2),
               'utf-8'
             )
-          } else {
-            let mismatch = false
-            for (const [binName, pkg] of Object.entries(mapping)) {
-              if (!binSnapshot[binName]) {
-                console.error(
-                  `Binary missing in snapshot: ${binName} -> ${pkg} - update with: --bin-snapshot`
-                )
-                mismatch = true
-                continue
-              }
-              if (binSnapshot[binName] !== pkg) {
-                console.error(
-                  `Binary mismatch: ${binName} -> ${pkg}, expected ${binSnapshot[binName]}`
-                )
-                mismatch = true
-              }
-            }
-            if (mismatch) {
-              process.exit(1)
-            }
           }
         },
         /** @type {WrapScriptExecutionHook} */
