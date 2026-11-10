@@ -1,7 +1,7 @@
 import test from 'ava'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { copyProject } from './utils.js'
@@ -21,9 +21,22 @@ const runnerSetupPerPm = {
 }
 
 /** @param {import('ava').ExecutionContext} t */
-async function installYarnBinProject(t) {
+async function installYarnBinProject(t, { runFromWorkspace = false } = {}) {
   t.timeout(180_000)
   const cwd = await copyProject(t, 'runner-yarn-bins')
+  let installCwd = cwd
+  if (runFromWorkspace) {
+    const packageJsonPath = path.join(cwd, 'package.json')
+    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'))
+    packageJson.workspaces = ['packages/*']
+    await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
+    installCwd = path.join(cwd, 'packages', 'app')
+    await mkdir(installCwd, { recursive: true })
+    await writeFile(
+      path.join(installCwd, 'package.json'),
+      JSON.stringify({ name: 'test-yarn-bins-workspace', version: '1.0.0' })
+    )
+  }
   const snapshotPath = path.join(cwd, 'lavamoat/bin-snapshot.json')
   const snapshot = await readFile(snapshotPath, 'utf8')
   const env = { ...process.env, PWD: cwd }
@@ -40,9 +53,12 @@ async function installYarnBinProject(t) {
     print: () => {},
   })
 
-  const result = await execFileAsync('yarn', ['install'], { cwd, env })
+  const result = await execFileAsync('yarn', ['install'], {
+    cwd: installCwd,
+    env,
+  })
   // t.log(result.stdout, result.stderr)
-  return { cwd, env, snapshotPath, snapshot, result }
+  return { cwd, env, installCwd, snapshotPath, snapshot, result }
 }
 
 test('yarn runner matches the bin snapshot on install', async (t) => {
@@ -57,6 +73,17 @@ test('yarn runner matches the bin snapshot on install', async (t) => {
     lavamoat: 'node:npm',
     'lavamoat-sort-policy': 'lavamoat-core:npm',
   })
+})
+
+test('yarn runner resolves the bin snapshot from the project root', async (t) => {
+  const { snapshotPath, snapshot, result } = await installYarnBinProject(t, {
+    runFromWorkspace: true,
+  })
+  t.notRegex(
+    result.stdout + result.stderr,
+    /Binary (?:missing in snapshot|mismatch):/
+  )
+  t.is(await readFile(snapshotPath, 'utf8'), snapshot)
 })
 
 test('yarn runner rejects a local dependency replacing a snapshotted bin', async (t) => {

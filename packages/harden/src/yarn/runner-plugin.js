@@ -51,7 +51,10 @@ module.exports = {
           }
 
           // read lavamoat/bin-snapshot.json and compare with mapping
-          const binSnapshotPath = path.resolve('lavamoat/bin-snapshot.json')
+          const binSnapshotPath = path.resolve(
+            project.cwd,
+            'lavamoat/bin-snapshot.json'
+          )
           /** @type {{ [binName: string]: string }} */
           let binSnapshot = {}
           if (fs.existsSync(binSnapshotPath)) {
