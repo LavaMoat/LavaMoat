@@ -19,20 +19,16 @@ import {
   DEFAULT_POLICY_OVERRIDE_FILENAME,
 } from './constants.js'
 import { InvalidPolicyError, NoPolicyError, WritePolicyError } from './error.js'
-import { hrCode, hrPath } from './format.js'
+import { emphasis, hrCode, hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
+import { hasValue, isPathLike, toAbsolutePath, toPath } from './util.js'
 import {
-  hasValue,
-  isArray,
-  isIncludeEntryByLocation,
-  isIncludeEntryByName,
-  isNonEmptyString,
-  isNonArrayObject,
-  isPathLike,
-  toAbsolutePath,
-  toPath,
-} from './util.js'
+  isLavaMoatPolicy as isPolicy,
+  validateLavaMoatPolicy,
+} from '@lavamoat/policy'
+
+export { isPolicy, validateLavaMoatPolicy }
 
 /**
  * @import {
@@ -263,10 +259,7 @@ export const loadPolicies = async (
   } else {
     jobs.push(
       (() => {
-        assertPolicy(
-          allegedPolicy,
-          `Invalid LavaMoat policy; does not match expected schema`
-        )
+        assertPolicy(allegedPolicy)
 
         return allegedPolicy
       })()
@@ -281,10 +274,7 @@ export const loadPolicies = async (
   } else {
     jobs.push(
       (() => {
-        assertPolicy(
-          allegedPolicyOverride,
-          `Invalid LavaMoat policy overrides; does not match expected schema`
-        )
+        assertPolicy(allegedPolicyOverride)
         return allegedPolicyOverride
       })()
     )
@@ -306,17 +296,20 @@ export const loadPolicies = async (
 /**
  * Assertion for a {@link LavaMoatPolicy}
  *
+ * @privateRemarks
+ * Must be a function declaration due to TypeScript's quirks around
+ * `asserts`-style type guards.
  * @param {unknown} allegedPolicy
- * @param {string} [message] Assertion failure message
  * @returns {asserts allegedPolicy is LavaMoatPolicy}
  * @public
  */
-export const assertPolicy = (
-  allegedPolicy,
-  message = 'Invalid LavaMoat policy; does not match expected schema'
-) => {
-  if (!isPolicy(allegedPolicy)) {
-    throw new InvalidPolicyError(message)
+export function assertPolicy(allegedPolicy) {
+  const result = validateLavaMoatPolicy(allegedPolicy)
+  if (!result.success) {
+    throw new InvalidPolicyError(
+      `Invalid LavaMoat Policy: ${emphasis(result.error.message)}`,
+      { cause: result.error }
+    )
   }
 }
 
@@ -376,30 +369,6 @@ export const writePolicy = async (
     )
   }
 }
-
-/**
- * Type predicate for a {@link LavaMoatPolicy}
- *
- * @remarks
- * This is non-exhaustive and should eventually be replaced with a proper
- * schema.
- * @param {unknown} value Value to check
- * @returns {value is LavaMoatPolicy} Whether the value is a `LavaMoatPolicy`
- * @public
- */
-export const isPolicy = (value) =>
-  isNonArrayObject(value) &&
-  hasValue(value, 'resources') &&
-  isNonArrayObject(value.resources) &&
-  (!('root' in value) || isNonArrayObject(value.root)) &&
-  (!('include' in value) ||
-    (isArray(value.include) &&
-      value.include.every(
-        (item) =>
-          isNonEmptyString(item) ||
-          isIncludeEntryByName(item) ||
-          isIncludeEntryByLocation(item)
-      )))
 
 /**
  * Returns `true` if there is no such

@@ -20,6 +20,7 @@ export { generatePolicy } from './policy-gen/generate.js'
 export {
   assertPolicy,
   isPolicy,
+  validateLavaMoatPolicy,
   isTrusted,
   loadPolicies,
   maybeReadPolicyOverride,
