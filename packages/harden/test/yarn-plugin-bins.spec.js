@@ -38,7 +38,7 @@ async function installYarnBinProject(t, { runFromWorkspace = false } = {}) {
     )
   }
   const snapshotPath = path.join(cwd, 'lavamoat/bin-snapshot.json')
-  const snapshot = await readFile(snapshotPath, 'utf8')
+  const snapshot = (await readFile(snapshotPath, 'utf8')).trim()
   const env = { ...process.env, PWD: cwd }
   delete env.UPDATE_BIN_SNAPSHOT // just in case of a leftover, it should not be set
 
@@ -96,10 +96,7 @@ test('yarn runner rejects a local dependency replacing a snapshotted bin', async
     }),
     { code: 1 }
   )
-  t.regex(
-    error.message,
-    /Binary mismatch: lavamoat -> node:file, expected node:npm/
-  )
+  t.regex(error.message, /attack: lavamoat -> node:file, expected node:npm/)
   t.is(await readFile(snapshotPath, 'utf8'), snapshot)
   const manifest = JSON.parse(
     await readFile(path.join(cwd, 'package.json'), 'utf8')
@@ -107,28 +104,20 @@ test('yarn runner rejects a local dependency replacing a snapshotted bin', async
   t.true(manifest.dependencies['@lavamoat/node'].startsWith('file:'))
 })
 
-test('yarn runner updates the bin snapshot for a local dependency', async (t) => {
+test('yarn runner updates the bin snapshot for a new dependency', async (t) => {
   const { cwd, env, snapshotPath, snapshot } = await installYarnBinProject(t)
-  const localDependency = fileURLToPath(new URL('../../node/', import.meta.url))
-  await execFileAsync(
-    'yarn',
-    ['add', `@lavamoat/node@file:${localDependency}`],
-    {
-      cwd,
-      env: { ...env, UPDATE_BIN_SNAPSHOT: '1' },
-    }
-  )
+  await execFileAsync('yarn', ['add', `rimraf`], {
+    cwd,
+    env,
+  })
 
   const updatedSnapshot = JSON.parse(await readFile(snapshotPath, 'utf8'))
   t.deepEqual(updatedSnapshot, {
     ...JSON.parse(snapshot),
-    lavamoat: 'node:file',
+    rimraf: 'rimraf:npm',
   })
 
   const result = await execFileAsync('yarn', ['install'], { cwd, env })
-  t.notRegex(
-    result.stdout + result.stderr,
-    /Binary (?:missing in snapshot|mismatch):/
-  )
+  t.notRegex(result.stdout + result.stderr, /attack/)
   t.deepEqual(JSON.parse(await readFile(snapshotPath, 'utf8')), updatedSnapshot)
 })
