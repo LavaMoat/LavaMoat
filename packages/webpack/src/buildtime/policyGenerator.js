@@ -19,9 +19,15 @@ const diag = require('./diagnostics')
  * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
  */
 
-/** @import {LavaMoatPolicy, ResourceMetadata} from '@lavamoat/types' */
+/** @import {
+  LavaMoatPolicy,
+  ResourceMetadata
+} from '@lavamoat/policy' */
 /** @import {CanonicalNameMap} from '@lavamoat/aa' */
-/** @import {NormalModule, Module} from 'webpack' */
+/** @import {
+  Module,
+  NormalModule
+} from 'webpack' */
 
 module.exports = {
   stringifyPolicyReliably: jsonStringifySortedPolicy,
@@ -75,7 +81,13 @@ module.exports = {
    * @param {boolean | undefined} opts.overwritePolicyWithOverride
    * @returns {LavaMoatPolicy}
    */
-  generatePolicy({ canonicalNameMap, location, isBuiltin, modulesToInspect, overwritePolicyWithOverride }) {
+  generatePolicy({
+    canonicalNameMap,
+    location,
+    isBuiltin,
+    modulesToInspect,
+    overwritePolicyWithOverride,
+  }) {
     const { applyOverride } = loadPoliciesSync({
       policyPath: path.join(location, 'policy.json'),
       policyOverridePath: path.join(location, 'policy-override.json'),
@@ -206,11 +218,13 @@ module.exports = {
       }
       policy.resources[packageName].meta = packageMeta
     })
-    const overriddenPolicy = applyOverride(policy);
+    const overriddenPolicy = applyOverride(policy)
     mkdirSync(location, { recursive: true })
     writeFileSync(
       path.join(location, 'policy.json'),
-      jsonStringifySortedPolicy(overwritePolicyWithOverride ? overriddenPolicy : policy),
+      jsonStringifySortedPolicy(
+        overwritePolicyWithOverride ? overriddenPolicy : policy
+      ),
       'utf8'
     )
     return overriddenPolicy

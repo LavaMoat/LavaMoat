@@ -33,10 +33,10 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 /**
  * Just import
  *
+ * @import {CanonicalNameMap} from '@lavamoat/aa'
+ * @import {LavaMoatPolicy} from '@lavamoat/policy'
  * @import {LockdownOptions} from 'ses'
  * @import {CompleteLavaMoatPluginOptions} from './buildtime/types'
- * @import {CanonicalNameMap} from '@lavamoat/aa'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -369,7 +369,8 @@ class LavaMoatPlugin {
                     connections:
                       compilation.moduleGraph.getOutgoingConnections(module),
                   })),
-                  overwritePolicyWithOverride: STORE.options.generatePolicyIncludeOverrides,
+                  overwritePolicyWithOverride:
+                    STORE.options.generatePolicyIncludeOverrides,
                 })
               : loadPolicy({
                   policyFromOptions: STORE.options.policy,

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-explicit-any */
-import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatPolicy } from '@lavamoat/policy'
 import type {
   EndowmentsToolkitFactory,
   LavaMoatScuttleOpts,
