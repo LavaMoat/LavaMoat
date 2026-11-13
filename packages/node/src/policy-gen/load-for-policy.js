@@ -46,7 +46,7 @@ import { GenerationError } from '../error.js'
  *   GlobalPolicy,
  *   LavaMoatPolicy,
  *   PackagePolicy
- * } from '@lavamoat/types'
+ * } from '@lavamoat/policy'
  * @import {PackageJson} from 'type-fest'
  * @import {
  *   ConsumerMapNodeModulesOptions,

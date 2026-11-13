@@ -14,6 +14,9 @@
   "references": [
     {
       "path": "../src/tsconfig.json"
+    },
+    {
+      "path": "../../policy/src/tsconfig.json"
     }
   ]
 }

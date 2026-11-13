@@ -297,3 +297,73 @@ test('writePolicy - removes created directory when file write fails', async (t) 
   t.is(/** @type {Error} */ (err).cause, cause)
   t.deepEqual(rmCall, { path: '/nope', opts: { recursive: true } })
 })
+
+// --- assertPolicy / isPolicy backed by @lavamoat/policy schema ---
+
+test('assertPolicy - thrown error includes schema detail in message', (t) => {
+  const err = t.throws(() => assertPolicy({}), {
+    code: ErrorCodes.InvalidPolicy,
+  })
+  const msg = /** @type {Error} */ (err).message
+  // message must mention the default prefix
+  t.regex(msg, /does not match expected schema/i)
+  // message must include field name from schema error
+  t.regex(msg, /resources/)
+})
+
+test('assertPolicy - cause is a ZodError with issues array', (t) => {
+  const err = t.throws(() => assertPolicy({}), {
+    code: ErrorCodes.InvalidPolicy,
+  })
+  const cause = /** @type {any} */ (err?.cause)
+  t.truthy(cause)
+  t.true(Array.isArray(cause.issues))
+  t.true(cause.issues.length > 0)
+})
+
+test('assertPolicy - custom message appears as prefix in thrown error', (t) => {
+  const err = t.throws(() => assertPolicy({}, 'my custom prefix'), {
+    code: ErrorCodes.InvalidPolicy,
+  })
+  t.regex(/** @type {Error} */ (err).message, /my custom prefix/)
+})
+
+test('readPolicy - throws InvalidPolicy with path and schema detail for invalid content', async (t) => {
+  vol.fromJSON({ '/bad-policy.json': JSON.stringify({ notResources: {} }) })
+  const err = await t.throwsAsync(
+    () =>
+      readPolicy('/bad-policy.json', {
+        readFile: /** @type {any} */ (fs.promises.readFile),
+      }),
+    { code: ErrorCodes.InvalidPolicy }
+  )
+  const msg = /** @type {Error} */ (err).message
+  t.regex(msg, /bad-policy\.json/)
+  t.regex(msg, /resources/)
+})
+
+test('maybeReadPolicyOverride - throws InvalidPolicy with path and schema detail for invalid content', async (t) => {
+  vol.fromJSON({
+    '/bad-override.json': JSON.stringify({ notResources: {} }),
+  })
+  const err = await t.throwsAsync(
+    () =>
+      maybeReadPolicyOverride('/bad-override.json', {
+        readFile: /** @type {any} */ (fs.promises.readFile),
+      }),
+    { code: ErrorCodes.InvalidPolicy }
+  )
+  const msg = /** @type {Error} */ (err).message
+  t.regex(msg, /bad-override\.json/)
+  t.regex(msg, /resources/)
+})
+
+test('isPolicy - returns false for non-canonical resource name', (t) => {
+  t.false(isPolicy({ resources: { 'Not A Name!': {} } }))
+})
+
+test('isPolicy - returns false for non-builtin key under builtin', (t) => {
+  t.false(
+    isPolicy({ resources: { foo: { builtin: { 'not-a-builtin': true } } } })
+  )
+})

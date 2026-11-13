@@ -19,7 +19,7 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { LavaMoatPolicy, Resources } from '@lavamoat/types'
+import type { LavaMoatPolicy } from '@lavamoat/policy'
 import type { IsBuiltinFn, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
@@ -452,11 +452,9 @@ export type WithReadPowersXorBuilders = Simplify<
 
 /**
  * Options containing a `policy` prop
- *
- * @template T The type of the resources in the policy
  */
-export interface WithPolicy<T extends Resources = Resources> {
-  policy?: LavaMoatPolicy<T>
+export interface WithPolicy {
+  policy?: LavaMoatPolicy
 }
 
 /**
@@ -491,12 +489,11 @@ export type {
   GlobalPolicyWrite,
   LavaMoatPolicy,
   PackagePolicy,
-  Resolutions,
   ResourcePolicy,
   Resources as ResourcePolicyRecord,
   Resources,
-  RootPolicy
-} from '@lavamoat/types'
+  RootPolicy,
+} from '@lavamoat/policy'
 
 export type * from './errors.js'
 
