@@ -1,7 +1,7 @@
 const { readFileSync } = require('node:fs')
 const { repairs } = require('./repairs/index')
 
-/** @import {LavaMoatPolicy} from "@lavamoat/types" */
+/** @import {LavaMoatPolicy} from '@lavamoat/policy' */
 
 /**
  * Combines the sources of only the repairs that are needed based on the policy
