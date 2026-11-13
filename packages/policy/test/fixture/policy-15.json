@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "a": {
+      "builtin": {
+        "crypto": true
+      }
+    }
+  }
+}
