@@ -3,14 +3,7 @@
     "module": "NodeNext",
     "outDir": "../types",
     "paths": {
-      "@lavamoat/types": ["../../types"],
-      "lavamoat-core": ["../../core/types/src/types.d.ts"],
-      "lavamoat-tofu/src/inspectSource.js": [
-        "../../tofu/types/inspectSource.d.ts"
-      ],
-      "lavamoat-tofu/src/inspectSesCompat.js": [
-        "../../tofu/types/inspectSesCompat.d.ts"
-      ]
+      "lavamoat-core": ["../../core/types/src/types.d.ts"]
     },
     "rootDir": ".",
     "strict": true,
@@ -25,7 +18,7 @@
       "path": "../../core/tsconfig.json"
     },
     {
-      "path": "../../types/tsconfig.json"
+      "path": "../../policy/src/tsconfig.json"
     },
     {
       "path": "../../tofu/tsconfig.json"

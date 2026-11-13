@@ -16,7 +16,7 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from '@lavamoat/policy'
  * @import {
  *   Macro,
  *   MacroDeclarationOptions,

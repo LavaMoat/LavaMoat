@@ -26,7 +26,7 @@ import { isOptionalDependency, noop } from '../util.js'
  *   GlobalPolicy,
  *   LavaMoatPolicy,
  *   PackagePolicy
- * } from '@lavamoat/types'
+ * } from '@lavamoat/policy'
  * @import {PackageJson} from 'type-fest'
  * @import {
  *   ModuleInspectionResult,

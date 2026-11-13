@@ -17,7 +17,7 @@ import type {
   GlobalPolicy,
   GlobalPolicyValue,
   LavaMoatPolicy,
-} from '@lavamoat/types'
+} from '@lavamoat/policy'
 import type { Except, PackageJson, ValueOf } from 'type-fest'
 import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {

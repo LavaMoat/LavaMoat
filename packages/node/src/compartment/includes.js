@@ -26,7 +26,7 @@ import { GenerationError, InvalidPolicyError } from '../error.js'
  *   IncludeEntryByLocation,
  *   IncludeEntryByName,
  *   IncludePolicy
- * } from '@lavamoat/types'
+ * } from '@lavamoat/policy'
  */
 
 /**
