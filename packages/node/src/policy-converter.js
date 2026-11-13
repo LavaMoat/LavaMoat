@@ -38,7 +38,7 @@ const { create, entries, fromEntries } = Object
  *   LavaMoatPolicy,
  *   PackagePolicy,
  *   ResourcePolicy
- * } from '@lavamoat/types'
+ * } from '@lavamoat/policy'
  * @import {
  *   LavaMoatEndoPackagePolicy,
  *   LavaMoatEndoPackagePolicyOptions,

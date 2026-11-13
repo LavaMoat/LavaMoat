@@ -20,7 +20,7 @@ import { InvalidPolicyError } from './error.js'
  *   IncludeEntryByLocation,
  *   IncludeEntryByName,
  *   LavaMoatPolicy
- * } from '@lavamoat/types'
+ * } from '@lavamoat/policy'
  * @import {
  *   PackageJson,
  *   SetNonNullable

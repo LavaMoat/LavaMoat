@@ -1,4 +1,4 @@
-import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatPolicy } from '@lavamoat/policy'
 import type { ExecutionContext } from 'ava'
 import type { LavaMoatScuttleOpts } from 'lavamoat-core'
 import { type NormalizedScenario } from 'lavamoat-core/test/scenario.js'
@@ -38,9 +38,7 @@ export type TestCLIExpectationFn<Ctx = unknown> = (
  * @template Ctx Test execution context object
  */
 export type TestCLIExpectation<Ctx = unknown> =
-  | string
-  | TestCLIExpectationProps
-  | TestCLIExpectationFn<Ctx>
+  string | TestCLIExpectationProps | TestCLIExpectationFn<Ctx>
 
 /**
  * Properties to match against the resolved value of the `runCLI` function.

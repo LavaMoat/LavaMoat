@@ -51,7 +51,7 @@ const crossReference = (neededIds, policyIds) => {
  * @import {
  *   LavaMoatPolicy,
  *   ResourcePolicy
- * } from '@lavamoat/types'
+ * } from '@lavamoat/policy'
  */
 
 /**

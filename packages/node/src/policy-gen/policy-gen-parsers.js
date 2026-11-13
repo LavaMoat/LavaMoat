@@ -21,7 +21,7 @@
  *   BuiltinPolicy,
  *   GlobalPolicy,
  *   GlobalPolicyValue
- * } from '@lavamoat/types'
+ * } from '@lavamoat/policy'
  * @import {
  *   CreatePolicyGenWorkerParsersOptions,
  *   ModuleInspectionProgressReporter,

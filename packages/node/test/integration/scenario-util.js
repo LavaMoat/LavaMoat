@@ -15,7 +15,7 @@ import { log as fallbackLog } from '../../src/log.js'
 
 /**
  * @import {ReadFn} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from '@lavamoat/policy'
  * @import {PlatformRunScenario} from 'lavamoat-core/test/util.js'
  * @import {Volume} from 'memfs'
  * @import {LavaMoatEndoPolicy} from '../../src/types.js'
