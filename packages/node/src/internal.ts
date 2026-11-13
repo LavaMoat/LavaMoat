@@ -24,7 +24,7 @@ import type {
   ComposeOptions,
   ConsumerCaptureFromMapOptions,
   FileUrlString,
-  MergedLavaMoatPolicy,
+  Merged,
   WithCompact,
   WithConcurrency,
   WithFs,
@@ -32,7 +32,6 @@ import type {
   WithLog,
   WithPolicy,
   WithPolicyOverride,
-  WithPolicyPath,
   WithProdOnly,
   WithProjectRoot,
   WithReadFile,
@@ -86,6 +85,35 @@ export type ReadPolicyOptions = WithReadFile
  * Options for `readPolicyOverride()`
  */
 export type ReadPolicyOverrideOptions = WithReadFile
+
+/**
+ * The primary half of {@link ResolvedPolicySources}: exactly one of `policyPath`
+ * or `policy` is set.
+ */
+export type ResolvedPrimarySource =
+  | { policyPath: string; policy?: never }
+  | { policyPath?: never; policy: LavaMoatPolicy }
+
+/**
+ * The override half of {@link ResolvedPolicySources}: at most one of
+ * `overridePath` or `overridePolicy` is set. Both are absent when the override
+ * source is `{ kind: 'none' }`.
+ */
+export type ResolvedOverrideSource =
+  | { overridePath: string; overridePolicy?: never }
+  | { overridePath?: never; overridePolicy: LavaMoatPolicy }
+  | { overridePath?: never; overridePolicy?: never }
+
+/**
+ * Concrete paths and/or inline values resolved from a {@link PolicyInput}.
+ *
+ * Produced by `resolvePolicySources`. Modelled as the intersection of two
+ * discriminated XOR pairs so consumers can narrow `policy` vs `policyPath` (and
+ * `overridePolicy` vs `overridePath`) via property access on the resolved
+ * object.
+ */
+export type ResolvedPolicySources = ResolvedPrimarySource &
+  ResolvedOverrideSource
 
 /**
  * Options for `resolveBinScript()`
@@ -144,13 +172,13 @@ export type ReportInvalidCanonicalNamesOptions = ComposeOptions<
 /**
  * Options for `reportSesViolations()`
  */
-export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
+export type ReportSesViolationsOptions = WithLog
 
 /**
  * Result of `loadAndGeneratePolicy()`
  */
 export interface LoadAndGeneratePolicyResult {
-  policy: MergedLavaMoatPolicy
+  policy: Merged<LavaMoatPolicy>
   packageJsonMap: Map<string, PackageJson>
   hasWarnings: boolean
   /**
@@ -423,3 +451,10 @@ export type ViolationsAnalyzerResults = {
   strictModeViolations: ViolationLocation[]
   dynamicRequires: ViolationLocation[]
 } | null
+
+/**
+ * Options bucket containing a `policyPath` prop
+ */
+export interface WithPolicyPath {
+  policyPath?: string | URL
+}
