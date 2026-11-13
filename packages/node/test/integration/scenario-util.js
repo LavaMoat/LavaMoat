@@ -107,7 +107,9 @@ async function readPolicy(readPower, policyDir) {
   }
 
   if (policyOverrides) {
-    policy = mergePolicy(policy, policyOverrides)
+    policy = /** @type {LavaMoatPolicy} */ (
+      mergePolicy(policy, policyOverrides)
+    )
   }
 
   return policy

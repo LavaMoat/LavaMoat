@@ -153,8 +153,7 @@ export const LAVAMOAT_POLICY_ITEM_WRITE = 'write'
 /**
  * Policy item for a readable global.
  *
- * This value is considered deprecated and is used for backwards compatibility;
- * use `true` instead.
+ * @deprecated Use `true` instead
  */
 export const LAVAMOAT_POLICY_ITEM_READ = 'read'
 

@@ -157,7 +157,10 @@ test('isPolicy - returns false for policy with IncludeEntryByLocation with empty
 
 test('isPolicy - returns false for policy with IncludeEntryByLocation with absolute location', (t) => {
   t.false(
-    isPolicy({ resources: {}, include: [{ location: '/absolute/path' }] })
+    isPolicy({
+      resources: {},
+      include: [{ location: '/absolute/path' }],
+    })
   )
 })
 

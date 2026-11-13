@@ -4,8 +4,7 @@ const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { compactPolicyOverride } = require('../src/compact')
 
 /**
- * @import {LavaMoatPolicy} from '@lavamoat/types'
- * @import {TestFn} from 'ava'
+ * @import {LavaMoatPolicy} from '@lavamoat/types/legacy'
  */
 
 test('compactPolicyOverride - removes redundant globals key', (t) => {

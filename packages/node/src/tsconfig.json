@@ -10,7 +10,8 @@
       ],
       "lavamoat-tofu/src/inspectSesCompat.js": [
         "../../tofu/types/inspectSesCompat.d.ts"
-      ]
+      ],
+      "@lavamoat/policy": ["../../policy/src/index.ts"]
     },
     "rootDir": ".",
     "strict": true,
@@ -29,6 +30,9 @@
     },
     {
       "path": "../../tofu/tsconfig.json"
+    },
+    {
+      "path": "../../policy/tsconfig.json"
     }
   ]
 }

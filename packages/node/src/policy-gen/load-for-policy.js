@@ -16,7 +16,10 @@ import {
 } from '../compartment/includes.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
-import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
+import {
+  DEFAULT_TRUST_ROOT_COMPARTMENT,
+  LAVAMOAT_POLICY_ITEM_READ,
+} from '../constants.js'
 import { action, hrCode, hrPath, seconds, success } from '../format.js'
 import { log as defaultLog, Loggerr } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
@@ -364,7 +367,10 @@ export const loadAndGeneratePolicy = async (
     policy,
     packageJsonMap,
     hasWarnings,
-    compactedPolicyOverride,
+    compactedPolicyOverride:
+      /** @type {LavaMoatPolicy & { compacted: boolean }} */ (
+        compactedPolicyOverride
+      ),
   }
 }
 
@@ -402,7 +408,9 @@ const compilePolicy = (
       const reducedPolicy = {}
       for (const key of reducedKeys) {
         reducedPolicy[key] =
-          packagePolicy[key] === 'read' ? true : packagePolicy[key]
+          packagePolicy[key] === LAVAMOAT_POLICY_ITEM_READ
+            ? true
+            : packagePolicy[key]
       }
       policy.resources[canonicalName] = {
         ...policy.resources[canonicalName],
