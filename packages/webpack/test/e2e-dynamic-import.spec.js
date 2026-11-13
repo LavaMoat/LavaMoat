@@ -1,3 +1,5 @@
+// cspell:ignore Dynamicchunk
+
 const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')

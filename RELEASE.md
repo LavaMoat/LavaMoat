@@ -29,7 +29,7 @@ LavaMoat follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html
 
    In both cases, Artifacts will be rebuilt and the default set of tests will run. _Do not attempt to publish individual packages!_
 
-   An error 404 likely means you lack permissions to publish and require an invite to the [organisation](https://www.npmjs.com/org/lavamoat).
+   An error 404 likely means you lack permissions to publish and require an invite to the [organization](https://www.npmjs.com/org/lavamoat).
 
 8. **Check the output** of `npm pack` to ensure the correct files are being published.
 9. If prompted, **enter** your 2FA passcode or **visit** the URL `npm` provides you. Once authenticated, the publish will proceed.

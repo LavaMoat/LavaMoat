@@ -55,7 +55,7 @@ testInspect(
 )
 
 testInspect(
-  'doesnt detect "this"',
+  `doesn't detect "this"`,
   {},
   () => {
     const x = this
@@ -64,7 +64,7 @@ testInspect(
 )
 
 testInspect(
-  'doesnt detect properties on "this"',
+  `doesn't detect properties on "this"`,
   {},
   () => {
     this.xyz

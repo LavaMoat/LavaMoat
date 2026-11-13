@@ -1,3 +1,5 @@
+// cspell:ignore npath
+
 // You will need to install @yarnpkg/core and @yarnpkg/fslib
 import { Configuration, Project } from '@yarnpkg/core'
 import { npath } from '@yarnpkg/fslib'
@@ -7,7 +9,7 @@ import { npath } from '@yarnpkg/fslib'
  * @import {
  *   Facts,
  *   PrintApi
- * } from "../tools/types.js"
+ * } from '../tools/types.js'
  */
 
 const projectCache = new Map()

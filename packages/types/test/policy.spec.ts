@@ -15,7 +15,7 @@ import type { LavaMoatPolicy, Resources } from '../src'
 /**
  * Given an object that looks like a policy, infer its type.
  *
- * @param policy Some policy-lookin' thing
+ * @param policy Some policy-looking thing
  * @returns Same object, but with a type
  */
 function infer<T extends Resources>(policy: LavaMoatPolicy<T>) {

@@ -1,3 +1,5 @@
+// cspell:ignore AQABAAD
+
 const { default: test } = /** @type {typeof import('ava')} */ (require('ava'))
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
@@ -24,7 +26,7 @@ test('webpack/main - dist shape', (t) => {
 test('webpack/main - default warning gets printed', (t) => {
   t.regex(
     t.context.build.stdout,
-    /options had to be overriden.*concatenateModules/
+    /options had to be overridden.*concatenateModules/
   )
 })
 
@@ -62,7 +64,7 @@ test('webpack/main - asset inlining works', (t) => {
 test('webpack/main - treeshaking works', (t) => {
   t.assert(
     !t.context.bundle.includes('13371337'),
-    'Expected treeshakeable reference to be excluded'
+    'Expected treeshakable reference to be excluded'
   )
 })
 

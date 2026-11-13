@@ -7,11 +7,13 @@
  */
 
 /**
- * @import {GetRunModuleStatementFn,
- *  GetPolyfillsFn,
- *  LockedDownSerializerConfig,
- *  LockdownSerializerOptions,
- *  LockdownSerializerConfig} from './lockdown-serializer.js'
+ * @import {
+ *   GetPolyfillsFn,
+ *   GetRunModuleStatementFn,
+ *   LockdownSerializerConfig,
+ *   LockdownSerializerOptions,
+ *   LockedDownSerializerConfig
+ * } from './lockdown-serializer.js'
  */
 
 const { warn } = console
@@ -79,8 +81,8 @@ const warnAboutAnomalies = () => {
 
     // Note: Metro loads React Native InitializeCore first, then the React Native app entry file index.js (moduleId: 0).
     // - React Native CLI calls Metro to bundle, which tends to call this sequence twice
-    // - After bunding, React Native in Dev mode tends to call this sequence per hot-reload
-    // - We warn rather than error on multiple calls, since this is expected behaviour
+    // - After bundling, React Native in Dev mode tends to call this sequence per hot-reload
+    // - We warn rather than error on multiple calls, since this is expected behavior
     if (new Set(callLog).size !== callLog.length) {
       warn(
         `LavaMoat: getRunModuleStatement was called with the same moduleId multiple times. It might be because some build is running twice with the same config instance. [${callLog.join(', ')}]`
