@@ -2,6 +2,8 @@
 
 > Common types for LavaMoat & related packages
 
+> [!WARNING] This package will soon be deprecated. New code should use [`@lavamoat/policy`](../policy) for policy types with Zod-backed validation.
+
 ## Includes
 
 - `LavaMoatPolicy`: the policy object used by LavaMoat
