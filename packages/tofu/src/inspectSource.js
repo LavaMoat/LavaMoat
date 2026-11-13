@@ -7,7 +7,7 @@ const {
 } = require('./primordials.js')
 
 /**
- * @import {GlobalPolicyValue} from '@lavamoat/types'
+ * @import {GlobalPolicyValue} from '@lavamoat/policy'
  */
 
 const {
@@ -121,8 +121,7 @@ function inspectGlobals(
 
   /**
    * @param {string} variableName
-   * @param {import('@babel/types').Identifier
-   *   | import('@babel/types').ThisExpression} identifierNode
+   * @param {import('@babel/types').Identifier | import('@babel/types').ThisExpression} identifierNode
    * @param {import('./inspectPrimordialAssignments').MemberLikeExpression[]} parents
    * @returns
    */
@@ -131,7 +130,7 @@ function inspectGlobals(
     identifierNode,
     parents
   ) {
-    /** @type {import('@lavamoat/types').GlobalPolicyValue} */
+    /** @type {import('@lavamoat/policy').GlobalPolicyValue} */
     let identifierUse = 'read'
     const { memberExpressions, parentOfMembershipChain, topmostMember } =
       getMemberExpressionNesting(identifierNode, parents)
@@ -160,7 +159,7 @@ function inspectGlobals(
 
   /**
    * @param {string} identifierPath
-   * @param {import('@lavamoat/types').GlobalPolicyValue} identifierUse
+   * @param {import('@lavamoat/policy').GlobalPolicyValue} identifierUse
    * @returns
    */
   function maybeAddGlobalUsage(identifierPath, identifierUse) {

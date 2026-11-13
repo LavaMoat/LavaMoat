@@ -136,7 +136,7 @@ function getTailmostMatchingChain(items, matcher) {
 /**
  * If array contains 'x' and 'x.y' just keep 'x'
  *
- * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} globalsConfig
+ * @param {Map<string, import('@lavamoat/policy').GlobalPolicyValue>} globalsConfig
  * @returns
  */
 function reduceToTopmostApiCalls(globalsConfig) {
@@ -165,8 +165,8 @@ function reduceToTopmostApiCalls(globalsConfig) {
 /**
  * If array contains 'x' and 'x.y' just keep 'x'
  *
- * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} globalsConfig
- * @returns {{ path: string, parent: string }[]}
+ * @param {Map<string, import('@lavamoat/policy').GlobalPolicyValue>} globalsConfig
+ * @returns {{ path: string; parent: string }[]}
  */
 function validateHierarchy(globalsConfig) {
   const truthyPaths = Array.from(globalsConfig.keys())
@@ -184,9 +184,7 @@ function validateHierarchy(globalsConfig) {
       parentParts.slice(0, index + 1).join('.')
     )
     // dont include this if a parent appears in the array
-    const parent = parents.find((parent) =>
-      truthyPaths.includes(parent)
-    )
+    const parent = parents.find((parent) => truthyPaths.includes(parent))
     if (parent) {
       acc.push({
         path,
@@ -194,7 +192,7 @@ function validateHierarchy(globalsConfig) {
       })
     }
     return acc
-  }, /** @type {{ path: string, parent: string }[]} */ ([]))
+  }, /** @type {{ path: string; parent: string }[]} */ ([]))
 }
 
 /**
@@ -232,9 +230,9 @@ function reduceToTopmostApiCallsFromStrings(keyPathStrings) {
 /**
  * Add variable to results, if not already set
  *
- * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} globalsConfig
+ * @param {Map<string, import('@lavamoat/policy').GlobalPolicyValue>} globalsConfig
  * @param {string} identifierPath
- * @param {import('@lavamoat/types').GlobalPolicyValue} identifierUse
+ * @param {import('@lavamoat/policy').GlobalPolicyValue} identifierUse
  */
 function addGlobalUsage(globalsConfig, identifierPath, identifierUse) {
   if (globalsConfig.has(identifierPath) && identifierUse !== 'write') {
@@ -248,8 +246,8 @@ function addGlobalUsage(globalsConfig, identifierPath, identifierUse) {
  * only
  *
  * @deprecated
- * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} configA
- * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} configB
+ * @param {Map<string, import('@lavamoat/policy').GlobalPolicyValue>} configA
+ * @param {Map<string, import('@lavamoat/policy').GlobalPolicyValue>} configB
  * @returns
  */
 function mergePolicy(configA, configB) {
