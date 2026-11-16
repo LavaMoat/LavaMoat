@@ -1,6 +1,6 @@
 // @ts-check
 
-const { runInContext, createContext } = require('node:vm')
+const { runInContext, createContext, constants } = require('node:vm')
 const path = require('node:path')
 
 const tmp = require('tmp-promise')
@@ -621,7 +621,11 @@ function prepareModuleInitializerArgs(
  * @param {object} context
  */
 function evaluateWithSourceUrl(filename, content, context) {
-  const vmContext = createContext()
+  // Because of https://github.com/nodejs/node/issues/66607
+  // (fixed in: https://github.com/nodejs/node/pull/66609 - but not sure it'll get merged)
+  // we cannot observe the errors thrown from getters in vm context.
+  // Avoiding contextifying, to the best of my understanding, can only have benefits for our testing here.
+  const vmContext = createContext(constants.DONT_CONTEXTIFY)
   const vmGlobalThis = runInContext('globalThis', vmContext)
   const vmFeralFunction = vmGlobalThis.Function
 
