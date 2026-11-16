@@ -20,7 +20,10 @@ const runnerSetupPerPm = {
   },
 }
 
-/** @param {import('ava').ExecutionContext} t */
+/**
+ * @param {import('ava').ExecutionContext} t
+ * @param {{ runFromWorkspace?: boolean }} [options]
+ */
 async function installYarnBinProject(t, { runFromWorkspace = false } = {}) {
   t.timeout(180_000)
   const cwd = await copyProject(t, 'runner-yarn-bins')
@@ -53,10 +56,14 @@ async function installYarnBinProject(t, { runFromWorkspace = false } = {}) {
     print: () => {},
   })
 
-  const result = await execFileAsync('yarn', ['install'], {
-    cwd: installCwd,
-    env,
-  })
+  const result = await execFileAsync(
+    'yarn',
+    ['install', ...(runFromWorkspace ? ['--no-immutable'] : [])],
+    {
+      cwd: installCwd,
+      env,
+    }
+  )
   // t.log(result.stdout, result.stderr)
   return { cwd, env, installCwd, snapshotPath, snapshot, result }
 }
