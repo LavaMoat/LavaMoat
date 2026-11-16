@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.9.0](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.1...harden-v0.9.0) (2026-11-16)
+
+
+### Features
+
+* **harden:** fall back on detected package manager more eagerly ([d69c7a0](https://github.com/LavaMoat/LavaMoat/commit/d69c7a07ba3628ded9d05d003977a63ba6cbf78f))
+* **harden:** runner accepts new bins if they are not collisions ([c51399e](https://github.com/LavaMoat/LavaMoat/commit/c51399eea88d12124e645b861a14731e63655fcd))
+* yarn plugin and npm PATH overrides preventing more classes of bin script confusion ([0017eab](https://github.com/LavaMoat/LavaMoat/commit/0017eab1210020b085eea08ebaf62c64c5382c45))
+
+
+### Bug Fixes
+
+* **deps:** update dependency semver to ^7.8.4 ([#2112](https://github.com/LavaMoat/LavaMoat/issues/2112)) ([761f969](https://github.com/LavaMoat/LavaMoat/commit/761f9691bdf5e3527fde2e0aa82cb65b32ab40a9))
+* **harden:** avoid bin snapshot failure in workspace ([8edaa69](https://github.com/LavaMoat/LavaMoat/commit/8edaa6955e1309b5874cb2bf77e82df83b1e3f96))
+* **harden:** report selected package manager in harden check ([0320ecd](https://github.com/LavaMoat/LavaMoat/commit/0320ecde8ce1a438a1bf39cea0b810711589a9b4))
+
 ## [0.8.1](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.0...harden-v0.8.1) (2026-10-08)
 
 
