@@ -2,7 +2,13 @@
   "name": "@lavamoat/aa",
   "version": "5.0.2",
   "description": "LavaMoat's secure package naming convention",
-  "author": "kumavis",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/aa"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/aa",
+  "author": "LavaMoat Team",
   "license": "MIT",
   "engines": {
     "node": "^22.5.1 || ^24.0.0 || ^26.0.0"
