@@ -53,7 +53,8 @@ module.exports = {
           // read lavamoat/bin-snapshot.json and compare with mapping
           const binSnapshotPath = path.resolve(
             project.cwd,
-            'lavamoat/bin-snapshot.json'
+            'lavamoat',
+            'bin-snapshot.json'
           )
           /** @type {{ [binName: string]: string }} */
           let binSnapshot = {}
@@ -124,7 +125,6 @@ module.exports = {
           // Abundance of caution. It seems yarn is not adding
           // any node_modules/.bin locations to the PATH by default.
           const binFolder = `node_modules${path.sep}.bin`
-          // const berryBin = extra.env.BERRY_BIN_FOLDER
 
           const wrapper = makeRunScriptWrapper(
             {
@@ -132,6 +132,7 @@ module.exports = {
               scriptPayload: extra.script,
               projectRoot: project.cwd,
               pathBinMatcher: (fragment) => {
+                // This used to include extra.env.BERRY_BIN_FOLDER
                 // BERRY_BIN_FOLDER is controlled by yarn and yarn prevents abuse of yarn and node commands
                 // see: https://github.com/yarnpkg/berry/blob/8f638c0806ec8f3758adb13d93567fc782f9c903/packages/yarnpkg-core/sources/scriptUtils.ts#L131-L136
                 // Therefore, we only match the binFolder to prevent artifacts from weird setups.

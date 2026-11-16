@@ -27,9 +27,12 @@ function testRunnerBins({ packageManager, expectedLinks }) {
     const cwd = await copyProject(t, `runner-${packageManager}-bins`)
     const nodeModules = path.join(cwd, 'node_modules')
     // the direct dependency providing tsc
-    await writeBin(path.join(nodeModules, 'typescript/bin/tsc'), 'real-tsc')
+    await writeBin(
+      path.join(nodeModules, 'typescript', '/', 'bin', '/', 'tsc'),
+      'real-tsc'
+    )
     await writeFile(
-      path.join(nodeModules, 'typescript/package.json'),
+      path.join(nodeModules, 'typescript', '/', 'package.json'),
       JSON.stringify({ name: 'typescript', bin: { tsc: 'bin/tsc' } })
     )
     // a transitive dependency attempting bin confusion

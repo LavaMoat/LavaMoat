@@ -130,12 +130,24 @@ test('bin overrides are prepared once and prepended to PATH', (t) => {
 
   const noNodeModules = makeWrapper().processEnv({ PATH: '/usr/bin' })
   t.is(calls.length, 0, 'skipped when node_modules is missing')
-  t.is(noNodeModules.PATH, '/usr/bin')
+  t.is(
+    noNodeModules.PATH,
+    '/usr/bin',
+    'PATH remains unchanged when node_modules is missing'
+  )
 
   fs.mkdirSync(path.join(projectRoot, 'node_modules'))
   const first = makeWrapper().processEnv({ PATH: '/usr/bin' })
-  t.deepEqual(calls, [{ dependencies: ['a', 'b'], overrideDir }])
-  t.is(first.PATH, [overrideDir, '/usr/bin'].join(path.delimiter))
+  t.deepEqual(
+    calls,
+    [{ dependencies: ['a', 'b'], overrideDir }],
+    'prepareBinOverrides called with correct params'
+  )
+  t.is(
+    first.PATH,
+    [overrideDir, '/usr/bin'].join(path.delimiter),
+    'overrideDir is added to PATH'
+  )
 
   const nested = makeWrapper().processEnv({ PATH: first.PATH })
   t.is(calls.length, 1, 'skipped when the dir already exists')
