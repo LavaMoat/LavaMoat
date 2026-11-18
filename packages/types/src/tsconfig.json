@@ -3,6 +3,10 @@
   "compilerOptions": {
     "outDir": "../dist",
     "emitDeclarationOnly": true,
+    "paths": {
+      "@lavamoat/policy": ["../../policy"]
+    }
   },
-  "include": ["."],
+  "references": [{ "path": "../../policy/tsconfig.json" }],
+  "include": ["."]
 }

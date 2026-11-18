@@ -5,7 +5,7 @@ import {
   type DefaultModuleInitArgs,
   type LavaMoatPolicy,
   type ModuleInitializer,
-} from '@lavamoat/types'
+} from '@lavamoat/types/legacy'
 import type { ExecutionContext } from 'ava'
 import { type SetRequired } from 'type-fest'
 import type { LavaMoatOpts } from '../src/options'

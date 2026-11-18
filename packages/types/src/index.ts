@@ -1,2 +1,1 @@
-export type * from './module-record'
-export type * from './policy-schema'
+export type * from '@lavamoat/policy/types.js'

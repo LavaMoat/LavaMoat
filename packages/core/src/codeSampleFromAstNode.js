@@ -2,8 +2,8 @@
 
 module.exports = { codeSampleFromAstNode }
 /**
+ * @import {LavamoatModuleRecord} from '@lavamoat/types/legacy'
  * @import {NodeWithLocation} from 'lavamoat-tofu'
- * @import {LavamoatModuleRecord} from '@lavamoat/types'
  */
 
 /**

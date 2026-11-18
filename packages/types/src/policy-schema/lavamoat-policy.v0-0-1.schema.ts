@@ -11,6 +11,8 @@ export type LavaMoatPolicyOverrides = LavaMoatPolicy
 
 /**
  * Schema for LavaMoat "debug" policy files
+ *
+ * @deprecated No longer supported
  */
 export type LavaMoatPolicyDebug<T extends Resources = Resources> =
   LavaMoatPolicy<T> & {
@@ -19,6 +21,8 @@ export type LavaMoatPolicyDebug<T extends Resources = Resources> =
 
 /**
  * Schema for LavaMoat policy files
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export interface LavaMoatPolicy<T extends Resources = Resources> {
   /**
@@ -54,6 +58,8 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
  * include in the policy.
  *
  * Canonical names do not need to be present in {@link Resources}.
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export interface IncludeEntryByName {
   name: string
@@ -63,6 +69,8 @@ export interface IncludeEntryByName {
 /**
  * List of locations and optionally relative module paths to forcefully include
  * in the policy.
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export interface IncludeEntryByLocation {
   /**
@@ -83,12 +91,15 @@ export interface IncludeEntryByLocation {
  *
  * If a `string`, it is treated as an {@link IncludeEntryByName} with a single
  * module path of `.` (which resolves to the package's declared entrypoint).
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export type IncludePolicy = IncludeEntryByName | IncludeEntryByLocation | string
 
 /**
  * Root configuration
  *
+ * @deprecated Use types from `@lavamoat/types` instead
  * @template T The value of {@link LavaMoatPolicy.resources}
  */
 export interface RootPolicy<T extends Resources = Resources> {
@@ -118,25 +129,40 @@ export interface DebugInfo {
   builtin: string[]
 }
 
+/**
+ * @deprecated No longer supported
+ */
 export interface SesCompat {
   dynamicRequires: SesCompatObj[]
   primordialMutations: SesCompatObj[]
   strictModeViolations: SesCompatObj[]
 }
 
+/**
+ * @deprecated No longer supported
+ */
 export interface SesCompatObj {
   node: SesCompatNode
 }
 
+/**
+ * @deprecated No longer supported
+ */
 export interface SesCompatNode {
   loc: SesCompatNodeLocation
 }
 
+/**
+ * @deprecated No longer supported
+ */
 export interface SesCompatNodeLocation {
   start: NodeLocation
   end: NodeLocation
 }
 
+/**
+ * @deprecated No longer supported
+ */
 export interface NodeLocation {
   column: number
   index: number
@@ -150,33 +176,44 @@ export type GlobalPolicyRead = 'read'
 
 /**
  * A writable global property
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export type GlobalPolicyWrite = 'write'
 
 /**
  * A property which can be defined via {@link Object.defineProperty} and/or
  * {@link Object.defineProperties}
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export type GlobalPolicyRedefine = 'redefine'
 
 /**
  * Possible values for global policy
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export type GlobalPolicyValue =
-  | boolean
-  | GlobalPolicyRead
-  | GlobalPolicyRedefine
-  | GlobalPolicyWrite
+  boolean | GlobalPolicyRead | GlobalPolicyRedefine | GlobalPolicyWrite
 
 /**
  * Describe the resources available to your application and direct dependencies
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export interface Resources {
   [k: string]: ResourcePolicy
 }
 
+/**
+ * @deprecated Use types from `@lavamoat/types` instead
+ */
 export type ResourceMetadata = Record<string, string | string[]>
 
+/**
+ * @deprecated Use types from `@lavamoat/types` instead
+ */
 export interface ResourcePolicy {
   globals?: GlobalPolicy
   builtin?: BuiltinPolicy
@@ -195,6 +232,8 @@ export interface ResourcePolicy {
 /**
  * Globals (including properties using dot notation) accessible to the module;
  * `true` to allow and `false` to deny
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export interface GlobalPolicy {
   [k: string]: GlobalPolicyValue
@@ -203,6 +242,8 @@ export interface GlobalPolicy {
 /**
  * Node.js builtins (including properties using dot notation); `true` to allow
  * and `false` to deny
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export interface BuiltinPolicy {
   [k: string]: boolean
@@ -211,12 +252,16 @@ export interface BuiltinPolicy {
 /**
  * Additional external packages (in their entirety) accessible to the module;
  * `true` to allow and `false` to deny
+ *
+ * @deprecated Use types from `@lavamoat/types` instead
  */
 export interface PackagePolicy {
   [k: string]: boolean
 }
 /**
  * Custom run-time module resolutions by direct dependency
+ *
+ * @deprecated No longer supported
  */
 export interface Resolutions {
   /**
@@ -232,6 +277,8 @@ export interface Resolutions {
 
 /**
  * For use with type-narrowing
+ *
+ * @deprecated Use `LavaMoatPolicy` from `@lavamoat/types` instead
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SomeLavaMoatPolicy = LavaMoatPolicy<any>
