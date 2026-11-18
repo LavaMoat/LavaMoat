@@ -14,7 +14,7 @@ import { mergePolicies, readPolicy } from '../../../src/policy-util.js'
 
 /**
  * @import {Policy} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from '@lavamoat/policy'
  * @import {
  *   LavaMoatEndoPackagePolicyItem,
  *   MergedLavaMoatPolicy

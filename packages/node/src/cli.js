@@ -36,7 +36,7 @@ import { NoPolicyError } from './error.js'
 import { availableParallelism } from 'node:os'
 
 /**
- * @import {LavaMoatPolicy} from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from '@lavamoat/policy'
  * @import {LavaMoatScuttleOpts} from 'lavamoat-core'
  * @import {PackageJson} from 'type-fest'
  */

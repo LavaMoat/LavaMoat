@@ -1,5 +1,5 @@
 import type { ReadNowPowers } from '@endo/compartment-mapper'
-import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatPolicy } from '@lavamoat/policy'
 import type { ExecutionContext } from 'ava'
 import { type Volume } from 'memfs'
 import type {
