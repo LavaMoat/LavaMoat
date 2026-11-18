@@ -116,7 +116,7 @@ test('Policy - watchify listens for policy file changes', async (t) => {
 })
 
 // this test is not written correctly, im disabling it for now
-// it tests features we dont support:
+// it tests features we don't support:
 // - automatic watchify writeAutoPolicy rebuilds when policy override is modified
 //   - hey, we support this now
 // - it uses invalid policy values

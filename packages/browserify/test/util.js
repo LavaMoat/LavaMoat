@@ -51,14 +51,14 @@ function overrideDepsWithLocalPackages(projectDir, log) {
 
 async function createBundleFromEntry(path, pluginOpts = {}) {
   pluginOpts.policy = pluginOpts.policy || { resources: {} }
-  const bifyOpts = Object.assign(
+  const browserifyOpts = Object.assign(
     {
       // inline sourcemaps
       debug: true,
     },
     lavamoatPlugin.args
   )
-  const bundler = browserify([], bifyOpts)
+  const bundler = browserify([], browserifyOpts)
   bundler.add(path)
   bundler.plugin(lavamoatPlugin, pluginOpts)
   return bundleAsync(bundler)
@@ -162,7 +162,7 @@ async function prepareBrowserifyScenarioOnDisk({ scenario, log }) {
   overrideDepsWithLocalPackages(projectDir, log)
 
   // copy scenario files
-  // we copy files first so that we dont attempt to install the immaginary deps
+  // we copy files first so that we don't attempt to install the imaginary deps
   const { policyDir } = await prepareScenarioOnDisk({
     scenario,
     projectDir,
@@ -229,7 +229,7 @@ async function runScenario({
 
 function createBrowserifyScenarioFromScaffold(...args) {
   const scenario = createScenarioFromScaffold(...args)
-  // ammend scenario to list browserify as a dependency
+  // amend scenario to list browserify as a dependency
   const packageJsonFileObject = scenario.files['package.json']
   const packageJsonFileContentObj = JSON.parse(packageJsonFileObject.content)
   if (!packageJsonFileContentObj.devDependencies['browserify']) {

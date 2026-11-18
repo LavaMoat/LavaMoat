@@ -47,7 +47,7 @@ export const createLogger = (options) => {
  * The `streams` is used to overwrite the stream used for each log level with
  * {@link process.stderr}.
  *
- * {@link Loggerr `loggerr`'s} default behavior is to use `stdout` for `notice`,
+ * {@link Loggerr Loggerr's} default behavior is to use `stdout` for `notice`,
  * `debug` and `info` levels. Output originating in `@lavamoat/node` is
  * generally warnings or information about the policy generation and conversion
  * process. The "output" of `@lavamoat/node` should be considered the output of

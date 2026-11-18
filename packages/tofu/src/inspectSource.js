@@ -121,8 +121,7 @@ function inspectGlobals(
 
   /**
    * @param {string} variableName
-   * @param {import('@babel/types').Identifier
-   *   | import('@babel/types').ThisExpression} identifierNode
+   * @param {import('@babel/types').Identifier | import('@babel/types').ThisExpression} identifierNode
    * @param {import('./inspectPrimordialAssignments').MemberLikeExpression[]} parents
    * @returns
    */
@@ -429,7 +428,7 @@ function inspectRequires(ast, packagesToInspect, deep = true) {
       // @ts-expect-error - FIXME - `name` not present on all nodes of type `Declaration`
       const varName = node.name
       const refs = path.scope.getBinding(varName)?.referencePaths
-      // if the var is not used anywhere, still whitelist it so the require call doesnt fail
+      // if the var is not used anywhere, still whitelist it so the require call doesn't fail
       if (!refs?.length) {
         // add to results
         cjsImports.push(keyPath)

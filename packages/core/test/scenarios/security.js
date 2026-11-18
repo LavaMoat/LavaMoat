@@ -16,7 +16,7 @@ module.exports = [
           Object.xyz = 123
         } catch (_) {}
         try {
-          Object.protoype.xyz = 123
+          Object.prototype.xyz = 123
         } catch (_) {}
       },
       expectedResult: { objectXyz: false, protoXyz: false },

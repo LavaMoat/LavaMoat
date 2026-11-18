@@ -4,7 +4,7 @@ module.exports = makePrepareRealmGlobalFromConfig
 
 // utilities for exposing configuring the exposed endowments on the container global
 
-// The config uses a period-deliminated path notation to pull out deep values from objects
+// The config uses a period-delimited path notation to pull out deep values from objects
 // These utilities help modify the container global to expose the allowed globals from the globalStore OR the platform global
 
 function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {

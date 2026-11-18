@@ -1,3 +1,5 @@
+// cspell:ignore BLARG, RAWR
+
 'use strict'
 
 const fs = require('node:fs')

@@ -1,3 +1,5 @@
+// cspell:ignore devlin
+
 const { default: test } = require('ava')
 const { getFreshGlobalThis } = require('./util')
 require('ses')

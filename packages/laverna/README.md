@@ -4,7 +4,7 @@
 
 If you're familiar with [lerna](https://lerna.js.org), **Laverna** does this: `lerna publish from-package`.
 
-If you're unfamiliar with it: **Laverna** publishes all workspacess wherein the _current_ version hasn't yet been published.
+If you're unfamiliar with it: **Laverna** publishes all workspaces wherein the _current_ version hasn't yet been published.
 
 ## Features
 

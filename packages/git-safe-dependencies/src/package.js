@@ -23,7 +23,7 @@ const getDirectDependenciesForPath = async (rootPath) => {
   const packageJson = JSON.parse(readFileSync(join(rootPath, 'package.json')))
   const dependencies = getDependencies(packageJson)
   if (packageJson.workspaces) {
-    // get dependencies from all packagejson files in the workspace
+    // get dependencies from all package.json files in the workspace
     const workspaces = packageJson.workspaces
     const workspacePaths = workspaces.packages || workspaces
     if (!Array.isArray(workspacePaths)) {

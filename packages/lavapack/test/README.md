@@ -53,7 +53,7 @@ function indicesOf(substring, string) {
   return result
 }
 
-// this is not perfecct - just a heuristic
+// this is not perfect - just a heuristic
 async function validateSourcemaps(t, sourceMeta) {
   const targetSlug = 'new Error'
   // eslint-disable-next-line no-undef

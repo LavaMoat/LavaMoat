@@ -1,3 +1,5 @@
+// cspell:ignore testbranch
+
 const { default: test } = require('ava')
 const { gitInfo, isGitUrl, isGitSpecifier } = require('../src/isgit')
 

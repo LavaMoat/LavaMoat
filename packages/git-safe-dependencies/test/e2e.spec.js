@@ -1,3 +1,5 @@
+// cspell:ignore nopackage
+
 /**
  * @import {
  *   ExecutionContext,
