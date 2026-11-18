@@ -1,0 +1,71 @@
+# unknown words
+
+sidechannel->side-channel
+shortcircuit->short-circuit
+contentscript->content script, contentScript
+contentscripts->content scripts, contentScripts
+globalthis->globalThis
+esnext->ESNext
+usecase->use-case
+usecases->use-cases
+dont->don't
+dedup->dedupe
+treeshakeable->treeshake-able
+carveout->carve-out
+doublecheck->double-check
+withproxies->with proxies, withProxies
+crossplatform->cross-platform, crossPlatform
+namefor->name for, nameFor
+weakset->WeakSet
+weakmap->WeakMap
+weakref->WeakRef
+supplychain->supply chain
+Ecma->ECMA
+blindspot->blind spot
+ConsenSys->Consensys
+shouldnt->shouldn't
+
+# typos, misspellings
+identiter->identifier
+compy->copy
+worthwihile->worthwhile
+hermesc->hermes
+byppass->bypass
+webpacks->webpack's
+apparennt->apparent
+negavives->negatives
+instantiaties->instantiates
+erapper->wrapper
+regerences->references
+minitication->minification
+postinstal->postinstall
+cludge->kludge
+packagejson->package.json
+intinsic->intrinsic
+corresponfing->corresponding
+unnexpected->unexpected
+identitier->identifier
+slihtly->slightly
+preferd->preferred
+abililty->ability
+behaviour->behavior
+specfifier->specifier
+allged->alleged
+gooesy->goosey
+unparseable->unparsable
+workspacess->workspaces
+enulated->emulated
+infrustructre->infrastructure
+interinsics->intrinsics
+arent->aren't
+incase->in case
+bify->browserify
+coincidently->coincidentally
+symplinks->symlinks
+visualisation->visualization
+devx->devex
+immaginary->imaginary
+uncommonn->uncommon
+organisation->organization
+confs->configs
+devdeps->devDeps
