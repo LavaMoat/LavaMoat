@@ -68,9 +68,9 @@ function endowmentsToolkit({
    * @param {T} sourceRef - Object from which to copy properties
    * @param {LMPolicy.ResourcePolicy} packagePolicy - LavaMoat policy item
    *   representing a package
-   * @param {object} unwrapTo - For getters and setters, when the this-value is
-   *   unwrapFrom, is replaced as unwrapTo
-   * @param {object} unwrapFrom - For getters and setters, the this-value to
+   * @param {object} [unwrapTo] - For getters and setters, when the this-value
+   *   is unwrapFrom, is replaced as unwrapTo
+   * @param {object} [unwrapFrom] - For getters and setters, the this-value to
    *   replace (default: targetRef)
    * @returns {Partial<T>} - The targetRef
    */
@@ -815,8 +815,7 @@ function instrumentDynamicValueAtPath(
 /**
  * @import {
  *   ContextTestFn,
- *   SomeFunction,
- *   SomeParameters
+ *   SomeFunction
  * } from './internal.js'
  */
 
@@ -894,7 +893,7 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {object} globalRef
  * @param {Record<PropertyKey, any>} target - The object to copy the properties
  *   to, recursively (hence any not unknown type)
- * @param {string[]} globalThisRefs
+ * @param {string[]} [globalThisRefs]
  * @returns {Record<PropertyKey, any>}
  */
 
