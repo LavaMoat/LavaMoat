@@ -5,11 +5,8 @@ import { type NormalizedScenario } from 'lavamoat-core/test/scenario.js'
 import type { NestedDirectoryJSON } from 'memfs'
 import type { ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
-import type {
-  ComposeOptions,
-  WithPolicyOverridePath,
-  WithPolicyPath,
-} from '../src/types.js'
+import { type WithPolicyPath } from '../src/internal.js'
+import type { ComposeOptions } from '../src/types.js'
 
 export interface RunnerWorkerData {
   entryPath: string
@@ -117,6 +114,7 @@ export interface TestExecForJSONMacroOptions extends TestExecMacroOptions {
  */
 export type FixtureOptions = ComposeOptions<
   [
+    WithPolicyPath,
     {
       /**
        * Entrypoint to use _verbatim_. This is useful when combined with `--bin`
@@ -128,9 +126,10 @@ export type FixtureOptions = ComposeOptions<
        * fixture dir.
        */
       entrypointFilename?: string
+
+      /** Path to the policy override file */
+      policyOverridePath?: string | URL
     },
-    WithPolicyPath,
-    WithPolicyOverridePath,
   ]
 >
 /**
