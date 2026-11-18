@@ -1,0 +1,21 @@
+{
+  "resolutions": {
+    "a": {
+      "b": "./fake-b.js",
+      "fs": "./fake-fs.js"
+    }
+  },
+  "resources": {
+    "a>0zero": {
+      "builtin": {
+        "fs.createReadStream": true
+      }
+    },
+    "a": {
+      "packages": {
+        "$root$": true,
+        "a>0zero": true
+      }
+    }
+  }
+}
