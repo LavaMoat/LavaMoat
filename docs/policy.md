@@ -173,6 +173,6 @@ More specifically, the deepest chain of properties needs to point to an allowed 
   }
 ```
 
-See packages/core/test/globals.js for reference
+See packages/lavamoat-core/test/globals.spec.js for reference
 
 You should not need this level of complexity often and LavaMoat will not generate negative entries for you to review.

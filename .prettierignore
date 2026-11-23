@@ -1,6 +1,6 @@
 # generated or vendored
-packages/core/src/kernel*.js
-packages/core/lib/*.umd.js
+packages/lavamoat-core/src/kernel*.js
+packages/lavamoat-core/lib/*.umd.js
 packages/lavapack/bundle.js
 packages/lavapack/src/runtime*.js
 packages/viz/dist/**/*

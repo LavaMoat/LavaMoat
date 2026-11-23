@@ -84,7 +84,7 @@ This is intentional. Thus, any actions that must happen pre-publish (or pre-_any
 | aa                        | @lavamoat/aa                        |                                                 |
 | allow-scripts             | @lavamoat/allow-scripts             | @lavamoat/aa                                    |
 | browserify                | lavamoat-browserify                 | @lavamoat/aa, @lavamoat/lavapack, lavamoat-core |
-| core                      | lavamoat-core                       | lavamoat-tofu                                   |
+| lavamoat-core             | lavamoat-core                       | lavamoat-tofu                                   |
 | lavapack                  | @lavamoat/lavapack                  | lavamoat-core                                   |
 | laverna                   | @lavamoat/laverna                   |                                                 |
 | node                      | lavamoat                            | @lavamoat/aa, lavamoat-core, lavamoat-tofu      |

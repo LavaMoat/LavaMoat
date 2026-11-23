@@ -16,7 +16,7 @@
 'pkg:lavamoat-core':
   - changed-files:
       - any-glob-to-any-file:
-          - 'packages/core/**'
+          - 'packages/lavamoat-core/**'
 
 'pkg:lavamoat-perf':
   - changed-files:

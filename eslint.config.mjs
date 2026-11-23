@@ -325,7 +325,7 @@ export default defineConfig(
   ...typedPackageConfigs('aa'),
   ...typedPackageConfigs('allow-scripts'),
   ...typedPackageConfigs('harden'),
-  ...typedPackageConfigs('core'),
+  ...typedPackageConfigs('lavamoat-core'),
   ...typedPackageConfigs('laverna'),
   ...typedPackageConfigs('node'),
   ...typedPackageConfigs('react-native-lockdown'),
@@ -349,12 +349,15 @@ export default defineConfig(
     },
   },
 
-  // --- packages/core ---
+  // --- packages/lavamoat-core ---
   {
-    ignores: ['packages/core/lib/*.umd.js', 'packages/core/test/scenarios/**'],
+    ignores: [
+      'packages/lavamoat-core/lib/*.umd.js',
+      'packages/lavamoat-core/test/scenarios/**',
+    ],
   },
   {
-    files: ['packages/core/{src,test}/**/*.{js,ts}'],
+    files: ['packages/lavamoat-core/{src,test}/**/*.{js,ts}'],
     languageOptions: {
       globals: {
         Compartment: 'readonly',
@@ -364,7 +367,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['packages/core/src/*Template.js'],
+    files: ['packages/lavamoat-core/src/*Template.js'],
     languageOptions: {
       globals: {
         __lavamoatDebugOptions__: 'readonly',

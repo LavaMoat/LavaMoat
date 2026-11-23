@@ -20,7 +20,7 @@
       "path": "packages/aa"
     },
     {
-      "path": "packages/core"
+      "path": "packages/lavamoat-core"
     },
     {
       "path": "packages/tofu"

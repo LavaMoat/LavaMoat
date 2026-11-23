@@ -68,7 +68,7 @@ node /path/to/LavaMoat/packages/lavamoat-node/src/cli.js hello.js
 
 ```bash
 # Test individual packages (each takes 1-3 minutes)
-npm run --workspace=packages/core test
+npm run --workspace=packages/lavamoat-core test
 npm run --workspace=packages/allow-scripts test
 npm run --workspace=packages/node test
 npm run --workspace=packages/lavamoat-node test
@@ -86,7 +86,7 @@ npm run --workspace=packages/tofu test
 
 ### Key Packages
 
-- `packages/core/` - Core LavaMoat runtime and policy generation
+- `packages/lavamoat-core/` - Core LavaMoat runtime and policy generation
 - `packages/node/` - Node.js CLI tool for policy generation and execution
 - `packages/lavamoat-node/` - Legacy Node.js runtime protection
 - `packages/allow-scripts/` - Dependency install script management
