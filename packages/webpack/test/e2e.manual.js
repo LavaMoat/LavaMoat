@@ -7,6 +7,7 @@ const { makeConfig } = require('./fixtures/main/webpack.config.js')
 
 const webpackConfig = makeConfig({
   generatePolicy: false,
+  emitBundleAnalysis: true,
 })
 // webpackConfig.entry = { app: './sourcemap.js' }
 // webpackConfig.devtool = 'source-map'
