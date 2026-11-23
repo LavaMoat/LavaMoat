@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "policyEvasion - package should not be evaluated before policy check",
+  "expect": {
+    "result": {
+      "importAllowed": false,
+      "pocWritten": false
+    }
+  }
+}

@@ -325,6 +325,7 @@ export default defineConfig(
   ...typedPackageConfigs('aa'),
   ...typedPackageConfigs('allow-scripts'),
   ...typedPackageConfigs('harden'),
+  ...typedPackageConfigs('core'),
   ...typedPackageConfigs('lavamoat-core'),
   ...typedPackageConfigs('laverna'),
   ...typedPackageConfigs('node'),
@@ -349,12 +350,23 @@ export default defineConfig(
     },
   },
 
+  // --- packages/core (@lavamoat/core) ---
+  {
+    ignores: ['packages/core/scenarios/**'],
+  },
+  {
+    files: ['packages/core/{src,test}/**/*.ts'],
+    languageOptions: {
+      globals: {
+        Compartment: 'readonly',
+        lockdown: 'readonly',
+      },
+    },
+  },
+
   // --- packages/lavamoat-core ---
   {
-    ignores: [
-      'packages/lavamoat-core/lib/*.umd.js',
-      'packages/lavamoat-core/test/scenarios/**',
-    ],
+    ignores: ['packages/lavamoat-core/lib/*.umd.js', 'packages/lavamoat-core/test/scenarios/**'],
   },
   {
     files: ['packages/lavamoat-core/{src,test}/**/*.{js,ts}'],

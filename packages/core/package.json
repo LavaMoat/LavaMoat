@@ -1,0 +1,82 @@
+{
+  "name": "@lavamoat/core",
+  "version": "0.1.0",
+  "description": "LavaMoat kernel-free core: policy generation, policy utilities, endowments, and scuttling",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "LavaMoat Project",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.5.1 || ^24.0.0 || ^26.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./endowments-toolkit": {
+      "types": "./dist/endowments-toolkit.d.ts",
+      "import": "./dist/endowments-toolkit.js"
+    },
+    "./scuttle": {
+      "types": "./dist/scuttle.d.ts",
+      "import": "./dist/scuttle.js"
+    },
+    "./scenarios": {
+      "types": "./dist/scenarios.d.ts",
+      "import": "./dist/scenarios.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "dist",
+    "scenarios",
+    "!**/*.tsbuildinfo"
+  ],
+  "dependencies": {
+    "@babel/types": "7.29.7",
+    "@lavamoat/types": "^2.0.0",
+    "json-stable-stringify": "1.3.0",
+    "lavamoat-tofu": "^9.1.0",
+    "ses": "2.3.0"
+  },
+  "devDependencies": {
+    "@babel/parser": "8.1.3",
+    "ava": "8.0.1"
+  },
+  "scripts": {
+    "build": "tsc -b src/tsconfig.json",
+    "lint:deps": "depcheck",
+    "pretest": "tsc -b src/tsconfig.json",
+    "test": "ava"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.spec.ts",
+      "test/**/*.spec.cjs"
+    ],
+    "extensions": [
+      "ts",
+      "cjs"
+    ],
+    "timeout": "60s"
+  },
+  "depcheck": {
+    "ignores": [
+      "@types/node",
+      "@types/ses"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

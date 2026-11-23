@@ -1,0 +1,18 @@
+ignores:
+  - 'ses'
+  # monorepo deps
+  - 'ava'
+  - '@typescript-eslint/parser'
+  # tests - fake packages
+  - 'abc'
+  - 'xyz'
+  - 'two'
+  - 'three'
+  - 'thisChecker'
+  - 'someClass'
+  - 'one'
+  # types
+  - '@types/json-stable-stringify'
+  - '@babel/types'
+  - '@lavamoat/types'
+  - 'type-fest'

@@ -1,0 +1,24 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "getTrueGlobalThisForTestsOnly": true
+      },
+      "packages": {
+        "five": true,
+        "three": true,
+        "two": true
+      }
+    },
+    "three": {
+      "packages": {
+        "one": true
+      }
+    },
+    "two": {
+      "packages": {
+        "three": true
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "scuttle - host env global object is scuttled to work",
+  "expect": {
+    "result": "111"
+  },
+  "scuttleGlobalThis": {
+    "enabled": true,
+    "exceptions": [
+      "WebAssembly",
+      "process",
+      "console",
+      "Math",
+      "Date",
+      "AAA"
+    ]
+  },
+  "setupPath": "setup.js"
+}

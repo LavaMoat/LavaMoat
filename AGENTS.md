@@ -86,7 +86,8 @@ npm run --workspace=packages/tofu test
 
 ### Key Packages
 
-- `packages/lavamoat-core/` - Core LavaMoat runtime and policy generation
+- `packages/lavamoat-core/` - Core LavaMoat runtime and policy generation (legacy; `@lavamoat/core` is the new package)
+- `packages/core/` - New `@lavamoat/core` package (TypeScript, ESM)
 - `packages/node/` - Node.js CLI tool for policy generation and execution
 - `packages/lavamoat-node/` - Legacy Node.js runtime protection
 - `packages/allow-scripts/` - Dependency install script management

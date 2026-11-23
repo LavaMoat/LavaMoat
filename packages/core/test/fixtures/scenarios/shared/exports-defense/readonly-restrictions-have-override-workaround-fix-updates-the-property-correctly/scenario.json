@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "exportsDefense - readOnly restrictions have override workaround fix - updates the property correctly",
+  "expect": {
+    "result": 2
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "endowments - bridged endowments matches original endowments object",
+  "expect": {
+    "result": true
+  },
+  "setupPath": "setup.js"
+}

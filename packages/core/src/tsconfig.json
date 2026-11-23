@@ -1,0 +1,25 @@
+{
+  "extends": "../../../.config/tsconfig.workspace.json",
+  "include": ["."],
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "../dist",
+    "paths": {
+      "@lavamoat/types": ["../../types/src"]
+    },
+    "rootDir": ".",
+    "strict": true,
+    "stripInternal": true,
+    "target": "esnext",
+    "types": ["node", "ses"]
+  },
+  "references": [
+    { "path": "../../types/tsconfig.json" },
+    { "path": "../../tofu/tsconfig.json" }
+  ]
+}

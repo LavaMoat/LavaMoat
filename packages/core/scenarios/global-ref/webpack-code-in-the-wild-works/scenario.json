@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globalRef - Webpack code in the wild works",
+  "expect": {
+    "result": {
+      "match": true,
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "extends": "../../../.config/tsconfig.test.json",
+  "include": ["**/*.ts"],
+  "exclude": ["fixtures/**"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node", "ses"],
+    "paths": {
+      "@lavamoat/core": ["../src/index.ts"],
+      "@lavamoat/core/endowments-toolkit": ["../src/endowments-toolkit.ts"],
+      "@lavamoat/core/scuttle": ["../src/scuttle.ts"],
+      "@lavamoat/core/scenarios": ["../src/scenarios.ts"]
+    }
+  },
+  "references": [
+    { "path": "../src/tsconfig.json" }
+  ]
+}

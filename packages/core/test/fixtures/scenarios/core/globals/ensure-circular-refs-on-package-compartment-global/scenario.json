@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - ensure circular refs on package compartment global",
+  "expect": {
+    "result": true
+  },
+  "globalThisRefs": [
+    "xyz",
+    "globalThis"
+  ]
+}

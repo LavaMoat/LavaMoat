@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - nested property true.false becomes true",
+  "expect": {
+    "result": {
+      "a": true,
+      "a_ok": true,
+      "a_b": true
+    }
+  },
+  "setupPath": "setup.js"
+}

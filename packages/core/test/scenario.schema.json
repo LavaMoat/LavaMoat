@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "title": "LavaMoat Scenario Config Schema",
+  "description": "Descriptor for a LavaMoat test scenario fixture (`scenario.json`). Each fixture directory under `fixtures/scenarios/<shared|core>/<group>/<slug>/` contains one of these alongside an `entry.js`. The scenario is executed under the policy in the fixture's `lavamoat/node/policy.json` (or an empty policy, if there is no such file) and its outcome is asserted against `expect`.",
+  "type": "object",
+  "required": ["name", "expect"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Location of this schema; lets editors validate the file. Ignored by the scenario loader.",
+      "type": "string"
+    },
+    "name": {
+      "description": "Human-readable scenario name, used as the test title. By convention: `<group> - <short description>`.",
+      "type": "string",
+      "minLength": 1
+    },
+    "expect": {
+      "description": "Expected outcome of the scenario run.",
+      "$ref": "#ScenarioExpect"
+    },
+    "setupPath": {
+      "description": "Path, relative to the fixture directory, of a CommonJS module which is `require()`-d before `lockdown()` is called. It may assign properties to `globalThis` and/or (in `core/` fixtures only) export a `builtins` object of fake builtin modules. Omit if the scenario needs no setup.",
+      "type": "string",
+      "minLength": 1,
+      "examples": ["setup.js"]
+    },
+    "scuttleGlobalThis": {
+      "description": "Options for scuttling `globalThis` during the scenario run. Scuttling is disabled if omitted.",
+      "$ref": "#LavaMoatScuttleOpts",
+      "default": { "enabled": false }
+    },
+    "globalThisRefs": {
+      "description": "Names of the properties which alias `globalThis` in the root compartment. Rarely needed.",
+      "type": "array",
+      "items": { "$ref": "#GlobalThisRef" },
+      "uniqueItems": true,
+      "default": ["globalThis", "global"]
+    }
+  },
+  "$defs": {
+    "ScenarioExpect": {
+      "$anchor": "ScenarioExpect",
+      "description": "Expected outcome of a scenario run. Exactly one expectation shape must be used. The entry module's `module.exports` is JSON-serialized by the runner, so expectations are checked against the parsed JSON value.",
+      "oneOf": [
+        { "$ref": "#ExpectResult" },
+        { "$ref": "#ExpectTruthy" },
+        { "$ref": "#ExpectFalsy" },
+        { "$ref": "#ExpectError" }
+      ]
+    },
+    "ExpectResult": {
+      "$anchor": "ExpectResult",
+      "description": "The scenario must complete without error and its result must deeply equal `result`.",
+      "type": "object",
+      "required": ["result"],
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "description": "Any JSON value (including `null`) to deep-equal against the scenario's result."
+        }
+      }
+    },
+    "ExpectTruthy": {
+      "$anchor": "ExpectTruthy",
+      "description": "The scenario must complete without error and its result must be truthy.",
+      "type": "object",
+      "required": ["truthy"],
+      "additionalProperties": false,
+      "properties": {
+        "truthy": {
+          "description": "Marker flag; always `true`.",
+          "const": true
+        }
+      }
+    },
+    "ExpectFalsy": {
+      "$anchor": "ExpectFalsy",
+      "description": "The scenario must complete without error and its result must be falsy.",
+      "type": "object",
+      "required": ["falsy"],
+      "additionalProperties": false,
+      "properties": {
+        "falsy": {
+          "description": "Marker flag; always `true`.",
+          "const": true
+        }
+      }
+    },
+    "ExpectError": {
+      "$anchor": "ExpectError",
+      "description": "The scenario must throw, and the error's message must match a regular expression.",
+      "type": "object",
+      "required": ["error"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "description": "Source of a regular expression (as passed to `new RegExp()`, without delimiters or flags) which the thrown error's message must match.",
+          "type": "string",
+          "examples": ["[\\s\\S]*", "inaccessible under scuttling mode"]
+        }
+      }
+    },
+    "LavaMoatScuttleOpts": {
+      "$anchor": "LavaMoatScuttleOpts",
+      "description": "Options for scuttling `globalThis`: making properties of the real global object inaccessible once the root compartment has been created.",
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Whether scuttling is enabled.",
+          "type": "boolean"
+        },
+        "exceptions": {
+          "description": "Properties of `globalThis` to exclude from scuttling.",
+          "type": "array",
+          "items": { "$ref": "#ScuttleException" }
+        },
+        "scuttlerName": {
+          "description": "Name of a custom scuttler function, which must exist as a property of the global object (e.g. `x` means the function is taken from `globalThis.x`).",
+          "type": "string"
+        }
+      }
+    },
+    "ScuttleException": {
+      "$anchor": "ScuttleException",
+      "description": "A property name to exclude from scuttling. A string beginning with `/` is treated as a regular expression literal (`/pattern/flags`) and matched against property names.",
+      "type": "string",
+      "minLength": 1,
+      "examples": ["process", "/^webkit/i"]
+    },
+    "GlobalThisRef": {
+      "$anchor": "GlobalThisRef",
+      "description": "Name of a property which refers to the global object.",
+      "type": "string",
+      "minLength": 1,
+      "examples": ["globalThis", "global", "self", "window"]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "moduleExports - object returned from exported function should be mutable",
+  "dependencies": {
+    "one": "1.0.0",
+    "two": "1.0.0",
+    "three": "1.0.0"
+  },
+  "devDependencies": {}
+}

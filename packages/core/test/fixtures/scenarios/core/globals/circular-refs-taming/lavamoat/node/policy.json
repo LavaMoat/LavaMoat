@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "globalThis": true,
+        "console.warn": true
+      }
+    }
+  }
+}

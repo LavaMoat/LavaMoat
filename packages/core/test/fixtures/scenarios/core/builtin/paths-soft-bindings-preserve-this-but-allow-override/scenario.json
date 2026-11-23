@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "builtin - paths soft-bindings preserve \"this\" but allow override",
+  "expect": {
+    "result": { "overrideCheck": true, "thisCheck": true, "classCheck": true }
+  },
+  "setupPath": "setup.js"
+}

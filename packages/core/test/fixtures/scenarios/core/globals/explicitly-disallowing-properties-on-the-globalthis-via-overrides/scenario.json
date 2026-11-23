@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - explicitly disallowing properties on the globalThis via overrides",
+  "expect": {
+    "error": "globalThis\\.abc is not a function"
+  },
+  "setupPath": "setup.js"
+}

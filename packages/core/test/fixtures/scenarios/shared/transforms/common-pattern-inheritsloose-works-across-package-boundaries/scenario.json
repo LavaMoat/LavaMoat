@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "transforms - common pattern \"_inheritsLoose\" works across package boundaries",
+  "expect": {
+    "truthy": true
+  }
+}

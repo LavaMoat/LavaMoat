@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - endowing bind on a function",
+  "expect": {
+    "result": {
+      "typeof": true,
+      "isXyz": true,
+      "isUndefined": true,
+      "isTrue": true,
+      "is42": true
+    }
+  },
+  "setupPath": "setup.js"
+}

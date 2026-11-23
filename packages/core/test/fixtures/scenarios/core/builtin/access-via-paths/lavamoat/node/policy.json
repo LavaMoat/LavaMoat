@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "one": {
+      "builtin": {
+        "abc.xyz": true
+      }
+    }
+  }
+}

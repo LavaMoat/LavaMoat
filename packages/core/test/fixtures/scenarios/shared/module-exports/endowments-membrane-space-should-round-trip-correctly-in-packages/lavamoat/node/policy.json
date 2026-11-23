@@ -1,0 +1,22 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "check": true
+      },
+      "packages": {
+        "five": true,
+        "three": true,
+        "two": true
+      }
+    },
+    "two": {
+      "globals": {
+        "get": true
+      },
+      "packages": {
+        "three": true
+      }
+    }
+  }
+}

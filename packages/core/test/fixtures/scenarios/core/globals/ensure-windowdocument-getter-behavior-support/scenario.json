@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - ensure window.document getter behavior support",
+  "expect": {
+    "result": "beepboop.bong"
+  },
+  "setupPath": "setup.js"
+}

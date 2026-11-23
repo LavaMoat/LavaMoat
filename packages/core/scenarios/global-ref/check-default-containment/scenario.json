@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globalRef - check default containment",
+  "expect": {
+    "result": {
+      "objCheckThis": false,
+      "objCheckGlobal": true,
+      "thisIsExports": true
+    }
+  }
+}

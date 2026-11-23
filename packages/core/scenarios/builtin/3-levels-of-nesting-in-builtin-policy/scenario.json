@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "builtin - 3 levels of nesting in builtin policy",
+  "expect": {
+    "result": {
+      "errnoType": "object",
+      "hasSignals": false,
+      "hasHostname": false
+    }
+  }
+}

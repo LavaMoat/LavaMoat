@@ -1,0 +1,27 @@
+{
+  "resources": {
+    "$root$": {
+      "globals": {
+        "check": true
+      },
+      "packages": {
+        "one": true
+      }
+    },
+    "one": {
+      "globals": {
+        "get": true
+      },
+      "packages": {
+        "five": true,
+        "three": true,
+        "two": true
+      }
+    },
+    "two": {
+      "packages": {
+        "three": true
+      }
+    }
+  }
+}

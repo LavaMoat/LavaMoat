@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "config - config validation fails: invalid \"globals\" value",
+  "expect": {
+    "error": "[\\s\\S]*"
+  }
+}

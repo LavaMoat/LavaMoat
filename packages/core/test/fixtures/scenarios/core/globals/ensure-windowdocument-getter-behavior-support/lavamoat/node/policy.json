@@ -1,0 +1,17 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "document": true
+      },
+      "packages": {
+        "two": true
+      }
+    },
+    "two": {
+      "globals": {
+        "document.location.href": true
+      }
+    }
+  }
+}

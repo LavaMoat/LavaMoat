@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - circular refs taming",
+  "expect": {
+    "result": {
+      "globalThis": true,
+      "warn": "function",
+      "info": "undefined"
+    }
+  }
+}

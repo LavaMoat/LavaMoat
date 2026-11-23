@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "circularDeps - multi-module circular deps dont inf loop",
+  "expect": {
+    "result": 42
+  }
+}

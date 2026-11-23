@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "policyEvasion - toString specifier",
+  "expect": {
+    "result": {
+      "result": 1
+    }
+  }
+}

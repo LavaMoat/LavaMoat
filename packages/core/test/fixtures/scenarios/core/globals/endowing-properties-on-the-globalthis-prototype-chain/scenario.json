@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - endowing properties on the globalThis prototype chain",
+  "expect": {
+    "result": 123
+  },
+  "setupPath": "setup.js"
+}

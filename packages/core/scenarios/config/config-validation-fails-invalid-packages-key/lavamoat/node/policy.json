@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "one": {
+      "packages": {
+        "five": true
+      }
+    },
+    "three": {
+      "packagesssss": {
+        "two": true
+      }
+    }
+  }
+}

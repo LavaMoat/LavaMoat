@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "one": {
+      "packages": {
+        "five": true,
+        "two": true
+      }
+    },
+    "two": {
+      "builtin": {
+        "url": true
+      },
+      "globals": {
+        "console": true
+      }
+    }
+  }
+}

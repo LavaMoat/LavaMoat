@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "Date": true
+      },
+      "packages": {
+        "five": true,
+        "three": true,
+        "two": true
+      }
+    },
+    "two": {
+      "packages": {
+        "three": true
+      }
+    }
+  }
+}

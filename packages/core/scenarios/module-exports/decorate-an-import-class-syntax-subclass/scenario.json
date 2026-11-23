@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "moduleExports - decorate an import - class syntax subclass",
+  "expect": {
+    "result": {
+      "abc": 456,
+      "jkl": 101
+    }
+  }
+}

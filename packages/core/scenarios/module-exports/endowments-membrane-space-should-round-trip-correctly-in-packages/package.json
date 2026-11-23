@@ -1,0 +1,9 @@
+{
+  "name": "moduleExports - <endowments> membrane space should round-trip correctly in packages",
+  "dependencies": {
+    "one": "1.0.0",
+    "two": "1.0.0",
+    "three": "1.0.0"
+  },
+  "devDependencies": {}
+}

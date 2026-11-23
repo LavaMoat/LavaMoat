@@ -55,7 +55,7 @@ module.exports = {
     // #endregion
 
     // #region lavamoat-core tests
-    'packages/lavamoat-core/test/mergePolicy.spec.js',
+    'packages/lavamoat-core/test/merge-policy.spec.js',
     // #endregion
   ],
 

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "basic - npm buffer toLocaleString support",
+  "expect": {
+    "result": 123
+  }
+}

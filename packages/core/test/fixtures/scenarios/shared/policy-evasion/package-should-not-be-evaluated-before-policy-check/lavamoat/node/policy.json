@@ -1,0 +1,22 @@
+{
+  "resources": {
+    "one": {
+      "builtin": {
+        "fs": true
+      },
+      "packages": {
+        "five": true,
+        "two": true
+      }
+    },
+    "three": {
+      "builtin": {
+        "fs": true
+      }
+    },
+    "two": {
+      "packages": {
+      }
+    }
+  }
+}

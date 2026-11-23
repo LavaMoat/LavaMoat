@@ -1,4 +1,5 @@
 # generated or vendored
+packages/core/dist
 packages/lavamoat-core/src/kernel*.js
 packages/lavamoat-core/lib/*.umd.js
 packages/lavapack/bundle.js

@@ -23,6 +23,9 @@
       "path": "packages/lavamoat-core"
     },
     {
+      "path": "packages/core"
+    },
+    {
       "path": "packages/tofu"
     },
     {

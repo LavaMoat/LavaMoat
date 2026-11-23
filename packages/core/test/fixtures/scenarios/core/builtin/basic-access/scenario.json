@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "builtin - basic access",
+  "expect": {
+    "result": { "abc": 123, "xyz": null }
+  },
+  "setupPath": "setup.js"
+}

@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "xyz": true
+      }
+    }
+  }
+}
