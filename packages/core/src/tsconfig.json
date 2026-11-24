@@ -1,17 +1,25 @@
 {
-  "extends": "../../../.config/tsconfig.src.json",
+  "extends": "../../../.config/tsconfig.workspace.json",
+  "include": ["."],
   "compilerOptions": {
+    "allowJs": false,
     "checkJs": false,
-    "rootDir": "..",
-    "outDir": "../types",
+    "declaration": true,
+    "declarationMap": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "../dist",
     "paths": {
-      "@lavamoat/types": ["../../types"],
-      "lavamoat-tofu": ["../../tofu"]
-    }
+      "@lavamoat/types": ["../../types/src"]
+    },
+    "rootDir": ".",
+    "strict": true,
+    "stripInternal": true,
+    "target": "esnext",
+    "types": ["node", "ses"]
   },
-  "include": ["../lib/transforms.umd.js", "."],
   "references": [
-    { "path": "../../types/src/tsconfig.json" },
-    { "path": "../../tofu/src/tsconfig.json" }
+    { "path": "../../types/tsconfig.json" },
+    { "path": "../../tofu/tsconfig.json" }
   ]
 }

@@ -1,7 +1,8 @@
 {
-  "name": "lavamoat-core",
-  "version": "19.0.2",
-  "description": "LavaMoat kernel and utils",
+  "name": "@lavamoat/core",
+  "version": "0.1.0",
+  "description": "LavaMoat kernel-free core: policy generation, policy utilities, endowments, and scuttling",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LavaMoat/lavamoat.git",
@@ -11,46 +12,71 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "author": "kumavis",
+  "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
-    "node": "^22.5.1 || ^24.0.0 || ^26.0.0"
+    "node": "^22.20.0 || ^24.12.0 || ^26.0.0"
   },
-  "bin": {
-    "lavamoat-sort-policy": "src/policy-sort-cli.js"
-  },
-  "main": "src/index.js",
-  "types": "./types/src/types.d.ts",
-  "directories": {
-    "lib": "lib"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./endowments-toolkit": {
+      "types": "./dist/endowments-toolkit.d.ts",
+      "import": "./dist/endowments-toolkit.js"
+    },
+    "./scuttle": {
+      "types": "./dist/scuttle.d.ts",
+      "import": "./dist/scuttle.js"
+    },
+    "./scenarios": {
+      "types": "./dist/scenarios.d.ts",
+      "import": "./dist/scenarios.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "CHANGELOG.md",
-    "lib",
-    "src",
-    "types",
-    "!*.tsbuildinfo"
+    "dist",
+    "scenarios",
+    "!**/*.tsbuildinfo"
   ],
-  "scripts": {
-    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js",
-    "lint:deps": "depcheck",
-    "test": "ava && npm run test:ses",
-    "test:ses": "bash ./test/ses.sh"
-  },
   "dependencies": {
     "@babel/types": "7.29.7",
-    "@lavamoat/types": "^2.0.1",
+    "@lavamoat/types": "^2.0.0",
     "json-stable-stringify": "1.3.0",
-    "lavamoat-tofu": "^9.1.1",
+    "lavamoat-tofu": "^9.1.0",
     "ses": "2.3.0"
   },
   "devDependencies": {
-    "tmp-promise": "3.0.3"
+    "@babel/parser": "8.1.3",
+    "ava": "8.0.1"
+  },
+  "scripts": {
+    "build": "tsc -b src/tsconfig.json",
+    "lint:deps": "depcheck",
+    "pretest": "tsc -b src/tsconfig.json",
+    "test": "ava"
   },
   "ava": {
     "files": [
-      "test/*.spec.js"
+      "test/**/*.spec.ts",
+      "test/**/*.spec.cjs"
     ],
-    "timeout": "30s"
+    "extensions": [
+      "ts",
+      "cjs"
+    ],
+    "timeout": "60s"
+  },
+  "depcheck": {
+    "ignores": [
+      "@types/node",
+      "@types/ses"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

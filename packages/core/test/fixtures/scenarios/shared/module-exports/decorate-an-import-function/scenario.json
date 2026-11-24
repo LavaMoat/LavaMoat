@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "moduleExports - decorate an import - function",
+  "expect": {
+    "result": {
+      "xyz": 42,
+      "call": 100
+    }
+  }
+}

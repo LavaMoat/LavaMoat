@@ -1,4 +1,3 @@
-ignore-dirs: 'lib'
 ignores:
   - 'ses'
   # monorepo deps

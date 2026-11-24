@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "exportsDefense - readOnly restrictions have override workaround fix - should not update the prototype",
+  "expect": {
+    "result": 1
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "basic - Function constructor for constructing constructor functions",
+  "dependencies": {
+    "one": "1.0.0",
+    "two": "1.0.0",
+    "three": "1.0.0"
+  },
+  "devDependencies": {}
+}

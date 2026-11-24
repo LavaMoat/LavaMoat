@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "paths": {
-      "lavamoat-core": ["../../core/types/src/types.d.ts"]
+      "lavamoat-core": ["../../lavamoat-core/types/src/types.d.ts"]
     },
     "rootDir": "..",
     "strict": true,

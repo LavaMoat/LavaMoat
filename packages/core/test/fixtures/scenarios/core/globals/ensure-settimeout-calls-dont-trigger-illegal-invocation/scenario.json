@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - ensure setTimeout calls dont trigger illegal invocation",
+  "expect": {
+    "result": 123
+  },
+  "setupPath": "setup.js"
+}

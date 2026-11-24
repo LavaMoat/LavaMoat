@@ -23,6 +23,7 @@ jobs:
         --workspace=packages/aa
         --workspace=packages/allow-scripts
         --workspace=packages/core
+        --workspace=packages/lavamoat-core
         --workspace=packages/lavapack
         --workspace=packages/preinstall-always-fail
         --workspace=packages/tofu

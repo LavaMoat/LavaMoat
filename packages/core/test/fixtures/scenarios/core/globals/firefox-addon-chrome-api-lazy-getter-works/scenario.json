@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - firefox addon chrome api lazy getter works",
+  "expect": {
+    "result": "xyz"
+  },
+  "setupPath": "setup.js"
+}

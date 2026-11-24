@@ -1,0 +1,17 @@
+{
+  "extends": "../../../.config/tsconfig.src.json",
+  "compilerOptions": {
+    "checkJs": false,
+    "rootDir": "..",
+    "outDir": "../types",
+    "paths": {
+      "@lavamoat/types": ["../../types"],
+      "lavamoat-tofu": ["../../tofu"]
+    }
+  },
+  "include": ["../lib/transforms.umd.js", "."],
+  "references": [
+    { "path": "../../types/src/tsconfig.json" },
+    { "path": "../../tofu/src/tsconfig.json" }
+  ]
+}

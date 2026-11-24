@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "config - global Function read policy ignored",
+  "expect": {
+    "result": {
+      "value": "this is module two"
+    }
+  }
+}

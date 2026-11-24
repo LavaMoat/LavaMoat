@@ -1,0 +1,14 @@
+{
+  // not extending the test config b/c we must output some types
+  "extends": "../../../.config/tsconfig.src.json",
+  "compilerOptions": {
+    "checkJs": false,
+    "outDir": "../types/test"
+  },
+  "include": ["**/*.js", "**/*.ts"],
+  "references": [
+    {
+      "path": "../src/tsconfig.json"
+    }
+  ]
+}

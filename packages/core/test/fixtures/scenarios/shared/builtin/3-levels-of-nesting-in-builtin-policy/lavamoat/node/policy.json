@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "one": {
+      "builtin": {
+        "node:os.constants.errno": true
+      },
+      "packages": {
+        "five": true,
+        "three": true,
+        "two": true
+      }
+    },
+    "two": {
+      "packages": {
+        "three": true
+      }
+    }
+  }
+}

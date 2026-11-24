@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "one": {
+      "builtin": {
+        "abc": true,
+        "xyz": false
+      }
+    }
+  }
+}

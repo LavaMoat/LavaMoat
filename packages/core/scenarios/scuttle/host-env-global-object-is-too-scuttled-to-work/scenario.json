@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "scuttle - host env global object is too scuttled to work",
+  "expect": {
+    "error": "SES_UNHANDLED_REJECTION|inaccessible under scuttling mode."
+  },
+  "scuttleGlobalThis": {
+    "enabled": true,
+    "exceptions": [
+      "WebAssembly",
+      "process",
+      "console",
+      "Math",
+      "Date"
+    ]
+  },
+  "setupPath": "setup.js"
+}

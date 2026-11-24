@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "moduleExports - <endowments> membrane space should round-trip correctly in packages",
+  "expect": {
+    "result": true
+  },
+  "setupPath": "setup.js"
+}

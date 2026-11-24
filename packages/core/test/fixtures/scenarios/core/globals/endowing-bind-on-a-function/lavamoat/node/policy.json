@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "abc.bind": true
+      }
+    }
+  }
+}

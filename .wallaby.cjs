@@ -42,7 +42,7 @@ module.exports = {
     // #endregion
 
     // #region lavamoat-core files
-    'packages/core/src/mergePolicy.js',
+    'packages/lavamoat-core/src/mergePolicy.js',
     // #endregion
   ],
   tests: [
@@ -55,7 +55,7 @@ module.exports = {
     // #endregion
 
     // #region lavamoat-core tests
-    'packages/core/test/mergePolicy.spec.js',
+    'packages/lavamoat-core/test/merge-policy.spec.js',
     // #endregion
   ],
 

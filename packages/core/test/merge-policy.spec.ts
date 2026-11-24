@@ -1,0 +1,448 @@
+import test, { type ExecutionContext } from 'ava'
+import { mergePolicy } from '../src/merge-policy.ts'
+import type { LavaMoatPolicy } from '@lavamoat/types'
+
+/**
+ * Macro that merges two policies and asserts the result.
+ */
+const testMergePolicy = test.macro(
+  (
+    t: ExecutionContext,
+    policy: LavaMoatPolicy,
+    policyOverride: LavaMoatPolicy,
+    expectedPolicy: LavaMoatPolicy
+  ) => {t.deepEqual(mergePolicy(policy, policyOverride), expectedPolicy)}
+)
+
+// #region deduplication
+test(
+  'deduplication - basic merge',
+  testMergePolicy,
+  {
+    resources: {
+      babel: {
+        globals: { abc: true, xyz: false, 'a.b.c': true },
+        builtin: { derp: true, qwerty: false },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        globals: { def: true, ghi: false, 'a.b': true },
+        builtin: { derp: true, qwerty: false },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        globals: { abc: true, xyz: false, def: true, ghi: false, 'a.b': true },
+        builtin: { derp: true, qwerty: false },
+      },
+    },
+  }
+)
+
+test(
+  'deduplication - re-add from override',
+  testMergePolicy,
+  {
+    resources: {
+      babel: {
+        globals: {
+          abc: true,
+          xyz: false,
+          'a.b': true,
+          'q.w.e': true,
+          document: true,
+          window: true,
+        },
+        builtin: { derp: true, qwerty: false },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        globals: {
+          abc: false,
+          'a.b.c': false,
+          'q.w': false,
+          document: false,
+          'document.createElement': true,
+          window: false,
+          'window.location.hash': true,
+        },
+        builtin: { derp: false },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        builtin: { derp: false, qwerty: false },
+        globals: {
+          'a.b': true,
+          abc: false,
+          'q.w': false,
+          xyz: false,
+          document: false,
+          window: false,
+          'document.createElement': true,
+          'window.location.hash': true,
+        },
+      },
+    },
+  }
+)
+// #endregion
+
+// #region general
+test('general - allow override missing resources property', (t) => {
+  t.plan(2)
+  const policy: LavaMoatPolicy = {
+    resources: {
+      babel: {
+        globals: { abc: true, xyz: false, 'a.b.c': true },
+        builtin: { derp: true, qwerty: false },
+      },
+    },
+  }
+  // @ts-expect-error - invalid policy (missing resources)
+  const result = mergePolicy(policy, {
+    resolutions: { foo: { bar: './baz' } },
+  })
+  t.deepEqual(result, {
+    resources: {
+      babel: {
+        globals: { abc: true, xyz: false, 'a.b.c': true },
+        builtin: { derp: true, qwerty: false },
+      },
+    },
+  })
+  t.not(result, policy, 'result should not be the same object as policy')
+})
+
+test('general - invalid nesting throws exception', (t) => {
+  t.throws(
+    () =>
+      mergePolicy(
+        { resources: { babel: { globals: { abc: true, qwe: true } } } },
+        { resources: { babel: { globals: { 'abc.z': true, 'qwe.z': true } } } }
+      ),
+    {
+      message: `LavaMoat - Policy hierarchy validation failed for resource "babel"\n  "abc.z" is invalid when "abc" is also present in policy"\n  "qwe.z" is invalid when "qwe" is also present in policy"\nYou could set the parent "abc" to false if you intended to override to a less permissive policy.`,
+    }
+  )
+})
+
+test(
+  'general - no spontaneously-appearing fields (include, root)',
+  testMergePolicy,
+  { resources: {} },
+  { resources: {} },
+  { resources: {} }
+)
+// #endregion
+
+// #region ResourcePolicy
+test(
+  'resources - merges packages field',
+  testMergePolicy,
+  { resources: { pkg: { packages: { dep1: true, dep2: false } } } },
+  { resources: { pkg: { packages: { dep2: true, dep3: true } } } },
+  { resources: { pkg: { packages: { dep1: true, dep2: true, dep3: true } } } }
+)
+
+test(
+  'resources - merges meta field',
+  testMergePolicy,
+  { resources: { pkg: { meta: { version: '1.0.0', tags: ['a'] } } } },
+  { resources: { pkg: { meta: { version: '2.0.0', author: 'x' } } } },
+  { resources: { pkg: { meta: { version: '2.0.0', tags: ['a'], author: 'x' } } } }
+)
+
+test(
+  'resources - native from override overrides policy',
+  testMergePolicy,
+  { resources: { pkg: { native: true } } },
+  { resources: { pkg: { native: false } } },
+  { resources: { pkg: { native: false } } }
+)
+
+test(
+  'resources - native preserved from policy when absent in override',
+  testMergePolicy,
+  { resources: { pkg: { native: true } } },
+  { resources: { pkg: { globals: { x: true } } } },
+  { resources: { pkg: { native: true, globals: { x: true } } } }
+)
+
+test(
+  'resources - native from override when absent in policy',
+  testMergePolicy,
+  { resources: { pkg: { globals: { x: true } } } },
+  { resources: { pkg: { native: true } } },
+  { resources: { pkg: { native: true, globals: { x: true } } } }
+)
+
+test(
+  'resources - only override has globals for a package',
+  testMergePolicy,
+  { resources: { pkg: { builtin: { fs: true } } } },
+  { resources: { pkg: { globals: { console: true } } } },
+  { resources: { pkg: { globals: { console: true }, builtin: { fs: true } } } }
+)
+
+test(
+  'resources - resource only in override',
+  testMergePolicy,
+  { resources: { 'pkg-a': { globals: { x: true } } } },
+  { resources: { 'pkg-b': { globals: { y: true } } } },
+  {
+    resources: {
+      'pkg-a': { globals: { x: true } },
+      'pkg-b': { globals: { y: true } },
+    },
+  }
+)
+// #endregion
+
+// #region RootPolicy
+test(
+  'root - override overrides policy',
+  testMergePolicy,
+  { resources: {}, root: { usePolicy: 'pkg-a' } },
+  { resources: {}, root: { usePolicy: 'pkg-b' } },
+  { resources: {}, root: { usePolicy: 'pkg-b' } }
+)
+
+test(
+  'root - only policy has root',
+  testMergePolicy,
+  { resources: {}, root: { usePolicy: 'pkg-a' } },
+  { resources: {} },
+  { resources: {}, root: { usePolicy: 'pkg-a' } }
+)
+
+test(
+  'root - only override has root',
+  testMergePolicy,
+  { resources: {} },
+  { resources: {}, root: { usePolicy: 'pkg-b' } },
+  { resources: {}, root: { usePolicy: 'pkg-b' } }
+)
+// #endregion
+
+// #region IncludePolicy
+test(
+  'include - deduplicates string items',
+  testMergePolicy,
+  { resources: {}, include: ['a>b', 'c'] },
+  { resources: {}, include: ['a>b', 'd'] },
+  { resources: {}, include: ['a>b', 'c', 'd'] }
+)
+
+test(
+  'include - deduplicates ByName object items',
+  testMergePolicy,
+  { resources: {}, include: [{ name: 'a>b', modules: ['./index.js'] }] },
+  { resources: {}, include: [{ name: 'a>b', modules: ['./index.js'] }] },
+  { resources: {}, include: [{ name: 'a>b', modules: ['./index.js'] }] }
+)
+
+test(
+  'include - mixed string and object items',
+  testMergePolicy,
+  { resources: {}, include: ['a>b'] },
+  { resources: {}, include: [{ name: 'a>b', modules: ['./other.js'] }] },
+  { resources: {}, include: ['a>b', { name: 'a>b', modules: ['./other.js'] }] }
+)
+
+test(
+  'include - no overlap',
+  testMergePolicy,
+  { resources: {}, include: ['a'] },
+  { resources: {}, include: ['b'] },
+  { resources: {}, include: ['a', 'b'] }
+)
+
+test(
+  'include - only policy has include',
+  testMergePolicy,
+  { resources: {}, include: ['a'] },
+  { resources: {} },
+  { resources: {}, include: ['a'] }
+)
+
+test(
+  'include - only override has include',
+  testMergePolicy,
+  { resources: {} },
+  { resources: {}, include: ['b'] },
+  { resources: {}, include: ['b'] }
+)
+
+test(
+  'include - same name, different modules arrays are distinct',
+  testMergePolicy,
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js'] }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./b.js'] }] },
+  {
+    resources: {},
+    include: [
+      { name: 'pkg', modules: ['./a.js'] },
+      { name: 'pkg', modules: ['./b.js'] },
+    ],
+  }
+)
+
+test(
+  'include - ByName with no modules vs ByName with modules are distinct',
+  testMergePolicy,
+  { resources: {}, include: [{ name: 'pkg' }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js'] }] },
+  { resources: {}, include: [{ name: 'pkg' }, { name: 'pkg', modules: ['./a.js'] }] }
+)
+
+test(
+  'include - ByName dedup is order-independent for modules',
+  testMergePolicy,
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js', './b.js'] }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./b.js', './a.js'] }] },
+  { resources: {}, include: [{ name: 'pkg', modules: ['./a.js', './b.js'] }] }
+)
+
+test(
+  'include - deduplicates ByLocation object items',
+  testMergePolicy,
+  { resources: {}, include: [{ location: './vendor' }] },
+  { resources: {}, include: [{ location: './vendor' }] },
+  { resources: {}, include: [{ location: './vendor' }] }
+)
+
+test(
+  'include - ByLocation same location, different modules arrays are distinct',
+  testMergePolicy,
+  { resources: {}, include: [{ location: './vendor', modules: ['./a.js'] }] },
+  { resources: {}, include: [{ location: './vendor', modules: ['./b.js'] }] },
+  {
+    resources: {},
+    include: [
+      { location: './vendor', modules: ['./a.js'] },
+      { location: './vendor', modules: ['./b.js'] },
+    ],
+  }
+)
+
+test(
+  'include - ByLocation distinct locations are both retained',
+  testMergePolicy,
+  { resources: {}, include: [{ location: './vendor' }] },
+  { resources: {}, include: [{ location: './other' }] },
+  { resources: {}, include: [{ location: './vendor' }, { location: './other' }] }
+)
+
+test(
+  'include - ByName and ByLocation with the same value are distinct variants',
+  testMergePolicy,
+  { resources: {}, include: [{ name: './foo' }] },
+  { resources: {}, include: [{ location: './foo' }] },
+  { resources: {}, include: [{ name: './foo' }, { location: './foo' }] }
+)
+// #endregion
+
+// #region No-mutation guarantee
+test('mutation - returns original policy when no override provided', (t) => {
+  const policy: LavaMoatPolicy = { resources: { pkg: { globals: { x: true } } } }
+  const result = mergePolicy(policy)
+  t.is(result, policy)
+})
+
+test('mutation - merged policy contains no references to original objects', (t) => {
+  const policy: LavaMoatPolicy = {
+    resources: {
+      pkg: {
+        globals: { console: true },
+        builtin: { 'node:fs': true },
+        packages: { dep: true },
+        native: true,
+        meta: { version: '1.0.0' },
+      },
+    },
+    root: { usePolicy: 'pkg' },
+    include: [{ name: 'pkg', modules: ['./index.js'] }],
+  }
+
+  const policyOverride: LavaMoatPolicy = {
+    resources: {
+      pkg: {
+        globals: { fetch: true },
+        builtin: { 'node:path': true },
+        packages: { other: true },
+        native: false,
+        meta: { author: 'x' },
+      },
+    },
+    root: { usePolicy: 'pkg' },
+    include: ['extra'],
+  }
+
+  const result = mergePolicy(policy, policyOverride)
+
+  const collectObjects = (root: unknown): Set<object> => {
+    const seen = new Set<object>()
+    const walk = (val: unknown): void => {
+      if (val !== null && typeof val === 'object' && !seen.has(val)) {
+        seen.add(val)
+        for (const v of Object.values(val)) walk(v)
+      }
+    }
+    walk(root)
+    return seen
+  }
+
+  const policyObjects = collectObjects(policy)
+  const overrideObjects = collectObjects(policyOverride)
+  const resultObjects = collectObjects(result)
+
+  for (const obj of resultObjects) {
+    for (const orig of policyObjects) {
+      t.not(obj, orig, 'merged policy must not share objects with policy')
+    }
+    for (const orig of overrideObjects) {
+      t.not(obj, orig, 'merged policy must not share objects with policyOverride')
+    }
+  }
+})
+
+test('mutation - does not mutate policy when resource has dedup-able globals', (t) => {
+  const policy: LavaMoatPolicy = {
+    resources: {
+      onlyInPolicy: {
+        globals: { 'a.b.c': true, 'a.b': true, x: true },
+        builtin: { 'node:fs.readFile': true, 'node:fs': true },
+      },
+    },
+  }
+
+  const { globals: globalsBefore, builtin: builtinBefore } =
+    policy.resources.onlyInPolicy
+
+  mergePolicy(policy, {
+    resources: { somethingElse: { globals: { y: true } } },
+  })
+
+  t.is(
+    policy.resources.onlyInPolicy.globals,
+    globalsBefore,
+    'policy globals reference must not be replaced'
+  )
+  t.is(
+    policy.resources.onlyInPolicy.builtin,
+    builtinBefore,
+    'policy builtin reference must not be replaced'
+  )
+})
+// #endregion

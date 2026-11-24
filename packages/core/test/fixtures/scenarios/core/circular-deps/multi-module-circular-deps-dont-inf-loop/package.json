@@ -1,0 +1,1 @@
+{"name":"circularDeps-multi-module","version":"1.0.0","dependencies":{"one":"1.0.0","two":"1.0.0","three":"1.0.0"}}

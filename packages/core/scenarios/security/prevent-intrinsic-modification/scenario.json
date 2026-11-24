@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "security - prevent intrinsic modification",
+  "expect": {
+    "result": {
+      "objectXyz": false,
+      "protoXyz": false
+    }
+  }
+}

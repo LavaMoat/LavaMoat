@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Internal types used by `lavamoat-core`.
+ * Internal types used by `@lavamoat/core`.
  *
  * @packageDocumentation
  * @internal
@@ -21,7 +21,7 @@ export type ContextTestFn = (context: object) => boolean
  * A function _or_ a constructor.
  *
  * @privateRemarks
- * I'm not entirely sure why `Function` does not satify one of the first two
+ * I'm not entirely sure why `Function` does not satisfy one of the first two
  * union members, but it has to be here.
  * @internal
  */
@@ -32,7 +32,7 @@ export type SomeFunction =
   | Function
 
 /**
- * The parameters of a {@link SomeFunction}
+ * The parameters of a {@link SomeFunction}.
  *
  * @template T Function or constructor
  * @internal

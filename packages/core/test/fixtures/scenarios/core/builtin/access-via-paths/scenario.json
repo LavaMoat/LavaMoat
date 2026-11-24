@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "builtin - access via paths",
+  "expect": {
+    "result": { "xyz": 123 }
+  },
+  "setupPath": "setup.js"
+}

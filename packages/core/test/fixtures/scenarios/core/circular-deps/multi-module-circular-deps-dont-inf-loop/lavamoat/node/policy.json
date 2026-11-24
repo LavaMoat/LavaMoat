@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "one": {
+      "packages": {
+        "two": true
+      }
+    },
+    "two": {
+      "packages": {
+        "three": true
+      }
+    },
+    "three": {
+      "packages": {
+        "one": true
+      }
+    }
+  }
+}

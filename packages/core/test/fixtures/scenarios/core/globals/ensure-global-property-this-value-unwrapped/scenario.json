@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "globals - ensure global property this-value unwrapped",
+  "expect": {
+    "result": {
+      "direct": true,
+      "indirect": false
+    }
+  },
+  "setupPath": "setup.js"
+}

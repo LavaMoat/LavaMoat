@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "config - disable access to package",
+  "expect": {
+    "error": "[\\s\\S]*"
+  }
+}

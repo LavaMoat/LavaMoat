@@ -1,137 +1,136 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-check
 
-import {
-  type DefaultModuleInitArgs,
-  type LavaMoatPolicy,
-  type ModuleInitializer,
-} from '@lavamoat/types'
+import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatScuttleOpts } from '../src/scuttle.js'
 import type { ExecutionContext } from 'ava'
-import { type SetRequired } from 'type-fest'
-import type { LavaMoatOpts } from '../src/options'
 
-export type ScenarioType = 'truthy' | 'falsy' | 'deepEqual'
+/** Deep-equal check against {@link Scenario.expect.result}. */
+export interface ExpectResult {
+  result: unknown
+}
 
-export type ScenarioFileType = 'builtin' | 'js' | 'native'
+/** Truthy check – the entry's stdout-parsed value must be truthy. */
+export interface ExpectTruthy {
+  truthy: true
+}
 
-export type JSFilepath = `${string}.js`
-
-/**
- * Scenario file which is _not_ a `.js` file and has had defaults applied
- */
-export interface NormalizedScenarioFile extends ScenarioFile {
-  file: string
+/** Falsy check – the entry's stdout-parsed value must be falsy. */
+export interface ExpectFalsy {
+  falsy: true
 }
 
 /**
- * Scenario file which is a `.js` file and has had defaults applied
+ * Expected error – the runner must throw and the message must match the regex
+ * whose source is `error`.
  */
-export interface NormalizedScenarioJSFile<
-  InitArgs extends any[] = DefaultModuleInitArgs,
-> extends ScenarioFile<InitArgs> {
-  file: JSFilepath
-  specifier: string
-  packageName: string
-  type: ScenarioFileType
-  entry?: true
-  importMap: Record<string, string>
+export interface ExpectError {
+  error: string
 }
 
-export type NormalizedBuiltin<InitArgs extends any[] = DefaultModuleInitArgs> =
-  SetRequired<
-    NormalizedScenarioJSFile<InitArgs>,
-    'specifier' | 'moduleInitializer'
-  >
+/** Union of all expectation shapes stored in `scenario.json`. */
+export type ScenarioExpect =
+  ExpectResult | ExpectTruthy | ExpectFalsy | ExpectError
 
 /**
- * Scenario file as provided by user
+ * A test scenario loaded from a committed fixture directory.
+ *
+ * Consumed by both `packages/core` (via the reference runtime) and
+ * `packages/node` (via the `@lavamoat/node` exec pipeline).
+ *
+ * @example
+ *
+ * ```ts
+ * import { loadScenarios } from 'lavamoat-core/test/scenarios/index.js'
+ *
+ * for await (const scenario of loadScenarios()) {
+ *   console.log(scenario.name, scenario.dir)
+ * }
+ * ```
  */
-export interface ScenarioFile<InitArgs extends any[] = DefaultModuleInitArgs> {
+export interface Scenario {
+  /** Human-readable scenario name, used as the AVA test title. */
+  name: string
+
   /**
-   * File content
+   * Absolute path to the fixture directory. Set by {@link loadScenarios}; not
+   * present in `scenario.json`.
    */
-  content: string
+  dir: string
+
   /**
-   * Filepath
+   * Absolute path to the entry module. Set by {@link loadScenarios} as
+   * `path.join(dir, 'entry.js')`.
    */
-  file?: string
-  specifier?: string
-  packageName?: string
-  type?: ScenarioFileType
-  entry?: boolean
-  importMap?: Record<string, string>
-  moduleInitializer?: ModuleInitializer<InitArgs>
+  entryPath: string
+
+  /**
+   * Absolute path to an optional `setup.js` that runs before `lockdown()`. Set
+   * by {@link loadScenarios} when `scenario.json.setupPath` is present.
+   */
+  setupPath?: string
+
+  /**
+   * LavaMoat policy for the fixture. Set by {@link loadScenarios} from the
+   * fixture's `lavamoat/node/policy.json`; not present in `scenario.json`. A
+   * fixture without a policy file gets an empty policy.
+   */
+  policy: LavaMoatPolicy
+
+  /** Global scuttling options, forwarded to the Worker. */
+  scuttleGlobalThis?: LavaMoatScuttleOpts
+
+  /**
+   * Custom `globalThis` alias names for the root compartment (rare). Defaults
+   * to `['globalThis', 'global']`.
+   */
+  globalThisRefs?: string[]
+
+  /** Expected outcome of the scenario run. */
+  expect: ScenarioExpect
 }
 
-export type ScenarioSourceFn = () => void
-
-export interface Scenario<Result = unknown> {
-  name?: string
-  config?: LavaMoatPolicy
-  configOverride?: LavaMoatPolicy
-  expectedFailure?: boolean
-  expectedResult?: Result
-  defineEntry?: ScenarioSourceFn
-  defineOne?: ScenarioSourceFn
-  defineTwo?: ScenarioSourceFn
-  defineThree?: ScenarioSourceFn
-  testType?: ScenarioType
-  expectedFailureMessageRegex?: RegExp
-  files?: Record<string, ScenarioFile>
-  defaultPolicy?: boolean
-  builtin?: Record<string, unknown>
-  context?: Record<string, unknown>
-  opts?: LavaMoatOpts
-  dir?: string
-  checkPostRun?: ScenarioCheckPostRunFn<Result>
-  checkError?: ScenarioCheckErrorFn<Result>
-  checkResult?: ScenarioCheckResultFn<Result>
-  kernelArgs?: Record<string, unknown>
-  beforeCreateKernel?: (scenario: NormalizedScenario<Result>) => void
+/**
+ * Options passed to a {@link PlatformRunScenario} implementation.
+ */
+export interface PlatformRunScenarioOpts {
+  scenario: Scenario
 }
 
-export type NormalizedScenario<Result = unknown> = Required<
-  Pick<
-    Scenario<Result>,
-    | 'name'
-    | 'checkError'
-    | 'checkPostRun'
-    | 'checkResult'
-    | 'testType'
-    | 'builtin'
-    | 'expectedResult'
-    | 'expectedFailure'
-    | 'expectedFailureMessageRegex'
-    | 'files'
-    | 'config'
-    | 'configOverride'
-    | 'context'
-    | 'opts'
-  >
-> &
-  Pick<Scenario<Result>, 'dir' | 'kernelArgs' | 'beforeCreateKernel'> & {
-    entries: string[]
-    globalThis?: Record<string, unknown>
-    vmContext?: Record<string, unknown>
-  }
+/**
+ * Platform-supplied scenario runner function.
+ *
+ * The core package provides {@link runScenario} as the default implementation.
+ * Platforms such as `@lavamoat/node` provide their own that run the scenario
+ * through the full platform execution pipeline.
+ *
+ * @template [Result=unknown] Default is `unknown`
+ */
+export type PlatformRunScenario<Result = unknown> = (
+  opts: PlatformRunScenarioOpts
+) => Promise<Result>
 
-export type ScenarioCheckPostRunFn<Result = unknown> = (
+/**
+ * Function signature used to check a scenario result in AVA.
+ *
+ * @template [Result=unknown] Default is `unknown`
+ */
+export type ScenarioCheckFn<Result = unknown> = (
   t: ExecutionContext,
   result: Result | undefined,
   err: Error | undefined,
-  scenario: Scenario<Result>
+  scenario: Scenario
 ) => Promise<void>
 
-export type ScenarioCheckResultFn<Result = unknown> = (
-  t: ExecutionContext,
-  result: Result,
-  scenario: Scenario<Result>
-) => Promise<void>
-
-export type ScenarioCheckErrorFn<Result = unknown> = (
-  t: ExecutionContext,
-  err: Error,
-  scenario: Scenario<Result>
-) => Promise<void>
-
+/** Async factory that produces a fully-loaded {@link Scenario}. */
 export type ScenarioFactory = () => Promise<Scenario>
+
+/**
+ * Data passed to the scenario runner Worker thread.
+ */
+export interface RunnerWorkerData {
+  entryPath: string
+  policy: LavaMoatPolicy
+  setupPath?: string
+  scuttleGlobalThis?: LavaMoatScuttleOpts
+  globalThisRefs?: string[]
+}

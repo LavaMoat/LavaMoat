@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "one": {
+      "globals": {
+        "a": true,
+        "a.b": false
+      }
+    }
+  }
+}

@@ -23,7 +23,7 @@ const localLavaMoatDeps = {
   lavapack: '@lavamoat/lavapack',
   browserify: 'lavamoat-browserify',
   'lavamoat-node': 'lavamoat',
-  core: 'lavamoat-core',
+  'lavamoat-core': 'lavamoat-core',
 }
 
 function overrideDepsWithLocalPackages(projectDir, log) {

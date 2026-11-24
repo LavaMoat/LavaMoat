@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "one": {
+      "builtin": {
+        "node:buffer.Buffer.from": true
+      },
+      "packages": {
+        "two": true
+      }
+    },
+    "two": {
+      "builtin": {
+        "node:buffer.Buffer.prototype.slice": true,
+        "abc.check": true,
+        "xyz.SomeClass": true
+      }
+    }
+  }
+}

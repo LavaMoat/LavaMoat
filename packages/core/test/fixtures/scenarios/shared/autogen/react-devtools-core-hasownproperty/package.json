@@ -1,0 +1,9 @@
+{
+  "name": "autogen - react-devtools-core hasOwnProperty",
+  "dependencies": {
+    "one": "1.0.0",
+    "two": "1.0.0",
+    "three": "1.0.0"
+  },
+  "devDependencies": {}
+}

@@ -8,6 +8,11 @@
       - any-glob-to-any-file:
           - 'packages/allow-scripts/**'
 
+'pkg:@lavamoat/core':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/core/**'
+
 'pkg:lavamoat-browserify':
   - changed-files:
       - any-glob-to-any-file:
@@ -16,7 +21,7 @@
 'pkg:lavamoat-core':
   - changed-files:
       - any-glob-to-any-file:
-          - 'packages/core/**'
+          - 'packages/lavamoat-core/**'
 
 'pkg:lavamoat-perf':
   - changed-files:

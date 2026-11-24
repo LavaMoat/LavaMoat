@@ -11,7 +11,7 @@
   "author": "LavaMoat Team",
   "license": "MIT",
   "engines": {
-    "node": "^22.9.0 || ^24.0.0 || ^26.0.0"
+    "node": "^22.12.0 || ^24.0.0 || ^26.0.0"
   },
   "bin": {
     "allow-scripts": "src/cli.js"

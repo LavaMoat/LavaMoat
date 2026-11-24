@@ -1,0 +1,17 @@
+{
+  "resources": {
+    "one": {
+      "packages": {
+        "five": true
+      }
+    },
+    "three": {
+      "globals": {
+        "console": false
+      },
+      "packages": {
+        "two": true
+      }
+    }
+  }
+}

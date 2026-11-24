@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LavaMoat/LavaMoat/main/packages/core/test/scenario.schema.json",
+  "name": "moduleExports - object returned from exported function should be mutable",
+  "expect": {
+    "result": 123
+  }
+}

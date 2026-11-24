@@ -4,7 +4,7 @@
     "outDir": "../types",
     "paths": {
       "@lavamoat/types": ["../../types"],
-      "lavamoat-core": ["../../core/types/src/types.d.ts"],
+      "lavamoat-core": ["../../lavamoat-core/types/src/types.d.ts"],
       "lavamoat-tofu/src/inspectSource.js": [
         "../../tofu/types/inspectSource.d.ts"
       ],
@@ -22,7 +22,7 @@
   "include": ["."],
   "references": [
     {
-      "path": "../../core/tsconfig.json"
+      "path": "../../lavamoat-core/tsconfig.json"
     },
     {
       "path": "../../types/tsconfig.json"
