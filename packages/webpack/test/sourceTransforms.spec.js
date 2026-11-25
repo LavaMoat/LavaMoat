@@ -62,7 +62,7 @@ test('defangs evasive patterns in comments and string literals', (t) => {
 
   t.notRegex(result, /import\s*\(/)
   t.notRegex(result, /(^|[^.])\beval\s*\(/)
-  t.notRegex(result, /<!--|-->/)
+  t.notRegex(result, /<!--|--!?>/)
 })
 
 test('preserves the meaning of an HTML comment containing a closing brace', (t) => {
@@ -72,7 +72,7 @@ test('preserves the meaning of an HTML comment containing a closing brace', (t) 
   runInNewContext(result, context)
 
   t.is(context.result, 1)
-  t.notRegex(result, /<!--|-->/)
+  t.notRegex(result, /<!--|--!?\s*>/)
 })
 
 test('defangs evasive patterns in untagged templates but preserves tagged templates', (t) => {
