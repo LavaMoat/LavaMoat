@@ -1,6 +1,9 @@
 /**
  * Provides {@link createExecVisitor}, an AST-based transform.
  *
+ * This file is duplicated in the node and webpack packages until it can be
+ * extracted to core. Keep both copies identical.
+ *
  * Handles five LavaMoat-specific source concerns:
  *
  * 1. **Hashbang removal** — strips the `#!...` interpreter directive so
@@ -27,7 +30,7 @@
  * @packageDocumentation
  */
 
-import { isArray } from '../util.js'
+const { isArray } = Array
 
 /**
  * @import {
