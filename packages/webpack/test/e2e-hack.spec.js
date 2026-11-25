@@ -56,18 +56,12 @@ test('webpack/hack/fetch - cannot pollute prototypes', (t) => {
 })
 
 test('webpack/hack/mismatched-curlies', async (t) => {
-  t.plan(1)
-  try {
-    t.context.build = await scaffold({
-      ...webpackConfigDefault,
-      entry: {
-        hack4: './hack4.js',
-      },
-    })
-  } catch (err) {
-    t.assert(
-      err.compilationErrors[0].message.startsWith('E_VALIDATION'),
-      'Expected a validation error from erapper check'
-    )
-  }
+  const build = await scaffold({
+    ...webpackConfigDefault,
+    entry: {
+      hack4: './hack4.js',
+    },
+  })
+
+  t.notThrows(() => runScriptWithSES(build.snapshot['/dist/hack4.js'], {}))
 })

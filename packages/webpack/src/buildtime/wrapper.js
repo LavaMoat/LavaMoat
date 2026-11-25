@@ -3,11 +3,7 @@
 const {
   sources: { ConcatSource },
 } = require('webpack')
-const {
-  needsTransform,
-  applyReplaceTransforms,
-  SES_TRANSFORMS,
-} = require('./sourceTransforms')
+const { applySourceTransforms, needsTransform } = require('./sourceTransforms')
 const diag = require('./diagnostics')
 const fs = require('node:fs')
 const q = JSON.stringify
@@ -57,12 +53,11 @@ exports.wrapper = function wrapper({
   let transformedSource = source
   let sourceChanged = false
   if (needsTransform(sourceString)) {
-    transformedSource = applyReplaceTransforms(
-      source,
-      sourceString,
-      SES_TRANSFORMS
-    )
-    sourceChanged = true
+    transformedSource = applySourceTransforms(source, sourceString, id)
+    sourceChanged = transformedSource.source().toString() !== sourceString
+    if (!sourceChanged) {
+      transformedSource = source
+    }
   }
 
   // This adds support for mapping `this` to `exports` or `module.exports` if webpack detected it's necessary
