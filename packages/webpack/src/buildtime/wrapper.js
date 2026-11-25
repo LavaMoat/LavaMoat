@@ -1,9 +1,9 @@
 /** @typedef {import('webpack').sources.Source} Source */
+/** @import {applySourceTransforms} from './sourceTransforms' */
 
 const {
   sources: { ConcatSource },
 } = require('webpack')
-const { applySourceTransforms, needsTransform } = require('./sourceTransforms')
 const diag = require('./diagnostics')
 const fs = require('node:fs')
 const q = JSON.stringify
@@ -23,6 +23,7 @@ const q = JSON.stringify
  * @property {string} evalKitFunctionName
  * @property {boolean} [runChecks]
  * @property {RuntimeFlags} [runtimeFlags]
+ * @property {typeof applySourceTransforms} transformSource
  */
 
 const {
@@ -45,20 +46,15 @@ exports.wrapper = function wrapper({
   evalKitFunctionName,
   runChecks = true,
   runtimeFlags = {},
+  transformSource,
 }) {
   const runtimeKitArray = Array.from(runtimeKit)
 
   const sourceString = source.source().toString()
 
-  let transformedSource = source
-  let sourceChanged = false
-  if (needsTransform(sourceString)) {
-    transformedSource = applySourceTransforms(source, sourceString, id)
-    sourceChanged = transformedSource.source().toString() !== sourceString
-    if (!sourceChanged) {
-      transformedSource = source
-    }
-  }
+  const transformedSource = transformSource(source, sourceString, id)
+  const sourceChanged =
+    typeof transformedSource !== 'string' || transformedSource !== sourceString
 
   // This adds support for mapping `this` to `exports` or `module.exports` if webpack detected it's necessary
   let optionalBinding = ''
@@ -96,11 +92,17 @@ exports.wrapper = function wrapper({
   )}}))${optionalBinding}()`
   if (runChecks) {
     validateSource(
-      sourceChanged ? transformedSource.source().toString() : sourceString
+      typeof transformedSource === 'string'
+        ? transformedSource
+        : transformedSource.source().toString()
     )
   }
   return {
-    wrappedSource: new ConcatSource(before, transformedSource, after),
+    wrappedSource: new ConcatSource(
+      before,
+      sourceChanged ? transformedSource : source,
+      after
+    ),
     sourceChanged,
   }
 }

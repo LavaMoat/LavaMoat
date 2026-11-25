@@ -116,6 +116,26 @@ test('webpack/sourcemap - eval transform maps back to original position', (t) =>
   )
 })
 
+test('webpack/sourcemap - opted-in transforms map eval back to original source', async (t) => {
+  const webpackConfig = makeConfig({ evasiveTransforms_experimental: true })
+  webpackConfig.entry = { app: './sourcemap.js' }
+  webpackConfig.devtool = 'source-map'
+  const build = await scaffold(webpackConfig)
+  const bundle = build.snapshot['/dist/app.js']
+  const map = JSON.parse(build.snapshot['/dist/app.js.map'])
+  const generated = findInSource(bundle.split('\n'), '(0,eval)')
+  t.not(generated.line, -1)
+  const consumer = new SourceMapConsumer(map)
+  const original = consumer.originalPositionFor({
+    line: generated.line,
+    column: generated.column,
+  })
+
+  t.regex(original.source, /sourcemap\.js/)
+  const source = consumer.sourceContentFor(original.source)
+  t.regex(source.split('\n')[original.line - 1].slice(original.column), /eval\(/)
+})
+
 /**
  * Find the first occurrence of a substring in an array of lines. Returns
  * 1-based line and 0-based column, or {line: -1, column: -1} if not found.

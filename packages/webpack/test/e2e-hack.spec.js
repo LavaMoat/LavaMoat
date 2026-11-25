@@ -3,6 +3,8 @@ const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
 
 test.before(async (t) => {
+  const modernTransforms = require.resolve('../src/buildtime/sourceTransforms')
+  t.falsy(require.cache[modernTransforms])
   const webpackConfig = {
     ...webpackConfigDefault,
     entry: {
@@ -14,6 +16,7 @@ test.before(async (t) => {
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(webpackConfig)
   }, 'Expected the build to succeed')
+  t.falsy(require.cache[modernTransforms])
 })
 
 test('webpack/hack - dist shape', (t) => {
@@ -55,9 +58,22 @@ test('webpack/hack/fetch - cannot pollute prototypes', (t) => {
   )
 })
 
-test('webpack/hack/mismatched-curlies', async (t) => {
+test('webpack/hack/mismatched-curlies rejects invalid legacy transformations', async (t) => {
+  const error = await t.throwsAsync(
+    scaffold({
+      ...webpackConfigDefault,
+      entry: {
+        hack4: './hack4.js',
+      },
+    })
+  )
+
+  t.regex(error.compilationErrors[0].message, /^E_VALIDATION/)
+})
+
+test('webpack/hack/mismatched-curlies works with evasive transforms', async (t) => {
   const build = await scaffold({
-    ...webpackConfigDefault,
+    ...webpackConfigDefault.makeConfig({ evasiveTransforms_experimental: true }),
     entry: {
       hack4: './hack4.js',
     },

@@ -7,7 +7,9 @@ const { generate } = require('@babel/generator')
 const {
   makeEvasiveTransformVisitor,
 } = require('@endo/evasive-transform/visitor.js')
-const { createExecVisitor } = require('./exec-visitor.mjs')
+// The ESM package boundary retains Node's visitor while legacy policy scanning
+// can still recognize its .js extension.
+const { createExecVisitor } = require('./esm/exec-visitor')
 const {
   sources: { SourceMapSource },
 } = require('webpack')
@@ -47,9 +49,13 @@ function needsTransform(sourceString) {
  * @param {string} sourceString - The already-extracted source string (avoids
  *   re-calling .source())
  * @param {string} sourceName
- * @returns {Source}
+ * @returns {Source | string} Transformed source, or the original string if unchanged.
  */
 function applySourceTransforms(webpackSource, sourceString, sourceName) {
+  if (!needsTransform(sourceString)) {
+    return sourceString
+  }
+
   const ast = parse(sourceString, {
     allowReturnOutsideFunction: true,
     createParenthesizedExpressions: true,
@@ -68,6 +74,9 @@ function applySourceTransforms(webpackSource, sourceString, sourceName) {
     sourceMaps: true,
   }
   const { code, map } = generate(ast, generatorOptions, sourceString)
+  if (code === sourceString) {
+    return sourceString
+  }
   if (!map) {
     throw new Error(`Failed to generate source map for ${sourceName}`)
   }

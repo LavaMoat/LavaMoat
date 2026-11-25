@@ -1,5 +1,6 @@
 /** @import {Generator, NormalModule} from 'webpack' */
 /** @import {ProgressAPI} from './utils.js' */
+/** @import {applySourceTransforms} from './sourceTransforms' */
 /** @typedef {import('webpack').sources.Source} Source */
 
 const { wrapper } = require('./wrapper.js')
@@ -55,9 +56,15 @@ const wrappedGeneratorInstances = new WeakSet()
  * @param {object} options
  * @param {string[]} options.excludes
  * @param {boolean | undefined} options.runChecks
+ * @param {typeof applySourceTransforms} options.transformSource
  * @param {ProgressAPI} options.PROGRESS
  */
-exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
+exports.wrapGenerator = ({
+  excludes,
+  runChecks,
+  transformSource,
+  PROGRESS,
+}) => {
   /** @type {string[]} */
   const tooEarly = []
 
@@ -174,6 +181,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           id: packageId,
           runtimeKit,
           runChecks,
+          transformSource,
           evalKitFunctionName: `__webpack_require__.${RUNTIME_KEY}`,
           runtimeFlags,
         })

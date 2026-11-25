@@ -22,6 +22,7 @@ export interface CompleteLavaMoatPluginOptions {
   lockdown: LockdownOptions
   policy?: LavaMoatPolicy
   runChecks?: boolean
+  evasiveTransforms_experimental?: boolean
   isBuiltin: (specifier: string) => boolean
   skipRepairs?: true | string[]
   scuttleGlobalThis?: LavaMoatScuttleOpts

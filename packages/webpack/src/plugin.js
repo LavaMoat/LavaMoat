@@ -139,6 +139,15 @@ class LavaMoatPlugin {
       tooEarly: [],
     }
 
+    let transformSource
+    if (STORE.options.evasiveTransforms_experimental) {
+      transformSource =
+        require('./buildtime/sourceTransforms').applySourceTransforms
+    } else {
+      transformSource =
+        require('./buildtime/sourceTransformsLegacy').applySourceTransforms
+    }
+
     const PROGRESS = progress({
       steps: [
         'start',
@@ -285,6 +294,7 @@ class LavaMoatPlugin {
         const generatorWrapper = wrapGenerator({
           excludes: STORE.excludes,
           runChecks: STORE.options.runChecks,
+          transformSource,
           PROGRESS,
         })
 

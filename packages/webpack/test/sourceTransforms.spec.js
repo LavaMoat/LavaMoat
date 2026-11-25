@@ -6,29 +6,34 @@ const { join } = require('node:path')
 const { parse } = require('@babel/parser')
 const { default: traverse } = require('@babel/traverse')
 const { wrapper } = require('../src/buildtime/wrapper')
+const { parseForPolicy } = require('../../lavamoat-node/src/parseForPolicy')
+const { createKernel } = require('../../lavamoat-node/src/kernel')
+const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const {
   applySourceTransforms,
   needsTransform,
 } = require('../src/buildtime/sourceTransforms')
+const {
+  applySourceTransforms: applyLegacyTransforms,
+} = require('../src/buildtime/sourceTransformsLegacy')
 
 /**
  * @param {string} source
  * @returns {string}
  */
 function transform(source) {
-  return applySourceTransforms(
+  const result = applySourceTransforms(
     new sources.RawSource(source),
     source,
     'fixture.js'
   )
-    .source()
-    .toString()
+  return typeof result === 'string' ? result : result.source().toString()
 }
 
 test('keeps the webpack and node execution visitors identical', (t) => {
   // Keep the copies in sync until the visitor is extracted to core.
   const webpackVisitor = readFileSync(
-    join(__dirname, '../src/buildtime/exec-visitor.mjs'),
+    join(__dirname, '../src/buildtime/esm/exec-visitor.js'),
     'utf8'
   )
   const nodeVisitor = readFileSync(
@@ -37,6 +42,48 @@ test('keeps the webpack and node execution visitors identical', (t) => {
   )
 
   t.is(webpackVisitor, nodeVisitor)
+})
+
+test('legacy LavaMoat scans both implementations and runs default transforms', async (t) => {
+  const projectRoot = join(__dirname, '..')
+  const entryId = join(__dirname, '../src/plugin.js')
+  const lavamoatPolicy = await parseForPolicy({
+    projectRoot,
+    entryId,
+    includeDebugInfo: true,
+  })
+  t.truthy(
+    lavamoatPolicy.debugInfo[
+      join(__dirname, '../src/buildtime/esm/exec-visitor.js')
+    ]
+  )
+  const canonicalNameMap = await loadCanonicalNameMap({
+    rootDir: projectRoot,
+    includeDevDeps: true,
+  })
+  const kernel = createKernel({
+    projectRoot,
+    lavamoatPolicy,
+    canonicalNameMap,
+    scuttleGlobalThis: { enabled: false },
+  })
+  t.is(typeof kernel.internalRequire(entryId), 'function')
+  const sandboxedWrapper = kernel.internalRequire(
+    join(__dirname, '../src/buildtime/wrapper.js')
+  ).wrapper
+  const transformSource = kernel.internalRequire(
+    join(__dirname, '../src/buildtime/sourceTransformsLegacy.js')
+  ).applySourceTransforms
+  const { wrappedSource, sourceChanged } = sandboxedWrapper({
+    source: new sources.RawSource('eval("1");'),
+    id: 'fixture.js',
+    runtimeKit: [],
+    evalKitFunctionName: 'getEvalKit',
+    transformSource,
+  })
+
+  t.true(sourceChanged)
+  t.regex(wrappedSource.source().toString(), /\(0,eval\)\("1"\)/)
 })
 
 test('rewrites direct eval calls but leaves member calls alone', (t) => {
@@ -117,6 +164,7 @@ test('rewrites eval calls obscured by identifier escapes', (t) => {
       id: 'fixture.js',
       runtimeKit: [],
       evalKitFunctionName: 'getEvalKit',
+      transformSource: applySourceTransforms,
     })
 
     t.true(sourceChanged)
@@ -182,6 +230,7 @@ test('skips parsing and source-map work for source without evasive patterns', (t
     id: 'fixture.js',
     runtimeKit: [],
     evalKitFunctionName: 'getEvalKit',
+    transformSource: applySourceTransforms,
   })
 
   t.false(sourceChanged)
@@ -193,6 +242,7 @@ test('transforms import-like text within a longer string', (t) => {
     id: 'fixture.js',
     runtimeKit: [],
     evalKitFunctionName: 'getEvalKit',
+    transformSource: applySourceTransforms,
   })
 
   t.true(sourceChanged)
@@ -205,6 +255,7 @@ test('transforms eval text hidden by an escape in a string', (t) => {
     id: 'fixture.js',
     runtimeKit: [],
     evalKitFunctionName: 'getEvalKit',
+    transformSource: applySourceTransforms,
   })
 
   t.true(sourceChanged)
@@ -217,10 +268,88 @@ test('strips hashbangs like the Node execution visitor', (t) => {
     id: 'fixture.js',
     runtimeKit: [],
     evalKitFunctionName: 'getEvalKit',
+    transformSource: applySourceTransforms,
   })
   const result = wrappedSource.source().toString()
 
   t.true(sourceChanged)
   t.notRegex(result, /#!/)
   t.regex(result, /const value = 1/)
+})
+
+test('applies injected legacy replacements', (t) => {
+  const { wrappedSource, sourceChanged } = wrapper({
+    source: new sources.RawSource('eval("1"); import("module");'),
+    id: 'fixture.js',
+    runtimeKit: [],
+    evalKitFunctionName: 'getEvalKit',
+    transformSource: applyLegacyTransforms,
+  })
+
+  t.true(sourceChanged)
+  t.regex(wrappedSource.source().toString(), /\(0,eval\)\("1"\)/)
+  t.regex(wrappedSource.source().toString(), /__import__\("module"\)/)
+})
+
+test('legacy transforms handle import dot and HTML comment end variants', (t) => {
+  for (const [source, expected] of [
+    ['import.meta', '__import__.meta'],
+    ['import \t.meta', '__import__ \t.meta'],
+    [`--${'>'}`, '-- >'],
+    [`--!${'>'}`, '--! >'],
+  ]) {
+    const result = applyLegacyTransforms(new sources.RawSource(source), source)
+    t.not(typeof result, 'string', source)
+    t.is(result.source().toString(), expected)
+  }
+})
+
+test('preserves the original source and sourcemap when a transform makes no changes', (t) => {
+  const sourceString = 'const loaded = import("module");'
+  const source = new sources.OriginalSource(sourceString, 'original.js')
+  const { wrappedSource, sourceChanged } = wrapper({
+    source,
+    id: 'fixture.js',
+    runtimeKit: [],
+    evalKitFunctionName: 'getEvalKit',
+    transformSource: applySourceTransforms,
+  })
+
+  t.false(sourceChanged)
+  const map = wrappedSource.map()
+  t.truthy(map)
+  t.true(map?.sources.includes('original.js'))
+})
+
+test('treats a returned Source as changed without reading it when checks are disabled', (t) => {
+  const source = new sources.RawSource('const value = 42;')
+  const transformed = new sources.RawSource('const value = 42;')
+  transformed.source = () => {
+    throw new Error('Unexpected transformed source read')
+  }
+  const { wrappedSource, sourceChanged } = wrapper({
+    source,
+    id: 'fixture.js',
+    runtimeKit: [],
+    evalKitFunctionName: 'getEvalKit',
+    transformSource: () => transformed,
+    runChecks: false,
+  })
+
+  t.true(sourceChanged)
+  t.true(wrappedSource.getChildren().includes(transformed))
+})
+
+test('validates a returned Source when checks are enabled', (t) => {
+  t.throws(
+    () =>
+      wrapper({
+        source: new sources.RawSource('const value = 42;'),
+        id: 'fixture.js',
+        runtimeKit: [],
+        evalKitFunctionName: 'getEvalKit',
+        transformSource: () => new sources.RawSource('const value = ;'),
+      }),
+    { message: /^E_VALIDATION/ }
+  )
 })
