@@ -1,28 +1,47 @@
 const { default: test } = require('ava')
 const { gitInfo, isGitUrl, isGitSpecifier } = require('../src/isgit')
+const { processDependencies } = require('../src/package')
 
 test('isGitUrl should identify git URLs correctly', (t) => {
-  t.plan(9)
+  t.plan(11)
   t.true(isGitUrl('git+https://github.com/user/repo'))
   t.true(isGitUrl('github:user/repo'))
   t.true(isGitUrl('git://github.com/user/repo'))
   t.true(isGitUrl('https://github.com/user/repo'))
   t.true(isGitUrl('git+ssh://git@github.com/user/repo'))
+  t.true(isGitUrl('ssh://git@github.com/user/repo'))
   t.true(isGitUrl('git@github.com:user/repo'))
   t.false(isGitUrl('not-a-git-url'))
   t.false(isGitUrl('npm:@types/bn.js@^4.11.6'))
   t.false(isGitUrl('user/repo'))
+  t.false(isGitUrl('ssh://other@github.com/user/repo'))
 })
 
 test('isGitSpecifier should identify git specifiers correctly', (t) => {
-  t.plan(7)
+  t.plan(8)
   t.true(isGitSpecifier('git+https://github.com/user/repo'))
   t.true(isGitSpecifier('github:user/repo'))
+  t.true(isGitSpecifier('ssh://git@github.com/user/repo.git#main'))
   t.true(isGitSpecifier('user/repo'))
   t.true(isGitSpecifier('organization/repo-name'))
   t.false(isGitSpecifier('not/a/valid/repo/path'))
   t.false(isGitSpecifier('npm:@types/bn.js@^4.11.6'))
   t.false(isGitSpecifier('just-package-name'))
+})
+
+test('plain SSH direct dependencies require a full commit hash', (t) => {
+  const url = 'ssh://git@github.com/user/repo.git'
+  const hash = '67f159d1eca5cd3350c8b5c2eb1e23108da1e50f'
+  for (const ref of ['', '#main', '#v1.0.0', '#67f159d']) {
+    const specifier = `${url}${ref}`
+    const result = processDependencies({ example: specifier })
+    t.is(result.dependencies.example, specifier)
+    t.is(result.errors.length, 1)
+    t.is(result.errors[0].validator, 'packageJson')
+  }
+  const pinned = processDependencies({ example: `${url}#${hash}` })
+  t.is(pinned.dependencies.example, `${url}#${hash}`)
+  t.deepEqual(pinned.errors, [])
 })
 
 test('isGitSpecifier should handle various formats', (t) => {

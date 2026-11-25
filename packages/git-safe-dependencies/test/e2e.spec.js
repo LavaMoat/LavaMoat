@@ -9,6 +9,8 @@ const { default: test } = /** @type {TestFn} */ (
   /** @type {unknown} */ (require('ava'))
 )
 const { execFile } = require('node:child_process')
+const { mkdtemp, rm, writeFile } = require('node:fs/promises')
+const os = require('node:os')
 const path = require('node:path')
 const { promisify } = require('node:util')
 
@@ -79,6 +81,40 @@ const runCliTest = test.macro(async (t, { args, cli = 'cli.js' } = {}) => {
 })
 
 test('npm project', runCliTest, { args: { projectRoot: 'npm' } })
+test('npm plain SSH direct dependency reports unpinned ref and lockfile mismatch', async (t) => {
+  const projectRoot = await mkdtemp(path.join(os.tmpdir(), 'git-safe-ssh-'))
+  t.teardown(() => rm(projectRoot, { recursive: true, force: true }))
+  const url = 'ssh://git@github.com/isaacs/abbrev-js.git#main'
+  const resolved =
+    'git+ssh://git@github.com/isaacs/abbrev-js.git#67f159d1eca5cd3350c8b5c2eb1e23108da1e50f'
+  const dependencies = { abbrev: url }
+  await writeFile(
+    path.join(projectRoot, 'package.json'),
+    JSON.stringify({ name: 'repro', version: '1.0.0', dependencies })
+  )
+  await writeFile(
+    path.join(projectRoot, 'package-lock.json'),
+    JSON.stringify({
+      name: 'repro',
+      version: '1.0.0',
+      lockfileVersion: 3,
+      requires: true,
+      packages: {
+        '': { name: 'repro', version: '1.0.0', dependencies },
+        'node_modules/abbrev': { version: '5.0.0', resolved },
+      },
+    })
+  )
+  const result = await execAsync(process.execPath, [
+    path.join(SRC_DIR, 'cli.js'),
+    `--projectRoot=${projectRoot}`,
+  ]).catch((error) => error)
+  t.is(result.code, 1)
+  t.regex(result.stderr, /\[packageJson\] GIT URLs must use a commit hash\./)
+  t.regex(result.stderr, /\[ValidateGitUrl\] There's a mismatch/)
+  t.true(result.stderr.includes(url))
+  t.true(result.stderr.includes(resolved))
+})
 test('npm workspaces project', runCliTest, {
   args: { projectRoot: 'npm-workspaces' },
 })

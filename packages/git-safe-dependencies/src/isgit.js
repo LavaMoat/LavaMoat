@@ -1,7 +1,7 @@
 const gitinfo = require('hosted-git-info')
 
 const gitUrlRegex =
-  /^(git\+https?:\/\/|github:|git:\/\/|https:\/\/([a-z]+\.)*github\.com|git\+ssh:\/\/git@|git@)/i
+  /^(git\+https?:\/\/|github:|git:\/\/|https:\/\/([a-z]+\.)*github\.com|(git\+)?ssh:\/\/git@|git@)/i
 const commitRegEx = /^[0-9a-f]{40}$/
 
 // yarn classic uses these in lockfiles
