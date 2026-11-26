@@ -159,6 +159,7 @@ const definedOpinions = Object.freeze(
           target: '.yarnrc.yml',
           key: 'npmMinimalAgeGate',
           value: 4320,
+          ifNotExist: true,
           comment:
             'Avoid installing packages published in last 3 days (in minutes).',
         },

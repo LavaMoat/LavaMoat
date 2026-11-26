@@ -152,7 +152,7 @@ Now that all package managers support a way to skip running lifecycle scripts, w
 
 Depending on your strictness choice, for yarn we can use the built-in `dependenciesMeta` feature to allow scripts for specific packages, or we can use `@lavamoat/allow-scripts` to be more precise about what's allowed. Note that `allow-scripts` requires that yarn creates a `node_modules` folder instead of using Plug'n'Play, so we live it up to you to decide on the tradeoff.
 
-> If you choose to approve detected lifecycle scripts in your dependencies, `@lavamoat/harden` will (except `yarn dependenciesMeta`) generate entries with version pinned. You should keep them pinned to the version you actually use. None of the package managers support enforcing that the versions remain pinned (at the time of writing).  
+> If you choose to approve detected lifecycle scripts in your dependencies, `@lavamoat/harden` will (except `yarn dependenciesMeta`) generate entries with version pinned. You should keep them pinned to the version you actually use. None of the package managers support enforcing that the versions remain pinned (at the time of writing).
 > Future versions of `@lavamoat/harden` may help with that if we find a way to enforce it.
 
 ### Script Execution Environment

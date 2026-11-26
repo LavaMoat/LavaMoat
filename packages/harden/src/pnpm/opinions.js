@@ -21,6 +21,7 @@ const definedOpinions = Object.freeze(
           target: 'pnpm-workspace.yaml',
           key: 'minimumReleaseAge',
           value: 4320,
+          ifNotExist: true,
           comment:
             'Avoid installing packages published in last 3 days (in minutes).',
         },

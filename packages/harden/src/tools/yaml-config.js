@@ -115,6 +115,14 @@ export async function applyYamlConfig(cwd, filename, entries, dryRun = false) {
 
   for (const entry of entries) {
     const existing = doc.get(entry.key)
+
+    // skip when the key is already set, so neither the value nor the comment
+    // above it gets rewritten.
+    // empty/null values (`key:`, `key: ~`, `key: ''`) count as absent
+    if (entry.ifNotExist && existing !== undefined && existing !== '') {
+      continue
+    }
+
     let valueToSet = entry.value
 
     if (entry.addToExisting) {
