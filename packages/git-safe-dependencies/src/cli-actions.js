@@ -11,7 +11,7 @@ const {
   options: {
     workflows: {
       type: 'string',
-      default: path.join(process.cwd(), '.github'),
+      default: path.join(process.cwd(), '.github', 'workflows'),
     },
     ignore: {
       type: 'string',
