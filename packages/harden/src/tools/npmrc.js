@@ -39,7 +39,22 @@ export async function applyNpmrc(cwd, entries, dryRun = false) {
   const changed = []
 
   for (const entry of entries) {
-    const keyPattern = new RegExp(`^\\s*;?\\s*${escapeRegex(entry.key)}\\s*=`)
+    // captures the `;` comment marker and the value
+    const keyPattern = new RegExp(`^\\s*(;?)\\s*${escapeRegex(entry.key)}\\s*=(.*)$`)
+
+    // skip when the key is already set on an active line, so neither the line
+    // nor the `##` comment above it gets rewritten.
+    // commented-out (`;key=`) or empty (`key=`) lines count as absent
+    if (
+      entry.ifNotExist &&
+      lines.some((line) => {
+        const match = keyPattern.exec(line)
+        return match !== null && match[1] === '' && match[2].trim() !== ''
+      })
+    ) {
+      continue
+    }
+
     const existingIdx = lines.findIndex((line) => keyPattern.test(line))
 
     const strValue = String(entry.value)

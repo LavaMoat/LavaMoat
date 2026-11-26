@@ -90,6 +90,7 @@ const definedOpinions = Object.freeze(
           target: '.npmrc',
           key: 'min-release-age',
           value: '3',
+          ifNotExist: true,
           comment: 'Avoid installing packages published in last 3 days.',
         },
       ],

@@ -34,6 +34,16 @@ export interface Change {
   key: string | string[]
   value: SerializableValue
   comment?: string
+  /**
+   * Skip the change when the target already exists, keeping the user's value.
+   * What counts as existing depends on the target:
+   *
+   * - YAML: key with a non-empty value (empty, `~` and `''` count as absent)
+   * - `.npmrc`: active line with a non-empty value (`;key=` and `key=` count as
+   *   absent)
+   * - `package.json`: any value other than `undefined` (`null` counts as set)
+   * - `/lavamoat`: the file exists
+   */
   ifNotExist?: boolean
   addToExisting?: boolean
 }
