@@ -87,7 +87,9 @@ class ValidateGitUrl {
 
   async validate(knownDirectDependencies) {
     const dependencies = Object.entries(this.packages).map(([key, dep]) => {
-      const [name, specifier] = key.split('@')
+      const separator = key.indexOf('@', 1)
+      const name = separator === -1 ? key : key.slice(0, separator)
+      const specifier = separator === -1 ? undefined : key.slice(separator + 1)
       return { url: dep.resolved, packageName: name, specifier }
     })
     const errors = []

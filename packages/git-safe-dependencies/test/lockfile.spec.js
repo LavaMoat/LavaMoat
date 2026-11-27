@@ -76,3 +76,53 @@ test('validatePackages - invalid: unacceptable git URL', async (t) => {
     /There's a mismatch between the specified git hash and URL/
   )
 })
+
+test('validatePackages - scoped direct git dependency', async (t) => {
+  const hash = 'fdfc62e3d10915dbb61dc265cbf78a77d51350aa'
+  const packages = {
+    [`@gitlab/eslint-plugin@22.1.0-${hash}`]: {
+      resolved: `git+ssh://git@gitlab.com/gitlab-org/frontend/eslint-plugin.git#${hash}`,
+    },
+  }
+  const result = await validatePackages(packages, {
+    '@gitlab/eslint-plugin': `git+https://gitlab.com/gitlab-org/frontend/eslint-plugin.git#${hash}`,
+  })
+  t.deepEqual(result, [])
+})
+
+test('validatePackages - scoped direct git dependency with mismatched hash', async (t) => {
+  const specifier = 'git+ssh://git@github.com/DABH/colors.js.git#abcdef'
+  const packages = {
+    [`@colors/colors@${specifier}`]: { resolved: specifier },
+  }
+  const result = await validatePackages(packages, {
+    '@colors/colors':
+      'git+https://github.com/DABH/colors.js.git#1234567890123456789012345678901234567890',
+  })
+  t.is(result.length, 1)
+  t.is(result[0].package, '@colors/colors')
+  t.regex(result[0].message, /mismatch between the specified git hash/)
+  t.true(result[0].message.includes(`specifier: ${specifier}`))
+})
+
+test('validatePackages - scoped direct git dependency without full hash', async (t) => {
+  const url = 'git+https://gitlab.com/group/project.git#abcdef'
+  const result = await validatePackages(
+    { '@scope/pkg@abcdef': { resolved: url } },
+    { '@scope/pkg': url }
+  )
+  t.is(result.length, 1)
+  t.is(result[0].package, '@scope/pkg')
+  t.regex(result[0].message, /lockfile must use a commit hash/)
+})
+
+test('validatePackages - scoped transitive non-GitHub dependency', async (t) => {
+  const specifier = 'git+ssh://git@gitlab.com/group/project.git#abcdef'
+  const result = await validatePackages({
+    [`@scope/pkg@${specifier}`]: { resolved: specifier },
+  })
+  t.is(result.length, 1)
+  t.is(result[0].package, '@scope/pkg')
+  t.regex(result[0].message, /transitive dependency is not a GitHub repo URL/)
+  t.true(result[0].message.includes(`specifier: ${specifier}`))
+})
