@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1
+
+### Patch Changes
+
+- [#2166](https://github.com/LavaMoat/LavaMoat/pull/2166) [`971fcd3`](https://github.com/LavaMoat/LavaMoat/commit/971fcd374938db8626b4c0a8ed831f9e9d7585ea) Thanks [@jase88](https://github.com/jase88)! - Keep existing release age gate values (`minimumReleaseAge`, `npmMinimalAgeGate`, `min-release-age`) and their comments instead of overwriting them. Any existing value counts as satisfied by `harden check`; all other settings are still enforced.
+
 ## [0.9.0](https://github.com/LavaMoat/LavaMoat/compare/harden-v0.8.1...harden-v0.9.0) (2026-11-16)
 
 
