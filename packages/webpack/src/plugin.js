@@ -601,6 +601,8 @@ class LavaMoatPlugin {
               HtmlWebpackPluginInUse,
               HtmlWebpackPluginInterop:
                 !!STORE.options.HtmlWebpackPluginInterop,
+              // only present in webpack versions with built-in html support
+              NativeHtmlPlugin: compiler.webpack.html?.HtmlModulesPlugin,
             })
           )
         }

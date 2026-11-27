@@ -31,15 +31,38 @@ module.exports = {
    * @param {Compilation} options.compilation
    * @param {WebpackPluginInstance} [options.HtmlWebpackPluginInUse]
    * @param {boolean} [options.HtmlWebpackPluginInterop]
+   * @param {{ getCompilationHooks: Function }} [options.NativeHtmlPlugin] webpack's built-in HtmlModulesPlugin, if this webpack version ships one
    * @returns {() => void}
    */
   sesEmitHook:
-    ({ compilation, HtmlWebpackPluginInUse, HtmlWebpackPluginInterop }) =>
+    ({
+      compilation,
+      HtmlWebpackPluginInUse,
+      HtmlWebpackPluginInterop,
+      NativeHtmlPlugin,
+    }) =>
     () => {
       // TODO: to consider: instead manually copy to compiler.options.output.path
       const asset = new RawSource(lockdownSource)
 
       compilation.emitAsset('lockdown', asset)
+
+      if (NativeHtmlPlugin && HtmlWebpackPluginInterop) {
+        // webpack's built-in html support (experiments.html). Tapping is harmless
+        // when the feature is disabled, the hooks are simply never called.
+        NativeHtmlPlugin.getCompilationHooks(compilation).injectTags.tap(
+          'LavaMoatWebpackPlugin-lockdown',
+          (/** @type {object[]} */ tags) => [
+            {
+              tag: 'script',
+              attrs: { src: './lockdown' },
+              // placed before any other script
+              injectTo: 'head-prepend',
+            },
+            ...tags,
+          ]
+        )
+      }
 
       if (HtmlWebpackPluginInUse && HtmlWebpackPluginInterop) {
         HtmlWebpackPluginInUse.constructor
