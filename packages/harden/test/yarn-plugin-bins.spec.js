@@ -2,7 +2,6 @@ import test from 'ava'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { copyProject } from './utils.js'
 import { hardenDefaults } from '../src/index.js'
@@ -95,7 +94,17 @@ test('yarn runner resolves the bin snapshot from the project root', async (t) =>
 
 test('yarn runner rejects a local dependency replacing a snapshotted bin', async (t) => {
   const { cwd, env, snapshotPath, snapshot } = await installYarnBinProject(t)
-  const localDependency = fileURLToPath(new URL('../../node/', import.meta.url))
+  const localDependency = path.join(cwd, 'local-node')
+  await mkdir(localDependency)
+  await writeFile(
+    path.join(localDependency, 'package.json'),
+    JSON.stringify({
+      name: '@lavamoat/node',
+      version: '1.0.0',
+      bin: { lavamoat: 'cli.js' },
+    })
+  )
+  await writeFile(path.join(localDependency, 'cli.js'), '')
   const error = await t.throwsAsync(
     execFileAsync('yarn', ['add', `@lavamoat/node@file:${localDependency}`], {
       cwd,

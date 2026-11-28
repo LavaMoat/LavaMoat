@@ -228,6 +228,12 @@ function makeRunScriptWrapper(
   function makeFlagsFromConfig(configOptions) {
     return Object.entries(configOptions)
       .map(([arg, value]) => {
+        if (!process.allowedNodeEnvironmentFlags.has(arg)) {
+          console.warn(
+            `[LavaMoat] Warning: Option "${arg}" was omitted. Not allowed in NODE_OPTIONS or unsupported by the current Node.js version.`
+          )
+          return
+        }
         if (typeof value === 'boolean') {
           return value ? arg : ''
         } else if (Array.isArray(value)) {

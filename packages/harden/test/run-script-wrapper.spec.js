@@ -8,6 +8,17 @@ import { getProjectDir } from './utils.js'
 const require = createRequire(import.meta.url)
 const makeRunScriptWrapper = require('../src/runner/run-script-wrapper.cjs')
 
+const WRAPPER_IO = {
+  readFileSync: fs.readFileSync,
+  existsSync: fs.existsSync,
+  pathJoin: path.join,
+  pathDelimiter: path.delimiter,
+  tmpdir: os.tmpdir,
+  realpathSync: fs.realpathSync,
+  lstatSync: fs.lstatSync,
+  readlinkSync: fs.readlinkSync,
+}
+
 test('script config extending provides a sum of options', (t) => {
   const projectRoot = getProjectDir('runner-features')
 
@@ -24,16 +35,7 @@ test('script config extending provides a sum of options', (t) => {
         scriptsConfig: { lint: 'lavamoat/scripts.compose.json' },
       }),
     },
-    {
-      readFileSync: fs.readFileSync,
-      existsSync: fs.existsSync,
-      pathJoin: path.join,
-      pathDelimiter: path.delimiter,
-      tmpdir: os.tmpdir,
-      realpathSync: fs.realpathSync,
-      lstatSync: fs.lstatSync,
-      readlinkSync: fs.readlinkSync,
-    }
+    WRAPPER_IO
   )
 
   const result = wrapper.processEnv({ PATH: process.env.PATH })
@@ -74,16 +76,7 @@ test('script config extending breaks cycles', (t) => {
         scriptsConfig: { lint: 'lavamoat/scripts.cycle.json' },
       }),
     },
-    {
-      readFileSync: fs.readFileSync,
-      existsSync: fs.existsSync,
-      pathJoin: path.join,
-      pathDelimiter: path.delimiter,
-      tmpdir: os.tmpdir,
-      realpathSync: fs.realpathSync,
-      lstatSync: fs.lstatSync,
-      readlinkSync: fs.readlinkSync,
-    }
+    WRAPPER_IO
   )
 
   t.throws(
@@ -91,6 +84,51 @@ test('script config extending breaks cycles', (t) => {
       wrapper.processEnv({ PATH: process.env.PATH })
     },
     { message: /maximum extend depth exceeded/ }
+  )
+})
+
+test('unsupported Node options are omitted while supported options are preserved', (t) => {
+  const projectRoot = getProjectDir('runner-features')
+  const configPath = path.join(projectRoot, 'options.json')
+  const banPath = path.join(projectRoot, 'lavamoat', '.env.ban.json')
+  const wrapper = makeRunScriptWrapper(
+    {
+      scriptName: 'lint',
+      projectRoot,
+      pathBinMatcher: () => false,
+      customizePermissionsConfig: () => {},
+      readPackageJson: () => ({
+        scriptsConfig: { lint: 'options.json' },
+      }),
+    },
+    {
+      ...WRAPPER_IO,
+      readFileSync: (filePath) => {
+        if (filePath === configPath) {
+          return JSON.stringify({
+            nodeOptions: {
+              '--trace-warnings': true,
+              '--require': ['first', 'second'],
+              '--max-old-space-size': '1024',
+              '--no-warnings': false,
+              '--nonexistent-boolean-option': true,
+              '--nonexistent-array-option': ['value'],
+              '--nonexistent-string-option': 'value',
+            },
+          })
+        }
+        if (filePath === banPath) {
+          return '[]'
+        }
+        throw new Error(`Unexpected file: ${filePath}`)
+      },
+    }
+  )
+
+  const result = wrapper.processEnv({ PATH: process.env.PATH })
+  t.is(
+    result.NODE_OPTIONS,
+    '--trace-warnings --require="first" --require="second" --max-old-space-size="1024"'
   )
 })
 
@@ -116,16 +154,7 @@ test('bin overrides are prepared once and prepended to PATH', (t) => {
           fs.mkdirSync(params.overrideDir)
         },
       },
-      {
-        readFileSync: fs.readFileSync,
-        existsSync: fs.existsSync,
-        pathJoin: path.join,
-        pathDelimiter: path.delimiter,
-        tmpdir: os.tmpdir,
-        realpathSync: fs.realpathSync,
-        lstatSync: fs.lstatSync,
-        readlinkSync: fs.readlinkSync,
-      }
+      WRAPPER_IO
     )
 
   const noNodeModules = makeWrapper().processEnv({ PATH: '/usr/bin' })
