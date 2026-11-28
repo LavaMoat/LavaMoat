@@ -7,7 +7,7 @@ const { belongs, tag2commit } = require('./validate-git')
 const { isCommitHash } = require('./isgit')
 const { checksum } = require('./ignore')
 
-const defaultDir = path.join(process.cwd(), '.github')
+const defaultDir = () => path.join(process.cwd(), '.github', 'workflows')
 
 /**
  * @typedef WorkflowErrorData
@@ -37,14 +37,16 @@ const sortErrors = (errors) => {
  *   info: string[]
  * }>}
  */
-exports.validateWorkflows = async function (workflowsDir = defaultDir) {
+exports.validateWorkflows = async function (workflowsDir = defaultDir()) {
   const actions = new Map()
   const info = []
   /** @type {Partial<WorkflowErrorData>[]} */
   const errors = []
 
-  // Find all workflow files in the .github directory
-  const files = globSync(`${workflowsDir}/**/*.yml`)
+  // Find all workflow files in the workflows directory
+  const files = globSync(`${workflowsDir}/**/*.yml`, {
+    windowsPathsNoEscape: process.platform === 'win32',
+  })
 
   files.forEach((file) => {
     const fileContent = fs.readFileSync(file, 'utf8')

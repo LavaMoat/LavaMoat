@@ -28,7 +28,7 @@ git-safe-actions [--workflows=path] [--ignore=file.json]
 ```
 
 - `--ignore=file.json` - Specify a JSON file with a list of problem IDs to ignore (if you must). Keep the file version controlled to track who ignored what and why.
-- `--workflows=path` - Specify the path to the directory with GitHub Actions workflow files. Defaults to `.github` and searches recursively.
+- `--workflows=path` - Specify the path to the directory with GitHub Actions workflow files. Defaults to `.github/workflows` and searches recursively.
 
 ### Programmatic usage
 
